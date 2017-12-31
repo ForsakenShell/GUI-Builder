@@ -1,0 +1,10 @@
+// Nuka World cell range
+//
+// Must cover entire height textures
+//
+// Lines starting with slashes are ignored
+
+CellRangeMinX=-18
+CellRangeMaxX=16
+CellRangeMinY=-18
+CellRangeMaxY=17

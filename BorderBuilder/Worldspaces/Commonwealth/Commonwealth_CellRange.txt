@@ -1,0 +1,10 @@
+// Commonwealth cell range
+//
+// Must cover entire height textures
+//
+// Lines starting with slashes are ignored
+
+CellRangeMinX=-33
+CellRangeMaxX=28
+CellRangeMinY=-36
+CellRangeMaxY=25
