@@ -91,7 +91,7 @@ namespace Border_Builder
             foreach( string fileLine in buildVolumeFile )
             {
                 lineWords = fileLine.ParseImportLine();
-                if( lineWords.Length > 0 )
+                if( !lineWords.NullOrEmpty() )
                 {
                     if( !parentOpen )
                     {

@@ -265,11 +265,38 @@ namespace Border_Builder
             if( worldspace.EditorID != volumeParent.WorldspaceEDID )
                 return;
             
-            var pen = new Pen( Color.FromArgb( 255, 191, 0, 191 ) );
-            
-            foreach( var buildVolume in volumeParent.BuildVolumes )
-                DrawPolyWorldTransform( pen, buildVolume.Corners );
-            
+            #if DEBUG
+            if( volumeParent.BorderSegments.NullOrEmpty() )
+            #endif
+            {
+                var pen = new Pen( Color.FromArgb( 255, 191, 0, 191 ) );
+                
+                foreach( var buildVolume in volumeParent.BuildVolumes )
+                    DrawPolyWorldTransform( pen, buildVolume.Corners );
+            }
+            #if DEBUG
+            else
+            {
+                int r = 255;
+                int g = 0;
+                int b = 127;
+                
+                for( var i = 0; i < volumeParent.BorderSegments.Count; i++ )
+                {
+                    var segment = volumeParent.BorderSegments[ i ];
+                    var pen = new Pen( Color.FromArgb( 255, r, g, b ) );
+                    r -= 32;
+                    g += 32;
+                    b += 64;
+                    if( r <   0 ) r += 255;
+                    if( g > 255 ) g -= 255;
+                    if( b > 255 ) b -= 255;
+                    var niP = ( segment.P0 + segment.P1 ) * 0.5f;
+                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen );
+                    DrawLineWorldTransform( pen, segment.P0, segment.P1 );
+                }
+            }
+            #endif
         }
         
         public void DrawBuildVolumes()

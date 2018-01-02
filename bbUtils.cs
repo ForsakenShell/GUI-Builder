@@ -10,6 +10,7 @@
  */
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Border_Builder
 {
@@ -46,10 +47,25 @@ namespace Border_Builder
         
         public static string[] ParseImportLine( this string importLine, char delimiter = ';' )
         {
-            string[] words = importLine.Split( delimiter );
+            const string commentStart = "//";
+            string working = importLine.Trim( ' ' );
+            working = working.Trim( '\t' );
+            if( working.StartsWith( commentStart ) ) return null;
+            
+            string[] words = working.Split( delimiter );
             for( int i = 0; i < words.Length; i++ )
                 words[ i ] = words[ i ].Trim( ' ' );
             return words;
+        }
+        
+        #endregion
+        
+        #region List Helpers
+        
+        public static bool NullOrEmpty<T>(this IList<T> list)
+        {
+            if( list == null ) return true;
+            return list.Count == 0;
         }
         
         #endregion

@@ -33,6 +33,9 @@ namespace Border_Builder
         public List<BuildVolume> BuildVolumes;
         public List<BorderNode> BorderNodes;
         
+        #if DEBUG
+        public
+        #endif
         List<BorderSegment> BorderSegments;
         
         bool _welded = false;
@@ -268,7 +271,7 @@ namespace Border_Builder
                 
             }
             // Segments no longer needed
-            BorderSegments = null;
+            //BorderSegments = null;
             DebugLog.Write( "}" );
         }
         
@@ -326,23 +329,32 @@ namespace Border_Builder
                     // Skip already used segments
                     if( tmpLst.Contains( segments[ i ] ) ) continue;
                     
-                    // Set n if needed and continue (no need to compare it to itself)
+                    // Set nextSegment if not already set and this segment is not colinear with the previous segment
                     if( nextSegment == -1 )
                     {
-                        DebugLog.Write( string.Format( "\tIndex: {0} -> {1} :: First Found", currentSegment, i ) );
-                        nextSegment = i;
+                        //var ip = segments[ i ].Normal;
+                        //var cp = segments[ currentSegment ].Normal;
+                        //var cross = Maths.Vector2f.Cross( cp, ip );
+                        //DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
+                        //if( !cross.ApproximatelyEquals( 0f ) )
+                        {
+                            DebugLog.Write( string.Format( "\tIndex: {0} -> {1} :: First Found", currentSegment, i ) );
+                            nextSegment = i;
+                        }
+                        // Set or not, continue to the next possible segment
                         continue;
                     }
                     
-                    var ip = segments[ i ].Normal;
-                    var np = segments[ nextSegment ].Normal;
-                    var cross = Maths.Vector2f.Cross( np, ip );
-                    DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
-                    if( cross > 0f )
                     {
-                        nextSegment = i;
+                        var ip = segments[ i ].Normal;
+                        var np = segments[ nextSegment ].Normal;
+                        var cross = Maths.Vector2f.Cross( np, ip );
+                        DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
+                        if( cross >= 0f )
+                        {
+                            nextSegment = i;
+                        }
                     }
-                    
                 }
                 if( nextSegment < 0 )
                 {
@@ -371,7 +383,7 @@ namespace Border_Builder
         {
             //DebugLog.Write( string.Format( "SplitSegmentForIntersectWith()\n\tvIndex={0}\n\tsegment={1}\n\tp0={2}\n\tp1={3}\n{{", vIndex, segment.ToString(), p0.ToString(), p1.ToString() ) );
             
-            float threshold = 1f;
+            float threshold = 0.0001f;
             
             // Test results
             Maths.Vector2f result;

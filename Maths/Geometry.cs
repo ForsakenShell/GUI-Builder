@@ -131,7 +131,10 @@ namespace Border_Builder
                     if(
                         ( ( l1x1.ApproximatelyEquals( l1x2, threshold ) )&&( l1y1.ApproximatelyEquals( l1y2, threshold ) ) )||
                         ( ( l2x1.ApproximatelyEquals( l2x2, threshold ) )&&( l2y1.ApproximatelyEquals( l2y2, threshold ) ) )
-                       ) return CollisionType.NoCollision;
+                       )
+                    {
+                        return CollisionType.NoCollision;
+                    }
                     
                     // Shared end-point?
                     if(
@@ -152,6 +155,19 @@ namespace Border_Builder
                     }
                     
                     // Now time for some maths...
+                    
+                    // Handle vertical lines having 0 delta X by adding epsilon if line 1 X's are equal
+                    const float verticalDelta = 0.01f;
+                    if( l1x1.ApproximatelyEquals( l1x2, verticalDelta ) )
+                    {
+                        l1x1 -= verticalDelta;
+                        l1x2 += verticalDelta;
+                    }
+                    if( l2x1.ApproximatelyEquals( l2x2, verticalDelta ) )
+                    {
+                        l2x1 -= verticalDelta;
+                        l2x2 += verticalDelta;
+                    }
                     
                     // Translate lines so l1p1 is on the origin
                     l1x2 -= l1x1; l1y2 -= l1y1;
