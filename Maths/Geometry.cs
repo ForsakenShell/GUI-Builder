@@ -48,7 +48,8 @@ namespace Border_Builder
                 NoCollision = 0,
                 SinglePoint = 1,
                 OverlappingRegions = 2,
-                Collinear = 2
+                Collinear = 2,
+                VertexMatch = 3
             }
             
             #region Intersection and overlap (AKA Collission)
@@ -143,7 +144,7 @@ namespace Border_Builder
                        ){
                         rx = l1x1;
                         ry = l1y1;
-                        return CollisionType.SinglePoint;
+                        return CollisionType.VertexMatch;
                     }
                     if(
                         ( ( l1x2.ApproximatelyEquals( l2x1, threshold ) )&&( l1y2.ApproximatelyEquals( l2y1, threshold ) ) )||
@@ -151,12 +152,13 @@ namespace Border_Builder
                        ){
                         rx = l1x2;
                         ry = l1y2;
-                        return CollisionType.SinglePoint;
+                        return CollisionType.VertexMatch;
                     }
                     
                     // Now time for some maths...
                     
                     // Handle vertical lines having 0 delta X by adding epsilon if line 1 X's are equal
+                    /*
                     const float verticalDelta = 0.01f;
                     if( l1x1.ApproximatelyEquals( l1x2, verticalDelta ) )
                     {
@@ -168,6 +170,7 @@ namespace Border_Builder
                         l2x1 -= verticalDelta;
                         l2x2 += verticalDelta;
                     }
+                    */
                     
                     // Translate lines so l1p1 is on the origin
                     l1x2 -= l1x1; l1y2 -= l1y1;
@@ -202,6 +205,12 @@ namespace Border_Builder
                     ry = l1y1 + iPos * rSin;
                     
                     // Intersection found
+                    if(
+                        ( iPos.ApproximatelyEquals( 0f, threshold ) )||
+                        ( iPos.ApproximatelyEquals( l1Length, threshold ) )
+                    )
+                        return CollisionType.VertexMatch;
+                    
                     return CollisionType.SinglePoint;
                     
                 }

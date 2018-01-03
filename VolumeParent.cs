@@ -233,7 +233,6 @@ namespace Border_Builder
                 var segment = BorderSegments[ i ];
                 segment.segIndex = i;
                 DebugLog.Write( string.Format( "Segment: {0} : {1}", i, segment.ToString() ) );
-                //DebugLog.Write( string.Format( "Segment: {0}, FVFCD={1}", segment.ToString(), LongestSegmentVertexDistanceFrom( centre, segment ).ToString() ) );
             }
             DebugLog.Write( "}" );
             
@@ -241,18 +240,13 @@ namespace Border_Builder
             var outsideSegments = OutsideEdgeSegments( BorderSegments );
             
             // Translate segments into border nodes
-            if( outsideSegments == null )
-            {
-                DebugLog.Write( "ERROR: No outsideSegments found!" );
-            }
-            else
+            if( !outsideSegments.NullOrEmpty() )
             {
                 DebugLog.Write( string.Format( "outsideSegments.Count={0}\n{{", outsideSegments.Count.ToString() ) );
                 for( int i = 0; i < outsideSegments.Count; i++ )
                 {
                     var segment = outsideSegments[ i ];
                     DebugLog.Write( string.Format( "Segment: {0} : {1}", i, segment.ToString() ) );
-                    //DebugLog.Write( string.Format( "Segment: {0}, FVFCD={1}", segment.ToString(), LongestSegmentVertexDistanceFrom( centre, segment ).ToString() ) );
                 }
                 DebugLog.Write( "}" );
                 
@@ -265,13 +259,20 @@ namespace Border_Builder
                 {
                     var node = BorderNodes[ i ];
                     DebugLog.Write( string.Format( "Node: {0} : {1}", i, node.ToString() ) );
-                    //DebugLog.Write( string.Format( "Node: {0}, FVFCD={1}", node.ToString(), LongestNodeVertexDistanceFrom( centre, node ).ToString() ) );
                 }
                 DebugLog.Write( "}" );
                 
             }
+            else
+            {
+                DebugLog.Write( "ERROR: No outsideSegments found!" );
+            }
+            
             // Segments no longer needed
-            //BorderSegments = null;
+            #if DEBUG
+            #else
+            BorderSegments = null;
+            #endif
             DebugLog.Write( "}" );
         }
         
@@ -296,7 +297,7 @@ namespace Border_Builder
                     var sp = segments[ startSegment ].Normal;
                     var cross = Maths.Vector2f.Cross( sp, ip );
                     DebugLog.Write( string.Format( "\tIndex: {0} ? {1} :: CrossProduct: {2}", startSegment, i, cross ) );
-                    if( cross > 0f )
+                    if( cross < 0f )
                     {
                         startSegment = i;
                     }
@@ -350,7 +351,7 @@ namespace Border_Builder
                         var np = segments[ nextSegment ].Normal;
                         var cross = Maths.Vector2f.Cross( np, ip );
                         DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
-                        if( cross >= 0f )
+                        if( cross < 0f )
                         {
                             nextSegment = i;
                         }
@@ -373,17 +374,20 @@ namespace Border_Builder
             DebugLog.Write( "}" );
             
             // Didn't find a complete loop, wth?
-            //if( currentSegment != startSegment )
-            //    tmpLst = null;
+            #if DEBUG
+            #else
+            if( currentSegment != startSegment )
+                tmpLst = null;
+            #endif
             
             return tmpLst;
         }
         
-        bool SplitSegmentForIntersectWith( int vIndex, BorderSegment segment, Maths.Vector2f p0, Maths.Vector2f p1, out BorderSegment segmentTail )
+        bool SplitSegmentForIntersectWith( BorderSegment segment, Maths.Vector2f p0, Maths.Vector2f p1, out BorderSegment segmentTail )
         {
-            //DebugLog.Write( string.Format( "SplitSegmentForIntersectWith()\n\tvIndex={0}\n\tsegment={1}\n\tp0={2}\n\tp1={3}\n{{", vIndex, segment.ToString(), p0.ToString(), p1.ToString() ) );
+            DebugLog.Write( string.Format( "SplitSegmentForIntersectWith()\n\tsegment={0}\n\tp0={1}\n\tp1={2}\n{{", segment.ToString(), p0.ToString(), p1.ToString() ) );
             
-            float threshold = 0.0001f;
+            const float threshold = 1f;
             
             // Test results
             Maths.Vector2f result;
@@ -391,44 +395,41 @@ namespace Border_Builder
             
             // Test the points against the edges
             
-            if( Maths.Geometry.Collision.LineLineIntersect(
+            var collision = Maths.Geometry.Collision.LineLineIntersect(
                 segment.P0, segment.P1,                         // Segment points
                 p0, p1,                                         // Test edge
                 out result,                                     // Intersection point
                 threshold                                       // Threshold
-               ) == Maths.Geometry.CollisionType.NoCollision )  // dur?
-            {
-                //DebugLog.Write( "}\tresult=false - No intersection" );
-                return false;
-            }
-            
-            //DebugLog.Write( string.Format( "intersection={0}", result.ToString() ) );
-            
-            // Check for the intersection being the edge end-points and ignore the split if it is (avoids near zero-length segments)
+               );
             if(
-                ( ( result.X.ApproximatelyEquals( segment.P0.X, threshold ) )&&( result.X.ApproximatelyEquals( segment.P0.X, threshold ) ) )||
-                ( ( result.X.ApproximatelyEquals( segment.P1.X, threshold ) )&&( result.X.ApproximatelyEquals( segment.P1.X, threshold ) ) )
-               ){
-                //DebugLog.Write( "}\tresult=false - Intersection at end-point" );
+                ( collision == Maths.Geometry.CollisionType.NoCollision )|| // dur?
+                ( collision == Maths.Geometry.CollisionType.VertexMatch )   // Ignore end-point matches
+            )
+            {
+                DebugLog.Write( string.Format( "}}\tresult={0}", collision.ToString() ) );
                 return false;
             }
+            
+            // TODO: Handle co-linear collisions more appropriately to reduce the final set of segments
+            
+            DebugLog.Write( string.Format( "intersection={0}", result.ToString() ) );
             
             // Clip the segment off at the intersection point
             var oldP1 = segment.P1;
             segment.P1 = new Maths.Vector2f( result );
             
             // Create a new segment, test if it's contained in another volume and if it's not then return the new segment as the tail of the original segment
-            segmentTail = new BorderSegment( vIndex, result, oldP1 );
-            //DebugLog.Write( string.Format( "segmentTail={0}", segmentTail.ToString() ) );
+            segmentTail = new BorderSegment( segment.Volume, result, oldP1 );
+            DebugLog.Write( string.Format( "segmentTail={0}", segmentTail.ToString() ) );
             
             // Segment was split 
-            //DebugLog.Write( string.Format( "}}\tresult=true - Segment split - segment={0}", segment.ToString() ) );
+            DebugLog.Write( string.Format( "}}\tresult={1} - Segment split - segment={0}", segment.ToString(), collision.ToString() ) );
             return true;
         }
         
-        void SplitSegmentForIntersections( int vIndex, BorderSegment segment )
+        void SplitSegmentForIntersections( BorderSegment segment )
         {
-            //DebugLog.Write( string.Format( "SplitSegmentForIntersections()\n\tvIndex={0}\n\tsegment={1}\n{{", vIndex, segment.ToString() ) );
+            DebugLog.Write( string.Format( "SplitSegmentForIntersections()\n\tsegment={0}\n{{", segment.ToString() ) );
             
             int count = BuildVolumes.Count;
             BorderSegment segmentTail;
@@ -437,7 +438,7 @@ namespace Border_Builder
             for( int index = 0; index < count; index++ )
             {
                 // Only test against other volumes (so we don't eliminate ourself)
-                if( vIndex == index )
+                if( index == segment.Volume )
                     continue;
                 
                 // Current volume and it's corners
@@ -445,63 +446,62 @@ namespace Border_Builder
                 var corners = volume.Corners;
                 
                 // Test the points against the volumes edges
-                //DebugLog.Write( string.Format( "vIndex={0}\nindex={1}\n{{", vIndex, index ) );
+                DebugLog.Write( string.Format( "Volume={0}\nindex={1}\n{{", segment.Volume, index ) );
                 
                 // Edge 1 (0,1)
-                //DebugLog.Write( "Test edge 1\n{" );
+                DebugLog.Write( "Test edge 1\n{" );
                 segmentTail = null;
-                if( SplitSegmentForIntersectWith( vIndex, segment, corners[ 0 ], corners[ 1 ], out segmentTail ) )
+                if( SplitSegmentForIntersectWith( segment, corners[ 0 ], corners[ 1 ], out segmentTail ) )
                     if( segmentTail != null )
-                        SplitSegmentForIntersections( vIndex, segmentTail );
-                //DebugLog.Write( "}" );
+                        SplitSegmentForIntersections( segmentTail );
+                DebugLog.Write( "}" );
                 
                 // Edge 2 (1,2)
-                //DebugLog.Write( "Test edge 2\n{" );
+                DebugLog.Write( "Test edge 2\n{" );
                 segmentTail = null;
-                if( SplitSegmentForIntersectWith( vIndex, segment, corners[ 1 ], corners[ 2 ], out segmentTail ) )
+                if( SplitSegmentForIntersectWith( segment, corners[ 1 ], corners[ 2 ], out segmentTail ) )
                     if( segmentTail != null )
-                        SplitSegmentForIntersections( vIndex, segmentTail );
-                //DebugLog.Write( "}" );
+                        SplitSegmentForIntersections( segmentTail );
+                DebugLog.Write( "}" );
                 
                 // Edge 3 (2,3)
-                //DebugLog.Write( "Test edge 3\n{" );
+                DebugLog.Write( "Test edge 3\n{" );
                 segmentTail = null;
-                if( SplitSegmentForIntersectWith( vIndex, segment, corners[ 2 ], corners[ 3 ], out segmentTail ) )
+                if( SplitSegmentForIntersectWith( segment, corners[ 2 ], corners[ 3 ], out segmentTail ) )
                     if( segmentTail != null )
-                        SplitSegmentForIntersections( vIndex, segmentTail );
-                //DebugLog.Write( "}" );
+                        SplitSegmentForIntersections( segmentTail );
+                DebugLog.Write( "}" );
                 
                 // Edge 4 (3,0)
-                //DebugLog.Write( "Test edge 4\n{" );
+                DebugLog.Write( "Test edge 4\n{" );
                 segmentTail = null;
-                if( SplitSegmentForIntersectWith( vIndex, segment, corners[ 3 ], corners[ 0 ], out segmentTail ) )
+                if( SplitSegmentForIntersectWith( segment, corners[ 3 ], corners[ 0 ], out segmentTail ) )
                     if( segmentTail != null )
-                        SplitSegmentForIntersections( vIndex, segmentTail );
-                //DebugLog.Write( "}" );
+                        SplitSegmentForIntersections( segmentTail );
+                DebugLog.Write( "}" );
                 
-                //DebugLog.Write( "}" );
+                DebugLog.Write( "}" );
             }
             
             BorderSegments.Add( segment );
                 
-            //DebugLog.Write( "}" );
+            DebugLog.Write( "}" );
         }
         
         void TryAddBorderSegment( int vIndex, Maths.Vector2f p0, Maths.Vector2f p1 )
         {
-            //DebugLog.Write( string.Format( "TryAddBorderSegment()\n\tvIndex={0}\n\tp0={1}\n\tp1={2}\n{{", vIndex, p0.ToString(), p1.ToString() ) );
+            DebugLog.Write( string.Format( "TryAddBorderSegment()\n\tvIndex={0}\n\tp0={1}\n\tp1={2}\n{{", vIndex, p0.ToString(), p1.ToString() ) );
             
-            // Create the segment
+            // Create the segment and split it for intersection with any another volume
             var segment = new BorderSegment( vIndex, p0, p1 );
+            SplitSegmentForIntersections( segment );
             
-            // Split the segment for intersection with another volume
-            SplitSegmentForIntersections( vIndex, segment );
-            //DebugLog.Write( "}" );
+            DebugLog.Write( "}" );
         }
         
         void CreateSegmentsForVolume( int vIndex )
         {
-            //DebugLog.Write( string.Format( "CreateSegmentsForVolume()\n\tvIndex={0}\n{{", vIndex ) );
+            DebugLog.Write( string.Format( "CreateSegmentsForVolume()\n\tvIndex={0}\n{{", vIndex ) );
             
             // Get the build volume and it's corners
             var buildVolume = BuildVolumes[ vIndex ];
@@ -512,7 +512,8 @@ namespace Border_Builder
             TryAddBorderSegment( vIndex, corners[ 1 ], corners[ 2 ] ); // Edge 2
             TryAddBorderSegment( vIndex, corners[ 2 ], corners[ 3 ] ); // Edge 3
             TryAddBorderSegment( vIndex, corners[ 3 ], corners[ 0 ] ); // Edge 4
-            //DebugLog.Write( "}" );
+            
+            DebugLog.Write( "}" );
         }
         
        #endregion

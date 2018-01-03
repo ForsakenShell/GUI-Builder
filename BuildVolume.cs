@@ -44,12 +44,12 @@ namespace Border_Builder
             var hSize = Size / 2f;
             var p2 = new Maths.Vector2f( Position.X, Position.Y );
             Corners = new Maths.Vector2f[ 4 ];
-            // Define the rect corners counter-clockwise,
+            // Define the rect corners counterclockwise,
             // Rotate in the inverse from screenspace to worldspace
-            Corners[ 0 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X - hSize.X, p2.Y + hSize.Y ), p2, -Rotation.Z );
-            Corners[ 1 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X + hSize.X, p2.Y + hSize.Y ), p2, -Rotation.Z );
-            Corners[ 2 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X + hSize.X, p2.Y - hSize.Y ), p2, -Rotation.Z );
-            Corners[ 3 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X - hSize.X, p2.Y - hSize.Y ), p2, -Rotation.Z );
+            Corners[ 0 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X - hSize.X, p2.Y - hSize.Y ), p2, -Rotation.Z );
+            Corners[ 1 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X + hSize.X, p2.Y - hSize.Y ), p2, -Rotation.Z );
+            Corners[ 2 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X + hSize.X, p2.Y + hSize.Y ), p2, -Rotation.Z );
+            Corners[ 3 ] = Maths.Vector2f.RotateAround( new Maths.Vector2f( p2.X - hSize.X, p2.Y + hSize.Y ), p2, -Rotation.Z );
         }
         
         public Maths.Vector2f[] ScaledCorners( float scale )

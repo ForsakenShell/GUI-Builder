@@ -24,11 +24,20 @@ namespace Border_Builder
         
         public static bool Opened
         {
-            get{ return logStream != null; }
+            get
+            {
+                #if DEBUG
+                return logStream != null;
+                #else
+                return false;
+                #endif
+            }
         }
         
         public static void Open()
         {
+            #if DEBUG
+            
             // Already open?
             if( logStream != null )
                 return;
@@ -37,10 +46,13 @@ namespace Border_Builder
             
             DebugLog.Write( string.Format( "Border Builder {0} log opened at {1}\n", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(), System.DateTime.Now.ToString() ) );
             
+            #endif
         }
         
         public static void Close()
         {
+            #if DEBUG
+            
             // Already closed?
             if( logStream == null )
                 return;
@@ -49,12 +61,17 @@ namespace Border_Builder
             
             logStream.Close();
             logStream = null;
+            
+            #endif
         }
         
         public static void Write( string message )
         {
+            #if DEBUG
+            
             if( !DebugLog.Opened )
                 DebugLog.Open();
+            
             var lines = message.Split( '\n' );
             foreach( var line in lines )
             {
@@ -75,6 +92,8 @@ namespace Border_Builder
                 if( ( line.StartsWith( "{" ) )||( line.EndsWith( "{" ) ) )
                     logIndent++;
             }
+            
+            #endif
         }
         
     }

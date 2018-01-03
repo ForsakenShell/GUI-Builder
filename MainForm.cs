@@ -70,6 +70,10 @@ namespace Border_Builder
             else if( machineName == "ERICS-LAPTOP" )
                 bbGlobal.GlobalPath = "C:\\Utils\\dev\\Projects\\Border Builder";
             
+            #if DEBUG
+            cbRenderBuildVolumes.ThreeState = true;
+            cbRenderBorders.ThreeState = true;
+            #endif
             
             ResetAllControls();
             PreloadImportMods();
@@ -479,6 +483,13 @@ namespace Border_Builder
             
             UpdateStatusMessage( "[Re]creating render transform..." );
             var rt = new RenderTransform( worldspace, selectedImport, selectedVolume, cellNW, cellSE, RenderScale );
+            
+            #if DEBUG
+            
+            rt.debugRenderBuildVolumes = cbRenderBuildVolumes.CheckState == CheckState.Indeterminate;
+            rt.debugRenderBorders = cbRenderBorders.CheckState == CheckState.Indeterminate;
+            
+            #endif
             
             if( renderLand )
                 rt.DrawLandMap();

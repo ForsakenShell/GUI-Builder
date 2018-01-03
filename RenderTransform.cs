@@ -38,6 +38,14 @@ namespace Border_Builder
         public Maths.Vector2i cellSE;
         public float scale;
         
+        #if DEBUG
+        
+        // Debug render options
+        public bool debugRenderBuildVolumes;
+        public bool debugRenderBorders;
+        
+        #endif
+        
         // Computed values from inputs
         public Maths.Vector2i hmCentre;
         
@@ -259,6 +267,9 @@ namespace Border_Builder
         
         #region Build Volumes Drawing
         
+        //public bool debugRenderBuildVolumes;
+        //public bool debugRenderBorders;
+        
         void DrawBuildVolume( VolumeParent volumeParent )
         {
             // Only show build volumes for the appropriate worldspace
@@ -266,7 +277,10 @@ namespace Border_Builder
                 return;
             
             #if DEBUG
-            if( volumeParent.BorderSegments.NullOrEmpty() )
+            if(
+                ( !debugRenderBuildVolumes )||
+                ( volumeParent.BorderSegments.NullOrEmpty() )
+            )
             #endif
             {
                 var pen = new Pen( Color.FromArgb( 255, 191, 0, 191 ) );
@@ -320,27 +334,20 @@ namespace Border_Builder
             if( ( worldspace.EditorID != volumeParent.WorldspaceEDID )||( volumeParent.BorderNodes == null ) )
                 return;
             
-            //int r = 255;
-            //int g = 0;
-            //int b = 127;
-            
             var pen = new Pen( Color.FromArgb( 255, 0, 255, 0 ) );
             
             for( var i = 0; i < volumeParent.BorderNodes.Count; i++ )
             {
                 var node = volumeParent.BorderNodes[ i ];
-                /*
-                pen = new Pen( Color.FromArgb( 255, r, g, b ) );
-                r -= 32;
-                g += 32;
-                b += 64;
-                if( r <   0 ) r += 255;
-                if( g > 255 ) g -= 255;
-                if( b > 255 ) b -= 255;
-                */
-                var niP = ( node.A + node.B ) * 0.5f;
-                DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen );
                 DrawLineWorldTransform( pen, node.A, node.B );
+                
+                #if DEBUG
+                if( debugRenderBorders )
+                {
+                    var niP = ( node.A + node.B ) * 0.5f;
+                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen );
+                }
+                #endif
             }
             
         }

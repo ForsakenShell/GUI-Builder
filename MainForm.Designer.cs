@@ -141,10 +141,10 @@ namespace Border_Builder
 		    this.gbRenderOptions = new System.Windows.Forms.GroupBox();
 		    this.cbRenderOverRegion = new System.Windows.Forms.CheckBox();
 		    this.cbExportPNG = new System.Windows.Forms.CheckBox();
-		    this.cbRenderSelectedOnly = new System.Windows.Forms.CheckBox();
 		    this.gbRenderJumpTo = new System.Windows.Forms.GroupBox();
 		    this.btnRenderJumpTo = new System.Windows.Forms.Button();
 		    this.cbRenderJumpTo = new System.Windows.Forms.ComboBox();
+		    this.cbRenderSelectedOnly = new System.Windows.Forms.CheckBox();
 		    this.cbRenderBorders = new System.Windows.Forms.CheckBox();
 		    this.cbRenderBuildVolumes = new System.Windows.Forms.CheckBox();
 		    this.cbRenderCellGrid = new System.Windows.Forms.CheckBox();
@@ -646,16 +646,6 @@ namespace Border_Builder
 		    this.cbExportPNG.Text = "Export PNG";
 		    this.cbExportPNG.UseVisualStyleBackColor = true;
 		    // 
-		    // cbRenderSelectedOnly
-		    // 
-		    this.cbRenderSelectedOnly.Location = new System.Drawing.Point(6, 49);
-		    this.cbRenderSelectedOnly.Name = "cbRenderSelectedOnly";
-		    this.cbRenderSelectedOnly.Size = new System.Drawing.Size(103, 18);
-		    this.cbRenderSelectedOnly.TabIndex = 14;
-		    this.cbRenderSelectedOnly.Text = "Selected Only";
-		    this.cbRenderSelectedOnly.UseVisualStyleBackColor = true;
-		    this.cbRenderSelectedOnly.CheckedChanged += new System.EventHandler(this.CbRenderSelectedOnlyCheckedChanged);
-		    // 
 		    // gbRenderJumpTo
 		    // 
 		    this.gbRenderJumpTo.Controls.Add(this.btnRenderJumpTo);
@@ -689,6 +679,16 @@ namespace Border_Builder
 		    this.cbRenderJumpTo.Size = new System.Drawing.Size(140, 21);
 		    this.cbRenderJumpTo.TabIndex = 0;
 		    this.cbRenderJumpTo.SelectedIndexChanged += new System.EventHandler(this.CbRenderJumpToSelectedIndexChanged);
+		    // 
+		    // cbRenderSelectedOnly
+		    // 
+		    this.cbRenderSelectedOnly.Location = new System.Drawing.Point(6, 49);
+		    this.cbRenderSelectedOnly.Name = "cbRenderSelectedOnly";
+		    this.cbRenderSelectedOnly.Size = new System.Drawing.Size(103, 18);
+		    this.cbRenderSelectedOnly.TabIndex = 14;
+		    this.cbRenderSelectedOnly.Text = "Selected Only";
+		    this.cbRenderSelectedOnly.UseVisualStyleBackColor = true;
+		    this.cbRenderSelectedOnly.CheckedChanged += new System.EventHandler(this.CbRenderSelectedOnlyCheckedChanged);
 		    // 
 		    // cbRenderBorders
 		    // 
