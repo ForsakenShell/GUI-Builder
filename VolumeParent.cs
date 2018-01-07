@@ -38,8 +38,6 @@ namespace Border_Builder
         #endif
         List<BorderSegment> BorderSegments;
         
-        bool _welded = false;
-        
         public VolumeParent( int editorID, string formID, string volumeKeyword, int worldspaceEDID  )
         {
             EditorID = editorID;
@@ -50,6 +48,37 @@ namespace Border_Builder
             BorderNodes = null;
             BorderSegments = null;
         }
+        
+        #region Debug dumps
+        
+        void DumpSegmentList( string listName, List<BorderSegment> list )
+        {
+            #if DEBUG
+            DebugLog.Write( string.Format( "{0}\n{{\nCount = {1}", listName, list.Count ) );
+            for( int i = 0; i < list.Count; i++ )
+            {
+                var segment = list[ i ];
+                segment.segIndex = i;
+                DebugLog.Write( string.Format( "Segment: {0} : {1}", i, segment.ToString() ) );
+            }
+            DebugLog.Write( "}" );
+            #endif
+        }
+        
+        void DumpNodeList( string listName, List<BorderNode> list )
+        {
+            #if DEBUG
+            DebugLog.Write( string.Format( "{0}\n{{\nCount = {1}", listName, list.Count ) );
+            for( int i = 0; i < list.Count; i++ )
+            {
+                var node = list[ i ];
+                DebugLog.Write( string.Format( "Node: {0} : {1}", i, node.ToString() ) );
+            }
+            DebugLog.Write( "}" );
+            #endif
+        }
+        
+        #endregion
         
         #region Bounding box and cells of entire build volume
         
@@ -127,145 +156,33 @@ namespace Border_Builder
         
         #endregion
         
-        #region Corner Welding
-        
-        public bool Welded
-        {
-            get
-            {
-                return _welded;
-            }
-        }
-        
-        class WeldPoints
-        {
-            public int VolumeIndex;
-            public int CornerIndex;
-            
-            public WeldPoints( int volumeIndex, int cornerIndex )
-            {
-                VolumeIndex = volumeIndex;
-                CornerIndex = cornerIndex;
-            }
-        }
-        
-        public void WeldVerticies( float threshold )
-        {
-            if( _welded )
-                return;
-            
-            for( int index = 0; index < BuildVolumes.Count; index++ )
-            {
-                WeldVolumeVerticies( index, threshold );
-            }
-            
-            _welded = true;
-        }
-        
-        List<WeldPoints> FindWeldableCorners( Maths.Vector2f origin, float threshold )
-        {
-            var points = new List<WeldPoints>();
-            
-            for( int index = 0; index < BuildVolumes.Count; index++ )
-            {
-                for( int index2 = 0; index2 < 4; index2++ )
-                {
-                    if( origin.DistanceFrom( BuildVolumes[ index ].Corners[ index2 ] ) < threshold )
-                    {
-                        points.Add( new WeldPoints( index, index2 ) );
-                    }
-                }
-            }
-            
-            return points;
-        }
-        
-        Maths.Vector2f WeldPoint( List<WeldPoints> points )
-        {
-            var result = new Maths.Vector2f();
-            foreach( var point in points )
-                result += BuildVolumes[ point.VolumeIndex ].Corners[ point.CornerIndex ];
-            result /= points.Count;
-            return result;
-        }
-        
-        void WeldVolumeVerticies( int volumeIndex, float threshold )
-        {
-            var buildVolume = BuildVolumes[ volumeIndex ];
-            for( int index = 0; index < 4; index++ )
-            {
-                var points = FindWeldableCorners( buildVolume.Corners[ index ], threshold );
-                if( points.Count > 1 )
-                {   // If it's only one point then it's itself
-                    var weldPoint = WeldPoint( points );
-                    foreach( var point in points )
-                        BuildVolumes[ point.VolumeIndex ].Corners[ point.CornerIndex ] = weldPoint;
-                }
-            }
-        }
-        
-        #endregion
-        
         #region Build Border
         
         public void BuildBorders()
         {
-            var worldspace = bbGlobal.WorldspaceFromEditorID( WorldspaceEDID );
-            if( worldspace == null )
-                return;
+            const float threshold = 1f;
             
             DebugLog.Write( string.Format( "BuildBorders()\n{{\nVolume = {0}", FormID ) );
             
-            // Create the lists
-            BorderNodes = new List<BorderNode>();
-            BorderSegments = new List<BorderSegment>();
+            var worldspace = bbGlobal.WorldspaceFromEditorID( WorldspaceEDID );
+            if( worldspace == null )
+            {
+                DebugLog.Write( "} - Unable to load the worldspace that contains the volume!" );
+                return;
+            }
             
             // Go through each volume and find all the segments
-            int count = BuildVolumes.Count;
-            for( int index = 0; index < count; index++ )
+            if( !CreateSegmentsFromBuildVolumes( threshold ) )
             {
-                CreateSegmentsForVolume( index );
+                DebugLog.Write( "} - Failed to create line segments from overlapping volume!" );
+                return;
             }
             
-            DebugLog.Write( string.Format( "BorderSegments.Count={0}\n{{", BorderSegments.Count.ToString() ) );
-            for( int i = 0; i < BorderSegments.Count; i++ )
+            // Create the final border nodes from the list of all border segments
+            if( !CreateNodesFromSegments( threshold ) )
             {
-                var segment = BorderSegments[ i ];
-                segment.segIndex = i;
-                DebugLog.Write( string.Format( "Segment: {0} : {1}", i, segment.ToString() ) );
-            }
-            DebugLog.Write( "}" );
-            
-            // Create outside edge
-            var outsideSegments = OutsideEdgeSegments( BorderSegments );
-            
-            // Translate segments into border nodes
-            if( !outsideSegments.NullOrEmpty() )
-            {
-                DebugLog.Write( string.Format( "outsideSegments.Count={0}\n{{", outsideSegments.Count.ToString() ) );
-                for( int i = 0; i < outsideSegments.Count; i++ )
-                {
-                    var segment = outsideSegments[ i ];
-                    DebugLog.Write( string.Format( "Segment: {0} : {1}", i, segment.ToString() ) );
-                }
-                DebugLog.Write( "}" );
-                
-            
-                foreach( var segment in outsideSegments )
-                    BorderNodes.Add( new BorderNode( segment ) );
-            
-                DebugLog.Write( string.Format( "BorderNodes.Count={0}\n{{", BorderNodes.Count.ToString() ) );
-                for( int i = 0; i < BorderNodes.Count; i++ )
-                {
-                    var node = BorderNodes[ i ];
-                    DebugLog.Write( string.Format( "Node: {0} : {1}", i, node.ToString() ) );
-                }
-                DebugLog.Write( "}" );
-                
-            }
-            else
-            {
-                DebugLog.Write( "ERROR: No outsideSegments found!" );
+                DebugLog.Write( "} - Failed to create border nodes from line segments!" );
+                return;
             }
             
             // Segments no longer needed
@@ -276,160 +193,135 @@ namespace Border_Builder
             DebugLog.Write( "}" );
         }
         
-        List<BorderSegment> OutsideEdgeSegments( List<BorderSegment> segments )
+        bool CreateSegmentsFromBuildVolumes( float threshold )
         {
-            const float vertex_threshold = 10f;
+            DebugLog.Write( string.Format( "CreateSegmentsFromBuildVolumes()\n{{\nthreshold = {0}", threshold ) );
             
-            DebugLog.Write( "OutsideEdgeSegments\n{" );
-            var segmentCount = segments.Count;
-            int startSegment = 0;
-            for( int i = 1; i < segmentCount; i++ )
+            // In [param] sanity..
+            if( BuildVolumes.NullOrEmpty() )
             {
-                // Pick left-most P0
-                if( segments[ i ].P0.X < segments[ startSegment ].P0.X )
-                {
-                    startSegment = i;
-                }
-                else if( ( segments[ i ].P0 - segments[ startSegment ].P0 ).Length.ApproximatelyEquals( 0f, vertex_threshold ) )
-                {
-                    // Found a matching P0, compare the cross products to find the segment that is left-most
-                    var ip = segments[ i ].Normal;
-                    var sp = segments[ startSegment ].Normal;
-                    var cross = Maths.Vector2f.Cross( sp, ip );
-                    DebugLog.Write( string.Format( "\tIndex: {0} ? {1} :: CrossProduct: {2}", startSegment, i, cross ) );
-                    if( cross < 0f )
-                    {
-                        startSegment = i;
-                    }
-                }
-            }
-            
-            int edgeIndex = 0;  // Used for debug logging only
-            DebugLog.Write( string.Format( "edge {0} : {1}", edgeIndex, segments[ startSegment ].ToString() ) );
-            
-            var tmpLst = new List<BorderSegment>();
-            tmpLst.Add( segments[ startSegment ] );
-            var currentSegment = startSegment;
-            do{
-                int nextSegment = -1;
-                for( int i = 0; i < segmentCount; i++ )
-                {
-                    // Skip self
-                    if( i == currentSegment ) continue;
-                    
-                    // P0 of segment must match P1 of last segment
-                    if( !( segments[ i ].P0 - segments[ currentSegment ].P1 ).Length.ApproximatelyEquals( 0f, vertex_threshold ) ) continue;
-                    
-                    // Led back to start, loop is complete at this point
-                    if( i == startSegment )
-                    {
-                        nextSegment = i;
-                        break;
-                    }
-                    
-                    // Skip already used segments
-                    if( tmpLst.Contains( segments[ i ] ) ) continue;
-                    
-                    // Set nextSegment if not already set and this segment is not colinear with the previous segment
-                    if( nextSegment == -1 )
-                    {
-                        //var ip = segments[ i ].Normal;
-                        //var cp = segments[ currentSegment ].Normal;
-                        //var cross = Maths.Vector2f.Cross( cp, ip );
-                        //DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
-                        //if( !cross.ApproximatelyEquals( 0f ) )
-                        {
-                            DebugLog.Write( string.Format( "\tIndex: {0} -> {1} :: First Found", currentSegment, i ) );
-                            nextSegment = i;
-                        }
-                        // Set or not, continue to the next possible segment
-                        continue;
-                    }
-                    
-                    {
-                        var ip = segments[ i ].Normal;
-                        var np = segments[ nextSegment ].Normal;
-                        var cross = Maths.Vector2f.Cross( np, ip );
-                        DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
-                        if( cross < 0f )
-                        {
-                            nextSegment = i;
-                        }
-                    }
-                }
-                if( nextSegment < 0 )
-                {
-                    DebugLog.Write( string.Format( "ERROR:  NO EDGE FOUND LINKING FROM: {0}", segments[ currentSegment ].ToString() ) );
-                    break;
-                }
-                if( nextSegment != startSegment )
-                {
-                    edgeIndex++;
-                    DebugLog.Write( string.Format( "edge {0} : {1}", edgeIndex, segments[ nextSegment ].ToString() ) );
-                    tmpLst.Add( segments[ nextSegment ] );
-                }
-                currentSegment = nextSegment;
-            }while( currentSegment != startSegment );
-            
-            DebugLog.Write( "}" );
-            
-            // Didn't find a complete loop, wth?
-            #if DEBUG
-            #else
-            if( currentSegment != startSegment )
-                tmpLst = null;
-            #endif
-            
-            return tmpLst;
-        }
-        
-        bool SplitSegmentForIntersectWith( BorderSegment segment, Maths.Vector2f p0, Maths.Vector2f p1, out BorderSegment segmentTail )
-        {
-            DebugLog.Write( string.Format( "SplitSegmentForIntersectWith()\n\tsegment={0}\n\tp0={1}\n\tp1={2}\n{{", segment.ToString(), p0.ToString(), p1.ToString() ) );
-            
-            const float threshold = 1f;
-            
-            // Test results
-            Maths.Vector2f result;
-            segmentTail = null;
-            
-            // Test the points against the edges
-            
-            var collision = Maths.Geometry.Collision.LineLineIntersect(
-                segment.P0, segment.P1,                         // Segment points
-                p0, p1,                                         // Test edge
-                out result,                                     // Intersection point
-                threshold                                       // Threshold
-               );
-            if(
-                ( collision == Maths.Geometry.CollisionType.NoCollision )|| // dur?
-                ( collision == Maths.Geometry.CollisionType.VertexMatch )   // Ignore end-point matches
-            )
-            {
-                DebugLog.Write( string.Format( "}}\tresult={0}", collision.ToString() ) );
+                DebugLog.Write( "} - BorderVolumes is empty!" );
                 return false;
             }
             
-            // TODO: Handle co-linear collisions more appropriately to reduce the final set of segments
+            // I wonder what this line does...
+            BorderSegments = new List<BorderSegment>();
             
-            DebugLog.Write( string.Format( "intersection={0}", result.ToString() ) );
+            // Create all the segments
+            int count = BuildVolumes.Count;
+            for( int index = 0; index < count; index++ )
+            {
+                CreateSegmentsForVolume( index, threshold );
+            }
             
-            // Clip the segment off at the intersection point
-            var oldP1 = segment.P1;
-            segment.P1 = new Maths.Vector2f( result );
+            // Post-create segment sanity check
+            if( BorderSegments.NullOrEmpty() )
+            {
+                DebugLog.Write( "} - Attempted to create line segments from overlapping volumes but BorderSegments is empty!" );
+                return false;
+            }
             
-            // Create a new segment, test if it's contained in another volume and if it's not then return the new segment as the tail of the original segment
-            segmentTail = new BorderSegment( segment.Volume, result, oldP1 );
-            DebugLog.Write( string.Format( "segmentTail={0}", segmentTail.ToString() ) );
+            // Remove coincidental segments
+            RemoveCoincidentalSegments( threshold );
             
-            // Segment was split 
-            DebugLog.Write( string.Format( "}}\tresult={1} - Segment split - segment={0}", segment.ToString(), collision.ToString() ) );
+            // Post-coincidental segment sanity check
+            if( BorderSegments.Count < 1 )
+            {
+                DebugLog.Write( "} - Attempted to create line segments from overlapping volumes but BorderSegments is empty!" );
+                return false;
+            }
+            
+            // Dump segments to the log
+            DumpSegmentList( "BorderSegments", BorderSegments );
+            
+            DebugLog.Write( "}" );
             return true;
         }
         
-        void SplitSegmentForIntersections( BorderSegment segment )
+        bool CreateNodesFromSegments( float threshold )
         {
-            DebugLog.Write( string.Format( "SplitSegmentForIntersections()\n\tsegment={0}\n{{", segment.ToString() ) );
+            DebugLog.Write( string.Format( "CreateNodesFromSegments()\n{{\nthreshold = {0}", threshold ) );
+            
+            // In [param] sanity..
+            if( BorderSegments.NullOrEmpty() )
+            {
+                DebugLog.Write( "} - BorderSegments is empty!" );
+                return false;
+            }
+            
+            // Get the outside edge segments from the list of all segments
+            var outsideSegments = OutsideEdgeSegments( BorderSegments, threshold );
+            if( outsideSegments.NullOrEmpty() )
+            {
+                DebugLog.Write( "} - Unable to calculate a complete outside edge loop from line segments!" );
+                return false;
+            }
+            
+            // Dump outside edge segments to the log
+            DumpSegmentList( "outsideSegments", outsideSegments );
+            
+            // Translate segments into border nodes
+            BorderNodes = new List<BorderNode>();
+            foreach( var segment in outsideSegments )
+                BorderNodes.Add( new BorderNode( segment ) );
+                
+            // Dump border nodes to the log
+            DumpNodeList( "BorderNodes", BorderNodes );
+            
+            DebugLog.Write( "}" );
+            return true;
+        }
+        
+        void RemoveCoincidentalSegments( float threshold )
+        {
+            DebugLog.Write( string.Format( "RemoveCoincidentalSegments()\n{{\nthreshold = {0}", threshold ) );
+            var count = BorderSegments.Count;
+            for( int index = 0; index < count - 1; index++ )
+            {
+                for( int index2 = index + 1; index2 < count; index2++ )
+                {
+                    if( BorderSegments[ index ].IsCoincidentalWith( BorderSegments[ index2 ], threshold ) )
+                    {
+                        DebugLog.Write( string.Format( "Removing coincidental segment {1} which matches {0}", index, index2 ) );
+                        BorderSegments.RemoveAt( index2 );
+                        count--;
+                    }
+                }
+            }
+            DebugLog.Write( "}" );
+        }
+        
+        void CreateSegmentsForVolume( int vIndex, float threshold )
+        {
+            DebugLog.Write( string.Format( "CreateSegmentsForVolume()\n{{\nvIndex = {0}\nthreshold = {1}", vIndex, threshold ) );
+            
+            // Get the build volume and it's corners
+            var buildVolume = BuildVolumes[ vIndex ];
+            var corners = buildVolume.Corners;
+            
+            // Try to add each edge as a border segment
+            TryAddBorderSegment( vIndex, corners[ 0 ], corners[ 1 ], threshold ); // Edge 1
+            TryAddBorderSegment( vIndex, corners[ 1 ], corners[ 2 ], threshold ); // Edge 2
+            TryAddBorderSegment( vIndex, corners[ 2 ], corners[ 3 ], threshold ); // Edge 3
+            TryAddBorderSegment( vIndex, corners[ 3 ], corners[ 0 ], threshold ); // Edge 4
+            
+            DebugLog.Write( "}" );
+        }
+        
+        void TryAddBorderSegment( int vIndex, Maths.Vector2f p0, Maths.Vector2f p1, float threshold )
+        {
+            DebugLog.Write( string.Format( "TryAddBorderSegment()\n{{\nvIndex = {0}\np0 = {1}\np1 = {2}", vIndex, p0.ToString(), p1.ToString() ) );
+            
+            // Create the segment and split it for intersection with any another volume
+            var segment = new BorderSegment( vIndex, p0, p1 );
+            SplitSegmentForIntersections( segment, threshold );
+            
+            DebugLog.Write( "}" );
+        }
+        
+        void SplitSegmentForIntersections( BorderSegment segment, float threshold )
+        {
+            DebugLog.Write( string.Format( "SplitSegmentForIntersections()\n{{\nsegment = {0}", segment.ToString() ) );
             
             int count = BuildVolumes.Count;
             BorderSegment segmentTail;
@@ -446,40 +338,40 @@ namespace Border_Builder
                 var corners = volume.Corners;
                 
                 // Test the points against the volumes edges
-                DebugLog.Write( string.Format( "Volume={0}\nindex={1}\n{{", segment.Volume, index ) );
-                
-                // Edge 1 (0,1)
-                DebugLog.Write( "Test edge 1\n{" );
-                segmentTail = null;
-                if( SplitSegmentForIntersectWith( segment, corners[ 0 ], corners[ 1 ], out segmentTail ) )
-                    if( segmentTail != null )
-                        SplitSegmentForIntersections( segmentTail );
-                DebugLog.Write( "}" );
-                
-                // Edge 2 (1,2)
-                DebugLog.Write( "Test edge 2\n{" );
-                segmentTail = null;
-                if( SplitSegmentForIntersectWith( segment, corners[ 1 ], corners[ 2 ], out segmentTail ) )
-                    if( segmentTail != null )
-                        SplitSegmentForIntersections( segmentTail );
-                DebugLog.Write( "}" );
-                
-                // Edge 3 (2,3)
-                DebugLog.Write( "Test edge 3\n{" );
-                segmentTail = null;
-                if( SplitSegmentForIntersectWith( segment, corners[ 2 ], corners[ 3 ], out segmentTail ) )
-                    if( segmentTail != null )
-                        SplitSegmentForIntersections( segmentTail );
-                DebugLog.Write( "}" );
-                
-                // Edge 4 (3,0)
-                DebugLog.Write( "Test edge 4\n{" );
-                segmentTail = null;
-                if( SplitSegmentForIntersectWith( segment, corners[ 3 ], corners[ 0 ], out segmentTail ) )
-                    if( segmentTail != null )
-                        SplitSegmentForIntersections( segmentTail );
-                DebugLog.Write( "}" );
-                
+                DebugLog.Write( string.Format( "{{\nVolume = {0}\nindex = {1}", segment.Volume, index ) );
+                {
+                    // Edge 1 (0,1)
+                    DebugLog.Write( "Test edge 1\n{" );
+                    segmentTail = null;
+                    if( SplitSegmentForIntersectWith( segment, corners[ 0 ], corners[ 1 ], out segmentTail, threshold ) )
+                        if( segmentTail != null )
+                            SplitSegmentForIntersections( segmentTail, threshold );
+                    DebugLog.Write( "}" );
+                    
+                    // Edge 2 (1,2)
+                    DebugLog.Write( "Test edge 2\n{" );
+                    segmentTail = null;
+                    if( SplitSegmentForIntersectWith( segment, corners[ 1 ], corners[ 2 ], out segmentTail, threshold ) )
+                        if( segmentTail != null )
+                            SplitSegmentForIntersections( segmentTail, threshold );
+                    DebugLog.Write( "}" );
+                    
+                    // Edge 3 (2,3)
+                    DebugLog.Write( "Test edge 3\n{" );
+                    segmentTail = null;
+                    if( SplitSegmentForIntersectWith( segment, corners[ 2 ], corners[ 3 ], out segmentTail, threshold ) )
+                        if( segmentTail != null )
+                            SplitSegmentForIntersections( segmentTail, threshold );
+                    DebugLog.Write( "}" );
+                    
+                    // Edge 4 (3,0)
+                    DebugLog.Write( "Test edge 4\n{" );
+                    segmentTail = null;
+                    if( SplitSegmentForIntersectWith( segment, corners[ 3 ], corners[ 0 ], out segmentTail, threshold ) )
+                        if( segmentTail != null )
+                            SplitSegmentForIntersections( segmentTail, threshold );
+                    DebugLog.Write( "}" );
+                }
                 DebugLog.Write( "}" );
             }
             
@@ -488,32 +380,157 @@ namespace Border_Builder
             DebugLog.Write( "}" );
         }
         
-        void TryAddBorderSegment( int vIndex, Maths.Vector2f p0, Maths.Vector2f p1 )
+        bool SplitSegmentForIntersectWith( BorderSegment segment, Maths.Vector2f p0, Maths.Vector2f p1, out BorderSegment segmentTail, float threshold )
         {
-            DebugLog.Write( string.Format( "TryAddBorderSegment()\n\tvIndex={0}\n\tp0={1}\n\tp1={2}\n{{", vIndex, p0.ToString(), p1.ToString() ) );
+            DebugLog.Write( string.Format( "SplitSegmentForIntersectWith()\n{{\nsegment= {0}\np0 = {1}\np1= {2}", segment.ToString(), p0.ToString(), p1.ToString() ) );
             
-            // Create the segment and split it for intersection with any another volume
-            var segment = new BorderSegment( vIndex, p0, p1 );
-            SplitSegmentForIntersections( segment );
+            // Test results
+            Maths.Vector2f result;
+            segmentTail = null;
             
-            DebugLog.Write( "}" );
+            // Test the points against the edges
+            
+            var collision = Maths.Geometry.Collision.LineLineIntersect(
+                segment.P0, segment.P1,                         // Segment points
+                p0, p1,                                         // Test edge
+                out result,                                     // Intersection point
+                threshold                                       // Threshold
+               );
+            if(
+                ( collision == Maths.Geometry.CollisionType.NoCollision )|| // dur?
+                ( collision == Maths.Geometry.CollisionType.VertexMatch )|| // Ignore vertex matches
+                ( collision == Maths.Geometry.CollisionType.EndPoint )      // Ignore end-point matches
+            )
+            {
+                DebugLog.Write( string.Format( "}} - result = {0}", collision.ToString() ) );
+                return false;
+            }
+            
+            // TODO: Handle co-linear collisions more appropriately to reduce the final set of segments
+            
+            DebugLog.Write( string.Format( "intersection = {0}", result.ToString() ) );
+            
+            // Clip the segment off at the intersection point
+            var oldP1 = segment.P1;
+            segment.P1 = new Maths.Vector2f( result );
+            
+            // Create a new segment, test if it's contained in another volume and if it's not then return the new segment as the tail of the original segment
+            segmentTail = new BorderSegment( segment.Volume, result, oldP1 );
+            DebugLog.Write( string.Format( "segmentTail = {0}", segmentTail.ToString() ) );
+            
+            // Segment was split 
+            DebugLog.Write( string.Format( "}} - result = {1} - Segment split - segment = {0}", segment.ToString(), collision.ToString() ) );
+            return true;
         }
         
-        void CreateSegmentsForVolume( int vIndex )
+        List<BorderSegment> OutsideEdgeSegments( List<BorderSegment> segments, float threshold )
         {
-            DebugLog.Write( string.Format( "CreateSegmentsForVolume()\n\tvIndex={0}\n{{", vIndex ) );
+            DebugLog.Write( "OutsideEdgeSegments()\n{" );
+            var segmentCount = segments.Count;
+            int startSegment = 0;
             
-            // Get the build volume and it's corners
-            var buildVolume = BuildVolumes[ vIndex ];
-            var corners = buildVolume.Corners;
+            DebugLog.Write( "Finding left-most starting segment...\n{" );
+            for( int i = 1; i < segmentCount; i++ )
+            {
+                // Pick left-most P0
+                if( segments[ i ].P0.X < segments[ startSegment ].P0.X )
+                {
+                    DebugLog.Write( string.Format( "Index: {0} ? {1} :: Left-more: {2} ? {3}", i, startSegment, segments[ i ].P0.X, segments[ startSegment ].P0.X ) );
+                    startSegment = i;
+                }
+                else if( ( segments[ i ].P0 - segments[ startSegment ].P0 ).Length.ApproximatelyEquals( 0f, threshold ) )
+                {
+                    // Found a matching P0, compare the cross products to find the segment that is left-most
+                    var ip = segments[ i ].Normal;
+                    var sp = segments[ startSegment ].Normal;
+                    var cross = Maths.Vector2f.Cross( sp, ip );
+                    DebugLog.Write( string.Format( "Index: {0} ? {1} :: 'X' matches, CrossProduct: {2}", startSegment, i, cross ) );
+                    if( cross < 0f )
+                    {
+                        startSegment = i;
+                    }
+                }
+            }
+            DebugLog.Write( string.Format( "}} - Segment {0} picked", startSegment ) );
             
-            // Try to add each edge as a border segment
-            TryAddBorderSegment( vIndex, corners[ 0 ], corners[ 1 ] ); // Edge 1
-            TryAddBorderSegment( vIndex, corners[ 1 ], corners[ 2 ] ); // Edge 2
-            TryAddBorderSegment( vIndex, corners[ 2 ], corners[ 3 ] ); // Edge 3
-            TryAddBorderSegment( vIndex, corners[ 3 ], corners[ 0 ] ); // Edge 4
+            DebugLog.Write( "Following outside edge from start...\n{" );
+            var tmpLst = new List<BorderSegment>();
+            {
+                tmpLst.Add( segments[ startSegment ] );
+                var currentSegment = startSegment;
+                do{
+                    DebugLog.Write( string.Format( "currentSegment = {0} :: {1}\n{{", currentSegment, segments[ currentSegment ].ToString() ) );
+    
+                    int nextSegment = -1;
+                    for( int i = 0; i < segmentCount; i++ )
+                    {
+                        // Skip self
+                        if( i == currentSegment ) continue;
+                        
+                        // P0 of segment must match P1 of last segment
+                        if( !( segments[ i ].P0 - segments[ currentSegment ].P1 ).Length.ApproximatelyEquals( 0f, threshold ) ) continue;
+                        
+                        // Led back to start, loop is complete at this point
+                        if( i == startSegment )
+                        {
+                            nextSegment = i;
+                            break;
+                        }
+                        
+                        // Skip already used segments
+                        if( tmpLst.Contains( segments[ i ] ) ) continue;
+                        
+                        // Set nextSegment if not already set and this segment is not colinear with the previous segment
+                        if( nextSegment == -1 )
+                        {
+                            //var ip = segments[ i ].Normal;
+                            //var cp = segments[ currentSegment ].Normal;
+                            //var cross = Maths.Vector2f.Cross( cp, ip );
+                            //DebugLog.Write( string.Format( "\tIndex: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
+                            //if( !cross.ApproximatelyEquals( 0f ) )
+                            {
+                                DebugLog.Write( string.Format( "Index: {0} -> {1} :: First Found", currentSegment, i ) );
+                                nextSegment = i;
+                            }
+                            // Set or not, continue to the next possible segment
+                            continue;
+                        }
+                        
+                        {
+                            var ip = segments[ i ].Normal;
+                            var np = segments[ nextSegment ].Normal;
+                            var cross = Maths.Vector2f.Cross( np, ip );
+                            DebugLog.Write( string.Format( "Index: {0} -> {1} ? {2} = {4} :: CrossProduct: {3}", currentSegment, nextSegment, i, cross, cross > 0f ? i : nextSegment ) );
+                            if( cross < 0f )
+                            {
+                                nextSegment = i;
+                            }
+                        }
+                    }
+                    if( nextSegment < 0 )
+                    {
+                        DebugLog.Write( string.Format( "}} - ERROR:  NO EDGE FOUND LINKING FROM: {0} :: {1}", currentSegment, segments[ currentSegment ].ToString() ) );
+                        break;
+                    }
+                    if( nextSegment != startSegment )
+                    {
+                        tmpLst.Add( segments[ nextSegment ] );
+                    }
+                    DebugLog.Write( string.Format( "}} - nextSegment = {0} :: {1}", nextSegment, segments[ nextSegment ].ToString() ) );
+                    currentSegment = nextSegment;
+                }while( currentSegment != startSegment );
+            }
+            DebugLog.Write( "}" );
+            
+            // Didn't find a complete loop, wth?
+            #if DEBUG
+            #else
+            if( currentSegment != startSegment )
+                tmpLst = null;
+            #endif
             
             DebugLog.Write( "}" );
+            return tmpLst;
         }
         
        #endregion

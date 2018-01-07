@@ -47,9 +47,10 @@ namespace Border_Builder
             {
                 NoCollision = 0,
                 SinglePoint = 1,
-                OverlappingRegions = 2,
-                Collinear = 2,
-                VertexMatch = 3
+                EndPoint = 2,
+                VertexMatch = 3,
+                Collinear = 4,
+                OverlappingRegions = 5
             }
             
             #region Intersection and overlap (AKA Collission)
@@ -209,7 +210,7 @@ namespace Border_Builder
                         ( iPos.ApproximatelyEquals( 0f, threshold ) )||
                         ( iPos.ApproximatelyEquals( l1Length, threshold ) )
                     )
-                        return CollisionType.VertexMatch;
+                        return CollisionType.EndPoint;
                     
                     return CollisionType.SinglePoint;
                     

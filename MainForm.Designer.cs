@@ -61,9 +61,7 @@ namespace Border_Builder
 		private System.Windows.Forms.ToolStripMenuItem mbiImportMod;
 		private System.Windows.Forms.ToolStripMenuItem mbiBuildVolumeBorders;
 		private System.Windows.Forms.ToolStripMenuItem mbiHelpAbout;
-		private System.Windows.Forms.GroupBox gbRenderJumpTo;
-		private System.Windows.Forms.Button btnRenderJumpTo;
-		private System.Windows.Forms.ComboBox cbRenderJumpTo;
+		private System.Windows.Forms.GroupBox gbRenderSelectedOnly;
 		private System.Windows.Forms.CheckBox cbRenderSelectedOnly;
 		private System.Windows.Forms.CheckBox cbRenderWorldspaceHeightTextures;
 		private System.Windows.Forms.Button btnWeldImportVolumeVerts;
@@ -71,6 +69,10 @@ namespace Border_Builder
 		private System.Windows.Forms.TextBox tbWeldThreshold;
 		private System.Windows.Forms.CheckBox cbExportPNG;
 		private System.Windows.Forms.CheckBox cbRenderOverRegion;
+		private System.Windows.Forms.ListBox lbVolumeParents;
+		private System.Windows.Forms.ToolStripStatusLabel sbiMouseToCellGrid;
+		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+		private System.Windows.Forms.ToolStripStatusLabel sbiMouseToWorldspace;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -106,6 +108,9 @@ namespace Border_Builder
 		    this.sbMain = new System.Windows.Forms.StatusStrip();
 		    this.sbiProgress = new System.Windows.Forms.ToolStripProgressBar();
 		    this.sbiCaption = new System.Windows.Forms.ToolStripStatusLabel();
+		    this.sbiMouseToCellGrid = new System.Windows.Forms.ToolStripStatusLabel();
+		    this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+		    this.sbiMouseToWorldspace = new System.Windows.Forms.ToolStripStatusLabel();
 		    this.gbWorldspace = new System.Windows.Forms.GroupBox();
 		    this.cbRenderWorldspaceHeightTextures = new System.Windows.Forms.CheckBox();
 		    this.btnLoadWorldspaceHeightTextures = new System.Windows.Forms.Button();
@@ -141,9 +146,8 @@ namespace Border_Builder
 		    this.gbRenderOptions = new System.Windows.Forms.GroupBox();
 		    this.cbRenderOverRegion = new System.Windows.Forms.CheckBox();
 		    this.cbExportPNG = new System.Windows.Forms.CheckBox();
-		    this.gbRenderJumpTo = new System.Windows.Forms.GroupBox();
-		    this.btnRenderJumpTo = new System.Windows.Forms.Button();
-		    this.cbRenderJumpTo = new System.Windows.Forms.ComboBox();
+		    this.gbRenderSelectedOnly = new System.Windows.Forms.GroupBox();
+		    this.lbVolumeParents = new System.Windows.Forms.ListBox();
 		    this.cbRenderSelectedOnly = new System.Windows.Forms.CheckBox();
 		    this.cbRenderBorders = new System.Windows.Forms.CheckBox();
 		    this.cbRenderBuildVolumes = new System.Windows.Forms.CheckBox();
@@ -161,7 +165,7 @@ namespace Border_Builder
 		    ((System.ComponentModel.ISupportInitialize)(this.pbRenderWindow)).BeginInit();
 		    this.pnRenderWindow.SuspendLayout();
 		    this.gbRenderOptions.SuspendLayout();
-		    this.gbRenderJumpTo.SuspendLayout();
+		    this.gbRenderSelectedOnly.SuspendLayout();
 		    this.SuspendLayout();
 		    // 
 		    // mbMain
@@ -251,8 +255,11 @@ namespace Border_Builder
 		    // 
 		    this.sbMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.sbiProgress,
-            this.sbiCaption});
-		    this.sbMain.Location = new System.Drawing.Point(0, 534);
+            this.sbiCaption,
+            this.sbiMouseToCellGrid,
+            this.toolStripStatusLabel1,
+            this.sbiMouseToWorldspace});
+		    this.sbMain.Location = new System.Drawing.Point(0, 640);
 		    this.sbMain.Name = "sbMain";
 		    this.sbMain.Size = new System.Drawing.Size(754, 22);
 		    this.sbMain.TabIndex = 1;
@@ -268,8 +275,29 @@ namespace Border_Builder
 		    this.sbiCaption.AutoToolTip = true;
 		    this.sbiCaption.Name = "sbiCaption";
 		    this.sbiCaption.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-		    this.sbiCaption.Size = new System.Drawing.Size(357, 17);
+		    this.sbiCaption.Size = new System.Drawing.Size(461, 17);
+		    this.sbiCaption.Spring = true;
 		    this.sbiCaption.Text = "Operation being performed la la la, this is really long to test, la la la";
+		    this.sbiCaption.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+		    // 
+		    // sbiMouseToCellGrid
+		    // 
+		    this.sbiMouseToCellGrid.AutoSize = false;
+		    this.sbiMouseToCellGrid.Name = "sbiMouseToCellGrid";
+		    this.sbiMouseToCellGrid.Size = new System.Drawing.Size(64, 17);
+		    this.sbiMouseToCellGrid.Text = "-99,-99";
+		    // 
+		    // toolStripStatusLabel1
+		    // 
+		    this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+		    this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+		    // 
+		    // sbiMouseToWorldspace
+		    // 
+		    this.sbiMouseToWorldspace.AutoSize = false;
+		    this.sbiMouseToWorldspace.Name = "sbiMouseToWorldspace";
+		    this.sbiMouseToWorldspace.Size = new System.Drawing.Size(112, 17);
+		    this.sbiMouseToWorldspace.Text = "(-123456,-123456)";
 		    // 
 		    // gbWorldspace
 		    // 
@@ -587,6 +615,7 @@ namespace Border_Builder
 		    this.pbRenderWindow.TabIndex = 4;
 		    this.pbRenderWindow.TabStop = false;
 		    this.pbRenderWindow.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseMove);
+		    this.pbRenderWindow.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseUp);
 		    // 
 		    // pnRenderWindow
 		    // 
@@ -597,12 +626,12 @@ namespace Border_Builder
 		    this.pnRenderWindow.Controls.Add(this.pbRenderWindow);
 		    this.pnRenderWindow.Location = new System.Drawing.Point(299, 27);
 		    this.pnRenderWindow.Name = "pnRenderWindow";
-		    this.pnRenderWindow.Size = new System.Drawing.Size(449, 501);
+		    this.pnRenderWindow.Size = new System.Drawing.Size(449, 607);
 		    this.pnRenderWindow.TabIndex = 5;
 		    // 
 		    // btnCellWindowRedraw
 		    // 
-		    this.btnCellWindowRedraw.Location = new System.Drawing.Point(129, 110);
+		    this.btnCellWindowRedraw.Location = new System.Drawing.Point(129, 214);
 		    this.btnCellWindowRedraw.Name = "btnCellWindowRedraw";
 		    this.btnCellWindowRedraw.Size = new System.Drawing.Size(152, 23);
 		    this.btnCellWindowRedraw.TabIndex = 7;
@@ -614,7 +643,7 @@ namespace Border_Builder
 		    // 
 		    this.gbRenderOptions.Controls.Add(this.cbRenderOverRegion);
 		    this.gbRenderOptions.Controls.Add(this.cbExportPNG);
-		    this.gbRenderOptions.Controls.Add(this.gbRenderJumpTo);
+		    this.gbRenderOptions.Controls.Add(this.gbRenderSelectedOnly);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderBorders);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderBuildVolumes);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderCellGrid);
@@ -623,7 +652,7 @@ namespace Border_Builder
 		    this.gbRenderOptions.Controls.Add(this.btnCellWindowRedraw);
 		    this.gbRenderOptions.Location = new System.Drawing.Point(6, 389);
 		    this.gbRenderOptions.Name = "gbRenderOptions";
-		    this.gbRenderOptions.Size = new System.Drawing.Size(287, 139);
+		    this.gbRenderOptions.Size = new System.Drawing.Size(287, 245);
 		    this.gbRenderOptions.TabIndex = 6;
 		    this.gbRenderOptions.TabStop = false;
 		    this.gbRenderOptions.Text = "Render Options";
@@ -639,56 +668,43 @@ namespace Border_Builder
 		    // 
 		    // cbExportPNG
 		    // 
-		    this.cbExportPNG.Location = new System.Drawing.Point(129, 91);
+		    this.cbExportPNG.Location = new System.Drawing.Point(6, 219);
 		    this.cbExportPNG.Name = "cbExportPNG";
 		    this.cbExportPNG.Size = new System.Drawing.Size(109, 18);
 		    this.cbExportPNG.TabIndex = 15;
 		    this.cbExportPNG.Text = "Export PNG";
 		    this.cbExportPNG.UseVisualStyleBackColor = true;
 		    // 
-		    // gbRenderJumpTo
+		    // gbRenderSelectedOnly
 		    // 
-		    this.gbRenderJumpTo.Controls.Add(this.btnRenderJumpTo);
-		    this.gbRenderJumpTo.Controls.Add(this.cbRenderJumpTo);
-		    this.gbRenderJumpTo.Controls.Add(this.cbRenderSelectedOnly);
-		    this.gbRenderJumpTo.Enabled = false;
-		    this.gbRenderJumpTo.Location = new System.Drawing.Point(129, 9);
-		    this.gbRenderJumpTo.Name = "gbRenderJumpTo";
-		    this.gbRenderJumpTo.Size = new System.Drawing.Size(152, 76);
-		    this.gbRenderJumpTo.TabIndex = 13;
-		    this.gbRenderJumpTo.TabStop = false;
-		    this.gbRenderJumpTo.Text = "Jump To";
+		    this.gbRenderSelectedOnly.Controls.Add(this.lbVolumeParents);
+		    this.gbRenderSelectedOnly.Controls.Add(this.cbRenderSelectedOnly);
+		    this.gbRenderSelectedOnly.Enabled = false;
+		    this.gbRenderSelectedOnly.Location = new System.Drawing.Point(129, 9);
+		    this.gbRenderSelectedOnly.Name = "gbRenderSelectedOnly";
+		    this.gbRenderSelectedOnly.Size = new System.Drawing.Size(152, 199);
+		    this.gbRenderSelectedOnly.TabIndex = 13;
+		    this.gbRenderSelectedOnly.TabStop = false;
+		    this.gbRenderSelectedOnly.Text = "Volume Groups";
 		    // 
-		    // btnRenderJumpTo
+		    // lbVolumeParents
 		    // 
-		    this.btnRenderJumpTo.Enabled = false;
-		    this.btnRenderJumpTo.Location = new System.Drawing.Point(101, 46);
-		    this.btnRenderJumpTo.Name = "btnRenderJumpTo";
-		    this.btnRenderJumpTo.Size = new System.Drawing.Size(45, 23);
-		    this.btnRenderJumpTo.TabIndex = 1;
-		    this.btnRenderJumpTo.Text = "Go!";
-		    this.btnRenderJumpTo.UseVisualStyleBackColor = true;
-		    this.btnRenderJumpTo.Click += new System.EventHandler(this.BtnRenderJumpToClick);
-		    // 
-		    // cbRenderJumpTo
-		    // 
-		    this.cbRenderJumpTo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-		    this.cbRenderJumpTo.FormattingEnabled = true;
-		    this.cbRenderJumpTo.Location = new System.Drawing.Point(6, 19);
-		    this.cbRenderJumpTo.Name = "cbRenderJumpTo";
-		    this.cbRenderJumpTo.Size = new System.Drawing.Size(140, 21);
-		    this.cbRenderJumpTo.TabIndex = 0;
-		    this.cbRenderJumpTo.SelectedIndexChanged += new System.EventHandler(this.CbRenderJumpToSelectedIndexChanged);
+		    this.lbVolumeParents.FormattingEnabled = true;
+		    this.lbVolumeParents.Location = new System.Drawing.Point(9, 19);
+		    this.lbVolumeParents.Name = "lbVolumeParents";
+		    this.lbVolumeParents.ScrollAlwaysVisible = true;
+		    this.lbVolumeParents.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
+		    this.lbVolumeParents.Size = new System.Drawing.Size(130, 147);
+		    this.lbVolumeParents.TabIndex = 16;
 		    // 
 		    // cbRenderSelectedOnly
 		    // 
-		    this.cbRenderSelectedOnly.Location = new System.Drawing.Point(6, 49);
+		    this.cbRenderSelectedOnly.Location = new System.Drawing.Point(9, 175);
 		    this.cbRenderSelectedOnly.Name = "cbRenderSelectedOnly";
 		    this.cbRenderSelectedOnly.Size = new System.Drawing.Size(103, 18);
 		    this.cbRenderSelectedOnly.TabIndex = 14;
 		    this.cbRenderSelectedOnly.Text = "Selected Only";
 		    this.cbRenderSelectedOnly.UseVisualStyleBackColor = true;
-		    this.cbRenderSelectedOnly.CheckedChanged += new System.EventHandler(this.CbRenderSelectedOnlyCheckedChanged);
 		    // 
 		    // cbRenderBorders
 		    // 
@@ -749,7 +765,7 @@ namespace Border_Builder
 		    // 
 		    this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 		    this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-		    this.ClientSize = new System.Drawing.Size(754, 556);
+		    this.ClientSize = new System.Drawing.Size(754, 662);
 		    this.Controls.Add(this.gbWorldspace);
 		    this.Controls.Add(this.gbRenderOptions);
 		    this.Controls.Add(this.pnRenderWindow);
@@ -757,7 +773,7 @@ namespace Border_Builder
 		    this.Controls.Add(this.sbMain);
 		    this.Controls.Add(this.mbMain);
 		    this.MainMenuStrip = this.mbMain;
-		    this.MinimumSize = new System.Drawing.Size(770, 594);
+		    this.MinimumSize = new System.Drawing.Size(770, 700);
 		    this.Name = "fMain";
 		    this.Text = "Border Builder";
 		    this.Load += new System.EventHandler(this.FMainLoad);
@@ -779,7 +795,7 @@ namespace Border_Builder
 		    ((System.ComponentModel.ISupportInitialize)(this.pbRenderWindow)).EndInit();
 		    this.pnRenderWindow.ResumeLayout(false);
 		    this.gbRenderOptions.ResumeLayout(false);
-		    this.gbRenderJumpTo.ResumeLayout(false);
+		    this.gbRenderSelectedOnly.ResumeLayout(false);
 		    this.ResumeLayout(false);
 		    this.PerformLayout();
 

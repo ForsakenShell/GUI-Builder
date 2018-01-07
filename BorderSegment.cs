@@ -63,6 +63,18 @@ namespace Border_Builder
             P1 = new Maths.Vector2f( segment.P1 );
         }
         
+        public bool IsCoincidentalWith( BorderSegment other, float threshold = Maths.FLOAT_EPSILON )
+        {
+            if(
+                ( ( this.P0 - other.P0 ).Length.ApproximatelyEquals( 0f, threshold ) )&&
+                ( ( this.P1 - other.P1 ).Length.ApproximatelyEquals( 0f, threshold ) )
+            ) return true;
+            return(
+                ( ( this.P0 - other.P1 ).Length.ApproximatelyEquals( 0f, threshold ) )&&
+                ( ( this.P1 - other.P0 ).Length.ApproximatelyEquals( 0f, threshold ) )
+            );
+        }
+        
         public new string ToString()
         {
             return string.Format( "Volume={0}, segIndex={5}, P0={1}, P1={2}, Length={3}, Angle={4}", Volume, P0.ToString(), P1.ToString(), Length.ToString(), Angle.ToString(), segIndex );

@@ -114,28 +114,12 @@ namespace Border_Builder
             return WorldSpaceToCellGrid( v.X, v.Y );
         }
         
-        /*
-        public static float Clamp( float value, float lower, float upper )
+        public static Maths.Vector2i SizeOfCellRange( Maths.Vector2i nw, Maths.Vector2i se )
         {
-            return value < lower ? lower :
-                value > upper ? upper :
-                value;
+            return new Maths.Vector2i(
+                Math.Abs( se.X - nw.X ) + 1,
+                Math.Abs( nw.Y - se.Y ) + 1 );
         }
-        
-        public static byte Clamp( byte value, byte lower, byte upper )
-        {
-            return value < lower ? lower :
-                value > upper ? upper :
-                value;
-        }
-        
-        public static int Clamp( int value, int lower, int upper )
-        {
-            return value < lower ? lower :
-                value > upper ? upper :
-                value;
-        }
-        */
         
     }
     

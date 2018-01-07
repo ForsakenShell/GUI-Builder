@@ -22,11 +22,11 @@ namespace Border_Builder
         public Maths.Vector3f Rotation;
         public Maths.Vector3f Size;
         public Maths.Vector2i Cell;
-        public string Reference;
+        public int Reference;
         
         public Maths.Vector2f[] Corners;
         
-        public BuildVolume( Maths.Vector3f position, Maths.Vector3f rotation, Maths.Vector3f size, Maths.Vector2i cell, string reference )
+        public BuildVolume( Maths.Vector3f position, Maths.Vector3f rotation, Maths.Vector3f size, Maths.Vector2i cell, int reference )
         {
             // Restrict rotation to 0->360
             /*

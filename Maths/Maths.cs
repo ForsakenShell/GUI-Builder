@@ -18,7 +18,7 @@ namespace Border_Builder
     public static partial class Maths
     {
         
-        public const float PI_TO_RAD = (float)Math.PI / 180f;
+        public const float PI_TO_RAD = (float)( Math.PI / 180.0d );
         
         #region Approximate equality
         
@@ -55,6 +55,20 @@ namespace Border_Builder
             return value.CompareTo( lower ) < 0 ? lower :
                 value.CompareTo( upper ) > 0 ? upper :
                 value;
+        }
+        
+        #endregion
+        
+        #region Math Lerp
+        
+        public static float Lerp( float min, float max, float amount )
+        {
+            return min + ( max - min ) * amount;
+        }
+        
+        public static float InverseLerp( float min, float max, float amount )
+        {
+            return max - ( max - min ) * amount;
         }
         
         #endregion

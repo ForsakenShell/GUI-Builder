@@ -85,6 +85,7 @@ namespace Border_Builder
             string[] lineWords;
             string[] elementWords;
             
+            _welded = false;
             VolumeParents = new List<VolumeParent>();
             
             var buildVolumeFile = File.ReadLines( BuildVolumeRef_File );
@@ -210,7 +211,7 @@ namespace Border_Builder
                         Maths.Vector3f volumeSize;
                         Maths.Vector3f volumeRotation;
                         Maths.Vector2i volumeCell;
-                        string volumeReference;
+                        int volumeReference;
                         
                         // Volume position
                         elementWords = lineWords[ 1 ].ParseImportLine( ':' );
@@ -271,7 +272,11 @@ namespace Border_Builder
                             System.Windows.Forms.MessageBox.Show( string.Format( "LoadBuildVolumesFile()\nBad file format!\nExpected '{2}'\n'{1}'\nUnable to import from \"{0}\"!", BuildVolumeRef_File, fileLine, cReference ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
                             return;
                         }
-                        volumeReference = elementWords[ 1 ];
+                        if( !int.TryParse( elementWords[ 1 ], System.Globalization.NumberStyles.HexNumber, null, out volumeReference ) )
+                        {
+                            System.Windows.Forms.MessageBox.Show( string.Format( "LoadBuildVolumesFile()\nBad file format!\nExpected '{2}'\n'{1}'\nUnable to import from \"{0}\"!", BuildVolumeRef_File, fileLine, cReference ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
+                            return;
+                        }
                         
                         BuildVolume buildVolume = new BuildVolume(
                             volumePosition,
@@ -297,6 +302,11 @@ namespace Border_Builder
                     }
                 }
             }
+            
+            VolumeParents.Sort( ( x, y ) =>
+                               {
+                                   return string.Compare( x.FormID, y.FormID );
+                               } );
         }
         
         #endregion
@@ -314,6 +324,133 @@ namespace Border_Builder
         }
         
         #endregion
+        
+        #region Corner Welding
+        
+        bool _welded = false;
+        
+        public bool Welded
+        {
+            get
+            {
+                return _welded;
+            }
+        }
+        
+        class WeldPoints
+        {
+            public int ParentIndex;
+            public int VolumeIndex;
+            public int CornerIndex;
+            
+            public WeldPoints( int parentIndex, int volumeIndex, int cornerIndex )
+            {
+                ParentIndex = parentIndex;
+                VolumeIndex = volumeIndex;
+                CornerIndex = cornerIndex;
+            }
+        }
+        
+        public void WeldVerticies( float threshold )
+        {
+            if( _welded )
+                return;
+            
+            var fmain = fMain.Self;
+            for( int index = 0; index < VolumeParents.Count; index++ )
+            {
+                var parent = VolumeParents[ index ];
+                
+                fmain.UpdateStatusMessage( string.Format( "Welding verticies for {0}...", parent.FormID ) );
+                
+                for( int index2 = 0; index2 < parent.BuildVolumes.Count; index2++ )
+                {
+                    WeldVolumeVerticies( index, index2, threshold );
+                }
+            }
+            
+            _welded = true;
+        }
+        
+        void WeldVolumeVerticies( int parentIndex, int volumeIndex, float threshold )
+        {
+            var parent = VolumeParents[ parentIndex ];
+            var buildVolume = parent.BuildVolumes[ volumeIndex ];
+            for( int index = 0; index < 4; index++ )
+            {
+                var points = FindWeldableCorners( buildVolume.Corners[ index ], threshold );
+                if( points.Count > 1 )
+                {   // If it's only one point then it's itself
+                    var weldPoint = WeldPoint( points );
+                    foreach( var point in points )
+                        VolumeParents[ point.ParentIndex ].BuildVolumes[ point.VolumeIndex ].Corners[ point.CornerIndex ] = weldPoint;
+                }
+            }
+        }
+        
+        List<WeldPoints> FindWeldableCorners( Maths.Vector2f origin, float threshold )
+        {
+            var points = new List<WeldPoints>();
+            
+            for( int index = 0; index < VolumeParents.Count; index++ )
+            {
+                var parent = VolumeParents[ index ];
+                for( int index2 = 0; index2 < parent.BuildVolumes.Count; index2++ )
+                {
+                    for( int index3 = 0; index3 < 4; index3++ )
+                    {
+                        if( origin.DistanceFrom( parent.BuildVolumes[ index2 ].Corners[ index3 ] ) < threshold )
+                        {
+                            points.Add( new WeldPoints( index, index2, index3 ) );
+                        }
+                    }
+                }
+            }
+            
+            return points;
+        }
+        
+        Maths.Vector2f WeldPoint( List<WeldPoints> points )
+        {
+            var result = new Maths.Vector2f();
+            foreach( var point in points )
+                result += VolumeParents[ point.ParentIndex ].BuildVolumes[ point.VolumeIndex ].Corners[ point.CornerIndex ];
+            result /= points.Count;
+            return result;
+        }
+        
+        #endregion
+        
+        public bool TryGetVolumesFromPos( Maths.Vector2f pos, out List<VolumeParent> outParents, out List<BuildVolume> outVolumes, List<VolumeParent> fromGroup = null )
+        {
+            outParents = null;
+            outVolumes = null;
+            
+            var parents = new List<VolumeParent>();
+            var volumes = new List<BuildVolume>();
+            
+            if( fromGroup == null )
+                fromGroup = VolumeParents;
+            
+            foreach( var parent in fromGroup )
+            {
+                foreach( var volume in parent.BuildVolumes )
+                {
+                    if( Maths.Geometry.Collision.PointInPoly( pos, volume.Corners ) )
+                    {
+                        if( !parents.Contains( parent ) )
+                            parents.Add( parent );
+                        volumes.Add( volume );
+                    }
+                }
+            }
+            if( volumes.NullOrEmpty() )
+                return false;
+            
+            outParents = parents;
+            outVolumes = volumes;
+            return true;
+        }
         
     }
 }

@@ -29,14 +29,14 @@ namespace Border_Builder
         }
         
         // Source data pointers
-        public bbWorldspace worldspace;
-        public bbImportMod importMod;
-        public VolumeParent specificVolume;
+        bbWorldspace worldspace;
+        bbImportMod importMod;
+        public List<VolumeParent> renderVolumes;
         
         // Clipper inputs held for reference
-        public Maths.Vector2i cellNW;
-        public Maths.Vector2i cellSE;
-        public float scale;
+        Maths.Vector2i cellNW;
+        Maths.Vector2i cellSE;
+        float scale;
         
         #if DEBUG
         
@@ -47,34 +47,41 @@ namespace Border_Builder
         #endif
         
         // Computed values from inputs
-        public Maths.Vector2i hmCentre;
+        Maths.Vector2i hmCentre;
         
         // Size of selected region in cells
-        public Maths.Vector2i cmSize;
+        Maths.Vector2i cmSize;
         
         // Heightmap offset and size
-        public Maths.Vector2i hmOffset;
-        public Maths.Vector2i hmSize;
+        Maths.Vector2i hmOffset;
+        Maths.Vector2i hmSize;
         
         // Worldmap offset and size
-        public Maths.Vector2f wmOffset;
-        public Maths.Vector2f wmSize;
+        Maths.Vector2f wmOffset;
+        Maths.Vector2f wmSize;
         
-        public Maths.Vector2f hmTransform;
-        public Maths.Vector2f wmTransform;
+        Maths.Vector2f hmTransform;
+        Maths.Vector2f wmTransform;
         
         // Render target
-        public Bitmap bmpTarget;
-        public Graphics gfxTarget;
-        public GraphicsUnit guTarget;
-        public ImageAttributes iaTarget;
-        public Rectangle rectTarget;
+        Bitmap bmpTarget;
+        Graphics gfxTarget;
+        GraphicsUnit guTarget;
+        ImageAttributes iaTarget;
+        Rectangle rectTarget;
+        PictureBox pbTarget;
         
-        public void Dispose( bool fullClean = false )
+        // High light parents and volumes
+        public List<VolumeParent> hlParents = null;
+        public List<BuildVolume> hlVolumes = null;
+        
+        #region cTor, dTor, sortOf
+        
+        public void Dispose()
         {
             worldspace = null;
             importMod = null;
-            specificVolume = null;
+            renderVolumes = null;
             cellNW = Maths.Vector2i.Zero;
             cellSE = Maths.Vector2i.Zero;
             scale = 0f;
@@ -87,34 +94,37 @@ namespace Border_Builder
             hmTransform = Maths.Vector2f.Zero;
             wmTransform = Maths.Vector2f.Zero;
             gfxTarget.Dispose();
-            if( fullClean )
-                bmpTarget.Dispose(); 
+            bmpTarget.Dispose(); 
+            iaTarget.Dispose();
             bmpTarget = null;
             gfxTarget = null;
             guTarget = (GraphicsUnit)0;
-            iaTarget.Dispose();
             iaTarget = null;
             rectTarget = Rectangle.Empty;
         }
         
-        // Constructor
-        public RenderTransform( bbWorldspace _worldspace, bbImportMod _importMod, VolumeParent _specificVolume, Maths.Vector2i _cellNW, Maths.Vector2i _cellSE, float _scale )
+        public RenderTransform( PictureBox _pbTarget, bbWorldspace _worldspace, bbImportMod _importMod )
         {
-            // Shadow cache
+            pbTarget = _pbTarget;
+            worldspace = _worldspace;
+            importMod = _importMod;
+        }
+        
+        #endregion
+        
+        #region Render State Manipulation
+        
+        public void UpdateTransform( Maths.Vector2i _cellNW, Maths.Vector2i _cellSE, float _scale )
+        {
+            bool mustRebuildBuffers = ( bmpTarget == null )||( gfxTarget == null )||( iaTarget == null );
+            
             cellNW = _cellNW;
             cellSE = _cellSE;
             scale = _scale;
-            
-            worldspace = _worldspace;
-            importMod = _importMod;
-            specificVolume = _specificVolume;
-            
-            hmCentre = _worldspace.HeightMapOffset;
+            hmCentre = worldspace.HeightMapOffset;
             
             // Compute
-            cmSize = new Maths.Vector2i(
-                Math.Abs( cellSE.X - cellNW.X ) + 1,
-                Math.Abs( cellNW.Y - cellSE.Y ) + 1 );
+            cmSize = bbGlobal.SizeOfCellRange( cellNW, cellSE );
             
             hmOffset = new Maths.Vector2i(
                 hmCentre.X + cellNW.X * (int)bbConstant.HeightMap_Resolution,
@@ -138,35 +148,121 @@ namespace Border_Builder
                 -wmOffset.X * scale,
                  wmOffset.Y * scale );
             
-            rectTarget = new Rectangle(
+            var rect = new Rectangle(
                 0,
                 0,
                 (int)( wmSize.X * scale ),
                 (int)( wmSize.Y * scale ) );
             
+            if( rect != rectTarget )
+            {
+                rectTarget = rect;
+                mustRebuildBuffers = true;
+            }
+            
+            if( !mustRebuildBuffers ) return;
+            
+            bool doGC = false;
+            if( gfxTarget != null )
+            {
+                gfxTarget.Dispose();
+                gfxTarget = null;
+                doGC = true;
+            }
+            if( bmpTarget != null )
+            {
+                bmpTarget.Dispose(); 
+                bmpTarget = null;
+                doGC = true;
+            }
+            if( iaTarget != null )
+            {
+                iaTarget.Dispose();
+                iaTarget = null;
+            }
+            
+            if( doGC )
+                System.GC.Collect( System.GC.MaxGeneration );
+
             bmpTarget = new Bitmap( rectTarget.Width, rectTarget.Height );
             gfxTarget = Graphics.FromImage( bmpTarget );
             
             guTarget = GraphicsUnit.Pixel;
             iaTarget = new ImageAttributes();
             iaTarget.SetWrapMode( System.Drawing.Drawing2D.WrapMode.Clamp );
-            
         }
         
+        #endregion
         
-        #region Render to targets
+        #region Public Accessors
         
-        public void RenderToPictureBox( PictureBox target )
+        public bbWorldspace                     Worldspace              { get { return worldspace; } }
+        public bbImportMod                      ImportMod               { get { return importMod; } }
+        
+        public Maths.Vector2i                   CellNW                  { get { return cellNW; } }
+        public Maths.Vector2i                   CellSE                  { get { return cellSE; } }
+        
+        public List<VolumeParent>               HighlightParents        { get { return hlParents; } }
+        public List<BuildVolume>                HighlightVolumes        { get { return hlVolumes; } }
+        
+        #endregion
+        
+        public static float CalculateScale( Maths.Vector2i cells, Maths.Vector2i worldCells )
         {
-            if( target == null ) return;
-            target.Size = new Size( rectTarget.Width, rectTarget.Height );
-            target.Image = bmpTarget;
+            var scaleNS = (float)( (float)cells.Y / (float)worldCells.Y );
+            var scaleEW = (float)( (float)cells.X / (float)worldCells.X );
+            return Maths.InverseLerp( bbConstant.MinZoom, bbConstant.MaxZoom, scaleNS > scaleEW ? scaleNS : scaleEW );
+        }
+        
+        public Maths.Vector2f MouseToWorldspace( float mX, float mY )
+        {
+            var sX = ( mX / scale );
+            var sY = ( mY / scale );
+            var wX = ( (float)cellNW.X * bbConstant.WorldMap_Resolution ) + sX;
+            var wY = ( (float)cellNW.Y * bbConstant.WorldMap_Resolution ) - sY;
+            return new Maths.Vector2f( wX, wY );
+        }
+        
+        public Maths.Vector2i MouseToCellGrid( float mX, float mY )
+        {
+            var sX = ( mX / scale );
+            var sY = ( mY / scale );
+            var wX = cellNW.X + (int)( sX / bbConstant.WorldMap_Resolution );
+            var wY = cellNW.Y - (int)( sY / bbConstant.WorldMap_Resolution );
+            return new Maths.Vector2i( wX, wY );
+        }
+        
+        #region Render Scene
+        
+        public void RenderScene( bool renderLand, bool renderWater, bool renderCellGrid, bool renderBuildVolumes, bool renderBorders )
+        {
+            if( renderLand )
+                DrawLandMap();
+            
+            if( renderWater )
+                DrawWaterMap();
+            
+            if( renderCellGrid )
+                DrawCellGrid();
+            
+            if( renderBuildVolumes )
+                DrawBuildVolumes();
+            
+            if( renderBorders )
+                DrawParentBorders();
+            
+            pbTarget.Size = new Size( rectTarget.Width, rectTarget.Height );
+            pbTarget.Image = bmpTarget;
         }
         
         public void RenderToPNG()
         {
             // Export the [whole] map to a PNG
-            var filename = specificVolume == null ? worldspace.FormID : specificVolume.FormID + ".png";
+            if(
+                ( !renderVolumes.NullOrEmpty() )&&
+                ( renderVolumes.Count > 1 )
+               ) return;
+            var filename = renderVolumes.NullOrEmpty() ? worldspace.FormID : renderVolumes[ 0 ].FormID + ".png";
             bmpTarget.Save( filename, System.Drawing.Imaging.ImageFormat.Png );
         }
         
@@ -193,10 +289,10 @@ namespace Border_Builder
         
         #region Drawing Primitives (worldspace to transform target)
         
-        public void DrawTextWorldTransform( string text, float x, float y, Pen pen, Font font = null, Brush brush = null )
+        public void DrawTextWorldTransform( string text, float x, float y, Pen pen, float size = 12f, Font font = null, Brush brush = null )
         {
             if( font == null )
-                font = new Font( FontFamily.GenericSansSerif, 12f, FontStyle.Regular, GraphicsUnit.Pixel );
+                font = new Font( FontFamily.GenericSerif, size, FontStyle.Regular, GraphicsUnit.Pixel );
             if( brush == null )
                 brush = new SolidBrush( pen.Color );
             var rx = wmTransform.X + x * scale;
@@ -283,10 +379,34 @@ namespace Border_Builder
             )
             #endif
             {
-                var pen = new Pen( Color.FromArgb( 255, 191, 0, 191 ) );
+                int rb = 223;
+                var penHigh = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
+                rb -= 48;
+                var penMid = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
+                rb -= 48;
+                var penLow = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
                 
                 foreach( var buildVolume in volumeParent.BuildVolumes )
-                    DrawPolyWorldTransform( pen, buildVolume.Corners );
+                {
+                    var usePen = penLow;
+                    if( hlParents.NullOrEmpty() )
+                    {
+                        usePen = penHigh;
+                    }
+                    else if(
+                        ( !hlVolumes.NullOrEmpty() )&&
+                        ( hlVolumes.Contains( buildVolume ) )
+                    )
+                    {
+                        usePen = penHigh;
+                    }
+                    else if( hlParents.Contains( volumeParent ) )
+                    {
+                        usePen = penMid;
+                    }
+                
+                    DrawPolyWorldTransform( usePen, buildVolume.Corners );
+                }
             }
             #if DEBUG
             else
@@ -298,15 +418,18 @@ namespace Border_Builder
                 for( var i = 0; i < volumeParent.BorderSegments.Count; i++ )
                 {
                     var segment = volumeParent.BorderSegments[ i ];
+                    
                     var pen = new Pen( Color.FromArgb( 255, r, g, b ) );
+                    
                     r -= 32;
                     g += 32;
                     b += 64;
                     if( r <   0 ) r += 255;
                     if( g > 255 ) g -= 255;
                     if( b > 255 ) b -= 255;
+                    
                     var niP = ( segment.P0 + segment.P1 ) * 0.5f;
-                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen );
+                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen, 10f );
                     DrawLineWorldTransform( pen, segment.P0, segment.P1 );
                 }
             }
@@ -315,13 +438,16 @@ namespace Border_Builder
         
         public void DrawBuildVolumes()
         {
-            if( specificVolume != null )
+            if( renderVolumes.NullOrEmpty() )
             {
-                DrawBuildVolume( specificVolume );
-            }
-            else if( importMod != null )
                 foreach( var volumeParent in importMod.VolumeParents )
                     DrawBuildVolume( volumeParent );
+            }
+            else
+            {
+                foreach( var volumeParent in renderVolumes )
+                    DrawBuildVolume( volumeParent );
+            }
         }
         
         #endregion
@@ -334,12 +460,26 @@ namespace Border_Builder
             if( ( worldspace.EditorID != volumeParent.WorldspaceEDID )||( volumeParent.BorderNodes == null ) )
                 return;
             
-            var pen = new Pen( Color.FromArgb( 255, 0, 255, 0 ) );
+            int g = 255;
+            if(
+                ( !hlParents.NullOrEmpty() )&&
+                ( !hlParents.Contains( volumeParent ) )
+            )   g >>= 1;
+            
+            var pen = new Pen( Color.FromArgb( 255, 0, g, 0 ) );
             
             for( var i = 0; i < volumeParent.BorderNodes.Count; i++ )
             {
                 var node = volumeParent.BorderNodes[ i ];
-                DrawLineWorldTransform( pen, node.A, node.B );
+                
+                /*
+                if(
+                    ( !hlVolumes.NullOrEmpty() )&&
+                    ( hlVolumes.Contains( node.Volume ) )
+                )   g >>= 1;
+                */
+                
+               DrawLineWorldTransform( pen, node.A, node.B );
                 
                 #if DEBUG
                 if( debugRenderBorders )
@@ -354,13 +494,16 @@ namespace Border_Builder
         
         public void DrawParentBorders()
         {
-            if( specificVolume != null )
+            if( renderVolumes.NullOrEmpty() )
             {
-                DrawParentBorder( specificVolume );
-            }
-            else if( importMod != null )
                 foreach( var volumeParent in importMod.VolumeParents )
                     DrawParentBorder( volumeParent );
+            }
+            else
+            {
+                foreach( var volumeParent in renderVolumes )
+                    DrawParentBorder( volumeParent );
+            }
         }
         
         #endregion

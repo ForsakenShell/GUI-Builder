@@ -62,10 +62,30 @@ namespace Border_Builder
         
         #region List Helpers
         
-        public static bool NullOrEmpty<T>(this IList<T> list)
+        /// <summary>
+        /// Is the list null or contain 0 elements?
+        /// </summary>
+        /// <param name="list">List to test for null or empty</param>
+        /// <returns></returns>
+        public static bool NullOrEmpty<T>( this IList<T> list )
         {
             if( list == null ) return true;
             return list.Count == 0;
+        }
+        
+        /// <summary>
+        /// Does the list contain all elements of the other list?
+        /// </summary>
+        /// <param name="list">The list to check the contents of</param>
+        /// <param name="other">The other list with the items to check</param>
+        /// <returns></returns>
+        public static bool Contains<T>( this IList<T> list, IList<T> other )
+        {
+            if( list.NullOrEmpty() ) return false;
+            if( other.NullOrEmpty() ) return false;
+            foreach( var item in other )
+                if( !list.Contains( item ) ) return false;
+            return true;
         }
         
         #endregion
