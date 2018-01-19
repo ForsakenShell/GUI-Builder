@@ -172,6 +172,11 @@ namespace Border_Builder
                 return new Vector2f( (float)((double)p.X + rX ), (float)((double)p.Y + rY ) );
             }
             
+            public Vector2f RotateAround( Vector2f p, float a )
+            {
+                return RotateAround( this, p, a );
+            }
+            
             public float DistanceFrom( Vector2f other )
             {
                 return DistanceFrom( other.X, other.Y );

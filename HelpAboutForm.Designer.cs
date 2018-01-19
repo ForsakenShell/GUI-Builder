@@ -154,7 +154,9 @@ namespace Border_Builder
             this.Controls.Add(this.lblCredit);
             this.Controls.Add(this.lblTitle);
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(503, 740);
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(503, 376);
             this.Name = "HelpAboutForm";
             this.ShowInTaskbar = false;
             this.Text = "About Border Builder";

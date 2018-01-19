@@ -88,8 +88,8 @@ namespace Border_Builder
             _welded = false;
             VolumeParents = new List<VolumeParent>();
             
-            var buildVolumeFile = File.ReadLines( BuildVolumeRef_File );
-            foreach( string fileLine in buildVolumeFile )
+            var volumeFile = File.ReadLines( BuildVolumeRef_File );
+            foreach( string fileLine in volumeFile )
             {
                 lineWords = fileLine.ParseImportLine();
                 if( !lineWords.NullOrEmpty() )
@@ -278,7 +278,7 @@ namespace Border_Builder
                             return;
                         }
                         
-                        BuildVolume buildVolume = new BuildVolume(
+                        var volume = new BuildVolume(
                             volumePosition,
                             volumeRotation,
                             volumeSize,
@@ -286,7 +286,7 @@ namespace Border_Builder
                             volumeReference
                         );
                         
-                        volumeParent.BuildVolumes.Add( buildVolume );
+                        volumeParent.BuildVolumes.Add( volume );
                         
                         // Ready for next volume
                         volumeIndex++;
@@ -303,10 +303,7 @@ namespace Border_Builder
                 }
             }
             
-            VolumeParents.Sort( ( x, y ) =>
-                               {
-                                   return string.Compare( x.FormID, y.FormID );
-                               } );
+            VolumeParents.Sort( ( x, y ) => string.Compare( x.FormID, y.FormID ) );
         }
         
         #endregion
@@ -337,21 +334,7 @@ namespace Border_Builder
             }
         }
         
-        class WeldPoints
-        {
-            public int ParentIndex;
-            public int VolumeIndex;
-            public int CornerIndex;
-            
-            public WeldPoints( int parentIndex, int volumeIndex, int cornerIndex )
-            {
-                ParentIndex = parentIndex;
-                VolumeIndex = volumeIndex;
-                CornerIndex = cornerIndex;
-            }
-        }
-        
-        public void WeldVerticies( float threshold )
+        public void WeldVerticies( float threshold, bool weldToOtherParents )
         {
             if( _welded )
                 return;
@@ -360,63 +343,16 @@ namespace Border_Builder
             for( int index = 0; index < VolumeParents.Count; index++ )
             {
                 var parent = VolumeParents[ index ];
-                
                 fmain.UpdateStatusMessage( string.Format( "Welding verticies for {0}...", parent.FormID ) );
                 
                 for( int index2 = 0; index2 < parent.BuildVolumes.Count; index2++ )
                 {
-                    WeldVolumeVerticies( index, index2, threshold );
+                    var volume = parent.BuildVolumes[ index2 ];
+                    WeldPoint.WeldVolumeVerticies( VolumeParents, parent, volume, threshold, weldToOtherParents );
                 }
             }
             
             _welded = true;
-        }
-        
-        void WeldVolumeVerticies( int parentIndex, int volumeIndex, float threshold )
-        {
-            var parent = VolumeParents[ parentIndex ];
-            var buildVolume = parent.BuildVolumes[ volumeIndex ];
-            for( int index = 0; index < 4; index++ )
-            {
-                var points = FindWeldableCorners( buildVolume.Corners[ index ], threshold );
-                if( points.Count > 1 )
-                {   // If it's only one point then it's itself
-                    var weldPoint = WeldPoint( points );
-                    foreach( var point in points )
-                        VolumeParents[ point.ParentIndex ].BuildVolumes[ point.VolumeIndex ].Corners[ point.CornerIndex ] = weldPoint;
-                }
-            }
-        }
-        
-        List<WeldPoints> FindWeldableCorners( Maths.Vector2f origin, float threshold )
-        {
-            var points = new List<WeldPoints>();
-            
-            for( int index = 0; index < VolumeParents.Count; index++ )
-            {
-                var parent = VolumeParents[ index ];
-                for( int index2 = 0; index2 < parent.BuildVolumes.Count; index2++ )
-                {
-                    for( int index3 = 0; index3 < 4; index3++ )
-                    {
-                        if( origin.DistanceFrom( parent.BuildVolumes[ index2 ].Corners[ index3 ] ) < threshold )
-                        {
-                            points.Add( new WeldPoints( index, index2, index3 ) );
-                        }
-                    }
-                }
-            }
-            
-            return points;
-        }
-        
-        Maths.Vector2f WeldPoint( List<WeldPoints> points )
-        {
-            var result = new Maths.Vector2f();
-            foreach( var point in points )
-                result += VolumeParents[ point.ParentIndex ].BuildVolumes[ point.VolumeIndex ].Corners[ point.CornerIndex ];
-            result /= points.Count;
-            return result;
         }
         
         #endregion
@@ -426,11 +362,11 @@ namespace Border_Builder
             outParents = null;
             outVolumes = null;
             
+            fromGroup = fromGroup ?? VolumeParents;
+            if( fromGroup.NullOrEmpty() ) return false;
+            
             var parents = new List<VolumeParent>();
             var volumes = new List<BuildVolume>();
-            
-            if( fromGroup == null )
-                fromGroup = VolumeParents;
             
             foreach( var parent in fromGroup )
             {

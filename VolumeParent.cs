@@ -88,9 +88,10 @@ namespace Border_Builder
             {
                 float minX = float.MaxValue;
                 float maxY = float.MinValue;
-                foreach( var buildVolume in BuildVolumes )
+                foreach( var volume in BuildVolumes )
                 {
-                    foreach( var corner in buildVolume.Corners )
+                    var corners = volume.Corners;
+                    foreach( var corner in corners )
                     {
                         minX = Math.Min( minX, corner.X );
                         maxY = Math.Max( maxY, corner.Y );
@@ -106,9 +107,10 @@ namespace Border_Builder
             {
                 float maxX = float.MinValue;
                 float minY = float.MaxValue;
-                foreach( var buildVolume in BuildVolumes )
+                foreach( var volume in BuildVolumes )
                 {
-                    foreach( var corner in buildVolume.Corners )
+                    var corners = volume.Corners;
+                    foreach( var corner in corners )
                     {
                         maxX = Math.Max( maxX, corner.X );
                         minY = Math.Min( minY, corner.Y );
@@ -296,8 +298,8 @@ namespace Border_Builder
             DebugLog.Write( string.Format( "CreateSegmentsForVolume()\n{{\nvIndex = {0}\nthreshold = {1}", vIndex, threshold ) );
             
             // Get the build volume and it's corners
-            var buildVolume = BuildVolumes[ vIndex ];
-            var corners = buildVolume.Corners;
+            var volume = BuildVolumes[ vIndex ];
+            var corners = volume.Corners;
             
             // Try to add each edge as a border segment
             TryAddBorderSegment( vIndex, corners[ 0 ], corners[ 1 ], threshold ); // Edge 1

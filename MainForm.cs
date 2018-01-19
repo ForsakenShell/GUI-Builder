@@ -138,7 +138,7 @@ namespace Border_Builder
             lbVolumeParents.Items.Clear();
             gbRenderSelectedOnly.Enabled = false;
             
-            // Set appropriate jump points
+            // Set appropriate maskable parents
             if( selectedImport.VolumeParents.Count > 0 )
             {
                 foreach( var volumeParent in selectedImport.VolumeParents )
@@ -147,6 +147,12 @@ namespace Border_Builder
             }
             
             gbRenderSelectedOnly.Enabled = true;
+            
+            // Allow editing so long as welding hasn't been done
+            gbEditOptions.Enabled = !selectedImport.Welded;
+            if( !gbEditOptions.Enabled )
+                cbEditModeEnable.Checked = false;
+            
         }
         
         void ResetWorldspaceControls( bool fullReset = false )
@@ -382,7 +388,11 @@ namespace Border_Builder
                 return;
             SetEnableState( false );
             
-            selectedImport.WeldVerticies( float.Parse( tbWeldThreshold.Text ) );
+            // Weld the corners across the world!
+            selectedImport.WeldVerticies( float.Parse( tbWeldThreshold.Text ), cbWeldAllTogether.Checked );
+            
+            // Welding prevents editor mode
+            gbEditOptions.Enabled = false;
             
             SetEnableState( true );
         }
@@ -428,7 +438,24 @@ namespace Border_Builder
         
         #endregion
         
-        #region Cell window rendering and controls
+        void CbEditModeEnableCheckedChanged( object sender, EventArgs e )
+        {
+            if( cbEditModeEnable.Checked )
+            {
+                if( transform == null )
+                {
+                    cbEditModeEnable.Checked = false;
+                    return;
+                }
+                transform.EnableEditorMode( this, sbiEditorSelectionMode, tbEMHotKeys );
+            }
+            else if( transform != null )
+            {
+                transform.DisableEditorMode();
+            }
+        }
+        
+        #region Rendering and controls
         
         #region Rendering
         
@@ -495,9 +522,9 @@ namespace Border_Builder
             if( ( worldspace.LandHeight_Bitmap == null )||( worldspace.WaterHeight_Bitmap == null ) )
                 worldspace.RenderHeightMap( this );
             
-            Maths.Vector2i cellNW = worldspace.CellNW;
-            Maths.Vector2i cellSE = worldspace.CellSE;
-            var scale = bbConstant.MinZoom;
+            Maths.Vector2i cellNW;
+            Maths.Vector2i cellSE;
+            //var scale = 0f;
             
             if( renderSelectedOnly )
             {
@@ -512,18 +539,28 @@ namespace Border_Builder
                     if( volSE.X > cellSE.X ) cellSE.X = volSE.X;
                     if( volSE.Y < cellSE.Y ) cellSE.Y = volSE.Y;
                 }
-                var size = new Maths.Vector2i( cellSE.X - cellNW.X + 1, cellNW.Y - cellSE.Y + 1 );
-                var world = new Maths.Vector2i( worldspace.CellSE.X - worldspace.CellNW.X + 1, worldspace.CellNW.Y - worldspace.CellSE.Y + 1 );
-                scale = RenderTransform.CalculateScale( size, world ); // bbConstant.MaxZoom;
+                //var size = new Maths.Vector2i( cellSE.X - cellNW.X + 1, cellNW.Y - cellSE.Y + 1 );
+                //var world = new Maths.Vector2i( worldspace.CellSE.X - worldspace.CellNW.X + 1, worldspace.CellNW.Y - worldspace.CellSE.Y + 1 );
+                //scale = RenderTransform.CalculateScale( size, world ); // bbConstant.MaxZoom;
             }
-            else if( renderNonPlayable )
+            else
             {
-                var hmCSize = worldspace.HeightMapCellSize;
-                cellNW = worldspace.HeightMapCellOffset;
-                cellSE = new Maths.Vector2i(
-                    cellNW.X + ( hmCSize.X - 1 ),
-                    cellNW.Y - ( hmCSize.Y - 1 ) );
+                if( renderNonPlayable )
+                {
+                    var hmCSize = worldspace.HeightMapCellSize;
+                    cellNW = worldspace.HeightMapCellOffset;
+                    cellSE = new Maths.Vector2i(
+                        cellNW.X + ( hmCSize.X - 1 ),
+                        cellNW.Y - ( hmCSize.Y - 1 ) );
+                }
+                else
+                {
+                    cellNW = worldspace.CellNW;
+                    cellSE = worldspace.CellSE;
+                }
             }
+            var size = new Maths.Vector2i( cellSE.X - cellNW.X + 1, cellNW.Y - cellSE.Y + 1 );
+            var scale = RenderTransform.CalculateScale( size );
             
             if(
                 ( transform == null )||
@@ -541,6 +578,11 @@ namespace Border_Builder
                 }
                 UpdateStatusMessage( "[Re]creating render transform..." );
                 transform = new RenderTransform( pbRenderWindow, worldspace, selectedImport );
+                
+                // Reconfigure editor mode for the new transform
+                if( cbEditModeEnable.Checked )
+                    transform.EnableEditorMode( this, sbiEditorSelectionMode, tbEMHotKeys );
+                
             }
             
             UpdateStatusMessage( "Updating render transform..." );
@@ -555,7 +597,7 @@ namespace Border_Builder
             #endif
             
             UpdateStatusMessage( "Rendering final bitmap..." );
-            transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders );
+            transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, false, true );
             
             if( exportPNG )
                 transform.RenderToPNG();
@@ -636,8 +678,9 @@ namespace Border_Builder
         void PbRenderWindowMouseUp( object sender, MouseEventArgs e )
         {
             if( transform == null ) return;
+            if( transform.MouseSelectionMode ) return;
             
-            var mouseWorldPos = transform.MouseToWorldspace( e.X, e.Y );
+            var mouseWorldPos = transform.WindowToWorldspace( e.X, e.Y );
             
             List<VolumeParent> parents = null;
             List<BuildVolume> volumes = null;
@@ -656,8 +699,9 @@ namespace Border_Builder
         void PbRenderWindowMouseMove( object sender, MouseEventArgs e )
         {
             if( transform == null ) return;
-            sbiMouseToCellGrid.Text = transform.MouseToCellGrid( e.X, e.Y ).ToString();
-            var mouseWorldPos = transform.MouseToWorldspace( e.X, e.Y );
+            
+            sbiMouseToCellGrid.Text = transform.WindowToCellGrid( e.X, e.Y ).ToString();
+            var mouseWorldPos = transform.WindowToWorldspace( e.X, e.Y );
             sbiMouseToWorldspace.Text = mouseWorldPos.ToString();
             
             List<VolumeParent> parents = null;
@@ -675,7 +719,7 @@ namespace Border_Builder
             var rthlParents = transform.HighlightParents;
             var rthlVolumes = transform.HighlightVolumes;
             
-            bool reRender = false;
+            bool volumesChanged = false;
             
             if( parents != null )
             {
@@ -685,10 +729,10 @@ namespace Border_Builder
                         ( !rthlParents.Contains( parents ) )||
                         ( !parents.Contains( rthlParents ) )
                     )
-                )   reRender = true;
+                )   volumesChanged = true;
             }
             else if( rthlParents != null )
-                reRender = true;
+                volumesChanged = true;
             
             if( volumes != null )
             {
@@ -698,22 +742,26 @@ namespace Border_Builder
                         ( !rthlVolumes.Contains( volumes ) )||
                         ( !volumes.Contains( rthlVolumes ) )
                     )
-                )   reRender = true;
+                )   volumesChanged = true;
             }
             else if( rthlVolumes != null )
-                reRender = true;
+                volumesChanged = true;
             
-            if( !reRender ) return;
-            
-            bool renderNonPlayable, renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, renderSelectedOnly, exportPNG;
-            GetRenderOptions( out renderNonPlayable, out renderLand, out renderWater, out renderCellGrid, out renderBuildVolumes, out renderBorders, out renderSelectedOnly, out exportPNG );
+            if( !volumesChanged ) return;
             
             transform.hlParents = parents;
             transform.hlVolumes = volumes;
             
+            // The editor will handle redrawing the scene
+            if( transform.MouseSelectionMode ) return;
+            
+            // The editor won't handle redrawing the scene
+            bool renderNonPlayable, renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, renderSelectedOnly, exportPNG;
+            GetRenderOptions( out renderNonPlayable, out renderLand, out renderWater, out renderCellGrid, out renderBuildVolumes, out renderBorders, out renderSelectedOnly, out exportPNG );
+            
             renderLand = false;
             renderWater = false;
-            transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders );
+            transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, false, false );
         }
         
         #endregion

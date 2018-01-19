@@ -22,12 +22,14 @@ namespace Border_Builder
         public const string WorldspacePath = DataPath + "\\Worldspaces";
         public const string ImportModPath = DataPath + "\\Mods";
         
-        public const float MaxZoom = 1f / 16f;
-        public const float MinZoom = 1f / 128f;
         public const float HeightMap_Resolution = 32;
         public const float HeightMap_Alignment = 1024;
         public const float WorldMap_Resolution = 4096;
         public const float HeightMap_To_Worldmap = WorldMap_Resolution / HeightMap_Resolution;
+
+        public const float MaxPictureBoxSize = 16384f;
+        public const float MaxZoom = WorldMap_Resolution / MaxPictureBoxSize;
+        public const float MinZoom = HeightMap_Resolution / MaxPictureBoxSize;
         
     }
     
