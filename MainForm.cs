@@ -707,8 +707,10 @@ namespace Border_Builder
             List<VolumeParent> parents = null;
             List<BuildVolume> volumes = null;
             string status = "";
-            if( transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.renderVolumes ) )
-            {
+            if(
+                ( transform.ImportMod != null )&&
+                ( transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.renderVolumes ) )
+            ){
                 status = parents[ 0 ].FormID;
                 for( int i = 1; i < parents.Count; i++ )
                     status = status + ", " + parents[ i ].FormID;

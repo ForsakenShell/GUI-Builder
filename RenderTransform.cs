@@ -16,6 +16,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
+
 namespace Border_Builder
 {
     
@@ -907,7 +908,7 @@ namespace Border_Builder
                 )   g >>= 1;
                 */
                 
-               DrawLineWorldTransform( pen, node.A, node.B );
+                DrawLineWorldTransform( pen, node.A, node.B );
                 
                 #if DEBUG
                 if( debugRenderBorders )
