@@ -60,6 +60,7 @@ namespace Border_Builder
         #region Semi-Public API:  Destructor & IDispose
         
         // Protect against "double-free" errors caused by combinations of explicit disposal[s] and GC disposal
+        
         bool _disposed = false;
         
         ~VolumeEditor()
@@ -79,6 +80,13 @@ namespace Border_Builder
             
             // Remove the hooks
             DisableEditorMode();
+            
+            // Dispose of external references
+            transform = null;
+            editorForm = null;
+            pbTarget = null;
+            editorSelectionModeStatus = null;
+            editorHotkeyDescriptions = null;
             
             // This is no longer a valid state
             _disposed = true;
@@ -110,8 +118,6 @@ namespace Border_Builder
             pbTarget.MouseEnter -= this.editorMode_MouseEnter;
             pbTarget.MouseLeave -= this.editorMode_MouseLeave;
             
-            editorForm = null;
-            editorSelectionModeStatus = null;
         }
         
         public void EnableEditorMode()

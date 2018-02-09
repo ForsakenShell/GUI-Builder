@@ -90,18 +90,63 @@ namespace Border_Builder
             RenderTargetSizeChanged( false );
         }
         
+        #region Semi-Public API:  Destructor & IDispose
+        
+        // Protect against "double-free" errors caused by combinations of explicit disposal[s] and GC disposal
+        bool _disposed = false;
+        
+        ~RenderTransform()
+        {
+            Dispose( false );
+        }
+        
         public void Dispose()
         {
+            Dispose( true );
+            GC.SuppressFinalize( this );
+        }
+        
+        protected virtual void Dispose( bool disposing )
+        {
+            if( _disposed ) return;
+            
+            // Dispose of external references
+            attachedEditor = null;
+            pbTarget = null;
             worldspace = null;
             importMod = null;
             renderVolumes = null;
+            hlParents = null;
+            hlVolumes = null;
+            
+            // Reset all type fields (not strictly necessary)
             cellNW = Maths.Vector2i.Zero;
             cellSE = Maths.Vector2i.Zero;
             scale = 0f;
+            invScale = 0f;
+            minScale = 0f;
             viewCentre = Maths.Vector2f.Zero;
             trueCentre = Maths.Vector2f.Zero;
             hmCentre = Maths.Vector2i.Zero;
             cmSize = Maths.Vector2i.Zero;
+            rectTarget = Rectangle.Empty;
+            
+            // Reset render states
+            _renderLand = false;
+            _renderWater = false;
+            _renderCellGrid = false;
+            _renderBuildVolumes = false;
+            _renderBorders = false;
+            
+            #if DEBUG
+            
+            // Reset debug render options
+            debugRenderBuildVolumes = false;
+            debugRenderBorders = false;
+            
+            #endif
+            
+            // Dispose of GDI resources
             gfxTarget.Dispose();
             bmpTarget.Dispose(); 
             iaTarget.Dispose();
@@ -109,9 +154,12 @@ namespace Border_Builder
             gfxTarget = null;
             guTarget = (GraphicsUnit)0;
             iaTarget = null;
-            rectTarget = Rectangle.Empty;
-            attachedEditor = null;
+            
+            // This is no longer a valid state
+            _disposed = true;
         }
+        
+        #endregion
         
         #endregion
         
@@ -486,7 +534,6 @@ namespace Border_Builder
                 _renderBorders = renderBorders;
             }
             
-            pbTarget.Size = new Size( rectTarget.Width, rectTarget.Height );
             pbTarget.Image = bmpTarget;
         }
         

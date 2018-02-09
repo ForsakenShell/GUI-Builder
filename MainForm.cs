@@ -441,15 +441,17 @@ namespace Border_Builder
         
         #endregion
         
+        #region Editor Enable/Disable
+        
         void CbEditModeEnableCheckedChanged( object sender, EventArgs e )
         {
+            if( transform == null )
+            {
+                cbEditModeEnable.Checked = false;
+                return;
+            }
             if( cbEditModeEnable.Checked )
             {
-                if( transform == null )
-                {
-                    cbEditModeEnable.Checked = false;
-                    return;
-                }
                 if( editor == null )
                     editor = new VolumeEditor( transform, this, pbRenderWindow, sbiEditorSelectionMode, tbEMHotKeys );
                 editor.EnableEditorMode();
@@ -461,37 +463,9 @@ namespace Border_Builder
             }
         }
         
-        #region Rendering and controls
-        
-        #region Rendering
-        
-        public int RenderWindowWidth
-        {
-            get
-            {
-                return pbRenderWindow.Width;
-            }
-        }
-        
-        public int RenderWindowHeight
-        {
-            get
-            {
-                return pbRenderWindow.Height;
-            }
-        }
-        
-        /*
-        public Maths.Vector2i RenderWindowCellNW
-        {
-            get
-            {
-                return pbRenderWindow.Width;
-            }
-        }
-        */
-        
         #endregion
+        
+        #region Rendering and controls
         
         void GetRenderOptions( out bool renderNonPlayable, out bool renderLand, out bool renderWater, out bool renderCellGrid, out bool renderBuildVolumes, out bool renderBorders, out bool renderSelectedOnly, out bool exportPNG )
         {
@@ -509,7 +483,7 @@ namespace Border_Builder
             
         }
         
-        void BtnCellWindowRedrawClick(object sender, EventArgs e)
+        void BtnCellWindowRedrawClick( object sender, EventArgs e )
         {
             var selectedWorldspace = SelectedWorldspace();
             if( selectedWorldspace == null )
@@ -528,9 +502,10 @@ namespace Border_Builder
             if( ( selectedWorldspace.LandHeight_Bitmap == null )||( selectedWorldspace.WaterHeight_Bitmap == null ) )
                 selectedWorldspace.RenderHeightMap( this );
             
+            
+            // Get cell range from [whole] map/selected volumes
             Maths.Vector2i cellNW;
             Maths.Vector2i cellSE;
-            //var scale = 0f;
             
             if( renderSelectedOnly )
             {
@@ -545,9 +520,6 @@ namespace Border_Builder
                     if( volSE.X > cellSE.X ) cellSE.X = volSE.X;
                     if( volSE.Y < cellSE.Y ) cellSE.Y = volSE.Y;
                 }
-                //var size = new Maths.Vector2i( cellSE.X - cellNW.X + 1, cellNW.Y - cellSE.Y + 1 );
-                //var world = new Maths.Vector2i( worldspace.CellSE.X - worldspace.CellNW.X + 1, worldspace.CellNW.Y - worldspace.CellSE.Y + 1 );
-                //scale = RenderTransform.CalculateScale( size, world ); // bbConstant.MaxZoom;
             }
             else
             {
@@ -566,13 +538,11 @@ namespace Border_Builder
                 }
             }
             
+            // Create a new transform if needed
             if( transform == null )
             {
-                // Dispose of the old editor
-                if(
-                    ( cbEditModeEnable.Checked )&&
-                    ( editor != null )
-                )
+                // Dispose of the old editor (this should never happen though...)
+                if( editor != null )
                 {
                     editor.Dispose();
                     editor = null;
@@ -590,20 +560,11 @@ namespace Border_Builder
             transform.ImportMod = selectedImport;
             transform.RenderVolumes = selectedVolumes;
             
-            // Update physical transform
+            // Update physical transform (don't recompute until all the initial conditions are set)
             transform.UpdateCellClipper( cellNW, cellSE, false );
-            
-            //transform.SetScale( 0.0125f / 2.0f, false );
-            //transform.SetViewCentre( Maths.Vector2f.Zero, false );
-            
-            //var nw = new Maths.Vector2f( cellNW.X * bbConstant.WorldMap_Resolution, cellNW.Y * bbConstant.WorldMap_Resolution );
-            //var se = new Maths.Vector2f( cellSE.X * bbConstant.WorldMap_Resolution, cellSE.Y * bbConstant.WorldMap_Resolution );
-            //transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
-            //transform.SetViewCentre( ( nw + se ) / 2f, false );
-            
             transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
             transform.SetViewCentre( transform.WorldspaceClipperCentre(), false );
-            
+            // Recompute!
             transform.RecomputeSceneClipper();
             
             #if DEBUG
