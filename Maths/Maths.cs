@@ -18,7 +18,7 @@ namespace Border_Builder
     public static partial class Maths
     {
         
-        public const float PI_TO_RAD = (float)( Math.PI / 180.0d );
+        public const float DEG_TO_RAD = (float)( Math.PI / 180.0d );
         
         #region Approximate equality
         

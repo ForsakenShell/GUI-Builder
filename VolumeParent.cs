@@ -125,7 +125,7 @@ namespace Border_Builder
             get
             {
                 var corner = CornerNW;
-                var cell = bbGlobal.WorldSpaceToCellGrid( corner );
+                var cell = bbSpaceConversions.WorldspaceToCellGrid( corner );
                 if( ( corner.X < 0 )&&( cell.X * bbConstant.WorldMap_Resolution > corner.X ) )
                     cell.X--;
                 //if( ( corner.X > 0 )&&( cell.X * bbConstant.WorldMap_Resolution < corner.X ) )
@@ -143,7 +143,7 @@ namespace Border_Builder
             get
             {
                 var corner = CornerSE;
-                var cell = bbGlobal.WorldSpaceToCellGrid( corner );
+                var cell = bbSpaceConversions.WorldspaceToCellGrid( corner );
                 if( ( corner.X < 0 )&&( cell.X * bbConstant.WorldMap_Resolution > corner.X ) )
                     cell.X--;
                 //if( ( corner.X > 0 )&&( cell.X * bbConstant.WorldMap_Resolution < corner.X ) )

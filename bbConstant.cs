@@ -26,6 +26,7 @@ namespace Border_Builder
         public const float HeightMap_Alignment = 1024;
         public const float WorldMap_Resolution = 4096;
         public const float HeightMap_To_Worldmap = WorldMap_Resolution / HeightMap_Resolution;
+        public const float WorldMap_To_Heightmap = HeightMap_Resolution / WorldMap_Resolution;
 
         public const float MaxPictureBoxSize = 16384f;
         public const float MaxZoom = WorldMap_Resolution / MaxPictureBoxSize;

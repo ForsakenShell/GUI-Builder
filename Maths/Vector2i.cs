@@ -97,6 +97,11 @@ namespace Border_Builder
                 return new Vector2i( left.X * right, left.Y * right );
             }
             
+            public static Vector2f operator * ( Vector2i left, float right )
+            {
+                return new Vector2f( (float)left.X * right, (float)left.Y * right );
+            }
+            
             public static Vector2i operator / ( Vector2i left, Vector2i right )
             {
                 return new Vector2i( left.X / right.X, left.Y / right.Y );

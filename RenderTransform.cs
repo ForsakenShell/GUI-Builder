@@ -30,14 +30,22 @@ namespace Border_Builder
         }
         
         // Source data pointers
-        bbWorldspace worldspace;
-        bbImportMod importMod;
+        public bbWorldspace worldspace;
+        public bbImportMod importMod;
         public List<VolumeParent> renderVolumes;
         
         // Clipper inputs held for reference
         Maths.Vector2i cellNW;
         Maths.Vector2i cellSE;
+        Maths.Vector2f viewCentre;
+        Maths.Vector2f trueCentre;
+        //Rectangle wmViewPort;
+        //Rectangle wmClipper;
+        //Rectangle hmClipper;
         float scale;
+        float invScale;
+        float minScale;
+        const float maxScale = 1.0f;
         
         // Editor mode controls
         
@@ -71,15 +79,15 @@ namespace Border_Builder
         Maths.Vector2i cmSize;
         
         // Heightmap offset and size
-        Maths.Vector2i hmOffset;
-        Maths.Vector2i hmSize;
+        //Maths.Vector2i hmOffset;
+        //Maths.Vector2i hmSize;
         
         // Worldmap offset and size
-        Maths.Vector2f wmOffset;
-        Maths.Vector2f wmSize;
+        //Maths.Vector2f wmOffset;
+        //Maths.Vector2f wmSize;
         
-        Maths.Vector2f hmTransform;
-        Maths.Vector2f wmTransform;
+        //Maths.Vector2f hmTransform;
+        //Maths.Vector2f wmTransform;
         
         // Render target
         Bitmap bmpTarget;
@@ -102,13 +110,12 @@ namespace Border_Builder
         
         #region Constructor and Dispose()
         
-        public RenderTransform( PictureBox _pbTarget, bbWorldspace _worldspace, bbImportMod _importMod )
+        public RenderTransform( PictureBox _pbTarget )
         {
             pbTarget = _pbTarget;
-            worldspace = _worldspace;
-            importMod = _importMod;
             editorMode = false;
             editorMouseOver = false;
+            RenderTargetSizeChanged( false );
         }
         
         public void Dispose()
@@ -120,14 +127,19 @@ namespace Border_Builder
             cellNW = Maths.Vector2i.Zero;
             cellSE = Maths.Vector2i.Zero;
             scale = 0f;
+            viewCentre = Maths.Vector2f.Zero;
+            trueCentre = Maths.Vector2f.Zero;
+            //wmViewPort = Rectangle.Empty;
+            //wmClipper = Rectangle.Empty;
+            //hmClipper = Rectangle.Empty;
             hmCentre = Maths.Vector2i.Zero;
             cmSize = Maths.Vector2i.Zero;
-            hmOffset = Maths.Vector2i.Zero;
-            hmSize = Maths.Vector2i.Zero;
-            wmOffset = Maths.Vector2f.Zero;
-            wmSize = Maths.Vector2f.Zero;
-            hmTransform = Maths.Vector2f.Zero;
-            wmTransform = Maths.Vector2f.Zero;
+            //hmOffset = Maths.Vector2i.Zero;
+            //hmSize = Maths.Vector2i.Zero;
+            //wmOffset = Maths.Vector2f.Zero;
+            //wmSize = Maths.Vector2f.Zero;
+            //hmTransform = Maths.Vector2f.Zero;
+            //wmTransform = Maths.Vector2f.Zero;
             gfxTarget.Dispose();
             bmpTarget.Dispose(); 
             iaTarget.Dispose();
@@ -142,53 +154,30 @@ namespace Border_Builder
         
         #region Render State Manipulation
         
-        public void UpdateTransform( Maths.Vector2i _cellNW, Maths.Vector2i _cellSE, float _scale )
+        public void UpdateSceneMetricsAndRedraw()
         {
-            bool mustRebuildBuffers = ( bmpTarget == null )||( gfxTarget == null )||( iaTarget == null );
-            
-            cellNW = _cellNW;
-            cellSE = _cellSE;
-            scale = _scale;
-            hmCentre = worldspace.HeightMapOffset;
-            
-            // Compute
-            cmSize = bbGlobal.SizeOfCellRange( cellNW, cellSE );
-            
-            hmOffset = new Maths.Vector2i(
-                hmCentre.X + cellNW.X * (int)bbConstant.HeightMap_Resolution,
-                hmCentre.Y - cellNW.Y * (int)bbConstant.HeightMap_Resolution );
-            hmSize = new Maths.Vector2i(
-                cmSize.X * (int)bbConstant.HeightMap_Resolution,
-                cmSize.Y * (int)bbConstant.HeightMap_Resolution );
-            
-            wmOffset = new Maths.Vector2f(
-                (float)cellNW.X * bbConstant.WorldMap_Resolution,
-                (float)cellNW.Y * bbConstant.WorldMap_Resolution );
-            wmSize = new Maths.Vector2f(
-                (float)cmSize.X * bbConstant.WorldMap_Resolution,
-                (float)cmSize.Y * bbConstant.WorldMap_Resolution );
-            
-            hmTransform = new Maths.Vector2f(
-                -cellNW.X * bbConstant.WorldMap_Resolution * scale,
-                -cellSE.Y * bbConstant.WorldMap_Resolution * scale );
-            
-            wmTransform = new Maths.Vector2f(
-                -wmOffset.X * scale,
-                 wmOffset.Y * scale );
+            RecomputeSceneClipper();
+            ReRenderCurrentScene();
+        }
+        
+        public void RenderTargetSizeChanged( bool updateScene = true )
+        {
+            if(
+                ( pbTarget.Width < 1 )||
+                ( pbTarget.Height < 1 )
+            )   return;
             
             var rect = new Rectangle(
                 0,
                 0,
-                (int)( wmSize.X * scale ),
-                (int)( wmSize.Y * scale ) );
+                pbTarget.Width,
+                pbTarget.Height );
             
-            if( rect != rectTarget )
-            {
-                rectTarget = rect;
-                mustRebuildBuffers = true;
-            }
+            if( rect == rectTarget )
+                return;
             
-            if( !mustRebuildBuffers ) return;
+            rectTarget = rect;
+            trueCentre = new Maths.Vector2f( rectTarget.Centre() );
             
             bool doGC = false;
             if( gfxTarget != null )
@@ -211,13 +200,125 @@ namespace Border_Builder
             
             if( doGC )
                 System.GC.Collect( System.GC.MaxGeneration );
-
+            
             bmpTarget = new Bitmap( rectTarget.Width, rectTarget.Height );
             gfxTarget = Graphics.FromImage( bmpTarget );
             
             guTarget = GraphicsUnit.Pixel;
             iaTarget = new ImageAttributes();
-            iaTarget.SetWrapMode( System.Drawing.Drawing2D.WrapMode.Clamp );
+            iaTarget.SetWrapMode( System.Drawing.Drawing2D.WrapMode.Tile );
+            
+            if( updateScene )
+                UpdateSceneMetricsAndRedraw();
+            
+        }
+        
+        public void UpdateCellClipper( Maths.Vector2i _cellNW, Maths.Vector2i _cellSE, bool updateScene = true )
+        {
+            bool mustRebuildBuffers = ( bmpTarget == null )||( gfxTarget == null )||( iaTarget == null );
+            
+            cellNW = _cellNW;
+            cellSE = _cellSE;
+            hmCentre = worldspace.HeightMapOffset;
+                
+            // Compute
+            cmSize = bbSpaceConversions.SizeOfCellRange( cellNW, cellSE );
+            
+            if( updateScene )
+                UpdateSceneMetricsAndRedraw();
+        }
+        
+        public float GetScale() { return scale; }
+        public void SetScale( float value, bool updateScene = true )
+        {
+            scale = value;
+            invScale = 1.0f / scale;
+            if( updateScene )
+                UpdateSceneMetricsAndRedraw();
+        }
+        public float GetInvScale() { return invScale; }
+        public void SetInvScale( float value, bool updateScene = true )
+        {
+            scale = 1.0f / value;
+            if( updateScene )
+                UpdateSceneMetricsAndRedraw();
+        }
+        
+        public Maths.Vector2f GetViewCentre() { return viewCentre; }
+        public void SetViewCentre( Maths.Vector2f value, bool updateScene = true )
+        {
+            viewCentre = value;
+            if( updateScene )
+                UpdateSceneMetricsAndRedraw();
+        }
+        
+        public Maths.Vector2i GetClipperCellSize() { return cmSize; }
+        
+        public void RecomputeSceneClipper()
+        {
+            minScale = CalculateScale( cmSize );
+            scale = Math.Min( maxScale, Math.Max( minScale, scale ) );
+            invScale = 1.0f / scale;
+            
+            /*
+            // Turn cellNW, cellSE into the worldmap clipper
+            var wmClipper = new Rectangle(
+                (int)( cellNW.X * bbConstant.WorldMap_Resolution ),
+                (int)( cellNW.Y * bbConstant.WorldMap_Resolution ),
+                (int)( cmSize.X * bbConstant.WorldMap_Resolution ),
+                (int)( cmSize.Y * bbConstant.WorldMap_Resolution )
+            );
+            
+            // Render target size
+            var tWidth = rectTarget.Width;
+            var tHeight = rectTarget.Height;
+            
+            // Compute the visible area at the current zoom level
+            var tvWidth   = tWidth   * invScale;
+            var tvHeight  = tHeight  * invScale;
+            var htvWidth  = tvWidth  * 0.5f;
+            var htvHeight = tvHeight * 0.5f;
+            
+            // Make sure the viewCentre is inside the worldmap clipper
+            viewCentre.X = Math.Min( wmClipper.Right  - htvWidth,
+                           Math.Max( wmClipper.Left   + htvWidth,
+                                     viewCentre.X ) );
+            
+            viewCentre.Y = Math.Min( wmClipper.Top    + htvHeight,
+                           Math.Max( wmClipper.Bottom - htvHeight,
+                                     viewCentre.Y ) );
+            */
+            
+            // Compute the visible area of the worldmap
+            /*
+            wmOffset = new Maths.Vector2f(
+                viewCentre.X - htvWidth,
+                viewCentre.Y + htvHeight );
+            wmSize = new Maths.Vector2f(
+                tvWidth,
+                tvHeight );
+            */
+            
+            // Compute the visible area of the heightmap
+            /*
+            hmOffset = new Maths.Vector2i(
+                hmCentre.X + (int)( wmOffset.X * bbConstant.WorldMap_To_Heightmap ),
+                hmCentre.Y - (int)( wmOffset.Y * bbConstant.WorldMap_To_Heightmap ) );
+            hmSize = new Maths.Vector2i(
+                (int)( wmSize.X * bbConstant.WorldMap_To_Heightmap ),
+                (int)( wmSize.Y * bbConstant.WorldMap_To_Heightmap ) );
+            */
+            
+            /*
+            hmTransform = new Maths.Vector2f(
+                -cellNW.X * bbConstant.WorldMap_Resolution * scale,
+                -cellSE.Y * bbConstant.WorldMap_Resolution * scale );
+            
+            wmTransform = new Maths.Vector2f(
+                -wmOffset.X * scale,
+                 wmOffset.Y * scale );
+            */
+            
         }
         
         #endregion
@@ -412,7 +513,7 @@ namespace Border_Builder
                 return;
             
             // Update the mouse selection point
-            mouseSelectionPoint = WindowToWorldspace( e.X, e.Y );
+            mouseSelectionPoint = ScreenspaceToWorldspace( e.X, e.Y );
             
             // Find the cloest anchored vertex that isn't in the selected group
             var closestAnchored = ClosestAnchoredCornerNear( mouseSelectionPoint, false );
@@ -482,7 +583,7 @@ namespace Border_Builder
             
             if( editorSelectionMode == EditorSelectionMode.Vertex )
             {
-                mouseSelectionPoint = WindowToWorldspace( e.X, e.Y );
+                mouseSelectionPoint = ScreenspaceToWorldspace( e.X, e.Y );
                 SelectVerticiesNear( mouseSelectionPoint, true );
             }
             
@@ -516,7 +617,7 @@ namespace Border_Builder
                 else
                 {
                     // User isn't actively editing but we need to update the "selection circle"
-                    mouseSelectionPoint = WindowToWorldspace( e.X, e.Y );
+                    mouseSelectionPoint = ScreenspaceToWorldspace( e.X, e.Y );
                 }
             }
             
@@ -550,11 +651,12 @@ namespace Border_Builder
         
         #endregion
         
-        public static float CalculateScale( Maths.Vector2i cells )
+        public float CalculateScale( Maths.Vector2i cells )
         {
-            var scaleNS = bbConstant.MaxPictureBoxSize / ( (float)cells.Y * bbConstant.WorldMap_Resolution );
-            var scaleEW = bbConstant.MaxPictureBoxSize / ( (float)cells.X * bbConstant.WorldMap_Resolution );
-            var scale = Maths.Lerp( bbConstant.MinZoom, bbConstant.MaxZoom, scaleNS > scaleEW ? scaleNS : scaleEW );
+            var scaleNS = (float)rectTarget.Height / ( (float)cells.Y * bbConstant.WorldMap_Resolution );
+            var scaleEW = (float)rectTarget.Width / ( (float)cells.X * bbConstant.WorldMap_Resolution );
+            //var scale = Maths.Lerp( minScale, maxScale, scaleNS > scaleEW ? scaleNS : scaleEW );
+            var scale = scaleNS < scaleEW ? scaleNS : scaleEW;
             return scale;
         }
         
@@ -566,25 +668,100 @@ namespace Border_Builder
             return scale;
         }
         
-        #region Screenspace transforms
+        #region Screenspace (Window) transforms
         
-        public Maths.Vector2f WindowToWorldspace( float X, float Y )
+        #region Screenspace <-> Worldspace
+        
+        public Maths.Vector2f ScreenspaceToWorldspace( float x, float y )
         {
-            var sX = ( X / scale );
-            var sY = ( Y / scale );
-            var wX = ( (float)cellNW.X * bbConstant.WorldMap_Resolution ) + sX;
-            var wY = ( (float)cellNW.Y * bbConstant.WorldMap_Resolution ) - sY;
-            return new Maths.Vector2f( wX, wY );
+            var r = new Maths.Vector2f(
+                 x - trueCentre.X,
+                -y + trueCentre.Y );
+            r *= invScale;
+            r += viewCentre;
+            return r;
         }
         
-        public Maths.Vector2i WindowToCellGrid( float X, float Y )
+        public Maths.Vector2f WorldspaceToScreenspace( float x, float y )
         {
-            var sX = ( X / scale );
-            var sY = ( Y / scale );
-            var wX = cellNW.X + (int)( sX / bbConstant.WorldMap_Resolution );
-            var wY = cellNW.Y - (int)( sY / bbConstant.WorldMap_Resolution );
-            return new Maths.Vector2i( wX, wY );
+            var r = new Maths.Vector2f( x, y ) - viewCentre;
+            r *= scale;
+            r.X +=       trueCentre.X;
+            r.Y = -r.Y + trueCentre.Y;
+            return r;
         }
+        
+        public Maths.Vector2f ScreenspaceToWorldspace( Maths.Vector2f v )
+        {
+            return ScreenspaceToWorldspace( v.X, v.Y );
+        }
+        
+        public Maths.Vector2f WorldspaceToScreenspace( Maths.Vector2f v )
+        {
+            return WorldspaceToScreenspace( v.X, v.Y );
+        }
+        
+        public Rectangle WorldspaceToHeightmapClipper( float x, float y )
+        {
+            var ss = new Maths.Vector2f( rectTarget.Width, rectTarget.Height ) * invScale;
+            var hss = ss * 0.5f;
+            var nw = bbSpaceConversions.WorldspaceToHeightmap( x - hss.X, y + hss.Y, hmCentre );
+            var s = ss.WorldspaceToCellspace();
+            return new Rectangle(
+                nw.X, nw.Y,
+                (int)s.X, (int)s.Y
+            );
+        }
+        
+        #endregion
+        
+        #region Screenspace <-> Cellspace
+        
+        public Maths.Vector2f ScreenspaceToCellspace( float x, float y )
+        {
+            return ScreenspaceToWorldspace( x, y ).WorldspaceToCellspace();
+        }
+        
+        public Maths.Vector2f CellspaceToScreenspace( float x, float y )
+        {
+            return WorldspaceToScreenspace( bbSpaceConversions.CellspaceToWorldspace( x, y ) );
+        }
+        
+        public Maths.Vector2f ScreenspaceToCellspace( Maths.Vector2f v )
+        {
+            return ScreenspaceToWorldspace( v ).WorldspaceToCellspace();
+        }
+        
+        public Maths.Vector2f CellspaceToScreenspace( Maths.Vector2f v )
+        {
+            return WorldspaceToScreenspace( v.CellspaceToWorldspace() );
+        }
+        
+        #endregion
+        
+        #region Screenspace <-> CellGrid
+        
+        public Maths.Vector2i ScreenspaceToCellGrid( float x, float y )
+        {
+            return ScreenspaceToWorldspace( x, y ).WorldspaceToCellGrid();
+        }
+        
+        public Maths.Vector2f CellGridToScreenspace( int x, int y )
+        {
+            return WorldspaceToScreenspace( bbSpaceConversions.CellGridToWorldspace( x, y ) );
+        }
+        
+        public Maths.Vector2i ScreenspaceToCellGrid( Maths.Vector2f v )
+        {
+            return ScreenspaceToWorldspace( v ).WorldspaceToCellGrid();
+        }
+        
+        public Maths.Vector2f CellGridToScreenspace( Maths.Vector2i v )
+        {
+            return WorldspaceToScreenspace( v.CellGridToWorldspace() );
+        }
+        
+        #endregion
         
         #endregion
         
@@ -637,7 +814,7 @@ namespace Border_Builder
                     case EditorSelectionMode.Vertex :
                         // Draw the "selection circle"
                         var pen = new Pen( Color.White );
-                        DrawCircleWorldTransform( pen, mouseSelectionPoint.X, mouseSelectionPoint.Y, 64f );
+                        DrawCircleWorldTransform( pen, mouseSelectionPoint.X, mouseSelectionPoint.Y, 1024f );
                             
                         break;
                         
@@ -676,9 +853,11 @@ namespace Border_Builder
         
         public void DrawLineCellTransform( Pen pen, float x0, float y0, float x1, float y1 )
         {
-            var r0 = hmTransform + new Maths.Vector2f( x0 * bbConstant.HeightMap_To_Worldmap * scale, y0 * bbConstant.HeightMap_To_Worldmap * scale );
-            var r1 = hmTransform + new Maths.Vector2f( x1 * bbConstant.HeightMap_To_Worldmap * scale, y1 * bbConstant.HeightMap_To_Worldmap * scale );
-            gfxTarget.DrawLine( pen, r0.X, r0.Y, r1.X, r1.Y );
+            //var r0 = hmTransform + new Maths.Vector2f( x0 * bbConstant.HeightMap_To_Worldmap * scale, y0 * bbConstant.HeightMap_To_Worldmap * scale );
+            //var r1 = hmTransform + new Maths.Vector2f( x1 * bbConstant.HeightMap_To_Worldmap * scale, y1 * bbConstant.HeightMap_To_Worldmap * scale );
+            var tp0 = CellspaceToScreenspace( x0, y0 );
+            var tp1 = CellspaceToScreenspace( x1, y1 );
+            gfxTarget.DrawLine( pen, tp0.X, tp0.Y, tp1.X, tp1.Y );
         }
         
         public void DrawRectCellTransform( Pen pen, Maths.Vector2f p0, Maths.Vector2f p1 )
@@ -699,32 +878,38 @@ namespace Border_Builder
                 font = new Font( FontFamily.GenericSerif, size, FontStyle.Regular, GraphicsUnit.Pixel );
             if( brush == null )
                 brush = new SolidBrush( pen.Color );
-            var rx = wmTransform.X + x * scale;
-            var ry = wmTransform.Y - y * scale;
-            gfxTarget.DrawString( text, font, brush, rx, ry );
+            //var rx = wmTransform.X + x * scale;
+            //var ry = wmTransform.Y - y * scale;
+            //gfxTarget.DrawString( text, font, brush, rx, ry );
+            var tp = WorldspaceToScreenspace( x, y );
+            gfxTarget.DrawString( text, font, brush, tp.X, tp.Y );
         }
         
         public void DrawCircleWorldTransform( Pen pen, float x, float y, float r )
         {
             var sr = r * scale;
             var hr = sr / 2f;
-            var sX = wmTransform.X + x * scale;
-            var sY = wmTransform.Y - y * scale;
-            var e = new Rectangle(
-                (int)( sX - hr ),
-                (int)( sY - hr ),
+            //var sX = wmTransform.X + x * scale;
+            //var sY = wmTransform.Y - y * scale;
+            var tp = WorldspaceToScreenspace( x, y );
+            var tr = new Rectangle(
+                (int)( tp.X - hr ),
+                (int)( tp.Y - hr ),
                 (int)( sr ),
                 (int)( sr ) );
-            gfxTarget.DrawEllipse( pen, e );
+            gfxTarget.DrawEllipse( pen, tr );
         }
         
         public void DrawLineWorldTransform( Pen pen, float x0, float y0, float x1, float y1 )
         {
-            var rx0 = wmTransform.X + x0 * scale;
-            var ry0 = wmTransform.Y - y0 * scale;
-            var rx1 = wmTransform.X + x1 * scale;
-            var ry1 = wmTransform.Y - y1 * scale;
-            gfxTarget.DrawLine( pen, rx0, ry0, rx1, ry1 );
+            //var rx0 = wmTransform.X + x0 * scale;
+            //var ry0 = wmTransform.Y - y0 * scale;
+            //var rx1 = wmTransform.X + x1 * scale;
+            //var ry1 = wmTransform.Y - y1 * scale;
+            //gfxTarget.DrawLine( pen, rx0, ry0, rx1, ry1 );
+            var tp0 = WorldspaceToScreenspace( x0, y0 );
+            var tp1 = WorldspaceToScreenspace( x1, y1 );
+            gfxTarget.DrawLine( pen, tp0.X, tp0.Y, tp1.X, tp1.Y );
         }
         
         public void DrawLineWorldTransform( Pen pen, Maths.Vector2f p0, Maths.Vector2f p1 )
@@ -768,13 +953,17 @@ namespace Border_Builder
         public void DrawLandMap()
         {
             if( worldspace.LandHeight_Bitmap == null ) return;
-            gfxTarget.DrawImage( worldspace.LandHeight_Bitmap, rectTarget, hmOffset.X, hmOffset.Y, hmSize.X, hmSize.Y, guTarget, iaTarget );
+            //gfxTarget.DrawImage( worldspace.LandHeight_Bitmap, rectTarget, hmOffset.X, hmOffset.Y, hmSize.X, hmSize.Y, guTarget, iaTarget );
+            var hmClipper = WorldspaceToHeightmapClipper( viewCentre.X, viewCentre.Y );
+            gfxTarget.DrawImage( worldspace.LandHeight_Bitmap, rectTarget, hmClipper.X, hmClipper.Y, hmClipper.Width, hmClipper.Height, guTarget, iaTarget );
         }
         
         public void DrawWaterMap()
         {
             if( worldspace.WaterHeight_Bitmap == null ) return;
-            gfxTarget.DrawImage( worldspace.WaterHeight_Bitmap, rectTarget, hmOffset.X, hmOffset.Y, hmSize.X, hmSize.Y, guTarget, iaTarget );
+            //gfxTarget.DrawImage( worldspace.WaterHeight_Bitmap, rectTarget, hmOffset.X, hmOffset.Y, hmSize.X, hmSize.Y, guTarget, iaTarget );
+            var hmClipper = WorldspaceToHeightmapClipper( viewCentre.X, viewCentre.Y );
+            gfxTarget.DrawImage( worldspace.WaterHeight_Bitmap, rectTarget, hmClipper.X, hmClipper.Y, hmClipper.Width, hmClipper.Height, guTarget, iaTarget );
         }
         
         #endregion
@@ -951,7 +1140,8 @@ namespace Border_Builder
         
         public void DrawCellGrid()
         {
-            var pen = new Pen( Color.FromArgb( 127, 127, 127, 0 ) );
+            var pen0 = new Pen( Color.FromArgb( 127, 255, 255, 0 ) );
+            var pen = new Pen( Color.FromArgb( 127, 91, 91, 0 ) );
             
             for( int y = cellSE.Y; y <= cellNW.Y; y++ )
             {
@@ -961,9 +1151,10 @@ namespace Border_Builder
                     {
                         if( ( x >= worldspace.CellNW.X )&&( x <= worldspace.CellSE.X ) )
                         {
+                            var p = ( x == 0 )||( y == 0 ) ? pen0 : pen;
                             var p0 = new Maths.Vector2f(   x       * bbConstant.WorldMap_Resolution    ,   y       * bbConstant.WorldMap_Resolution     );
                             var p1 = new Maths.Vector2f( ( x + 1 ) * bbConstant.WorldMap_Resolution - 1, ( y - 1 ) * bbConstant.WorldMap_Resolution + 1 );
-                            DrawRectWorldTransform( pen, p0, p1 );
+                            DrawRectWorldTransform( p, p0, p1 );
                         }
                     }
                 }

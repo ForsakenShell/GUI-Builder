@@ -424,5 +424,15 @@ namespace Border_Builder
             
             
         }
+        
+        #region Some Extension Methods
+        
+        public static Maths.Vector2i Centre( this System.Drawing.Rectangle rectangle )
+        {
+            return new Maths.Vector2i( rectangle.X + rectangle.Width >> 1, rectangle.Y + rectangle.Height >> 1 );
+        }
+        
+        #endregion
+        
     }
 }

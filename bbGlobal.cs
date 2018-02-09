@@ -1,7 +1,7 @@
 ﻿/*
  * bbGlobal.cs
  * 
- * Global functions and enumated data for use by Border Builder.
+ * Global functions and enumerated data for use by Border Builder.
  * 
  * User: 1000101
  * Date: 25/11/2017
@@ -91,34 +91,6 @@ namespace Border_Builder
                 if( worldspace.EditorID == editorID )
                     return worldspace;
             return null;
-        }
-        
-        public static Maths.Vector2i HeightMapToCellGrid( int x, int y )
-        {
-            return new Maths.Vector2i(
-                (  (int)((float)x / bbConstant.HeightMap_Resolution ) ),
-                ( -(int)((float)y / bbConstant.HeightMap_Resolution ) )
-           );
-        }
-        
-        public static Maths.Vector2i WorldSpaceToCellGrid( float x, float y )
-        {
-            return new Maths.Vector2i(
-                ( (int)( x / bbConstant.WorldMap_Resolution ) ),
-                ( (int)( y / bbConstant.WorldMap_Resolution ) )
-           );
-        }
-        
-        public static Maths.Vector2i WorldSpaceToCellGrid( Maths.Vector2f v )
-        {
-            return WorldSpaceToCellGrid( v.X, v.Y );
-        }
-        
-        public static Maths.Vector2i SizeOfCellRange( Maths.Vector2i nw, Maths.Vector2i se )
-        {
-            return new Maths.Vector2i(
-                Math.Abs( se.X - nw.X ) + 1,
-                Math.Abs( nw.Y - se.Y ) + 1 );
         }
         
     }

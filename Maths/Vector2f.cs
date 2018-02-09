@@ -43,6 +43,12 @@ namespace Border_Builder
                 Y = v.Y;
             }
             
+            public Vector2f( Vector2i v )
+            {
+                X = (float)v.X;
+                Y = (float)v.Y;
+            }
+            
             #region Equality (IEquatable)
             
             public override bool Equals( object obj )
@@ -89,9 +95,19 @@ namespace Border_Builder
                 return new Vector2f( left.X + right.X, left.Y + right.Y );
             }
             
+            public static Vector2f operator + ( Vector2f left, Vector2i right )
+            {
+                return new Vector2f( left.X + (float)right.X, left.Y + (float)right.Y );
+            }
+            
             public static Vector2f operator - ( Vector2f left, Vector2f right )
             {
                 return new Vector2f( left.X - right.X, left.Y - right.Y );
+            }
+            
+            public static Vector2f operator - ( Vector2f left, Vector2i right )
+            {
+                return new Vector2f( left.X - (float)right.X, left.Y - (float)right.Y );
             }
             
             public static Vector2f operator * ( Vector2f left, Vector2f right )
@@ -163,8 +179,8 @@ namespace Border_Builder
             
             public static Vector2f RotateAround( Vector2f v, Vector2f p, float a )
             {
-                var c = Math.Cos( a * Maths.PI_TO_RAD );
-                var s = Math.Sin( a * Maths.PI_TO_RAD );
+                var c = Math.Cos( a * Maths.DEG_TO_RAD );
+                var s = Math.Sin( a * Maths.DEG_TO_RAD );
                 var x = (double)v.X - (double)p.X;
                 var y = (double)v.Y - (double)p.Y;
                 var rX = x * c - y * s;

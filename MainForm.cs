@@ -505,8 +505,8 @@ namespace Border_Builder
         
         void BtnCellWindowRedrawClick(object sender, EventArgs e)
         {
-            var worldspace = SelectedWorldspace();
-            if( worldspace == null )
+            var selectedWorldspace = SelectedWorldspace();
+            if( selectedWorldspace == null )
                 return;
             
             SetEnableState( false );
@@ -519,8 +519,8 @@ namespace Border_Builder
             
             if( !renderSelectedOnly ) selectedVolumes = null;
             
-            if( ( worldspace.LandHeight_Bitmap == null )||( worldspace.WaterHeight_Bitmap == null ) )
-                worldspace.RenderHeightMap( this );
+            if( ( selectedWorldspace.LandHeight_Bitmap == null )||( selectedWorldspace.WaterHeight_Bitmap == null ) )
+                selectedWorldspace.RenderHeightMap( this );
             
             Maths.Vector2i cellNW;
             Maths.Vector2i cellSE;
@@ -547,37 +547,23 @@ namespace Border_Builder
             {
                 if( renderNonPlayable )
                 {
-                    var hmCSize = worldspace.HeightMapCellSize;
-                    cellNW = worldspace.HeightMapCellOffset;
+                    var hmCSize = selectedWorldspace.HeightMapCellSize;
+                    cellNW = selectedWorldspace.HeightMapCellOffset;
                     cellSE = new Maths.Vector2i(
                         cellNW.X + ( hmCSize.X - 1 ),
                         cellNW.Y - ( hmCSize.Y - 1 ) );
                 }
                 else
                 {
-                    cellNW = worldspace.CellNW;
-                    cellSE = worldspace.CellSE;
+                    cellNW = selectedWorldspace.CellNW;
+                    cellSE = selectedWorldspace.CellSE;
                 }
             }
-            var size = new Maths.Vector2i( cellSE.X - cellNW.X + 1, cellNW.Y - cellSE.Y + 1 );
-            var scale = RenderTransform.CalculateScale( size );
             
-            if(
-                ( transform == null )||
-                ( transform.Worldspace != worldspace )||
-                ( transform.ImportMod != selectedImport )
-            )
+            if( transform == null )
             {
-                if( transform != null )
-                {
-                    // Release references and garbage collect them
-                    UpdateStatusMessage( "Collecting garbage..." );
-                    transform.Dispose();
-                    transform = null;
-                    System.GC.Collect( System.GC.MaxGeneration );
-                }
-                UpdateStatusMessage( "[Re]creating render transform..." );
-                transform = new RenderTransform( pbRenderWindow, worldspace, selectedImport );
+                UpdateStatusMessage( "Creating render transform..." );
+                transform = new RenderTransform( pbRenderWindow );
                 
                 // Reconfigure editor mode for the new transform
                 if( cbEditModeEnable.Checked )
@@ -586,8 +572,33 @@ namespace Border_Builder
             }
             
             UpdateStatusMessage( "Updating render transform..." );
-            transform.UpdateTransform( cellNW, cellSE, scale );
+            
+            // Update data references
+            transform.worldspace = selectedWorldspace;
+            transform.importMod = selectedImport;
             transform.renderVolumes = selectedVolumes;
+            
+            // Update physical transform
+            transform.UpdateCellClipper( cellNW, cellSE, false );
+            
+            //transform.SetScale( 0.0125f / 2.0f, false );
+            //transform.SetViewCentre( Maths.Vector2f.Zero, false );
+            
+            //var nw = new Maths.Vector2f( cellNW.X * bbConstant.WorldMap_Resolution, cellNW.Y * bbConstant.WorldMap_Resolution );
+            //var se = new Maths.Vector2f( cellSE.X * bbConstant.WorldMap_Resolution, cellSE.Y * bbConstant.WorldMap_Resolution );
+            //transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
+            //transform.SetViewCentre( ( nw + se ) / 2f, false );
+            
+            var nw = new Maths.Vector2f( cellNW.X * bbConstant.WorldMap_Resolution, cellNW.Y * bbConstant.WorldMap_Resolution );
+            var s = transform.GetClipperCellSize();
+            var ws = s * bbConstant.WorldMap_Resolution;
+            var vc = new Maths.Vector2f(
+                nw.X + ws.X * 0.5f,
+                nw.Y - ws.Y * 0.5f );
+            transform.SetScale( transform.CalculateScale( s ), false );
+            transform.SetViewCentre( vc, false );
+            
+            transform.RecomputeSceneClipper();
             
             #if DEBUG
             
@@ -606,8 +617,9 @@ namespace Border_Builder
             pbRenderWindow.Refresh();
             pnRenderWindow.Enabled = true;
             pnRenderWindow.Visible = true;
-            pnRenderWindow.Tag = worldspace;
+            pnRenderWindow.Tag = selectedWorldspace;
             UpdateStatusMessage( string.Format( "Rendered map: ({0},{1})-({2},{3})", transform.CellNW.X, transform.CellNW.Y, transform.CellSE.X, transform.CellSE.Y ) );
+            
             SetEnableState( true );
         }
         
@@ -680,7 +692,7 @@ namespace Border_Builder
             if( transform == null ) return;
             if( transform.MouseSelectionMode ) return;
             
-            var mouseWorldPos = transform.WindowToWorldspace( e.X, e.Y );
+            var mouseWorldPos = transform.ScreenspaceToWorldspace( e.X, e.Y );
             
             List<VolumeParent> parents = null;
             List<BuildVolume> volumes = null;
@@ -700,8 +712,8 @@ namespace Border_Builder
         {
             if( transform == null ) return;
             
-            sbiMouseToCellGrid.Text = transform.WindowToCellGrid( e.X, e.Y ).ToString();
-            var mouseWorldPos = transform.WindowToWorldspace( e.X, e.Y );
+            sbiMouseToCellGrid.Text = transform.ScreenspaceToCellGrid( e.X, e.Y ).ToString();
+            var mouseWorldPos = transform.ScreenspaceToWorldspace( e.X, e.Y );
             sbiMouseToWorldspace.Text = mouseWorldPos.ToString();
             
             List<VolumeParent> parents = null;
@@ -764,6 +776,29 @@ namespace Border_Builder
             renderLand = false;
             renderWater = false;
             transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, false, false );
+        }
+        
+        void PbRenderWindowSizeChanged( object sender, EventArgs e )
+        {
+            if( transform == null ) return;
+            
+            transform.RenderTargetSizeChanged();
+        }
+        
+        void PbRenderWindowPreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
+        {
+            if( transform == null ) return;
+            
+            var viewCentre = transform.GetViewCentre();
+            var invScale = transform.GetInvScale();
+            
+            var code = e.KeyCode;
+            if( code == Keys.Left )     viewCentre.X -= invScale;
+            if( code == Keys.Right )    viewCentre.X += invScale;
+            if( code == Keys.Up )       viewCentre.Y += invScale;
+            if( code == Keys.Down )     viewCentre.Y -= invScale;
+            
+            transform.SetViewCentre( viewCentre );
         }
         
         #endregion

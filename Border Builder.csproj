@@ -78,6 +78,7 @@
     <Compile Include="NoBSFileAccess.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="bbSpaceConversions.cs" />
     <Compile Include="WeldPoints.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -650,22 +650,26 @@ namespace Border_Builder
 		    // 
 		    // pbRenderWindow
 		    // 
+		    this.pbRenderWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 		    this.pbRenderWindow.BackColor = System.Drawing.Color.Black;
 		    this.pbRenderWindow.Cursor = System.Windows.Forms.Cursors.Cross;
 		    this.pbRenderWindow.Location = new System.Drawing.Point(0, 0);
 		    this.pbRenderWindow.Name = "pbRenderWindow";
-		    this.pbRenderWindow.Size = new System.Drawing.Size(128, 128);
+		    this.pbRenderWindow.Size = new System.Drawing.Size(449, 614);
 		    this.pbRenderWindow.TabIndex = 4;
 		    this.pbRenderWindow.TabStop = false;
+		    this.pbRenderWindow.SizeChanged += new System.EventHandler(this.PbRenderWindowSizeChanged);
 		    this.pbRenderWindow.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseMove);
 		    this.pbRenderWindow.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseUp);
+		    this.pbRenderWindow.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.PbRenderWindowPreviewKeyDown);
 		    // 
 		    // pnRenderWindow
 		    // 
 		    this.pnRenderWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-		    this.pnRenderWindow.AutoScroll = true;
 		    this.pnRenderWindow.Controls.Add(this.pbRenderWindow);
 		    this.pnRenderWindow.Location = new System.Drawing.Point(299, 27);
 		    this.pnRenderWindow.Name = "pnRenderWindow";
