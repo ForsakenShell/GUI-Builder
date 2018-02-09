@@ -33,7 +33,7 @@ namespace Border_Builder
             return true;
         }
         
-        public static  bool TryAssignFile( ref string target, string newFile)
+        public static  bool TryAssignFile( ref string target, string newFile )
         {
             if( !File.Exists( newFile ) )
                 return false;

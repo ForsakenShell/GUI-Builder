@@ -43,10 +43,6 @@ namespace Border_Builder
         // Cell Range file data
         public Maths.Vector2i CellNW;
         public Maths.Vector2i CellSE;
-        //public int CellRangeMinX = 0;
-        //public int CellRangeMaxX = 0;
-        //public int CellRangeMinY = 0;
-        //public int CellRangeMaxY = 0;
         
         // Height map data (extracted from DDS)
         public int HeightMap_Width = 0;
@@ -130,12 +126,6 @@ namespace Border_Builder
         /// </summary>
         public void LoadCellRangeFile()
         {
-            /*
-CellRangeMinX=-42
-CellRangeMaxX=38
-CellRangeMinY=-46
-CellRangeMaxY=36
-            */
             const string cCellRangeMinX = "CellRangeMinX=";
             const string cCellRangeMaxX = "CellRangeMaxX=";
             const string cCellRangeMinY = "CellRangeMinY=";

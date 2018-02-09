@@ -44,6 +44,9 @@ namespace Border_Builder
         // Main render transform
         RenderTransform transform;
         
+        // Editor
+        VolumeEditor editor;
+        
         #region Main Start/Stop
         
         public fMain()
@@ -447,11 +450,14 @@ namespace Border_Builder
                     cbEditModeEnable.Checked = false;
                     return;
                 }
-                transform.EnableEditorMode( this, sbiEditorSelectionMode, tbEMHotKeys );
+                if( editor == null )
+                    editor = new VolumeEditor( transform, this, pbRenderWindow, sbiEditorSelectionMode, tbEMHotKeys );
+                editor.EnableEditorMode();
             }
-            else if( transform != null )
+            else if( editor != null )
             {
-                transform.DisableEditorMode();
+                editor.Dispose();
+                editor = null;
             }
         }
         
@@ -562,21 +568,27 @@ namespace Border_Builder
             
             if( transform == null )
             {
+                // Dispose of the old editor
+                if(
+                    ( cbEditModeEnable.Checked )&&
+                    ( editor != null )
+                )
+                {
+                    editor.Dispose();
+                    editor = null;
+                }
+                
                 UpdateStatusMessage( "Creating render transform..." );
                 transform = new RenderTransform( pbRenderWindow );
-                
-                // Reconfigure editor mode for the new transform
-                if( cbEditModeEnable.Checked )
-                    transform.EnableEditorMode( this, sbiEditorSelectionMode, tbEMHotKeys );
                 
             }
             
             UpdateStatusMessage( "Updating render transform..." );
             
             // Update data references
-            transform.worldspace = selectedWorldspace;
-            transform.importMod = selectedImport;
-            transform.renderVolumes = selectedVolumes;
+            transform.Worldspace = selectedWorldspace;
+            transform.ImportMod = selectedImport;
+            transform.RenderVolumes = selectedVolumes;
             
             // Update physical transform
             transform.UpdateCellClipper( cellNW, cellSE, false );
@@ -589,14 +601,8 @@ namespace Border_Builder
             //transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
             //transform.SetViewCentre( ( nw + se ) / 2f, false );
             
-            var nw = new Maths.Vector2f( cellNW.X * bbConstant.WorldMap_Resolution, cellNW.Y * bbConstant.WorldMap_Resolution );
-            var s = transform.GetClipperCellSize();
-            var ws = s * bbConstant.WorldMap_Resolution;
-            var vc = new Maths.Vector2f(
-                nw.X + ws.X * 0.5f,
-                nw.Y - ws.Y * 0.5f );
-            transform.SetScale( transform.CalculateScale( s ), false );
-            transform.SetViewCentre( vc, false );
+            transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
+            transform.SetViewCentre( transform.WorldspaceClipperCentre(), false );
             
             transform.RecomputeSceneClipper();
             
@@ -620,83 +626,29 @@ namespace Border_Builder
             pnRenderWindow.Tag = selectedWorldspace;
             UpdateStatusMessage( string.Format( "Rendered map: ({0},{1})-({2},{3})", transform.CellNW.X, transform.CellNW.Y, transform.CellSE.X, transform.CellSE.Y ) );
             
+            // Re-enable editor mode
+            if( cbEditModeEnable.Checked )
+            {
+                editor = new VolumeEditor( transform, this, pbRenderWindow, sbiEditorSelectionMode, tbEMHotKeys );
+                editor.EnableEditorMode();
+            }
+            
             SetEnableState( true );
         }
-        
-        /*
-        void UpdateSelectedOnlyVolume()
-        {
-            var selectedImport = SelectedImportMod();
-            if( selectedImport == null )
-            {
-                cbRenderJumpTo.Tag = null;
-                return;
-            }
-            
-            var volumeParent = selectedImport.VolumeByFormID( cbRenderJumpTo.Text );
-            cbRenderSelectedOnly.Checked = true;
-            btnRenderJumpTo.Enabled = ( volumeParent != null );
-            cbRenderJumpTo.Tag = volumeParent;
-            if( volumeParent != null )
-                UpdateStatusMessage( string.Format( "{0}, {1}-{2}", volumeParent.FormID, volumeParent.CellNW.ToString(), volumeParent.CellSE.ToString() ) );
-        }
-        
-        void CbRenderSelectedOnlyCheckedChanged( object sender, EventArgs e )
-        {
-            if( cbRenderSelectedOnly.Checked == false )
-                return;
-            UpdateSelectedOnlyVolume();
-        }
-        
-        void CbRenderJumpToSelectedIndexChanged( object sender, EventArgs e )
-        {
-            if( cbRenderJumpTo.SelectedIndex == -1 )
-            {
-                cbRenderSelectedOnly.Checked = false;
-                cbRenderJumpTo.Tag = null;
-                return;
-            }
-            UpdateSelectedOnlyVolume();
-        }
-        
-        void BtnRenderJumpToClick( object sender, EventArgs e )
-        {
-            UpdateSelectedOnlyVolume();
-            var worldspace = SelectedWorldspace();
-            var selectedImport = SelectedImportMod();
-            var locationFormID = cbRenderJumpTo.Text;
-            if( ( worldspace == null )||( selectedImport == null )||( string.IsNullOrEmpty( locationFormID ) ) )
-                return;
-            
-            SetEnableState( false );
-            
-            RenderCellWindow();
-            
-            var volumeParent = selectedImport.VolumeByFormID( locationFormID );
-            if( volumeParent != null )
-            {
-                var wWidth  = ( worldspace.HeightMap_Width  - pnRenderWindow.Width  ) / 2f;
-                var wHeight = ( worldspace.HeightMap_Height - pnRenderWindow.Height ) / 2f;
-                var lX = volumeParent.Position.X * RenderScale;
-                var lY = volumeParent.Position.Y * RenderScale;
-                //pnRenderWindow.HorizontalScroll.Value = (int)( wWidth  + lX );
-                //pnRenderWindow.VerticalScroll.Value   = (int)( wHeight - lY );
-            }
-            SetEnableState( true );
-            
-        }
-        */
         
         void PbRenderWindowMouseUp( object sender, MouseEventArgs e )
         {
             if( transform == null ) return;
-            if( transform.MouseSelectionMode ) return;
+            if(
+                ( editor != null )&&
+                ( editor.MouseSelectionMode )
+            ) return;
             
             var mouseWorldPos = transform.ScreenspaceToWorldspace( e.X, e.Y );
             
             List<VolumeParent> parents = null;
             List<BuildVolume> volumes = null;
-            if( !transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.renderVolumes ) )
+            if( !transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.RenderVolumes ) )
                 return;
             
             foreach( var parent in parents )
@@ -721,7 +673,7 @@ namespace Border_Builder
             string status = "";
             if(
                 ( transform.ImportMod != null )&&
-                ( transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.renderVolumes ) )
+                ( transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.RenderVolumes ) )
             ){
                 status = parents[ 0 ].FormID;
                 for( int i = 1; i < parents.Count; i++ )
@@ -763,11 +715,14 @@ namespace Border_Builder
             
             if( !volumesChanged ) return;
             
-            transform.hlParents = parents;
-            transform.hlVolumes = volumes;
+            transform.HighlightParents = parents;
+            transform.HighlightVolumes = volumes;
             
             // The editor will handle redrawing the scene
-            if( transform.MouseSelectionMode ) return;
+            if(
+                ( editor != null )&&
+                ( editor.MouseSelectionMode )
+            ) return;
             
             // The editor won't handle redrawing the scene
             bool renderNonPlayable, renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, renderSelectedOnly, exportPNG;
@@ -785,12 +740,16 @@ namespace Border_Builder
             transform.RenderTargetSizeChanged();
         }
         
+        // This doesn't work because Windows.Forms is retarded and can't/won't send key input to certain controls
+        /*
         void PbRenderWindowPreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
         {
             if( transform == null ) return;
             
+            e.IsInputKey = true;
+            
             var viewCentre = transform.GetViewCentre();
-            var invScale = transform.GetInvScale();
+            var invScale = transform.GetInvScale() * ( e.Shift ? 10f : 1f );
             
             var code = e.KeyCode;
             if( code == Keys.Left )     viewCentre.X -= invScale;
@@ -800,7 +759,8 @@ namespace Border_Builder
             
             transform.SetViewCentre( viewCentre );
         }
-        
+        */
+       
         #endregion
         
         #region Show about form

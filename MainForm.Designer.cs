@@ -663,7 +663,6 @@ namespace Border_Builder
 		    this.pbRenderWindow.SizeChanged += new System.EventHandler(this.PbRenderWindowSizeChanged);
 		    this.pbRenderWindow.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseMove);
 		    this.pbRenderWindow.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseUp);
-		    this.pbRenderWindow.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.PbRenderWindowPreviewKeyDown);
 		    // 
 		    // pnRenderWindow
 		    // 

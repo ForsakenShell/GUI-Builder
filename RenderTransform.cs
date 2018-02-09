@@ -30,39 +30,21 @@ namespace Border_Builder
         }
         
         // Source data pointers
-        public bbWorldspace worldspace;
-        public bbImportMod importMod;
-        public List<VolumeParent> renderVolumes;
+        bbWorldspace worldspace;
+        bbImportMod importMod;
+        List<VolumeParent> renderVolumes;
         
         // Clipper inputs held for reference
         Maths.Vector2i cellNW;
         Maths.Vector2i cellSE;
+        
+        // View port
         Maths.Vector2f viewCentre;
         Maths.Vector2f trueCentre;
-        //Rectangle wmViewPort;
-        //Rectangle wmClipper;
-        //Rectangle hmClipper;
         float scale;
         float invScale;
         float minScale;
         const float maxScale = 1.0f;
-        
-        // Editor mode controls
-        
-        enum EditorSelectionMode
-        {
-            None = 0,
-            Vertex,
-            Edge
-        }
-        
-        bool editorMode;
-        bool oldFormKeyPreview; // We're setting KeyPreview to true, don't reset it to false erroneously when editor mode is toggled off 
-        bool editorMouseOver;
-        EditorSelectionMode editorSelectionMode;
-        
-        Form editorForm;
-        ToolStripStatusLabel editorSelectionModeStatus;
         
         #if DEBUG
         
@@ -77,17 +59,6 @@ namespace Border_Builder
         
         // Size of selected region in cells
         Maths.Vector2i cmSize;
-        
-        // Heightmap offset and size
-        //Maths.Vector2i hmOffset;
-        //Maths.Vector2i hmSize;
-        
-        // Worldmap offset and size
-        //Maths.Vector2f wmOffset;
-        //Maths.Vector2f wmSize;
-        
-        //Maths.Vector2f hmTransform;
-        //Maths.Vector2f wmTransform;
         
         // Render target
         Bitmap bmpTarget;
@@ -105,22 +76,22 @@ namespace Border_Builder
         bool _renderBorders;
         
         // High light parents and volumes
-        public List<VolumeParent> hlParents = null;
-        public List<BuildVolume> hlVolumes = null;
+        List<VolumeParent> hlParents = null;
+        List<BuildVolume> hlVolumes = null;
+        
+        VolumeEditor attachedEditor;
         
         #region Constructor and Dispose()
         
         public RenderTransform( PictureBox _pbTarget )
         {
             pbTarget = _pbTarget;
-            editorMode = false;
-            editorMouseOver = false;
+            attachedEditor = null;
             RenderTargetSizeChanged( false );
         }
         
         public void Dispose()
         {
-            DisableEditorMode();
             worldspace = null;
             importMod = null;
             renderVolumes = null;
@@ -129,17 +100,8 @@ namespace Border_Builder
             scale = 0f;
             viewCentre = Maths.Vector2f.Zero;
             trueCentre = Maths.Vector2f.Zero;
-            //wmViewPort = Rectangle.Empty;
-            //wmClipper = Rectangle.Empty;
-            //hmClipper = Rectangle.Empty;
             hmCentre = Maths.Vector2i.Zero;
             cmSize = Maths.Vector2i.Zero;
-            //hmOffset = Maths.Vector2i.Zero;
-            //hmSize = Maths.Vector2i.Zero;
-            //wmOffset = Maths.Vector2f.Zero;
-            //wmSize = Maths.Vector2f.Zero;
-            //hmTransform = Maths.Vector2f.Zero;
-            //wmTransform = Maths.Vector2f.Zero;
             gfxTarget.Dispose();
             bmpTarget.Dispose(); 
             iaTarget.Dispose();
@@ -148,6 +110,7 @@ namespace Border_Builder
             guTarget = (GraphicsUnit)0;
             iaTarget = null;
             rectTarget = Rectangle.Empty;
+            attachedEditor = null;
         }
         
         #endregion
@@ -213,6 +176,16 @@ namespace Border_Builder
             
         }
         
+        public Maths.Vector2f WorldspaceClipperCentre()
+        {
+            var nw = new Maths.Vector2f( cellNW.X * bbConstant.WorldMap_Resolution, cellNW.Y * bbConstant.WorldMap_Resolution );
+            var s = GetClipperCellSize();
+            var ws = s * bbConstant.WorldMap_Resolution;
+            return new Maths.Vector2f(
+                nw.X + ws.X * 0.5f,
+                nw.Y - ws.Y * 0.5f );
+        }
+        
         public void UpdateCellClipper( Maths.Vector2i _cellNW, Maths.Vector2i _cellSE, bool updateScene = true )
         {
             bool mustRebuildBuffers = ( bmpTarget == null )||( gfxTarget == null )||( iaTarget == null );
@@ -259,414 +232,111 @@ namespace Border_Builder
             minScale = CalculateScale( cmSize );
             scale = Math.Min( maxScale, Math.Max( minScale, scale ) );
             invScale = 1.0f / scale;
-            
-            /*
-            // Turn cellNW, cellSE into the worldmap clipper
-            var wmClipper = new Rectangle(
-                (int)( cellNW.X * bbConstant.WorldMap_Resolution ),
-                (int)( cellNW.Y * bbConstant.WorldMap_Resolution ),
-                (int)( cmSize.X * bbConstant.WorldMap_Resolution ),
-                (int)( cmSize.Y * bbConstant.WorldMap_Resolution )
-            );
-            
-            // Render target size
-            var tWidth = rectTarget.Width;
-            var tHeight = rectTarget.Height;
-            
-            // Compute the visible area at the current zoom level
-            var tvWidth   = tWidth   * invScale;
-            var tvHeight  = tHeight  * invScale;
-            var htvWidth  = tvWidth  * 0.5f;
-            var htvHeight = tvHeight * 0.5f;
-            
-            // Make sure the viewCentre is inside the worldmap clipper
-            viewCentre.X = Math.Min( wmClipper.Right  - htvWidth,
-                           Math.Max( wmClipper.Left   + htvWidth,
-                                     viewCentre.X ) );
-            
-            viewCentre.Y = Math.Min( wmClipper.Top    + htvHeight,
-                           Math.Max( wmClipper.Bottom - htvHeight,
-                                     viewCentre.Y ) );
-            */
-            
-            // Compute the visible area of the worldmap
-            /*
-            wmOffset = new Maths.Vector2f(
-                viewCentre.X - htvWidth,
-                viewCentre.Y + htvHeight );
-            wmSize = new Maths.Vector2f(
-                tvWidth,
-                tvHeight );
-            */
-            
-            // Compute the visible area of the heightmap
-            /*
-            hmOffset = new Maths.Vector2i(
-                hmCentre.X + (int)( wmOffset.X * bbConstant.WorldMap_To_Heightmap ),
-                hmCentre.Y - (int)( wmOffset.Y * bbConstant.WorldMap_To_Heightmap ) );
-            hmSize = new Maths.Vector2i(
-                (int)( wmSize.X * bbConstant.WorldMap_To_Heightmap ),
-                (int)( wmSize.Y * bbConstant.WorldMap_To_Heightmap ) );
-            */
-            
-            /*
-            hmTransform = new Maths.Vector2f(
-                -cellNW.X * bbConstant.WorldMap_Resolution * scale,
-                -cellSE.Y * bbConstant.WorldMap_Resolution * scale );
-            
-            wmTransform = new Maths.Vector2f(
-                -wmOffset.X * scale,
-                 wmOffset.Y * scale );
-            */
-            
         }
-        
-        #endregion
-        
-        #region Editor Mode
-        
-        #region Editor Mode State (Enable/Disable)
-        
-        public void DisableEditorMode()
-        {
-            if( !editorMode )
-                return;
-            
-            mouseSelectionMode = false;
-            editorSelectedVertices = null;
-            editorMode = false;
-            
-            editorSelectionModeStatus.Text = EditorSelectionModeLabel;
-            
-            editorForm.KeyPreview = oldFormKeyPreview;
-            editorForm.KeyPress -= this.editorMode_KeyPress;
-            pbTarget.MouseDown -= this.editorMode_MouseDown;
-            pbTarget.MouseUp -= this.editorMode_MouseUp;
-            pbTarget.MouseMove -= this.editorMode_MouseMove;
-            pbTarget.MouseEnter -= this.editorMode_MouseEnter;
-            pbTarget.MouseLeave -= this.editorMode_MouseLeave;
-            
-            editorForm = null;
-            editorSelectionModeStatus = null;
-        }
-        
-        public void EnableEditorMode( Form _editorForm, ToolStripStatusLabel _editorSelectionModeStatus, TextBox _editorHotkeyDescriptions )
-        {
-            if( ( _editorForm == null )||( _editorSelectionModeStatus == null )||( _editorHotkeyDescriptions == null ) )
-            {
-                return;
-            }
-            if( editorMode )
-            {
-                DisableEditorMode();
-            }
-            
-            editorForm = _editorForm;
-            editorSelectionModeStatus = _editorSelectionModeStatus;
-            
-            oldFormKeyPreview = editorForm.KeyPreview;
-            editorForm.KeyPreview = true;
-            editorForm.KeyPress += this.editorMode_KeyPress;
-            pbTarget.MouseDown += this.editorMode_MouseDown;
-            pbTarget.MouseUp += this.editorMode_MouseUp;
-            pbTarget.MouseMove += this.editorMode_MouseMove;
-            pbTarget.MouseEnter += this.editorMode_MouseEnter;
-            pbTarget.MouseLeave += this.editorMode_MouseLeave;
-            
-            editorMode = true;
-            mouseSelectionMode = false;
-            editorSelectedVertices = null;
-            editorSelectionModeStatus.Text = EditorSelectionModeLabel;
-            
-            _editorHotkeyDescriptions.Clear();
-            foreach( var hk in EditorHotkeys )
-                _editorHotkeyDescriptions.AppendText( hk.FullDescription + "\n" );
-        }
-        
-        #endregion
-        
-        #region Hotkey Dispatcher, Delegate and, Struct
-        
-        public delegate bool HotkeyDelegate( object sender, KeyPressEventArgs e );
-        
-        public struct EditorHotkey
-        {
-            char[] _validKeys;
-            string _showKey;
-            string _description;
-            
-            HotkeyDelegate _callback;
-            
-            public EditorHotkey( char[] validKeys, string showKey, string description, HotkeyDelegate callback )
-            {
-                this._validKeys = validKeys;
-                this._showKey = showKey;
-                this._description = description;
-                this._callback = callback;
-            }
-            
-            public string FullDescription
-            {
-                get
-                {
-                    return string.Format( "{0} - {1}", _showKey, _description );
-                }
-            }
-            
-            public bool ValidKeyPressed( char test )
-            {
-                foreach( var key in _validKeys )
-                    if( test == key ) return true;
-                return false;
-            }
-            
-            public bool TryHandle( object sender, KeyPressEventArgs e )
-            {
-                return ValidKeyPressed( e.KeyChar ) && _callback( sender, e );
-            }
-        }
-        
-        public bool HotkeyDispatcher( object sender, KeyPressEventArgs e )
-        {
-            foreach( var hk in EditorHotkeys )
-                if( hk.TryHandle( sender, e ) ) return true;
-            return false;
-        }
-        
-        #endregion
-        
-        #region Selection Mode
-        
-        string EditorSelectionModeLabel
-        {
-            get
-            {
-                if( editorMode )
-                {
-                    switch( editorSelectionMode )
-                    {
-                        case EditorSelectionMode.None :
-                            return "None";
-                        case EditorSelectionMode.Vertex :
-                            return "Vertex";
-                        case EditorSelectionMode.Edge :
-                            return "Edge";
-                    }
-                }
-                return "";
-            }
-        }
-        
-        void EditorSelectionModeToggle( EditorSelectionMode mode )
-        {
-            editorSelectionMode = editorSelectionMode != mode ? mode : EditorSelectionMode.None;
-            if( editorSelectionModeStatus != null )
-                editorSelectionModeStatus.Text = EditorSelectionModeLabel;
-        }
-        
-        #endregion
-        
-        #region Hotkey Selection Modes
-        
-        bool mouseSelectionMode;
-        Maths.Vector2f mouseSelectionPoint;
-        List<WeldPoint> editorSelectedVertices;
-        
-        public List<WeldPoint> EditorSelectedVertices { get { return editorSelectedVertices; } }
-        public bool MouseSelectionMode { get { return mouseSelectionMode; } }
-        
-        public void SelectVerticiesNear( Maths.Vector2f position, bool unweldAsNeeded = false )
-        {
-            var corners = WeldPoint.FindWeldableCorners( worldspace, renderVolumes, position, 64f, true, null );
-            WeldPoint.FilterWeldPoints( corners, true, false, true, unweldAsNeeded, null );
-            editorSelectedVertices = corners;
-        }
-        
-        public WeldPoint ClosestAnchoredCornerNear( Maths.Vector2f position, bool includeAlreadySelectedCorners = false )
-        {
-            // Find all the corners near the position
-            var corners = WeldPoint.FindWeldableCorners( worldspace, renderVolumes, position, 64f, true, null );
-            WeldPoint.FilterWeldPoints( corners, false, true, true, false, !includeAlreadySelectedCorners ? editorSelectedVertices : null );
-            
-            // No corners found
-            if( corners.NullOrEmpty() ) return null;
-            
-            // Now search through the remaining anchored corners and return the closest
-            int closest = 0;
-            float dist = ( position - corners[ closest ].Position ).Length;
-            for( int i = 1; i < corners.Count; i++ )
-            {
-                float temp = ( position - corners[ i ].Position ).Length;
-                if( temp < dist )
-                {
-                    dist = temp;
-                    closest = i;
-                }
-            }
-            
-            return corners[ closest ];
-        }
-        
-        void MoveSelectedVerticiesToMouse( MouseEventArgs e, bool anchorCorners )
-        {
-            if( editorSelectedVertices.NullOrEmpty() )
-                return;
-            
-            // Update the mouse selection point
-            mouseSelectionPoint = ScreenspaceToWorldspace( e.X, e.Y );
-            
-            // Find the cloest anchored vertex that isn't in the selected group
-            var closestAnchored = ClosestAnchoredCornerNear( mouseSelectionPoint, false );
-            
-            // Found it, snap the selection point to the anchor point
-            if( closestAnchored != null )
-                mouseSelectionPoint = closestAnchored.Position;
-            
-            // Now move the selected corners to the mouse/closest unselected anchored corner
-            WeldPoint.WeldCornersTo( mouseSelectionPoint, editorSelectedVertices, true, anchorCorners );
-        }
-        
-        bool ToggleVertexSelection( object sender, KeyPressEventArgs e )
-        {
-            // Only allow toggle if not actively selecting anything
-            if( mouseSelectionMode ) return false;
-            
-            EditorSelectionModeToggle( EditorSelectionMode.Vertex );
-            return true;
-        }
-        
-        bool ToggleEdgeSelection( object sender, KeyPressEventArgs e )
-        {
-            // Only allow toggle if not actively selecting anything
-            if( mouseSelectionMode ) return false;
-            
-            EditorSelectionModeToggle( EditorSelectionMode.Edge );
-            return true;
-        }
-        
-        #endregion
-        
-        #region EditorHotkeys Property
-        
-        List<EditorHotkey> _editorHotkeys;
-        public List<EditorHotkey> EditorHotkeys
-        {
-            get
-            {
-                if( _editorHotkeys == null )
-                {
-                    var hk = new List<EditorHotkey>();
-                    hk.Add( new EditorHotkey( new char[] { 'V', 'v' }, "V", "Toggle vertex selection", ToggleVertexSelection ) );
-                    hk.Add( new EditorHotkey( new char[] { 'E', 'e' }, "E", "Toggle edge selection", ToggleEdgeSelection ) );
-                    _editorHotkeys = hk;
-                }
-                return _editorHotkeys;
-            }
-        }
-        
-        #endregion
-        
-        #region Editor Mode pbTarget and editorForm events
-        
-        void editorMode_KeyPress( object sender, KeyPressEventArgs e )
-        {
-            if( !editorMouseOver )
-                return;
-            e.Handled = HotkeyDispatcher( sender, e );
-        }
-        
-        void editorMode_MouseDown( object sender, MouseEventArgs e )
-        {
-            if( editorSelectionMode == EditorSelectionMode.None ) return;
-            
-            mouseSelectionMode = true;
-            
-            if( editorSelectionMode == EditorSelectionMode.Vertex )
-            {
-                mouseSelectionPoint = ScreenspaceToWorldspace( e.X, e.Y );
-                SelectVerticiesNear( mouseSelectionPoint, true );
-            }
-            
-            ReRenderCurrentScene();
-        }
-        
-        void editorMode_MouseUp( object sender, MouseEventArgs e )
-        {
-            if( !mouseSelectionMode ) return;
-            
-            if( editorSelectionMode == EditorSelectionMode.Vertex )
-            {
-                // Set and anchor the corner[s] when done moving them
-                MoveSelectedVerticiesToMouse( e, true );
-            }
-            
-            mouseSelectionMode = false;
-            mouseSelectionPoint = Maths.Vector2f.Zero;
-            editorSelectedVertices = null;
-        }
-        
-        void editorMode_MouseMove( object sender, MouseEventArgs e )
-        {
-            if( editorSelectionMode == EditorSelectionMode.Vertex )
-            {
-                if( mouseSelectionMode )
-                {
-                    // Set but don't anchor the corner[s] while moving them
-                    MoveSelectedVerticiesToMouse( e, false );
-                }
-                else
-                {
-                    // User isn't actively editing but we need to update the "selection circle"
-                    mouseSelectionPoint = ScreenspaceToWorldspace( e.X, e.Y );
-                }
-            }
-            
-            ReRenderCurrentScene();
-        }
-        
-        void editorMode_MouseEnter( object sender, EventArgs e )
-        {
-            editorMouseOver = true;
-        }
-        
-        void editorMode_MouseLeave( object sender, EventArgs e )
-        {
-            editorMouseOver = false;
-        }
-        
-        #endregion
         
         #endregion
         
         #region Public Accessors
         
-        public bbWorldspace                     Worldspace              { get { return worldspace; } }
-        public bbImportMod                      ImportMod               { get { return importMod; } }
+        public VolumeEditor                     AttachedEditor
+        {
+            get
+            {
+                return attachedEditor;
+            }
+            set
+            {
+                attachedEditor = value;
+            }
+        }
+        
+        public bbWorldspace                     Worldspace
+        {
+            get
+            {
+                return worldspace;
+            }
+            set
+            {
+                if( value == null ) return;
+                worldspace = value;
+                UpdateCellClipper( worldspace.CellNW, worldspace.CellSE, false );
+                SetViewCentre( WorldspaceClipperCentre(), false );
+            }
+        }
+        
+        public bbImportMod                      ImportMod
+        {
+            get
+            {
+                return importMod;
+            }
+            set
+            {
+                importMod = value;
+            }
+        }
         
         public Maths.Vector2i                   CellNW                  { get { return cellNW; } }
         public Maths.Vector2i                   CellSE                  { get { return cellSE; } }
         
-        public List<VolumeParent>               HighlightParents        { get { return hlParents; } }
-        public List<BuildVolume>                HighlightVolumes        { get { return hlVolumes; } }
+        public List<VolumeParent>               RenderVolumes
+        {
+            get
+            {
+                return renderVolumes;
+            }
+            set
+            {
+                renderVolumes = value;
+            }
+        }
+        
+        public List<VolumeParent>               HighlightParents
+        {
+            get
+            {
+                return hlParents;
+            }
+            set
+            {
+                hlParents = value;
+            }
+        }
+        
+        public List<BuildVolume>                HighlightVolumes
+        {
+            get
+            {
+                return hlVolumes;
+            }
+            set
+            {
+                hlVolumes = value;
+            }
+        }
         
         #endregion
+        
+        #region Scale Calculator
         
         public float CalculateScale( Maths.Vector2i cells )
         {
             var scaleNS = (float)rectTarget.Height / ( (float)cells.Y * bbConstant.WorldMap_Resolution );
             var scaleEW = (float)rectTarget.Width / ( (float)cells.X * bbConstant.WorldMap_Resolution );
-            //var scale = Maths.Lerp( minScale, maxScale, scaleNS > scaleEW ? scaleNS : scaleEW );
-            var scale = scaleNS < scaleEW ? scaleNS : scaleEW;
-            return scale;
+            var _scale = scaleNS < scaleEW ? scaleNS : scaleEW;
+            return _scale;
         }
         
         public static float CalculateScale( Maths.Vector2i cells, Maths.Vector2i worldCells )
         {
             var scaleNS = (float)( (float)cells.Y / (float)worldCells.Y );
             var scaleEW = (float)( (float)cells.X / (float)worldCells.X );
-            var scale = Maths.InverseLerp( bbConstant.MinZoom, bbConstant.MaxZoom, scaleNS > scaleEW ? scaleNS : scaleEW );
-            return scale;
+            var _scale = Maths.InverseLerp( bbConstant.MinZoom, bbConstant.MaxZoom, scaleNS > scaleEW ? scaleNS : scaleEW );
+            return _scale;
         }
+        
+        #endregion
         
         #region Screenspace (Window) transforms
         
@@ -804,24 +474,8 @@ namespace Border_Builder
             if( renderBorders )
                 DrawParentBorders();
             
-            if( editorMode )
-            {
-                switch( editorSelectionMode )
-                {
-                    case EditorSelectionMode.None :
-                        break;
-                        
-                    case EditorSelectionMode.Vertex :
-                        // Draw the "selection circle"
-                        var pen = new Pen( Color.White );
-                        DrawCircleWorldTransform( pen, mouseSelectionPoint.X, mouseSelectionPoint.Y, 1024f );
-                            
-                        break;
-                        
-                    case EditorSelectionMode.Edge :
-                        break;
-                }
-            }
+            if( attachedEditor != null )
+                attachedEditor.DrawEditor();
             
             if( cacheRenderLayers )
             {
@@ -853,8 +507,6 @@ namespace Border_Builder
         
         public void DrawLineCellTransform( Pen pen, float x0, float y0, float x1, float y1 )
         {
-            //var r0 = hmTransform + new Maths.Vector2f( x0 * bbConstant.HeightMap_To_Worldmap * scale, y0 * bbConstant.HeightMap_To_Worldmap * scale );
-            //var r1 = hmTransform + new Maths.Vector2f( x1 * bbConstant.HeightMap_To_Worldmap * scale, y1 * bbConstant.HeightMap_To_Worldmap * scale );
             var tp0 = CellspaceToScreenspace( x0, y0 );
             var tp1 = CellspaceToScreenspace( x1, y1 );
             gfxTarget.DrawLine( pen, tp0.X, tp0.Y, tp1.X, tp1.Y );
@@ -878,9 +530,6 @@ namespace Border_Builder
                 font = new Font( FontFamily.GenericSerif, size, FontStyle.Regular, GraphicsUnit.Pixel );
             if( brush == null )
                 brush = new SolidBrush( pen.Color );
-            //var rx = wmTransform.X + x * scale;
-            //var ry = wmTransform.Y - y * scale;
-            //gfxTarget.DrawString( text, font, brush, rx, ry );
             var tp = WorldspaceToScreenspace( x, y );
             gfxTarget.DrawString( text, font, brush, tp.X, tp.Y );
         }
@@ -888,25 +537,17 @@ namespace Border_Builder
         public void DrawCircleWorldTransform( Pen pen, float x, float y, float r )
         {
             var sr = r * scale;
-            var hr = sr / 2f;
-            //var sX = wmTransform.X + x * scale;
-            //var sY = wmTransform.Y - y * scale;
             var tp = WorldspaceToScreenspace( x, y );
             var tr = new Rectangle(
-                (int)( tp.X - hr ),
-                (int)( tp.Y - hr ),
-                (int)( sr ),
-                (int)( sr ) );
+                (int)( tp.X - sr ),
+                (int)( tp.Y - sr ),
+                (int)( sr * 2f ),
+                (int)( sr * 2f ) );
             gfxTarget.DrawEllipse( pen, tr );
         }
         
         public void DrawLineWorldTransform( Pen pen, float x0, float y0, float x1, float y1 )
         {
-            //var rx0 = wmTransform.X + x0 * scale;
-            //var ry0 = wmTransform.Y - y0 * scale;
-            //var rx1 = wmTransform.X + x1 * scale;
-            //var ry1 = wmTransform.Y - y1 * scale;
-            //gfxTarget.DrawLine( pen, rx0, ry0, rx1, ry1 );
             var tp0 = WorldspaceToScreenspace( x0, y0 );
             var tp1 = WorldspaceToScreenspace( x1, y1 );
             gfxTarget.DrawLine( pen, tp0.X, tp0.Y, tp1.X, tp1.Y );
@@ -953,7 +594,6 @@ namespace Border_Builder
         public void DrawLandMap()
         {
             if( worldspace.LandHeight_Bitmap == null ) return;
-            //gfxTarget.DrawImage( worldspace.LandHeight_Bitmap, rectTarget, hmOffset.X, hmOffset.Y, hmSize.X, hmSize.Y, guTarget, iaTarget );
             var hmClipper = WorldspaceToHeightmapClipper( viewCentre.X, viewCentre.Y );
             gfxTarget.DrawImage( worldspace.LandHeight_Bitmap, rectTarget, hmClipper.X, hmClipper.Y, hmClipper.Width, hmClipper.Height, guTarget, iaTarget );
         }
@@ -961,7 +601,6 @@ namespace Border_Builder
         public void DrawWaterMap()
         {
             if( worldspace.WaterHeight_Bitmap == null ) return;
-            //gfxTarget.DrawImage( worldspace.WaterHeight_Bitmap, rectTarget, hmOffset.X, hmOffset.Y, hmSize.X, hmSize.Y, guTarget, iaTarget );
             var hmClipper = WorldspaceToHeightmapClipper( viewCentre.X, viewCentre.Y );
             gfxTarget.DrawImage( worldspace.WaterHeight_Bitmap, rectTarget, hmClipper.X, hmClipper.Y, hmClipper.Width, hmClipper.Height, guTarget, iaTarget );
         }
@@ -990,10 +629,12 @@ namespace Border_Builder
                 rb -= 48;
                 var penLow = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
                 
+                var editorEnabled = ( attachedEditor != null )&&( attachedEditor.Enabled );
+                
                 foreach( var volume in volumeParent.BuildVolumes )
                 {
-                    var usePen = editorMode ? penMid : penLow;
-                    if( !editorMode )
+                    var usePen = editorEnabled ? penMid : penLow;
+                    if( !editorEnabled )
                     {
                         if( hlParents.NullOrEmpty() )
                         {
@@ -1077,9 +718,11 @@ namespace Border_Builder
             if( ( worldspace.EditorID != volumeParent.WorldspaceEDID )||( volumeParent.BorderNodes == null ) )
                 return;
             
+            var editorEnabled = ( attachedEditor != null )&&( attachedEditor.Enabled );
+            
             int g = 255;
             if(
-                ( !editorMode )&&
+                ( !editorEnabled )&&
                 ( !hlParents.NullOrEmpty() )&&
                 ( !hlParents.Contains( volumeParent ) )
             )   g >>= 1;
@@ -1140,7 +783,7 @@ namespace Border_Builder
         
         public void DrawCellGrid()
         {
-            var pen0 = new Pen( Color.FromArgb( 127, 255, 255, 0 ) );
+            var pen0 = new Pen( Color.FromArgb( 127, 63, 63, 191 ) );
             var pen = new Pen( Color.FromArgb( 127, 91, 91, 0 ) );
             
             for( int y = cellSE.Y; y <= cellNW.Y; y++ )
@@ -1151,10 +794,24 @@ namespace Border_Builder
                     {
                         if( ( x >= worldspace.CellNW.X )&&( x <= worldspace.CellSE.X ) )
                         {
-                            var p = ( x == 0 )||( y == 0 ) ? pen0 : pen;
                             var p0 = new Maths.Vector2f(   x       * bbConstant.WorldMap_Resolution    ,   y       * bbConstant.WorldMap_Resolution     );
                             var p1 = new Maths.Vector2f( ( x + 1 ) * bbConstant.WorldMap_Resolution - 1, ( y - 1 ) * bbConstant.WorldMap_Resolution + 1 );
-                            DrawRectWorldTransform( p, p0, p1 );
+                            if(
+                                ( ( x < -1 )&&( x > 0 ) )&&
+                                ( ( y < -1 )&&( y > 0 ) )
+                            )
+                                DrawRectWorldTransform( pen, p0, p1 );
+                            else
+                            {
+                                var e0 = ( y == -1 ) ? pen0 : pen;
+                                var e1 = ( x == -1 ) ? pen0 : pen;
+                                var e2 = ( y ==  0 ) ? pen0 : pen;
+                                var e3 = ( x ==  0 ) ? pen0 : pen;
+                                DrawLineWorldTransform( e0, p0.X, p0.Y, p1.X, p0.Y ); // top
+                                DrawLineWorldTransform( e1, p1.X, p0.Y, p1.X, p1.Y ); // right
+                                DrawLineWorldTransform( e2, p1.X, p1.Y, p0.X, p1.Y ); // bottom
+                                DrawLineWorldTransform( e3, p0.X, p1.Y, p0.X, p0.Y ); // left
+                            }
                         }
                     }
                 }

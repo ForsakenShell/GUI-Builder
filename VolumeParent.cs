@@ -125,13 +125,9 @@ namespace Border_Builder
             get
             {
                 var corner = CornerNW;
-                var cell = bbSpaceConversions.WorldspaceToCellGrid( corner );
+                var cell = corner.WorldspaceToCellGrid();
                 if( ( corner.X < 0 )&&( cell.X * bbConstant.WorldMap_Resolution > corner.X ) )
                     cell.X--;
-                //if( ( corner.X > 0 )&&( cell.X * bbConstant.WorldMap_Resolution < corner.X ) )
-                //    cell.X++;
-                //if( ( corner.Y < 0 )&&( cell.Y * bbConstant.WorldMap_Resolution > corner.Y ) )
-                //    cell.Y--;
                 if( ( corner.Y > 0 )&&( cell.Y * bbConstant.WorldMap_Resolution < corner.Y ) )
                     cell.Y++;
                 return cell;
@@ -143,13 +139,9 @@ namespace Border_Builder
             get
             {
                 var corner = CornerSE;
-                var cell = bbSpaceConversions.WorldspaceToCellGrid( corner );
+                var cell = corner.WorldspaceToCellGrid();
                 if( ( corner.X < 0 )&&( cell.X * bbConstant.WorldMap_Resolution > corner.X ) )
                     cell.X--;
-                //if( ( corner.X > 0 )&&( cell.X * bbConstant.WorldMap_Resolution < corner.X ) )
-                //    cell.X++;
-                //if( ( corner.Y < 0 )&&( cell.Y * bbConstant.WorldMap_Resolution > corner.Y ) )
-                //    cell.Y--;
                 if( ( corner.Y > 0 )&&( cell.Y * bbConstant.WorldMap_Resolution < corner.Y ) )
                     cell.Y++;
                 return cell;
