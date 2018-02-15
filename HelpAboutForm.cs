@@ -20,7 +20,7 @@ namespace Border_Builder
     public partial class HelpAboutForm : Form
     {
         
-        public fMain fMain;
+        public bbMain fMain;
         
         public HelpAboutForm()
         {

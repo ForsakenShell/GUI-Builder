@@ -8,7 +8,7 @@
  */
 namespace Border_Builder
 {
-	partial class fMain
+	partial class bbMain
 	{
 		/// <summary>
 		/// Designer variable used to keep track of non-visual components.
@@ -44,11 +44,9 @@ namespace Border_Builder
 		private System.Windows.Forms.Label lWorldspaceMapHeightMin;
 		private System.Windows.Forms.TextBox tbWorldspaceMapHeightMax;
 		private System.Windows.Forms.TextBox tbWorldspaceMapHeightMin;
-		private System.Windows.Forms.Button btnLoadWorldspaceHeightTextures;
 		private System.Windows.Forms.GroupBox gbSourceMod;
 		private System.Windows.Forms.ComboBox cbImportMod;
 		private System.Windows.Forms.Button btnLoadImportModBuildVolumes;
-		private System.Windows.Forms.PictureBox pbRenderWindow;
 		private System.Windows.Forms.Panel pnRenderWindow;
 		private System.Windows.Forms.Button btnCellWindowRedraw;
 		private System.Windows.Forms.GroupBox gbRenderOptions;
@@ -63,7 +61,6 @@ namespace Border_Builder
 		private System.Windows.Forms.ToolStripMenuItem mbiHelpAbout;
 		private System.Windows.Forms.GroupBox gbRenderSelectedOnly;
 		private System.Windows.Forms.CheckBox cbRenderSelectedOnly;
-		private System.Windows.Forms.CheckBox cbRenderWorldspaceHeightTextures;
 		private System.Windows.Forms.Button btnWeldImportVolumeVerts;
 		private System.Windows.Forms.GroupBox gbWeldThreshold;
 		private System.Windows.Forms.TextBox tbWeldThreshold;
@@ -79,6 +76,8 @@ namespace Border_Builder
 		private System.Windows.Forms.ToolStripStatusLabel sbiEditorSelectionMode;
 		private System.Windows.Forms.CheckBox cbWeldAllTogether;
 		private System.Windows.Forms.Label lblWeldThreshold;
+		private System.Windows.Forms.Panel pnMainForm;
+		private System.Windows.Forms.CheckBox cbWindowedRenderer;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -119,8 +118,6 @@ namespace Border_Builder
 		    this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
 		    this.sbiMouseToWorldspace = new System.Windows.Forms.ToolStripStatusLabel();
 		    this.gbWorldspace = new System.Windows.Forms.GroupBox();
-		    this.cbRenderWorldspaceHeightTextures = new System.Windows.Forms.CheckBox();
-		    this.btnLoadWorldspaceHeightTextures = new System.Windows.Forms.Button();
 		    this.gbWorldspaceMapHeightRange = new System.Windows.Forms.GroupBox();
 		    this.lWorldspaceMapHeightMax = new System.Windows.Forms.Label();
 		    this.lWorldspaceMapHeightMin = new System.Windows.Forms.Label();
@@ -149,10 +146,10 @@ namespace Border_Builder
 		    this.btnBuildImportModVolumeBorders = new System.Windows.Forms.Button();
 		    this.btnLoadImportModBuildVolumes = new System.Windows.Forms.Button();
 		    this.cbImportMod = new System.Windows.Forms.ComboBox();
-		    this.pbRenderWindow = new System.Windows.Forms.PictureBox();
 		    this.pnRenderWindow = new System.Windows.Forms.Panel();
 		    this.btnCellWindowRedraw = new System.Windows.Forms.Button();
 		    this.gbRenderOptions = new System.Windows.Forms.GroupBox();
+		    this.cbWindowedRenderer = new System.Windows.Forms.CheckBox();
 		    this.cbRenderOverRegion = new System.Windows.Forms.CheckBox();
 		    this.cbExportPNG = new System.Windows.Forms.CheckBox();
 		    this.gbRenderSelectedOnly = new System.Windows.Forms.GroupBox();
@@ -166,6 +163,7 @@ namespace Border_Builder
 		    this.gbEditOptions = new System.Windows.Forms.GroupBox();
 		    this.cbEditModeEnable = new System.Windows.Forms.CheckBox();
 		    this.tbEMHotKeys = new System.Windows.Forms.TextBox();
+		    this.pnMainForm = new System.Windows.Forms.Panel();
 		    this.mbMain.SuspendLayout();
 		    this.sbMain.SuspendLayout();
 		    this.gbWorldspace.SuspendLayout();
@@ -174,11 +172,10 @@ namespace Border_Builder
 		    this.gbWorldspaceGridRange.SuspendLayout();
 		    this.gbSourceMod.SuspendLayout();
 		    this.gbWeldThreshold.SuspendLayout();
-		    ((System.ComponentModel.ISupportInitialize)(this.pbRenderWindow)).BeginInit();
-		    this.pnRenderWindow.SuspendLayout();
 		    this.gbRenderOptions.SuspendLayout();
 		    this.gbRenderSelectedOnly.SuspendLayout();
 		    this.gbEditOptions.SuspendLayout();
+		    this.pnMainForm.SuspendLayout();
 		    this.SuspendLayout();
 		    // 
 		    // mbMain
@@ -189,7 +186,7 @@ namespace Border_Builder
             this.mbiHelp});
 		    this.mbMain.Location = new System.Drawing.Point(0, 0);
 		    this.mbMain.Name = "mbMain";
-		    this.mbMain.Size = new System.Drawing.Size(754, 24);
+		    this.mbMain.Size = new System.Drawing.Size(298, 24);
 		    this.mbMain.TabIndex = 0;
 		    this.mbMain.Text = "menuStrip1";
 		    // 
@@ -273,9 +270,9 @@ namespace Border_Builder
             this.sbiMouseToCellGrid,
             this.toolStripStatusLabel1,
             this.sbiMouseToWorldspace});
-		    this.sbMain.Location = new System.Drawing.Point(0, 647);
+		    this.sbMain.Location = new System.Drawing.Point(0, 642);
 		    this.sbMain.Name = "sbMain";
-		    this.sbMain.Size = new System.Drawing.Size(754, 22);
+		    this.sbMain.Size = new System.Drawing.Size(298, 22);
 		    this.sbMain.TabIndex = 1;
 		    this.sbMain.Text = "statusStrip1";
 		    // 
@@ -289,7 +286,7 @@ namespace Border_Builder
 		    // 
 		    this.sbiCaption.AutoToolTip = true;
 		    this.sbiCaption.Name = "sbiCaption";
-		    this.sbiCaption.Size = new System.Drawing.Size(413, 17);
+		    this.sbiCaption.Size = new System.Drawing.Size(1, 17);
 		    this.sbiCaption.Spring = true;
 		    this.sbiCaption.Text = "Operation being performed la la la, this is really long to test, la la la";
 		    this.sbiCaption.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -324,39 +321,18 @@ namespace Border_Builder
 		    // 
 		    // gbWorldspace
 		    // 
-		    this.gbWorldspace.Controls.Add(this.cbRenderWorldspaceHeightTextures);
-		    this.gbWorldspace.Controls.Add(this.btnLoadWorldspaceHeightTextures);
 		    this.gbWorldspace.Controls.Add(this.gbWorldspaceMapHeightRange);
 		    this.gbWorldspace.Controls.Add(this.gbWorldspaceTextures);
 		    this.gbWorldspace.Controls.Add(this.tbWorldspaceFormIDEditorID);
 		    this.gbWorldspace.Controls.Add(this.lWorldspaceFormID);
 		    this.gbWorldspace.Controls.Add(this.cbWorldspace);
 		    this.gbWorldspace.Controls.Add(this.gbWorldspaceGridRange);
-		    this.gbWorldspace.Location = new System.Drawing.Point(6, 140);
+		    this.gbWorldspace.Location = new System.Drawing.Point(6, 116);
 		    this.gbWorldspace.Name = "gbWorldspace";
-		    this.gbWorldspace.Size = new System.Drawing.Size(287, 243);
+		    this.gbWorldspace.Size = new System.Drawing.Size(287, 217);
 		    this.gbWorldspace.TabIndex = 2;
 		    this.gbWorldspace.TabStop = false;
 		    this.gbWorldspace.Text = "Worldspace:        ";
-		    // 
-		    // cbRenderWorldspaceHeightTextures
-		    // 
-		    this.cbRenderWorldspaceHeightTextures.Location = new System.Drawing.Point(138, 213);
-		    this.cbRenderWorldspaceHeightTextures.Name = "cbRenderWorldspaceHeightTextures";
-		    this.cbRenderWorldspaceHeightTextures.Size = new System.Drawing.Size(130, 24);
-		    this.cbRenderWorldspaceHeightTextures.TabIndex = 7;
-		    this.cbRenderWorldspaceHeightTextures.Text = "Create bitmaps";
-		    this.cbRenderWorldspaceHeightTextures.UseVisualStyleBackColor = true;
-		    // 
-		    // btnLoadWorldspaceHeightTextures
-		    // 
-		    this.btnLoadWorldspaceHeightTextures.Location = new System.Drawing.Point(6, 214);
-		    this.btnLoadWorldspaceHeightTextures.Name = "btnLoadWorldspaceHeightTextures";
-		    this.btnLoadWorldspaceHeightTextures.Size = new System.Drawing.Size(117, 23);
-		    this.btnLoadWorldspaceHeightTextures.TabIndex = 6;
-		    this.btnLoadWorldspaceHeightTextures.Text = "Load Textures";
-		    this.btnLoadWorldspaceHeightTextures.UseVisualStyleBackColor = true;
-		    this.btnLoadWorldspaceHeightTextures.Click += new System.EventHandler(this.BtnLoadWorldspaceHeightTexturesClick);
 		    // 
 		    // gbWorldspaceMapHeightRange
 		    // 
@@ -558,7 +534,7 @@ namespace Border_Builder
 		    this.gbSourceMod.Controls.Add(this.btnBuildImportModVolumeBorders);
 		    this.gbSourceMod.Controls.Add(this.btnLoadImportModBuildVolumes);
 		    this.gbSourceMod.Controls.Add(this.cbImportMod);
-		    this.gbSourceMod.Location = new System.Drawing.Point(6, 27);
+		    this.gbSourceMod.Location = new System.Drawing.Point(6, 3);
 		    this.gbSourceMod.Name = "gbSourceMod";
 		    this.gbSourceMod.Size = new System.Drawing.Size(287, 107);
 		    this.gbSourceMod.TabIndex = 3;
@@ -642,51 +618,38 @@ namespace Border_Builder
 		    // 
 		    this.cbImportMod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 		    this.cbImportMod.FormattingEnabled = true;
-		    this.cbImportMod.Location = new System.Drawing.Point(76, 0);
+		    this.cbImportMod.Location = new System.Drawing.Point(77, 0);
 		    this.cbImportMod.Name = "cbImportMod";
 		    this.cbImportMod.Size = new System.Drawing.Size(201, 21);
 		    this.cbImportMod.TabIndex = 2;
 		    this.cbImportMod.SelectedIndexChanged += new System.EventHandler(this.CbImportModSelectedIndexChanged);
-		    // 
-		    // pbRenderWindow
-		    // 
-		    this.pbRenderWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-		    this.pbRenderWindow.BackColor = System.Drawing.Color.Black;
-		    this.pbRenderWindow.Cursor = System.Windows.Forms.Cursors.Cross;
-		    this.pbRenderWindow.Location = new System.Drawing.Point(0, 0);
-		    this.pbRenderWindow.Name = "pbRenderWindow";
-		    this.pbRenderWindow.Size = new System.Drawing.Size(449, 614);
-		    this.pbRenderWindow.TabIndex = 4;
-		    this.pbRenderWindow.TabStop = false;
-		    this.pbRenderWindow.SizeChanged += new System.EventHandler(this.PbRenderWindowSizeChanged);
-		    this.pbRenderWindow.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseMove);
-		    this.pbRenderWindow.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PbRenderWindowMouseUp);
 		    // 
 		    // pnRenderWindow
 		    // 
 		    this.pnRenderWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-		    this.pnRenderWindow.Controls.Add(this.pbRenderWindow);
-		    this.pnRenderWindow.Location = new System.Drawing.Point(299, 27);
+		    this.pnRenderWindow.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		    this.pnRenderWindow.Location = new System.Drawing.Point(297, 27);
 		    this.pnRenderWindow.Name = "pnRenderWindow";
-		    this.pnRenderWindow.Size = new System.Drawing.Size(449, 614);
+		    this.pnRenderWindow.Size = new System.Drawing.Size(1, 614);
 		    this.pnRenderWindow.TabIndex = 5;
+		    this.pnRenderWindow.Resize += new System.EventHandler(this.PnRenderWindowResize);
 		    // 
 		    // btnCellWindowRedraw
 		    // 
-		    this.btnCellWindowRedraw.Location = new System.Drawing.Point(129, 136);
+		    this.btnCellWindowRedraw.Location = new System.Drawing.Point(129, 163);
 		    this.btnCellWindowRedraw.Name = "btnCellWindowRedraw";
 		    this.btnCellWindowRedraw.Size = new System.Drawing.Size(152, 23);
 		    this.btnCellWindowRedraw.TabIndex = 7;
-		    this.btnCellWindowRedraw.Text = "Redraw Map";
+		    this.btnCellWindowRedraw.Tag = "";
+		    this.btnCellWindowRedraw.Text = "Show Map";
 		    this.btnCellWindowRedraw.UseVisualStyleBackColor = true;
 		    this.btnCellWindowRedraw.Click += new System.EventHandler(this.BtnCellWindowRedrawClick);
 		    // 
 		    // gbRenderOptions
 		    // 
+		    this.gbRenderOptions.Controls.Add(this.cbWindowedRenderer);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderOverRegion);
 		    this.gbRenderOptions.Controls.Add(this.cbExportPNG);
 		    this.gbRenderOptions.Controls.Add(this.btnCellWindowRedraw);
@@ -696,12 +659,21 @@ namespace Border_Builder
 		    this.gbRenderOptions.Controls.Add(this.cbRenderCellGrid);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderWaterHeight);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderLandHeight);
-		    this.gbRenderOptions.Location = new System.Drawing.Point(6, 389);
+		    this.gbRenderOptions.Location = new System.Drawing.Point(6, 339);
 		    this.gbRenderOptions.Name = "gbRenderOptions";
-		    this.gbRenderOptions.Size = new System.Drawing.Size(287, 165);
+		    this.gbRenderOptions.Size = new System.Drawing.Size(287, 193);
 		    this.gbRenderOptions.TabIndex = 6;
 		    this.gbRenderOptions.TabStop = false;
 		    this.gbRenderOptions.Text = "Render Options";
+		    // 
+		    // cbWindowedRenderer
+		    // 
+		    this.cbWindowedRenderer.Location = new System.Drawing.Point(129, 139);
+		    this.cbWindowedRenderer.Name = "cbWindowedRenderer";
+		    this.cbWindowedRenderer.Size = new System.Drawing.Size(109, 18);
+		    this.cbWindowedRenderer.TabIndex = 17;
+		    this.cbWindowedRenderer.Text = "Windowed";
+		    this.cbWindowedRenderer.UseVisualStyleBackColor = true;
 		    // 
 		    // cbRenderOverRegion
 		    // 
@@ -742,6 +714,7 @@ namespace Border_Builder
 		    this.lbVolumeParents.SelectionMode = System.Windows.Forms.SelectionMode.MultiSimple;
 		    this.lbVolumeParents.Size = new System.Drawing.Size(130, 69);
 		    this.lbVolumeParents.TabIndex = 16;
+		    this.lbVolumeParents.SelectedIndexChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // cbRenderSelectedOnly
 		    // 
@@ -751,6 +724,7 @@ namespace Border_Builder
 		    this.cbRenderSelectedOnly.TabIndex = 14;
 		    this.cbRenderSelectedOnly.Text = "Selected Only";
 		    this.cbRenderSelectedOnly.UseVisualStyleBackColor = true;
+		    this.cbRenderSelectedOnly.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // cbRenderBorders
 		    // 
@@ -762,6 +736,7 @@ namespace Border_Builder
 		    this.cbRenderBorders.TabIndex = 12;
 		    this.cbRenderBorders.Text = "Volume Borders";
 		    this.cbRenderBorders.UseVisualStyleBackColor = true;
+		    this.cbRenderBorders.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // cbRenderBuildVolumes
 		    // 
@@ -773,6 +748,7 @@ namespace Border_Builder
 		    this.cbRenderBuildVolumes.TabIndex = 11;
 		    this.cbRenderBuildVolumes.Text = "Build Volumes";
 		    this.cbRenderBuildVolumes.UseVisualStyleBackColor = true;
+		    this.cbRenderBuildVolumes.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // cbRenderCellGrid
 		    // 
@@ -784,6 +760,7 @@ namespace Border_Builder
 		    this.cbRenderCellGrid.TabIndex = 10;
 		    this.cbRenderCellGrid.Text = "Cell Grid";
 		    this.cbRenderCellGrid.UseVisualStyleBackColor = true;
+		    this.cbRenderCellGrid.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // cbRenderWaterHeight
 		    // 
@@ -795,6 +772,7 @@ namespace Border_Builder
 		    this.cbRenderWaterHeight.TabIndex = 9;
 		    this.cbRenderWaterHeight.Text = "Water Height";
 		    this.cbRenderWaterHeight.UseVisualStyleBackColor = true;
+		    this.cbRenderWaterHeight.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // cbRenderLandHeight
 		    // 
@@ -806,12 +784,13 @@ namespace Border_Builder
 		    this.cbRenderLandHeight.TabIndex = 8;
 		    this.cbRenderLandHeight.Text = "Land Height";
 		    this.cbRenderLandHeight.UseVisualStyleBackColor = true;
+		    this.cbRenderLandHeight.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
 		    // 
 		    // gbEditOptions
 		    // 
 		    this.gbEditOptions.Controls.Add(this.cbEditModeEnable);
 		    this.gbEditOptions.Controls.Add(this.tbEMHotKeys);
-		    this.gbEditOptions.Location = new System.Drawing.Point(6, 560);
+		    this.gbEditOptions.Location = new System.Drawing.Point(6, 538);
 		    this.gbEditOptions.Name = "gbEditOptions";
 		    this.gbEditOptions.Size = new System.Drawing.Size(287, 74);
 		    this.gbEditOptions.TabIndex = 7;
@@ -834,26 +813,36 @@ namespace Border_Builder
 		    this.tbEMHotKeys.Multiline = true;
 		    this.tbEMHotKeys.Name = "tbEMHotKeys";
 		    this.tbEMHotKeys.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-		    this.tbEMHotKeys.Size = new System.Drawing.Size(168, 49);
+		    this.tbEMHotKeys.Size = new System.Drawing.Size(275, 49);
 		    this.tbEMHotKeys.TabIndex = 1;
 		    this.tbEMHotKeys.Text = "I am a potato";
 		    // 
-		    // fMain
+		    // pnMainForm
+		    // 
+		    this.pnMainForm.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		    this.pnMainForm.Controls.Add(this.gbEditOptions);
+		    this.pnMainForm.Controls.Add(this.gbSourceMod);
+		    this.pnMainForm.Controls.Add(this.gbRenderOptions);
+		    this.pnMainForm.Controls.Add(this.gbWorldspace);
+		    this.pnMainForm.Location = new System.Drawing.Point(0, 27);
+		    this.pnMainForm.Name = "pnMainForm";
+		    this.pnMainForm.Size = new System.Drawing.Size(297, 615);
+		    this.pnMainForm.TabIndex = 8;
+		    // 
+		    // bbMain
 		    // 
 		    this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 		    this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-		    this.ClientSize = new System.Drawing.Size(754, 669);
-		    this.Controls.Add(this.gbEditOptions);
-		    this.Controls.Add(this.gbWorldspace);
-		    this.Controls.Add(this.gbRenderOptions);
+		    this.ClientSize = new System.Drawing.Size(298, 664);
 		    this.Controls.Add(this.pnRenderWindow);
-		    this.Controls.Add(this.gbSourceMod);
 		    this.Controls.Add(this.sbMain);
 		    this.Controls.Add(this.mbMain);
+		    this.Controls.Add(this.pnMainForm);
 		    this.MainMenuStrip = this.mbMain;
-		    this.MinimumSize = new System.Drawing.Size(770, 700);
-		    this.Name = "fMain";
+		    this.MinimumSize = new System.Drawing.Size(314, 702);
+		    this.Name = "bbMain";
 		    this.Text = "Border Builder";
+		    this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BbMainFormClosing);
 		    this.Load += new System.EventHandler(this.FMainLoad);
 		    this.mbMain.ResumeLayout(false);
 		    this.mbMain.PerformLayout();
@@ -870,12 +859,11 @@ namespace Border_Builder
 		    this.gbSourceMod.ResumeLayout(false);
 		    this.gbWeldThreshold.ResumeLayout(false);
 		    this.gbWeldThreshold.PerformLayout();
-		    ((System.ComponentModel.ISupportInitialize)(this.pbRenderWindow)).EndInit();
-		    this.pnRenderWindow.ResumeLayout(false);
 		    this.gbRenderOptions.ResumeLayout(false);
 		    this.gbRenderSelectedOnly.ResumeLayout(false);
 		    this.gbEditOptions.ResumeLayout(false);
 		    this.gbEditOptions.PerformLayout();
+		    this.pnMainForm.ResumeLayout(false);
 		    this.ResumeLayout(false);
 		    this.PerformLayout();
 

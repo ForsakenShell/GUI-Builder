@@ -4,6 +4,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # SharpDevelop 5.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Border Builder", "Border Builder.csproj", "{71DB0BAB-5FAE-48C5-8C0E-4481ED75F9DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDL2ThinLayer", "..\SDL2ThinLayer\SDL2ThinLayer.csproj", "{A2D3C656-1C64-4530-A8CD-E2B20F8CB641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,5 +16,9 @@ Global
 		{71DB0BAB-5FAE-48C5-8C0E-4481ED75F9DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71DB0BAB-5FAE-48C5-8C0E-4481ED75F9DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71DB0BAB-5FAE-48C5-8C0E-4481ED75F9DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2D3C656-1C64-4530-A8CD-E2B20F8CB641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2D3C656-1C64-4530-A8CD-E2B20F8CB641}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2D3C656-1C64-4530-A8CD-E2B20F8CB641}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2D3C656-1C64-4530-A8CD-E2B20F8CB641}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

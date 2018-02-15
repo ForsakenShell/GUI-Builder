@@ -339,7 +339,7 @@ namespace Border_Builder
             if( _welded )
                 return;
             
-            var fmain = fMain.Self;
+            var fmain = bbMain.Self;
             for( int index = 0; index < VolumeParents.Count; index++ )
             {
                 var parent = VolumeParents[ index ];

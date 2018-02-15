@@ -432,6 +432,11 @@ namespace Border_Builder
             return new Maths.Vector2i( rectangle.X + rectangle.Width >> 1, rectangle.Y + rectangle.Height >> 1 );
         }
         
+        public static Maths.Vector2i Centre( this SDL2.SDL.SDL_Rect rectangle )
+        {
+            return new Maths.Vector2i( rectangle.x + rectangle.w >> 1, rectangle.y + rectangle.h >> 1 );
+        }
+        
         #endregion
         
     }

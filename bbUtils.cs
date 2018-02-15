@@ -90,5 +90,12 @@ namespace Border_Builder
         
         #endregion
         
+        public static bool ReadyForUse( this RenderTransform transform )
+        {
+            if( transform == null ) return false;
+            if( transform.Renderer == null ) return false;
+            return transform.Renderer.IsReady;
+        }
+        
     }
 }

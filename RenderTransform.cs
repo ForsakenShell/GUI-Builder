@@ -17,6 +17,9 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 
+using SDL2ThinLayer;
+using SDL2;
+
 namespace Border_Builder
 {
     
@@ -61,19 +64,18 @@ namespace Border_Builder
         Maths.Vector2i cmSize;
         
         // Render target
-        Bitmap bmpTarget;
-        Graphics gfxTarget;
-        GraphicsUnit guTarget;
-        ImageAttributes iaTarget;
-        Rectangle rectTarget;
-        PictureBox pbTarget;
+        SDL2ThinLayer.SDLRenderer sdlRenderer;
+        bbMain mainForm;
+        Control sdlTarget;
+        SDL.SDL_Rect rectTarget;
         
-        // Last rendered layers
+        // Last rendered layers and controls
         bool _renderLand;
         bool _renderWater;
         bool _renderCellGrid;
         bool _renderBuildVolumes;
         bool _renderBorders;
+        bool _renderFast;
         
         // High light parents and volumes
         List<VolumeParent> hlParents = null;
@@ -81,13 +83,27 @@ namespace Border_Builder
         
         VolumeEditor attachedEditor;
         
+        SDLRenderer.void_RendererOnly WindowClosed;
+        
         #region Constructor and Dispose()
         
-        public RenderTransform( PictureBox _pbTarget )
+        public RenderTransform( bbMain _form, Control _target )
         {
-            pbTarget = _pbTarget;
+            mainForm = _form;
+            sdlTarget = _target;
             attachedEditor = null;
-            RenderTargetSizeChanged( false );
+            WindowClosed = null;
+            RecreateSDLRenderer( true );
+        }
+        
+        public RenderTransform( bbMain _form, Size size, SDLRenderer.void_RendererOnly windowClosed )
+        {
+            mainForm = _form;
+            sdlTarget = null;
+            attachedEditor = null;
+            WindowClosed = windowClosed;
+            rectTarget = size.ToSDLRect();
+            RecreateSDLRenderer( true );
         }
         
         #region Semi-Public API:  Destructor & IDispose
@@ -111,8 +127,13 @@ namespace Border_Builder
             if( _disposed ) return;
             
             // Dispose of external references
+            if( sdlRenderer != null )
+                sdlRenderer.Dispose();
+            sdlRenderer = null;
             attachedEditor = null;
-            pbTarget = null;
+            //pbTarget = null;
+            mainForm = null;
+            sdlTarget = null;
             worldspace = null;
             importMod = null;
             renderVolumes = null;
@@ -129,7 +150,7 @@ namespace Border_Builder
             trueCentre = Maths.Vector2f.Zero;
             hmCentre = Maths.Vector2i.Zero;
             cmSize = Maths.Vector2i.Zero;
-            rectTarget = Rectangle.Empty;
+            //rectTarget = Rectangle.Empty;
             
             // Reset render states
             _renderLand = false;
@@ -146,6 +167,7 @@ namespace Border_Builder
             
             #endif
             
+            /*
             // Dispose of GDI resources
             gfxTarget.Dispose();
             bmpTarget.Dispose(); 
@@ -154,6 +176,7 @@ namespace Border_Builder
             gfxTarget = null;
             guTarget = (GraphicsUnit)0;
             iaTarget = null;
+            */
             
             // This is no longer a valid state
             _disposed = true;
@@ -163,65 +186,126 @@ namespace Border_Builder
         
         #endregion
         
-        #region Render State Manipulation
+        #region SDL_Window and SDL_Renderer [re]size/reset events
         
-        public void UpdateSceneMetricsAndRedraw()
+        void SDL_RendererReset( SDLRenderer renderer )
         {
-            RecomputeSceneClipper();
-            ReRenderCurrentScene();
+            Console.WriteLine( "SDL_RendererReset()" );
+            ReloadWorldspaceTextures( true );
         }
         
-        public void RenderTargetSizeChanged( bool updateScene = true )
+        void SDL_WindowResized( SDLRenderer renderer, SDL.SDL_Event e )
         {
+            Console.WriteLine( "SDL_WindowResized()" );
+            
+            // Tell the transform renderer that an external event resized the window
+            rectTarget = sdlRenderer.WindowSize.ToSDLRect();
+            UpdateSceneMetrics();
+        }
+        
+        bool _sdl_WindowSize_Queued = false;
+        void SDL_SetWindowSize( SDLRenderer renderer )
+        {
+            Console.WriteLine( "SDL_SetWindowSize()" );
+            
+            // Tell the sdl renderer that an internal event wants to resize the window
+            rectTarget = sdlTarget.Size.ToSDLRect();
+            sdlRenderer.WindowSize = sdlTarget.Size;
+            UpdateSceneMetrics();
+            
+            _sdl_WindowSize_Queued = false;
+        }
+        
+        public void InvokeSetSDLWindowSize()
+        {
+            Console.WriteLine( "InvokeSetSDLWindowSize()" );
+            
+            // Not attached, SDL_Window will handle this
+            if( sdlTarget == null ) return;
+            
+            // Don't requeue if we haven't handled the last one
+            if( _sdl_WindowSize_Queued ) return;
+            
+            _sdl_WindowSize_Queued = true;
+            
+            // Invoke a window size update in the renderer thread
+            sdlRenderer.BeginInvoke( SDL_SetWindowSize );
+        }
+        
+        public void RecreateSDLRenderer( bool forceRebuild )
+        {
+            Console.WriteLine( "RecreateSDLRenderer()" );
+            
+            SDL.SDL_Rect newRect = rectTarget;
+            
+            if( sdlTarget != null )
+            {
+                if(
+                    ( sdlTarget.Width < 1 )||
+                    ( sdlTarget.Height < 1 )
+                )   return;
+                
+                var rect = sdlTarget.Size.ToSDLRect();
+                
+                if(
+                    ( rect.Equals( rectTarget ) )&&
+                    ( !forceRebuild )
+                )   return;
+                
+                newRect = rect;
+            }
+            else
+            {
+                if( sdlRenderer != null )
+                    newRect = sdlRenderer.WindowSize.ToSDLRect();
+            }
+            
             if(
-                ( pbTarget.Width < 1 )||
-                ( pbTarget.Height < 1 )
-            )   return;
+                ( sdlRenderer != null )&&
+                ( !forceRebuild )
+           )   return;
             
-            var rect = new Rectangle(
-                0,
-                0,
-                pbTarget.Width,
-                pbTarget.Height );
-            
-            if( rect == rectTarget )
-                return;
-            
-            rectTarget = rect;
-            trueCentre = new Maths.Vector2f( rectTarget.Centre() );
-            
+            // Build a whole new renderer
             bool doGC = false;
-            if( gfxTarget != null )
+            if( sdlRenderer != null )
             {
-                gfxTarget.Dispose();
-                gfxTarget = null;
+                sdlRenderer.Dispose();
+                sdlRenderer = null;
                 doGC = true;
-            }
-            if( bmpTarget != null )
-            {
-                bmpTarget.Dispose(); 
-                bmpTarget = null;
-                doGC = true;
-            }
-            if( iaTarget != null )
-            {
-                iaTarget.Dispose();
-                iaTarget = null;
             }
             
             if( doGC )
                 System.GC.Collect( System.GC.MaxGeneration );
             
-            bmpTarget = new Bitmap( rectTarget.Width, rectTarget.Height );
-            gfxTarget = Graphics.FromImage( bmpTarget );
+            rectTarget = newRect;
             
-            guTarget = GraphicsUnit.Pixel;
-            iaTarget = new ImageAttributes();
-            iaTarget.SetWrapMode( System.Drawing.Drawing2D.WrapMode.Tile );
+            sdlRenderer =
+                sdlTarget != null
+                ? new SDLRenderer( mainForm, sdlTarget )
+                : new SDLRenderer( mainForm, rectTarget.w, rectTarget.h, "da window", WindowClosed );
+            if( sdlRenderer == null )
+                throw new Exception( string.Format( "Error resizing target:\n{0}", SDL.SDL_GetError() ) );
             
-            if( updateScene )
-                UpdateSceneMetricsAndRedraw();
+            sdlRenderer.BlendMode = SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND;
+            sdlRenderer.DrawScene += SDL_DrawScene;
+            if( sdlTarget == null )
+                sdlRenderer.WindowResized += SDL_WindowResized;
+            sdlRenderer.RendererReset += SDL_RendererReset;
             
+            UpdateSceneMetrics();
+        }
+        
+        #endregion
+        
+        #region Render State Manipulation
+        
+        public void UpdateSceneMetrics()
+        {
+            // TODO:  Don't much with trueCentre unless out of bounds!
+            trueCentre = new Maths.Vector2f( rectTarget.Centre() );
+            minScale = CalculateScale( cmSize );
+            scale = Math.Min( maxScale, Math.Max( minScale, scale ) );
+            invScale = 1.0f / scale;
         }
         
         public Maths.Vector2f WorldspaceClipperCentre()
@@ -236,7 +320,7 @@ namespace Border_Builder
         
         public void UpdateCellClipper( Maths.Vector2i _cellNW, Maths.Vector2i _cellSE, bool updateScene = true )
         {
-            bool mustRebuildBuffers = ( bmpTarget == null )||( gfxTarget == null )||( iaTarget == null );
+            //bool mustRebuildBuffers = ( bmpTarget == null )||( gfxTarget == null )||( iaTarget == null );
             
             cellNW = _cellNW;
             cellSE = _cellSE;
@@ -246,7 +330,7 @@ namespace Border_Builder
             cmSize = bbSpaceConversions.SizeOfCellRange( cellNW, cellSE );
             
             if( updateScene )
-                UpdateSceneMetricsAndRedraw();
+                UpdateSceneMetrics();
         }
         
         public float GetScale() { return scale; }
@@ -255,14 +339,14 @@ namespace Border_Builder
             scale = value;
             invScale = 1.0f / scale;
             if( updateScene )
-                UpdateSceneMetricsAndRedraw();
+                UpdateSceneMetrics();
         }
         public float GetInvScale() { return invScale; }
         public void SetInvScale( float value, bool updateScene = true )
         {
             scale = 1.0f / value;
             if( updateScene )
-                UpdateSceneMetricsAndRedraw();
+                UpdateSceneMetrics();
         }
         
         public Maths.Vector2f GetViewCentre() { return viewCentre; }
@@ -270,21 +354,10 @@ namespace Border_Builder
         {
             viewCentre = value;
             if( updateScene )
-                UpdateSceneMetricsAndRedraw();
+                UpdateSceneMetrics();
         }
         
         public Maths.Vector2i GetClipperCellSize() { return cmSize; }
-        
-        public void RecomputeSceneClipper()
-        {
-            minScale = CalculateScale( cmSize );
-            scale = Math.Min( maxScale, Math.Max( minScale, scale ) );
-            invScale = 1.0f / scale;
-        }
-        
-        #endregion
-        
-        #region Public Accessors
         
         public VolumeEditor                     AttachedEditor
         {
@@ -298,6 +371,10 @@ namespace Border_Builder
             }
         }
         
+        public bbMain                           MainForm { get { return mainForm; } }
+        public Control                          TargetControl { get { return sdlTarget; } }
+        public SDLRenderer                      Renderer { get { return sdlRenderer; } }
+        
         public bbWorldspace                     Worldspace
         {
             get
@@ -310,6 +387,7 @@ namespace Border_Builder
                 worldspace = value;
                 UpdateCellClipper( worldspace.CellNW, worldspace.CellSE, false );
                 SetViewCentre( WorldspaceClipperCentre(), false );
+                ReloadWorldspaceTextures( false );
             }
         }
         
@@ -370,8 +448,8 @@ namespace Border_Builder
         
         public float CalculateScale( Maths.Vector2i cells )
         {
-            var scaleNS = (float)rectTarget.Height / ( (float)cells.Y * bbConstant.WorldMap_Resolution );
-            var scaleEW = (float)rectTarget.Width / ( (float)cells.X * bbConstant.WorldMap_Resolution );
+            var scaleNS = (float)rectTarget.h / ( (float)cells.Y * bbConstant.WorldMap_Resolution );
+            var scaleEW = (float)rectTarget.w / ( (float)cells.X * bbConstant.WorldMap_Resolution );
             var _scale = scaleNS < scaleEW ? scaleNS : scaleEW;
             return _scale;
         }
@@ -421,7 +499,7 @@ namespace Border_Builder
         
         public Rectangle WorldspaceToHeightmapClipper( float x, float y )
         {
-            var ss = new Maths.Vector2f( rectTarget.Width, rectTarget.Height ) * invScale;
+            var ss = new Maths.Vector2f( rectTarget.w, rectTarget.h ) * invScale;
             var hss = ss * 0.5f;
             var nw = bbSpaceConversions.WorldspaceToHeightmap( x - hss.X, y + hss.Y, hmCentre );
             var s = ss.WorldspaceToCellspace();
@@ -483,58 +561,113 @@ namespace Border_Builder
         
         #endregion
         
-        #region Render Scene
-        
-        public void ReRenderCurrentScene()
+        void ReloadWorldspaceTextures( bool forceReload )
         {
-            RenderScene( _renderLand, _renderWater, _renderCellGrid, _renderBuildVolumes, _renderBorders, true, false );
+            Console.WriteLine( "ReloadWorldspaceTextures()" );
+            if( worldspace == null ) return;
+            if(
+                ( sdlRenderer == null )||
+                ( !sdlRenderer.IsReady )
+            ) return;
+            if(
+                ( forceReload )||
+                (
+                    ( _renderLand )&&
+                    ( worldspace.LandHeight_Texture == null )
+                )||
+                (
+                    ( _renderWater )&&
+                    ( worldspace.WaterHeight_Texture == null )
+                )
+            ) {
+                worldspace.CreateHeightmapTextures( this );
+            }
         }
         
-        public void RenderScene( bool renderLand, bool renderWater, bool renderCellGrid, bool renderBuildVolumes, bool renderBorders, bool fastRender, bool cacheRenderLayers )
+        #region Render Scene
+        
+        public bool                             RenderLand
         {
-            if( fastRender )
+            get     { return _renderLand; }
+            set
             {
-                gfxTarget.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
-                gfxTarget.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                gfxTarget.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
-                gfxTarget.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+                _renderLand = value;
+                ReloadWorldspaceTextures( false );
             }
-            else
+        }
+        
+        public bool                             RenderWater
+        {
+            get     { return _renderWater; }
+            set
             {
-                gfxTarget.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                gfxTarget.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                gfxTarget.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                gfxTarget.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+                _renderWater = value;
+                ReloadWorldspaceTextures( false );
             }
+        }
+        
+        public bool                             RenderCellGrid
+        {
+            get     { return _renderCellGrid; }
+            set     { _renderCellGrid = value; }
+        }
+        
+        public bool                             RenderBuildVolumes
+        {
+            get     { return _renderBuildVolumes; }
+            set     { _renderBuildVolumes = value; }
+        }
+        
+        public bool                             RenderBorders
+        {
+            get     { return _renderBorders; }
+            set     { _renderBorders = value; }
+        }
+        
+        public bool                             RenderFast
+        {
+            get     { return _renderFast; }
+            set
+            {
+                _renderFast = value;
+                sdlRenderer.PreserveUserState = !value;
+            }
+        }
+        
+        public void UpdateScene( bool renderLand, bool renderWater, bool renderCellGrid, bool renderBuildVolumes, bool renderBorders, bool fastRender )
+        {
+            _renderLand = renderLand;
+            _renderWater = renderWater;
+            _renderCellGrid = renderCellGrid;
+            _renderBuildVolumes = renderBuildVolumes;
+            _renderBorders = renderBorders;
+            _renderFast = fastRender;
+            sdlRenderer.PreserveUserState = !fastRender;
+            ReloadWorldspaceTextures( false );
+        }
+        
+        void SDL_DrawScene( SDLRenderer renderer )
+        {
+            if( renderer != sdlRenderer ) return;
             
-            if( renderLand )
+            if( _renderLand )
                 DrawLandMap();
             
-            if( renderWater )
+            if( _renderWater )
                 DrawWaterMap();
             
-            if( renderCellGrid )
+            if( _renderCellGrid )
                 DrawCellGrid();
             
-            if( renderBuildVolumes )
+            if( _renderBuildVolumes )
                 DrawBuildVolumes();
             
-            if( renderBorders )
+            if( _renderBorders )
                 DrawParentBorders();
             
             if( attachedEditor != null )
                 attachedEditor.DrawEditor();
             
-            if( cacheRenderLayers )
-            {
-                _renderLand = renderLand;
-                _renderWater = renderWater;
-                _renderCellGrid = renderCellGrid;
-                _renderBuildVolumes = renderBuildVolumes;
-                _renderBorders = renderBorders;
-            }
-            
-            pbTarget.Image = bmpTarget;
         }
         
         public void RenderToPNG()
@@ -545,93 +678,85 @@ namespace Border_Builder
                 ( renderVolumes.Count > 1 )
                ) return;
             var filename = renderVolumes.NullOrEmpty() ? worldspace.FormID : renderVolumes[ 0 ].FormID + ".png";
-            bmpTarget.Save( filename, System.Drawing.Imaging.ImageFormat.Png );
+            //bmpTarget.Save( filename, System.Drawing.Imaging.ImageFormat.Png );
+            // TODO:  Implement SDLRenderer PNG Save
         }
         
         #endregion
         
         #region Drawing Primitives (cellspace (heightmap) to transform target)
         
-        public void DrawLineCellTransform( Pen pen, float x0, float y0, float x1, float y1 )
+        public void DrawLineCellTransform( float x0, float y0, float x1, float y1, Color c )
         {
-            var tp0 = CellspaceToScreenspace( x0, y0 );
-            var tp1 = CellspaceToScreenspace( x1, y1 );
-            gfxTarget.DrawLine( pen, tp0.X, tp0.Y, tp1.X, tp1.Y );
+            var tp0 = CellspaceToScreenspace( x0, y0 ).ToSDLPoint( !_renderFast );
+            var tp1 = CellspaceToScreenspace( x1, y1 ).ToSDLPoint( !_renderFast );
+            sdlRenderer.DrawLine( tp0, tp1, c );
         }
         
-        public void DrawRectCellTransform( Pen pen, Maths.Vector2f p0, Maths.Vector2f p1 )
+        public void DrawRectCellTransform( Maths.Vector2f p0, Maths.Vector2f p1, Color c )
         {
-            DrawLineCellTransform( pen, p0.X, p0.Y, p1.X, p0.Y );
-            DrawLineCellTransform( pen, p1.X, p0.Y, p1.X, p1.Y );
-            DrawLineCellTransform( pen, p1.X, p1.Y, p0.X, p1.Y );
-            DrawLineCellTransform( pen, p0.X, p1.Y, p0.X, p0.Y );
+            DrawLineCellTransform( p0.X, p0.Y, p1.X, p0.Y, c );
+            DrawLineCellTransform( p1.X, p0.Y, p1.X, p1.Y, c );
+            DrawLineCellTransform( p1.X, p1.Y, p0.X, p1.Y, c );
+            DrawLineCellTransform( p0.X, p1.Y, p0.X, p0.Y, c );
         }
         
         #endregion
         
         #region Drawing Primitives (worldspace to transform target)
         
-        public void DrawTextWorldTransform( string text, float x, float y, Pen pen, float size = 12f, Font font = null, Brush brush = null )
+        public void DrawTextWorldTransform( string text, float x, float y, Color c, SDLRenderer.Font font, int style = 0 )
         {
-            if( font == null )
-                font = new Font( FontFamily.GenericSerif, size, FontStyle.Regular, GraphicsUnit.Pixel );
-            if( brush == null )
-                brush = new SolidBrush( pen.Color );
-            var tp = WorldspaceToScreenspace( x, y );
-            gfxTarget.DrawString( text, font, brush, tp.X, tp.Y );
+           var tp = WorldspaceToScreenspace( x, y ).ToSDLPoint( !_renderFast );
+           sdlRenderer.DrawText( tp, font, text, c, style );
         }
         
-        public void DrawCircleWorldTransform( Pen pen, float x, float y, float r )
+        public void DrawCircleWorldTransform( float x, float y, float r, Color c )
         {
-            var sr = r * scale;
-            var tp = WorldspaceToScreenspace( x, y );
-            var tr = new Rectangle(
-                (int)( tp.X - sr ),
-                (int)( tp.Y - sr ),
-                (int)( sr * 2f ),
-                (int)( sr * 2f ) );
-            gfxTarget.DrawEllipse( pen, tr );
+            var sr = _renderFast ? (int)( r * scale ) : (int)Math.Round( r * scale );
+            var tp = WorldspaceToScreenspace( x, y ).ToSDLPoint( !_renderFast );
+            sdlRenderer.DrawCircle( tp, sr, c );
         }
         
-        public void DrawLineWorldTransform( Pen pen, float x0, float y0, float x1, float y1 )
+        public void DrawLineWorldTransform( float x0, float y0, float x1, float y1, Color c )
         {
-            var tp0 = WorldspaceToScreenspace( x0, y0 );
-            var tp1 = WorldspaceToScreenspace( x1, y1 );
-            gfxTarget.DrawLine( pen, tp0.X, tp0.Y, tp1.X, tp1.Y );
+            var tp0 = WorldspaceToScreenspace( x0, y0 ).ToSDLPoint( !_renderFast );
+            var tp1 = WorldspaceToScreenspace( x1, y1 ).ToSDLPoint( !_renderFast );
+            sdlRenderer.DrawLine( tp0, tp1, c );
         }
         
-        public void DrawLineWorldTransform( Pen pen, Maths.Vector2f p0, Maths.Vector2f p1 )
+        public void DrawLineWorldTransform( Maths.Vector2f p0, Maths.Vector2f p1, Color c )
         {
-            DrawLineWorldTransform( pen, p0.X, p0.Y, p1.X, p1.Y );
+            DrawLineWorldTransform( p0.X, p0.Y, p1.X, p1.Y, c );
         }
         
-        public void DrawLineWorldTransform( Pen pen, Maths.Vector3f p0, Maths.Vector3f p1 )
+        public void DrawLineWorldTransform( Maths.Vector3f p0, Maths.Vector3f p1, Color c )
         {
-            DrawLineWorldTransform( pen, p0.X, p0.Y, p1.X, p1.Y );
+            DrawLineWorldTransform( p0.X, p0.Y, p1.X, p1.Y, c );
         }
         
-        public void DrawRectWorldTransform( Pen pen, Maths.Vector2f p0, Maths.Vector2f p1 )
+        public void DrawRectWorldTransform( Maths.Vector2f p0, Maths.Vector2f p1, Color c )
         {
-            DrawLineWorldTransform( pen, p0.X, p0.Y, p1.X, p0.Y );
-            DrawLineWorldTransform( pen, p1.X, p0.Y, p1.X, p1.Y );
-            DrawLineWorldTransform( pen, p1.X, p1.Y, p0.X, p1.Y );
-            DrawLineWorldTransform( pen, p0.X, p1.Y, p0.X, p0.Y );
+            DrawLineWorldTransform( p0.X, p0.Y, p1.X, p0.Y, c );
+            DrawLineWorldTransform( p1.X, p0.Y, p1.X, p1.Y, c );
+            DrawLineWorldTransform( p1.X, p1.Y, p0.X, p1.Y, c );
+            DrawLineWorldTransform( p0.X, p1.Y, p0.X, p0.Y, c );
         }
         
-        public void DrawRectWorldTransform( Pen pen, Maths.Vector3f p0, Maths.Vector3f p1 )
+        public void DrawRectWorldTransform( Maths.Vector3f p0, Maths.Vector3f p1, Color c )
         {
-            DrawLineWorldTransform( pen, p0.X, p0.Y, p1.X, p0.Y );
-            DrawLineWorldTransform( pen, p1.X, p0.Y, p1.X, p1.Y );
-            DrawLineWorldTransform( pen, p1.X, p1.Y, p0.X, p1.Y );
-            DrawLineWorldTransform( pen, p0.X, p1.Y, p0.X, p0.Y );
+            DrawLineWorldTransform( p0.X, p0.Y, p1.X, p0.Y, c );
+            DrawLineWorldTransform( p1.X, p0.Y, p1.X, p1.Y, c );
+            DrawLineWorldTransform( p1.X, p1.Y, p0.X, p1.Y, c );
+            DrawLineWorldTransform( p0.X, p1.Y, p0.X, p0.Y, c );
         }
         
-        public void DrawPolyWorldTransform( Pen pen, Maths.Vector2f[] p )
+        public void DrawPolyWorldTransform( Maths.Vector2f[] p, Color c )
         {
             var last = p.Length - 1;
             for( int index = 0; index < p.Length - 1; index++ )
-                DrawLineWorldTransform( pen, p[ index ], p[ index + 1 ] );
-            DrawLineWorldTransform( pen, p[ last ], p[ 0 ] );
+                DrawLineWorldTransform( p[ index ], p[ index + 1 ], c );
+            DrawLineWorldTransform( p[ last ], p[ 0 ], c );
         }
         
         #endregion
@@ -640,16 +765,18 @@ namespace Border_Builder
         
         public void DrawLandMap()
         {
-            if( worldspace.LandHeight_Bitmap == null ) return;
+            if( worldspace.LandHeight_Texture == null ) return;
             var hmClipper = WorldspaceToHeightmapClipper( viewCentre.X, viewCentre.Y );
-            gfxTarget.DrawImage( worldspace.LandHeight_Bitmap, rectTarget, hmClipper.X, hmClipper.Y, hmClipper.Width, hmClipper.Height, guTarget, iaTarget );
+            var rect = hmClipper.ToSDLRect();
+            sdlRenderer.Blit( rectTarget, worldspace.LandHeight_Texture, rect );
         }
         
         public void DrawWaterMap()
         {
-            if( worldspace.WaterHeight_Bitmap == null ) return;
+            if( worldspace.WaterHeight_Texture == null ) return;
             var hmClipper = WorldspaceToHeightmapClipper( viewCentre.X, viewCentre.Y );
-            gfxTarget.DrawImage( worldspace.WaterHeight_Bitmap, rectTarget, hmClipper.X, hmClipper.Y, hmClipper.Width, hmClipper.Height, guTarget, iaTarget );
+            var rect = hmClipper.ToSDLRect();
+            sdlRenderer.Blit( rectTarget, worldspace.WaterHeight_Texture, rect );
         }
         
         #endregion
@@ -670,37 +797,37 @@ namespace Border_Builder
             #endif
             {
                 int rb = 223;
-                var penHigh = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
+                var cHigh = Color.FromArgb( 255, rb, 0, rb );
                 rb -= 48;
-                var penMid = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
+                var cMid = Color.FromArgb( 255, rb, 0, rb );
                 rb -= 48;
-                var penLow = new Pen( Color.FromArgb( 255, rb, 0, rb ) );
+                var cLow = Color.FromArgb( 255, rb, 0, rb );
                 
                 var editorEnabled = ( attachedEditor != null )&&( attachedEditor.Enabled );
                 
                 foreach( var volume in volumeParent.BuildVolumes )
                 {
-                    var usePen = editorEnabled ? penMid : penLow;
+                    var useColor = editorEnabled ? cMid : cLow;
                     if( !editorEnabled )
                     {
                         if( hlParents.NullOrEmpty() )
                         {
-                            usePen = penHigh;
+                            useColor = cHigh;
                         }
                         else if(
                             ( !hlVolumes.NullOrEmpty() )&&
                             ( hlVolumes.Contains( volume ) )
                         )
                         {
-                            usePen = penHigh;
+                            useColor = cHigh;
                         }
                         else if( hlParents.Contains( volumeParent ) )
                         {
-                            usePen = penMid;
+                            useColor = cMid;
                         }
                     }
-                
-                    DrawPolyWorldTransform( usePen, volume.Corners );
+                    
+                    DrawPolyWorldTransform( volume.Corners, useColor );
                 }
             }
             #if DEBUG
@@ -709,12 +836,13 @@ namespace Border_Builder
                 int r = 255;
                 int g = 0;
                 int b = 127;
+                SDLRenderer.Font font = null; // TODO: FILL THIS!
                 
                 for( var i = 0; i < volumeParent.BorderSegments.Count; i++ )
                 {
                     var segment = volumeParent.BorderSegments[ i ];
                     
-                    var pen = new Pen( Color.FromArgb( 255, r, g, b ) );
+                    var c = Color.FromArgb( 255, r, g, b );
                     
                     r -= 32;
                     g += 32;
@@ -724,8 +852,8 @@ namespace Border_Builder
                     if( b > 255 ) b -= 255;
                     
                     var niP = ( segment.P0 + segment.P1 ) * 0.5f;
-                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen, 10f );
-                    DrawLineWorldTransform( pen, segment.P0, segment.P1 );
+                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, c, font );
+                    DrawLineWorldTransform( segment.P0, segment.P1, c );
                 }
             }
             #endif
@@ -774,7 +902,11 @@ namespace Border_Builder
                 ( !hlParents.Contains( volumeParent ) )
             )   g >>= 1;
             
-            var pen = new Pen( Color.FromArgb( 255, 0, g, 0 ) );
+            var c = Color.FromArgb( 255, 0, g, 0 );
+            
+            #if DEBUG
+            SDLRenderer.Font font = null; // TODO: FILL THIS!
+            #endif
             
             for( var i = 0; i < volumeParent.BorderNodes.Count; i++ )
             {
@@ -787,13 +919,13 @@ namespace Border_Builder
                 )   g >>= 1;
                 */
                 
-                DrawLineWorldTransform( pen, node.A, node.B );
+                DrawLineWorldTransform( node.A, node.B, c );
                 
                 #if DEBUG
                 if( debugRenderBorders )
                 {
                     var niP = ( node.A + node.B ) * 0.5f;
-                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, pen );
+                    DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, c, font );
                 }
                 #endif
             }
@@ -830,8 +962,8 @@ namespace Border_Builder
         
         public void DrawCellGrid()
         {
-            var pen0 = new Pen( Color.FromArgb( 127, 63, 63, 191 ) );
-            var pen = new Pen( Color.FromArgb( 127, 91, 91, 0 ) );
+            var c0 = Color.FromArgb( 127, 63, 63, 191 );
+            var c = Color.FromArgb( 127, 91, 91, 0 );
             
             for( int y = cellSE.Y; y <= cellNW.Y; y++ )
             {
@@ -847,17 +979,19 @@ namespace Border_Builder
                                 ( ( x < -1 )&&( x > 0 ) )&&
                                 ( ( y < -1 )&&( y > 0 ) )
                             )
-                                DrawRectWorldTransform( pen, p0, p1 );
+                            {
+                                DrawRectWorldTransform( p0, p1, c );
+                            }
                             else
                             {
-                                var e0 = ( y == -1 ) ? pen0 : pen;
-                                var e1 = ( x == -1 ) ? pen0 : pen;
-                                var e2 = ( y ==  0 ) ? pen0 : pen;
-                                var e3 = ( x ==  0 ) ? pen0 : pen;
-                                DrawLineWorldTransform( e0, p0.X, p0.Y, p1.X, p0.Y ); // top
-                                DrawLineWorldTransform( e1, p1.X, p0.Y, p1.X, p1.Y ); // right
-                                DrawLineWorldTransform( e2, p1.X, p1.Y, p0.X, p1.Y ); // bottom
-                                DrawLineWorldTransform( e3, p0.X, p1.Y, p0.X, p0.Y ); // left
+                                var e0 = ( y == -1 ) ? c0 : c;
+                                var e1 = ( x == -1 ) ? c0 : c;
+                                var e2 = ( y ==  0 ) ? c0 : c;
+                                var e3 = ( x ==  0 ) ? c0 : c;
+                                DrawLineWorldTransform( p0.X, p0.Y, p1.X, p0.Y, e0 ); // top
+                                DrawLineWorldTransform( p1.X, p0.Y, p1.X, p1.Y, e1 ); // right
+                                DrawLineWorldTransform( p1.X, p1.Y, p0.X, p1.Y, e2 ); // bottom
+                                DrawLineWorldTransform( p0.X, p1.Y, p0.X, p0.Y, e3 ); // left
                             }
                         }
                     }

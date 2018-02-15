@@ -14,12 +14,16 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
+
+using SDL2ThinLayer;
+using SDL2;
+
 namespace Border_Builder
 {
     /// <summary>
     /// Description of bbWorldspace.
     /// </summary>
-    public class bbWorldspace
+    public class bbWorldspace : IDisposable
     {
         private const string LandHeight_Texture_File_Suffix = "_LandHeights.dds";
         private const string WaterHeight_Texture_File_Suffix = "_WaterHeights.dds";
@@ -49,8 +53,14 @@ namespace Border_Builder
         public int HeightMap_Height = 0;
         public Single[,] LandHeightMap = null;
         public Single[,] WaterHeightMap = null;
-        public Bitmap LandHeight_Bitmap = null;
-        public Bitmap WaterHeight_Bitmap = null;
+        //public Bitmap LandHeight_Bitmap = null;
+        //public Bitmap WaterHeight_Bitmap = null;
+        public SDL2ThinLayer.SDLRenderer.Texture LandHeight_Texture;
+        public SDL2ThinLayer.SDLRenderer.Texture WaterHeight_Texture;
+        
+        // User feedback strings in the status area
+        const string txtCreateTexturesNP = "Creating textures...";
+        const string txtCreateTextures = "Creating textures...{0}%";
         
         #region Constructor
         
@@ -73,17 +83,51 @@ namespace Border_Builder
         
         #endregion
         
-        #region Preloading
+        #region Semi-Public API:  Destructor & IDispose
+        
+        // Protect against "double-free" errors caused by combinations of explicit disposal[s] and GC disposal
+        
+        bool _disposed = false;
+        
+        ~bbWorldspace()
+        {
+            Dispose( false );
+        }
+        
+        public void Dispose()
+        {
+            Dispose( true );
+            GC.SuppressFinalize( this );
+        }
+        
+        protected virtual void Dispose( bool disposing )
+        {
+            if( _disposed ) return;
+            
+            // Dispose of external references
+            DestroyTextures();
+            
+            LandHeightMap = null;
+            WaterHeightMap = null;
+            
+            // This is no longer a valid state
+            _disposed = true;
+        }
+        
+        #endregion
+        
+        #region Data file preloading
         
         public void Preload()
         {
             LoadStatsFile();
             LoadCellRangeFile();
+            FetchPhysicalDDSInfo( LandHeights_Texture_File );
         }
         
         #endregion
         
-        #region File loading and parsing
+        #region Data file loading and parsing
         
         /// <summary>
         /// Parse #Name#_Stats.txt as exported from FO4CK -> World -> World LOD -> #Name# -> Export Land/Water Height Map(s)
@@ -160,6 +204,8 @@ namespace Border_Builder
         
         #endregion
         
+        #region Derived Properties from file data
+        
         public Maths.Vector2i HeightMapOffset
         {
             get
@@ -192,94 +238,196 @@ namespace Border_Builder
             }
         }
         
-        public bool LoadLandHeightMap( fMain fmain )
+        #endregion
+        
+        #region Heightmap[s] DDS loading and Texture creation
+        
+        public void DestroyTextures()
         {
-            return LoadHeightMapDDS( LandHeights_Texture_File, out LandHeightMap, fmain );
+            if( LandHeight_Texture != null )
+            {
+                LandHeight_Texture.Dispose();
+                LandHeight_Texture = null;
+            }
+            if( WaterHeight_Texture != null )
+            {
+                WaterHeight_Texture.Dispose();
+                WaterHeight_Texture = null;
+            }
         }
         
-        public bool LoadWaterHeightMap( fMain fmain )
+        public bool LoadLandHeightMap( RenderTransform transform )
         {
-            return LoadHeightMapDDS( WaterHeights_Texture_File, out WaterHeightMap, fmain );
+            return LoadHeightMapDDS( LandHeights_Texture_File, out LandHeightMap, transform );
         }
         
-        unsafe public void RenderHeightMap( fMain fmain )
+        public bool LoadWaterHeightMap( RenderTransform transform )
         {
-            
-            if( LandHeightMap == null )
-                LoadLandHeightMap( fmain );
-            if( WaterHeightMap == null )
-                LoadWaterHeightMap( fmain );
-            
-            fmain.UpdateStatusMessage( "Creating bitmaps..." );
-            fmain.SetStatusProgressMinimum( 0 );
-            fmain.SetStatusProgressMaximum( HeightMap_Height * 2 );
-            fmain.UpdateStatusProgress( 0 );
+            return LoadHeightMapDDS( WaterHeights_Texture_File, out WaterHeightMap, transform );
+        }
+        
+        delegate int HeightMapColorAt( int x, int y );
+        
+        int LandHeightmapColor( int x, int y )
+        {
+            var lh = LandHeightMap[ y, x ];
+            var f = 255 * lh;
+            var i = (byte)Math.Round( f );
+            unchecked
+            {
+                return (int)0xFF000000 | ( i << 16 ) | ( i << 8 ) | i;
+            }
+        }
+        
+        int WaterHeightmapColor( int x, int y )
+        {
+            var wh = WaterHeightMap[ y, x ];
+            var lh = LandHeightMap[ y, x ];
+            return wh > lh ? 0x7F00007F : 0;
+        }
+        
+        unsafe SDLRenderer.Texture CreateTexture( RenderTransform transform, HeightMapColorAt hmColorAt, int statusPad, SDL.SDL_BlendMode blendMode )
+        {
+            var tmpSurface = transform.Renderer.CreateSurface( HeightMap_Width, HeightMap_Height, SDL.SDL_PIXELFORMAT_ARGB8888 );
+            if( tmpSurface.MustLock )
+                tmpSurface.Lock();
             
             Single cp;
             Single lp = -1f;
-            LandHeight_Bitmap = new Bitmap( HeightMap_Width, HeightMap_Height );
+            var pixels = (int*)tmpSurface.Pixels;
+            var pitch = tmpSurface.Pitch;
+            
             for( int y = 0; y < HeightMap_Height; y++ )
             {
-                var pixels = LandHeight_Bitmap.LockBits( new Rectangle( 0, y, HeightMap_Width, 1 ), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb );
-                var scanline = (int*)pixels.Scan0.ToPointer();
+                var scanline = pixels + ( ( pitch * y ) / sizeof( int ) );
                 {
                     for( int x = 0; x < HeightMap_Width; x++ )
                     {
-                        var lh = LandHeightMap[ y, x ];
-                        var f = 255 * lh;
-                        var i = (byte)Math.Round( f );
                         unchecked
                         {
-                            scanline[ x ] = (int)0xFF000000 | ( i << 16 ) | ( i << 8 ) | i;
+                            scanline[ x ] = hmColorAt( x, y );
                         }
                     }
                 }
-                LandHeight_Bitmap.UnlockBits( pixels );
-                fmain.UpdateStatusProgress( y );
-                cp = ((Single)y / ((Single)HeightMap_Height * 2.0f)) * 100.0f;
+                transform.MainForm.UpdateStatusProgress( y );
+                cp = ((Single)( statusPad + y ) / ((Single)HeightMap_Height * 2.0f)) * 100.0f;
                 if( (int)cp > (int)lp )
                 {
-                    fmain.UpdateStatusMessage( string.Format( "Creating bitmaps...{0}%", (int)cp ) );
+                    transform.MainForm.UpdateStatusMessage( string.Format( txtCreateTextures, (int)cp ) );
                     lp = cp;
                 }
-                System.Threading.Thread.Sleep(0);
+                //System.Threading.Thread.Sleep(0);
             }
             
-            WaterHeight_Bitmap = new Bitmap( HeightMap_Width, HeightMap_Height );
-            for( int y = 0; y < HeightMap_Height; y++ )
-            {
-                var pixels = WaterHeight_Bitmap.LockBits( new Rectangle( 0, y, HeightMap_Width, 1 ), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb );
-                var scanline = (int*)pixels.Scan0.ToPointer();
-                {
-                    for( int x = 0; x < HeightMap_Width; x++ )
-                    {
-                        var wh = WaterHeightMap[ y, x ];
-                        var lh = LandHeightMap[ y, x ];
-                        scanline[ x ] = wh > lh ? 0x7F00007F : 0;
-                    }
-                }
-                WaterHeight_Bitmap.UnlockBits( pixels );
-                fmain.UpdateStatusProgress( HeightMap_Height + y );
-                cp = (((Single)HeightMap_Height + (Single)y )/ ((Single)HeightMap_Height * 2.0f)) * 100.0f;
-                if( (int)cp > (int)lp )
-                {
-                    fmain.UpdateStatusMessage( string.Format( "Creating bitmaps...{0}%", (int)cp ) );
-                    lp = cp;
-                }
-                System.Threading.Thread.Sleep(0);
-            }
-            fmain.UpdateStatusMessage( string.Format( "Creating bitmaps...{0}%", (int)100 ) );
+            if( tmpSurface.MustLock )
+                tmpSurface.Unlock();
+            
+            var texture = transform.Renderer.CreateTextureFromSurface( tmpSurface );
+            tmpSurface.Dispose();
+            tmpSurface = null;
+            
+            texture.BlendMode = blendMode;
+            return texture;
         }
         
-        unsafe bool LoadHeightMapDDS( string ddsFile, out Single[,] target, fMain fmain  )
+        bool _textureLoadQueued = false;
+        unsafe public void CreateHeightmapTextures( RenderTransform transform )
+        {
+            Console.WriteLine( "CreateHeightmapTextures()" );
+            if( !transform.ReadyForUse() ) return;
+            if( _textureLoadQueued ) return;
+            _textureLoadQueued = true;
+            
+            if( LandHeightMap == null )
+                LoadLandHeightMap( transform );
+            if( WaterHeightMap == null )
+                LoadWaterHeightMap( transform );
+            
+            transform.MainForm.UpdateStatusMessage( txtCreateTexturesNP );
+            transform.MainForm.SetStatusProgressMinimum( 0 );
+            transform.MainForm.SetStatusProgressMaximum( HeightMap_Height * 2 );
+            transform.MainForm.UpdateStatusProgress( 0 );
+            
+            transform.Renderer.BeginInvoke(
+                (r) => {
+                    Console.WriteLine( "CreateHeightmapTextures() || transform.Renderer.BeginInvoke()" );
+                    if( LandHeight_Texture != null )
+                    {
+                        LandHeight_Texture.Dispose();
+                        LandHeight_Texture = null;
+                    }
+                    if( LandHeight_Texture == null )
+                        LandHeight_Texture = CreateTexture( transform, LandHeightmapColor, 0, SDL.SDL_BlendMode.SDL_BLENDMODE_NONE );
+                    
+                    if( WaterHeight_Texture != null )
+                    {
+                        WaterHeight_Texture.Dispose();
+                        WaterHeight_Texture = null;
+                    }
+                    if( WaterHeight_Texture == null )
+                        WaterHeight_Texture = CreateTexture( transform, WaterHeightmapColor, HeightMap_Height, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND );
+                    
+                    transform.MainForm.UpdateStatusMessage( string.Format( txtCreateTextures, (int)100 ) );
+                    _textureLoadQueued = false;
+                } );
+        }
+        
+        unsafe bool FetchPhysicalDDSInfo( string ddsFile )
+        {
+            if( !File.Exists( ddsFile ) )
+                return false;
+            
+            FileStream ddsStream = null;
+            try
+            {
+                ddsStream = File.Open( ddsFile, FileMode.Open );
+                if( ddsStream == null )
+                {
+                    System.Windows.Forms.MessageBox.Show( string.Format( "File.Open()\nNull\nUnable to access \"{0}\"!", ddsFile ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
+                    return false;
+                }
+            }
+            catch ( Exception e)
+            {
+                System.Windows.Forms.MessageBox.Show( string.Format( "File.Open()\n{1}\nUnable to access \"{0}\"!", ddsFile, e.ToString() ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
+                return false;
+            }
+            
+            var thingsOk = true;
+            var ddsHeader = new DDS_Header();
+            if( !NoBSFileAccess.Read( ddsStream, 0, &ddsHeader, (uint)sizeof( DDS_Header ) ) )
+            {
+                System.Windows.Forms.MessageBox.Show( string.Format( "File.Read()\nDDS_HEADER\nUnable to read from \"{0}\"!", ddsFile ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
+                thingsOk  = false;
+            }
+            else
+            {
+                
+                if( !ddsHeader.FileIDOk )
+                {
+                    System.Windows.Forms.MessageBox.Show( string.Format( "\"{0}\" is not a valid DDS file!", ddsFile ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
+                    thingsOk  = false;
+                }
+                else
+                {
+                    HeightMap_Width = (int)ddsHeader.dwWidth;
+                    HeightMap_Height = (int)ddsHeader.dwHeight;
+                }
+            }
+            
+            ddsStream.Close();
+            return thingsOk;
+        }
+        
+        unsafe bool LoadHeightMapDDS( string ddsFile, out Single[,] target, RenderTransform transform  )
         {
             var thingsOk = true;
             target = null;
             
-            fmain.SetStatusProgressMinimum( 0 );
-            fmain.SetStatusProgressMaximum( 0 );
-            fmain.UpdateStatusProgress( 0 );
-            fmain.UpdateStatusMessage( string.Format( "Loading {0}...", ddsFile ) );
+            transform.MainForm.SetStatusProgressMinimum( 0 );
+            transform.MainForm.SetStatusProgressMaximum( 0 );
+            transform.MainForm.UpdateStatusProgress( 0 );
+            transform.MainForm.UpdateStatusMessage( string.Format( "Loading {0}...", ddsFile ) );
             
             if( !File.Exists( ddsFile ) )
                 return false;
@@ -318,9 +466,9 @@ namespace Border_Builder
                 {
                     HeightMap_Width = (int)ddsHeader.dwWidth;
                     HeightMap_Height = (int)ddsHeader.dwHeight;
-                    fmain.SetStatusProgressMaximum( HeightMap_Height );
+                    transform.MainForm.SetStatusProgressMaximum( HeightMap_Height );
                     
-                    fmain.UpdateStatusMessage( string.Format( "Loading heightmap...", 0, HeightMap_Height ) );
+                    transform.MainForm.UpdateStatusMessage( string.Format( "Loading heightmap...", 0, HeightMap_Height ) );
                     target = new Single[HeightMap_Height,HeightMap_Width];
                     
                     Single cp;
@@ -336,20 +484,23 @@ namespace Border_Builder
                                 thingsOk  = false;
                             }
                         }
-                        fmain.UpdateStatusProgress( y );
+                        transform.MainForm.UpdateStatusProgress( y );
                         cp = ((Single)y/ (Single)HeightMap_Height) * 100.0f;
                         if( (int)cp > (int)lp )
                         {
-                            fmain.UpdateStatusMessage( string.Format( "Loading heightmap...{0}%", (int)cp ) );
+                            transform.MainForm.UpdateStatusMessage( string.Format( "Loading heightmap...{0}%", (int)cp ) );
                             lp = cp;
                         }
                         System.Threading.Thread.Sleep(0);
                     }
-                    fmain.UpdateStatusMessage( string.Format( "Loading heightmap...{0}%", (int)100 ) );
+                    transform.MainForm.UpdateStatusMessage( string.Format( "Loading heightmap...{0}%", (int)100 ) );
                 }
             }
             ddsStream.Close();
             return thingsOk;
         }
+        
+        #endregion
+        
     }
 }

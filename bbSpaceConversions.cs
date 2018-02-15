@@ -14,6 +14,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
+using SDL2ThinLayer;
+using SDL2;
+
 namespace Border_Builder
 {
     public static class bbSpaceConversions
@@ -167,12 +170,42 @@ namespace Border_Builder
         
         #endregion
         
+        #region Unit Type Calculations (SizeOfCellRange, etc)
+        
         public static Maths.Vector2i SizeOfCellRange( Maths.Vector2i nw, Maths.Vector2i se )
         {
             return new Maths.Vector2i(
                 Math.Abs( se.X - nw.X ) + 1,
                 Math.Abs( nw.Y - se.Y ) + 1 );
         }
+        
+        #endregion
+        
+        #region Unit Type Conversions (Maths.Vector2i->SDL.SDL_Point, etc)
+        
+        public static SDL.SDL_Point ToSDLPoint( this Maths.Vector2i v )
+        {
+            return new SDL.SDL_Point( v.X, v.Y );
+        }
+        
+        public static SDL.SDL_Point ToSDLPoint( this Maths.Vector2f v, bool rounded = false )
+        {
+            return rounded ?
+                new SDL.SDL_Point( (int)Math.Round( v.X ), (int)Math.Round( v.Y ) ) :
+                new SDL.SDL_Point( ( int )v.X, ( int )v.Y );
+        }
+        
+        public static Size ToSize( this SDL.SDL_Rect rect )
+        {
+            return new Size( rect.w, rect.h );
+        }
+        
+        public static SDL.SDL_Rect ToSDLRect( this Size size )
+        {
+            return new SDL.SDL_Rect( 0, 0, size.Width, size.Height );
+        }
+        
+        #endregion
         
     }
 }

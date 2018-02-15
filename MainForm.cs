@@ -18,28 +18,37 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 
+using SDL2ThinLayer;
+using SDL2;
+
 namespace Border_Builder
 {
     
     /// <summary>
     /// Description of MainForm.
     /// </summary>
-    public partial class fMain : Form
+    public partial class bbMain : Form
     {
         
         #region Static references to the main form (god objects suck, but fuck it)
         
-        private static fMain    _fMain;
+        private static bbMain _bbMain;
         
-        public static fMain Self
+        public static bbMain Self
         {
-            get{
-                return _fMain;
+            get
+            {
+                return _bbMain;
             }
         }
         
         #endregion
         
+        // Minimum sizes of the main window and render window/panel
+        readonly Size SIZE_ZERO = new Size( 0, 0 );
+        readonly Size MIN_RENDER_SIZE = new Size( 640, 480 );
+        readonly Size MIN_WINDOW_SIZE;
+        readonly Size MAIN_FORM_BASE_SIZE;
         
         // Main render transform
         RenderTransform transform;
@@ -49,7 +58,7 @@ namespace Border_Builder
         
         #region Main Start/Stop
         
-        public fMain()
+        public bbMain()
         {
             //
             // The InitializeComponent() call is required for Windows Forms designer support.
@@ -59,15 +68,29 @@ namespace Border_Builder
             //
             // TODO: Add constructor code after the InitializeComponent() call.
             //
-            _fMain = this;
+            _bbMain = this;
+            
+            MIN_WINDOW_SIZE = pnMainForm.Size;
+            MAIN_FORM_BASE_SIZE = this.Size - MIN_WINDOW_SIZE;
         }
         
-        void MenuExitClick(object sender, EventArgs e)
+        void MainShutdown()
         {
+            DestroyTransform();
+        }
+        
+        void BbMainFormClosing( object sender, FormClosingEventArgs e )
+        {
+            MainShutdown();
+        }
+        
+        void MenuExitClick( object sender, EventArgs e )
+        {
+            MainShutdown();
             Application.Exit();
         }
         
-        void FMainLoad(object sender, EventArgs e)
+        void FMainLoad( object sender, EventArgs e )
         {
             // DEBUG Code (since my dev path isn't the game install path and I'm too lazy to enumerate it atm)
             var machineName = Environment.MachineName;
@@ -88,6 +111,98 @@ namespace Border_Builder
         
         #endregion
         
+        #region Main Form and Renderer sizes
+        
+        Size _lastTransformWindowSize = new Size( 0, 0 );
+        Size _lastTransformPanelSize = new Size( 0, 0 );
+        
+        Size TransformLastWindowSize
+        {
+            get
+            {
+                return ( _lastTransformWindowSize.Width == 0 )||( _lastTransformWindowSize.Height == 0 )
+                    ? MIN_RENDER_SIZE
+                    : _lastTransformWindowSize;
+            }
+            set
+            {
+                _lastTransformWindowSize = value;
+            }
+        }
+        
+        Size TransformLastPanelSize
+        {
+            get
+            {
+                return ( _lastTransformPanelSize.Width == 0 )||( _lastTransformPanelSize.Height == 0 )
+                    ? MIN_RENDER_SIZE
+                    : _lastTransformPanelSize;
+            }
+            set
+            {
+                _lastTransformPanelSize = value;
+            }
+        }
+        
+        Size MainFormSizeForPanel( Size panelSize )
+        {
+            var bpm = MAIN_FORM_BASE_SIZE + MIN_WINDOW_SIZE;
+            var bpp = MAIN_FORM_BASE_SIZE + panelSize;
+            bpp.Width += MIN_WINDOW_SIZE.Width;
+            return new Size(
+                        (int)Math.Max( bpm.Width , bpp.Width ),
+                        (int)Math.Max( bpm.Height, bpp.Height )
+                );
+        }
+        
+        Size TransformMinWindowSize
+        {
+            get
+            {
+                return MainFormSizeForPanel( MIN_RENDER_SIZE );
+            }
+        }
+        
+        Size TransformMaxWindowSize
+        {
+            get
+            {
+                return SIZE_ZERO;
+            }
+        }
+        
+        Size CurrentMinWindowSize
+        {
+            get
+            {
+                if(
+                    ( cbWindowedRenderer.Checked )&&
+                    ( transform != null )
+                )
+                {
+                    return TransformMinWindowSize;
+                }
+                return MIN_WINDOW_SIZE;
+            }
+        }
+        
+        Size CurrentMaxWindowSize
+        {
+            get
+            {
+                if(
+                    ( cbWindowedRenderer.Checked )&&
+                    ( transform != null )
+                )
+                {
+                    return TransformMaxWindowSize;
+                }
+                return MIN_WINDOW_SIZE;
+            }
+        }
+        
+        #endregion
+        
         #region Global Form and Status bar update
         
         /// <summary>
@@ -96,28 +211,51 @@ namespace Border_Builder
         /// <param name="enabled">true to enable the form and it's controls, false to disable the form and it's controls.</param>
         public void SetEnableState( bool enabled )
         {
-            this.Enabled = enabled;
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
+                return;
+            }
+            pnMainForm.Enabled = enabled;
         }
         
         public void UpdateStatusMessage( string message )
         {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { UpdateStatusMessage( message ); }, null );
+                return;
+            }
             sbiCaption.Text = message;
-            sbMain.Invalidate();
-            sbMain.Refresh();
         }
         
         public void UpdateStatusProgress( int value )
         {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { UpdateStatusProgress( value ); }, null );
+                return;
+            }
             sbiProgress.Value = value;
         }
         
         public void SetStatusProgressMinimum( int min )
         {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { SetStatusProgressMinimum( min ); }, null );
+                return;
+            }
             sbiProgress.Minimum = min;
         }
         
         public void SetStatusProgressMaximum( int max )
         {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { SetStatusProgressMaximum( max ); }, null );
+                return;
+            }
             sbiProgress.Maximum = max;
         }
         
@@ -162,8 +300,6 @@ namespace Border_Builder
         {
             // Worldspace controls
             btnCellWindowRedraw.Enabled = false;
-            btnLoadWorldspaceHeightTextures.Enabled = false;
-            cbRenderWorldspaceHeightTextures.Checked = false;
             tbWorldspaceFormIDEditorID.Clear();
             tbWorldspaceGridBottomX.Clear();
             tbWorldspaceGridBottomY.Clear();
@@ -194,6 +330,8 @@ namespace Border_Builder
         
         void ResetAllControls()
         {
+            this.MinimumSize = MainFormSizeForPanel( SIZE_ZERO );
+            this.MaximumSize = MainFormSizeForPanel( SIZE_ZERO );
             ResetWorldspaceControls( true );
             ResetImportModControls( true );
             pnRenderWindow.Enabled = false;
@@ -297,26 +435,22 @@ namespace Border_Builder
         
         void LoadWorldspaceTextures( bbWorldspace worldspace, bool renderBitmaps )
         {
-            if( worldspace == null )
-                return;
+            if( worldspace == null ) return;
+            if( !transform.ReadyForUse() ) return;
             
             bool loadOk = 
-                ( worldspace.LoadLandHeightMap( this ) )&&
-                ( worldspace.LoadWaterHeightMap( this ) );
+                ( worldspace.LoadLandHeightMap( transform ) )&&
+                ( worldspace.LoadWaterHeightMap( transform ) );
             
             if( loadOk )
             {
                 if( renderBitmaps )
-                    worldspace.RenderHeightMap( this );
+                    worldspace.CreateHeightmapTextures( transform );
                 ResetRenderWindowControls();
-            }
-            else
-            {
-                btnLoadWorldspaceHeightTextures.Enabled = true;
             }
         }
         
-        void CbWorldspaceSelectedIndexChanged(object sender, EventArgs e)
+        void CbWorldspaceSelectedIndexChanged( object sender, EventArgs e )
         {
             ResetWorldspaceControls();
             var worldspace = SelectedWorldspace();
@@ -331,30 +465,15 @@ namespace Border_Builder
             tbWorldspaceGridBottomY.Text = worldspace.CellSE.Y.ToString();
             tbWorldspaceHeightmapTexture.Text = worldspace.LandHeights_Texture_File;
             tbWorldspaceWaterHeightsTexture.Text = worldspace.WaterHeights_Texture_File;
-            btnLoadWorldspaceHeightTextures.Enabled = ( !string.IsNullOrEmpty( worldspace.LandHeights_Texture_File ) )&&( !string.IsNullOrEmpty( worldspace.WaterHeights_Texture_File ) );
             
             ResetRenderWindowControls( true );
-        }
-        
-        void BtnLoadWorldspaceHeightTexturesClick(object sender, EventArgs e)
-        {
-            var worldspace = SelectedWorldspace();
-            if( ( worldspace == null )||( string.IsNullOrEmpty( worldspace.LandHeights_Texture_File ) )||( string.IsNullOrEmpty( worldspace.WaterHeights_Texture_File ) ) )
-               return;
-            
-            btnLoadWorldspaceHeightTextures.Enabled = false;
-            SetEnableState( false );
-            
-            LoadWorldspaceTextures( worldspace, cbRenderWorldspaceHeightTextures.Checked );
-            
-            SetEnableState( true );
         }
         
         #endregion
         
         #region Import mod form controls
         
-        void CbImportModSelectedIndexChanged(object sender, EventArgs e)
+        void CbImportModSelectedIndexChanged( object sender, EventArgs e )
         {
             ResetImportModControls();
             var index = cbImportMod.SelectedIndex;
@@ -364,7 +483,7 @@ namespace Border_Builder
             btnWeldImportVolumeVerts.Enabled = ( selectedImport.VolumeParents != null );
         }
         
-        void BtnLoadImportModBuildVolumesClick(object sender, EventArgs e)
+        void BtnLoadImportModBuildVolumesClick( object sender, EventArgs e )
         {
             var selectedImport = SelectedImportMod();
             if( selectedImport == null ) return;
@@ -402,8 +521,9 @@ namespace Border_Builder
         
         void BuildSelectedModBorders( bbImportMod selectedImport )
         {
-            if( selectedImport == null )
-                return;
+            if( selectedImport == null ) return;
+            if( !transform.ReadyForUse() ) return;
+            
             SetEnableState( false );
             
             //var volumeParent = selectedImport.VolumeParents[ 0 ];
@@ -416,10 +536,10 @@ namespace Border_Builder
                 {
                     
                     if( worldspace.LandHeightMap == null )
-                        worldspace.LoadLandHeightMap( this );
+                        worldspace.LoadLandHeightMap( transform );
                         
                     if( worldspace.WaterHeightMap == null )
-                        worldspace.LoadWaterHeightMap( this );
+                        worldspace.LoadWaterHeightMap( transform );
                     
                     UpdateStatusMessage( string.Format( "Building borders for {0}...", volumeParent.FormID ) );
                     
@@ -453,7 +573,7 @@ namespace Border_Builder
             if( cbEditModeEnable.Checked )
             {
                 if( editor == null )
-                    editor = new VolumeEditor( transform, this, pbRenderWindow, sbiEditorSelectionMode, tbEMHotKeys );
+                    editor = new VolumeEditor( transform, sbiEditorSelectionMode, tbEMHotKeys );
                 editor.EnableEditorMode();
             }
             else if( editor != null )
@@ -469,7 +589,7 @@ namespace Border_Builder
         
         void GetRenderOptions( out bool renderNonPlayable, out bool renderLand, out bool renderWater, out bool renderCellGrid, out bool renderBuildVolumes, out bool renderBorders, out bool renderSelectedOnly, out bool exportPNG )
         {
-            var selectedImport = SelectedImportMod();
+            var selectedImport  = SelectedImportMod();
             var selectedVolumes = SelectedVolumeParents();
             
             renderNonPlayable   = cbRenderOverRegion.Checked;
@@ -485,23 +605,134 @@ namespace Border_Builder
         
         void BtnCellWindowRedrawClick( object sender, EventArgs e )
         {
-            var selectedWorldspace = SelectedWorldspace();
-            if( selectedWorldspace == null )
-                return;
-            
+            if( transform == null )
+            {
+                SetEnableState( false );
+                
+                if( !CreateTransform() )
+                {
+                    SetEnableState( true );
+                    return;
+                }
+                UpdateRenderWindow();
+                
+                SetEnableState( true );
+            }
+            else
+                DestroyTransform();
+        }
+        
+        void TryUpdateRenderWindow()
+        {
             SetEnableState( false );
             
-            var selectedImport = SelectedImportMod();
-            var selectedVolumes = SelectedVolumeParents();
+            if( transform != null )
+                UpdateRenderWindow();
+            
+            SetEnableState( true );
+        }
+        
+        // This is called syncronously in the renderer thread
+        void ResetForNewTransform( SDLRenderer renderer )
+        {
+            Console.WriteLine( "ResetForNewTransform()" );
+            
+            DestroyWorldspaceTextures();
+        }
+        
+        void DestroyWorldspaceTextures()
+        {
+            foreach( var worldspace in bbGlobal.Worldspaces )
+                worldspace.DestroyTextures();
+        }
+        
+        void DestroyTransform()
+        {
+            SetEnableState( false );
+            
+            DestroyWorldspaceTextures();
+            
+            if( editor != null )
+                editor.Dispose();
+            editor = null;
+            
+            if( transform != null )
+            {
+                if( cbWindowedRenderer.Checked )
+                    TransformLastWindowSize = transform.Renderer.WindowSize;
+                else
+                    TransformLastPanelSize = pnRenderWindow.Size;
+                transform.Dispose();
+            }
+            transform = null;
+            
+            btnCellWindowRedraw.Text = "Show Map";
+            cbWindowedRenderer.Enabled = true;
+            cbEditModeEnable.Enabled = false;
+            this.MinimumSize = MainFormSizeForPanel( SIZE_ZERO );
+            this.MaximumSize = MainFormSizeForPanel( SIZE_ZERO );
+            
+            SetEnableState( true );
+        }
+        
+        bool CreateTransform()
+        {
+            // Dispose of the old editor (this should never happen though...)
+            cbEditModeEnable.Enabled = false;
+            if( editor != null )
+            {
+                editor.Dispose();
+                editor = null;
+            }
+            if( transform != null )
+            {
+                if( transform.Renderer != null )
+                {
+                    transform.Renderer.Invoke( ResetForNewTransform );
+                }
+                transform.Dispose();
+                transform = null;
+            }
+            
+            UpdateStatusMessage( "Creating render transform..." );
+            if( cbWindowedRenderer.Checked )
+            {
+                this.MinimumSize = MainFormSizeForPanel( SIZE_ZERO );
+                this.MaximumSize = MainFormSizeForPanel( SIZE_ZERO );
+                transform = new RenderTransform( this, TransformLastWindowSize, RenderWindow_Closed );
+            }
+            else
+            {
+                this.MinimumSize = TransformMinWindowSize;
+                this.MaximumSize = TransformMaxWindowSize;
+                this.Size = MainFormSizeForPanel( TransformLastPanelSize );
+                transform = new RenderTransform( this, pnRenderWindow );
+            }
+            if( transform == null ) return false;
+            
+            // Set renderer event handlers
+            transform.Renderer.MouseButtonUp += RenderWindow_MouseUp;
+            transform.Renderer.MouseMove += RenderWindow_MouseMove;
+            transform.Renderer.MouseWheel += RenderWindow_MouseWheel;
+            transform.Renderer.KeyDown += RenderWindow_KeyDown;
+            
+            btnCellWindowRedraw.Text = "Hide Map";
+            cbWindowedRenderer.Enabled = false;
+            cbEditModeEnable.Enabled = true;
+            return true;
+        }
+        
+        bool UpdateRenderWindow()
+        {
+            var selectedWorldspace = SelectedWorldspace();
+            if( selectedWorldspace == null )
+                return false;
             
             bool renderNonPlayable, renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, renderSelectedOnly, exportPNG;
             GetRenderOptions( out renderNonPlayable, out renderLand, out renderWater, out renderCellGrid, out renderBuildVolumes, out renderBorders, out renderSelectedOnly, out exportPNG );
             
-            if( !renderSelectedOnly ) selectedVolumes = null;
-            
-            if( ( selectedWorldspace.LandHeight_Bitmap == null )||( selectedWorldspace.WaterHeight_Bitmap == null ) )
-                selectedWorldspace.RenderHeightMap( this );
-            
+            var selectedImport = SelectedImportMod();
+            var selectedVolumes = renderSelectedOnly ? SelectedVolumeParents() : null;
             
             // Get cell range from [whole] map/selected volumes
             Maths.Vector2i cellNW;
@@ -538,21 +769,6 @@ namespace Border_Builder
                 }
             }
             
-            // Create a new transform if needed
-            if( transform == null )
-            {
-                // Dispose of the old editor (this should never happen though...)
-                if( editor != null )
-                {
-                    editor.Dispose();
-                    editor = null;
-                }
-                
-                UpdateStatusMessage( "Creating render transform..." );
-                transform = new RenderTransform( pbRenderWindow );
-                
-            }
-            
             UpdateStatusMessage( "Updating render transform..." );
             
             // Update data references
@@ -560,12 +776,7 @@ namespace Border_Builder
             transform.ImportMod = selectedImport;
             transform.RenderVolumes = selectedVolumes;
             
-            // Update physical transform (don't recompute until all the initial conditions are set)
-            transform.UpdateCellClipper( cellNW, cellSE, false );
-            transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
-            transform.SetViewCentre( transform.WorldspaceClipperCentre(), false );
-            // Recompute!
-            transform.RecomputeSceneClipper();
+            transform.UpdateScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, true );
             
             #if DEBUG
             
@@ -574,38 +785,90 @@ namespace Border_Builder
             
             #endif
             
-            UpdateStatusMessage( "Rendering final bitmap..." );
-            transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, false, true );
+            // Update physical transform (don't recompute until all the initial conditions are set)
+            transform.UpdateCellClipper( cellNW, cellSE, false );
+            transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
+            transform.SetViewCentre( transform.WorldspaceClipperCentre(), false );
+            // Recompute!
+            transform.UpdateSceneMetrics();
             
-            if( exportPNG )
-                transform.RenderToPNG();
-            
-            UpdateStatusMessage( "Refreshing..." );
-            pbRenderWindow.Refresh();
-            pnRenderWindow.Enabled = true;
             pnRenderWindow.Visible = true;
-            pnRenderWindow.Tag = selectedWorldspace;
-            UpdateStatusMessage( string.Format( "Rendered map: ({0},{1})-({2},{3})", transform.CellNW.X, transform.CellNW.Y, transform.CellSE.X, transform.CellSE.Y ) );
             
             // Re-enable editor mode
-            if( cbEditModeEnable.Checked )
-            {
-                editor = new VolumeEditor( transform, this, pbRenderWindow, sbiEditorSelectionMode, tbEMHotKeys );
+            if(
+                ( editor == null )&&
+                ( cbEditModeEnable.Checked )
+            ) {
+                editor = new VolumeEditor( transform, sbiEditorSelectionMode, tbEMHotKeys );
                 editor.EnableEditorMode();
             }
             
-            SetEnableState( true );
+            return true;
+        }
+       
+        #endregion
+        
+        #region Main form controls changed event
+        
+        void RenderStateControlChanged( object sender, EventArgs e )
+        {
+            TryUpdateRenderWindow();
         }
         
-        void PbRenderWindowMouseUp( object sender, MouseEventArgs e )
+        #endregion
+        
+        #region Target Panel events
+        
+        bool _setSizeScheduled = false;
+        
+        // User resized the main form, trigger a delayed size update of the SDL_Window
+        
+        void PnRenderWindowResize( object sender, EventArgs e )
         {
-            if( transform == null ) return;
+            if(
+                ( transform == null )||
+                ( !transform.Renderer.Anchored )
+            ) return;
+            if( !_setSizeScheduled )
+            {
+                _setSizeScheduled = true;
+                var timer = new System.Timers.Timer();
+                timer.Interval = 2500; // 2.5s
+                timer.AutoReset = false;
+                timer.Elapsed += ReloadTimerTimeout;
+                timer.Start();
+            }
+        }
+        
+        void ReloadTimerTimeout( object sender, EventArgs e )
+        {
+            _setSizeScheduled = false;
+            if(
+                ( transform == null )||
+                ( !transform.Renderer.Anchored )
+            ) return;
+            transform.InvokeSetSDLWindowSize();
+        }
+        
+        #endregion
+        
+        #region Render event handlers (called async in renderer thread)
+        
+        void RenderWindow_Closed( SDLRenderer renderer )
+        {
+            Console.WriteLine( "MainForm.RenderWindow_Closed()" );
+            DestroyTransform();
+        }
+        
+        void RenderWindow_MouseUp( SDLRenderer renderer, SDL.SDL_Event e )
+        {
+            // Editor supercedes us
             if(
                 ( editor != null )&&
                 ( editor.MouseSelectionMode )
             ) return;
             
-            var mouseWorldPos = transform.ScreenspaceToWorldspace( e.X, e.Y );
+            var mouseWorldPos = transform.ScreenspaceToWorldspace( e.motion.x, e.motion.y );
             
             List<VolumeParent> parents = null;
             List<BuildVolume> volumes = null;
@@ -621,12 +884,10 @@ namespace Border_Builder
             }
         }
         
-        void PbRenderWindowMouseMove( object sender, MouseEventArgs e )
+        void RenderWindow_MouseMove( SDLRenderer renderer, SDL.SDL_Event e )
         {
-            if( transform == null ) return;
-            
-            sbiMouseToCellGrid.Text = transform.ScreenspaceToCellGrid( e.X, e.Y ).ToString();
-            var mouseWorldPos = transform.ScreenspaceToWorldspace( e.X, e.Y );
+            var mouseWorldPos = transform.ScreenspaceToWorldspace( e.motion.x, e.motion.y );
+            sbiMouseToCellGrid.Text = mouseWorldPos.WorldspaceToCellGrid().ToString();
             sbiMouseToWorldspace.Text = mouseWorldPos.ToString();
             
             List<VolumeParent> parents = null;
@@ -680,6 +941,7 @@ namespace Border_Builder
             transform.HighlightVolumes = volumes;
             
             // The editor will handle redrawing the scene
+            /*
             if(
                 ( editor != null )&&
                 ( editor.MouseSelectionMode )
@@ -692,35 +954,30 @@ namespace Border_Builder
             renderLand = false;
             renderWater = false;
             transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, false, false );
+            */
         }
         
-        void PbRenderWindowSizeChanged( object sender, EventArgs e )
+        void RenderWindow_MouseWheel( SDLRenderer renderer, SDL.SDL_Event e )
         {
-            if( transform == null ) return;
-            
-            transform.RenderTargetSizeChanged();
+            var scale = transform.GetScale();
+            scale += (float)e.wheel.y * 0.05f;
+            transform.SetScale( scale );
         }
         
-        // This doesn't work because Windows.Forms is retarded and can't/won't send key input to certain controls
-        /*
-        void PbRenderWindowPreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
+        void RenderWindow_KeyDown( SDLRenderer renderer, SDL.SDL_Event e )
         {
-            if( transform == null ) return;
-            
-            e.IsInputKey = true;
-            
+            var kms = SDL.SDL_GetModState();
             var viewCentre = transform.GetViewCentre();
-            var invScale = transform.GetInvScale() * ( e.Shift ? 10f : 1f );
+            var invScale = transform.GetInvScale() * ( ( kms | SDL.SDL_Keymod.KMOD_SHIFT ) != 0 ? 10f : 1f );
             
-            var code = e.KeyCode;
-            if( code == Keys.Left )     viewCentre.X -= invScale;
-            if( code == Keys.Right )    viewCentre.X += invScale;
-            if( code == Keys.Up )       viewCentre.Y += invScale;
-            if( code == Keys.Down )     viewCentre.Y -= invScale;
+            var code = e.key.keysym.sym;
+            if( code == SDL.SDL_Keycode.SDLK_LEFT )     viewCentre.X -= invScale;
+            if( code == SDL.SDL_Keycode.SDLK_RIGHT )    viewCentre.X += invScale;
+            if( code == SDL.SDL_Keycode.SDLK_UP )       viewCentre.Y += invScale;
+            if( code == SDL.SDL_Keycode.SDLK_DOWN )     viewCentre.Y -= invScale;
             
             transform.SetViewCentre( viewCentre );
         }
-        */
        
         #endregion
         
