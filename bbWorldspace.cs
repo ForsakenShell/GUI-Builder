@@ -55,6 +55,8 @@ namespace Border_Builder
         public Single[,] WaterHeightMap = null;
         //public Bitmap LandHeight_Bitmap = null;
         //public Bitmap WaterHeight_Bitmap = null;
+        SDL2ThinLayer.SDLRenderer.Surface LandHeight_Surface;
+        SDL2ThinLayer.SDLRenderer.Surface WaterHeight_Surface;
         public SDL2ThinLayer.SDLRenderer.Texture LandHeight_Texture;
         public SDL2ThinLayer.SDLRenderer.Texture WaterHeight_Texture;
         
@@ -106,6 +108,7 @@ namespace Border_Builder
             
             // Dispose of external references
             DestroyTextures();
+            DestroySurfaces();
             
             LandHeightMap = null;
             WaterHeightMap = null;
@@ -256,6 +259,20 @@ namespace Border_Builder
             }
         }
         
+        public void DestroySurfaces()
+        {
+            if( LandHeight_Surface != null )
+            {
+                LandHeight_Surface.Dispose();
+                LandHeight_Surface = null;
+            }
+            if( WaterHeight_Surface != null )
+            {
+                WaterHeight_Surface.Dispose();
+                WaterHeight_Surface = null;
+            }
+        }
+        
         public bool LoadLandHeightMap( RenderTransform transform )
         {
             return LoadHeightMapDDS( LandHeights_Texture_File, out LandHeightMap, transform );
@@ -286,16 +303,19 @@ namespace Border_Builder
             return wh > lh ? 0x7F00007F : 0;
         }
         
-        unsafe SDLRenderer.Texture CreateTexture( RenderTransform transform, HeightMapColorAt hmColorAt, int statusPad, SDL.SDL_BlendMode blendMode )
+        unsafe SDLRenderer.Surface CreateSurface( RenderTransform transform, HeightMapColorAt hmColorAt, int statusPad, SDL.SDL_BlendMode blendMode )
         {
-            var tmpSurface = transform.Renderer.CreateSurface( HeightMap_Width, HeightMap_Height, SDL.SDL_PIXELFORMAT_ARGB8888 );
-            if( tmpSurface.MustLock )
-                tmpSurface.Lock();
+            var surface = transform.Renderer.CreateSurface( HeightMap_Width, HeightMap_Height, SDL.SDL_PIXELFORMAT_ARGB8888 );
+            if( surface == null )
+                throw new Exception( string.Format( "Cannot create a new surface!\n\n{0}", SDL.SDL_GetError() ) );
+            
+            if( surface.MustLock )
+                surface.Lock();
             
             Single cp;
             Single lp = -1f;
-            var pixels = (int*)tmpSurface.Pixels;
-            var pitch = tmpSurface.Pitch;
+            var pixels = (int*)surface.Pixels;
+            var pitch = surface.Pitch;
             
             for( int y = 0; y < HeightMap_Height; y++ )
             {
@@ -319,15 +339,11 @@ namespace Border_Builder
                 //System.Threading.Thread.Sleep(0);
             }
             
-            if( tmpSurface.MustLock )
-                tmpSurface.Unlock();
+            if( surface.MustLock )
+                surface.Unlock();
             
-            var texture = transform.Renderer.CreateTextureFromSurface( tmpSurface );
-            tmpSurface.Dispose();
-            tmpSurface = null;
-            
-            texture.BlendMode = blendMode;
-            return texture;
+            surface.BlendMode = blendMode;
+            return surface;
         }
         
         bool _textureLoadQueued = false;
@@ -356,16 +372,18 @@ namespace Border_Builder
                         LandHeight_Texture.Dispose();
                         LandHeight_Texture = null;
                     }
-                    if( LandHeight_Texture == null )
-                        LandHeight_Texture = CreateTexture( transform, LandHeightmapColor, 0, SDL.SDL_BlendMode.SDL_BLENDMODE_NONE );
+                    if( LandHeight_Surface == null )
+                        LandHeight_Surface = CreateSurface( transform, LandHeightmapColor, 0, SDL.SDL_BlendMode.SDL_BLENDMODE_NONE );
+                    LandHeight_Texture = transform.Renderer.CreateTextureFromSurface( LandHeight_Surface );
                     
                     if( WaterHeight_Texture != null )
                     {
                         WaterHeight_Texture.Dispose();
                         WaterHeight_Texture = null;
                     }
-                    if( WaterHeight_Texture == null )
-                        WaterHeight_Texture = CreateTexture( transform, WaterHeightmapColor, HeightMap_Height, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND );
+                    if( WaterHeight_Surface == null )
+                        WaterHeight_Surface = CreateSurface( transform, WaterHeightmapColor, HeightMap_Height, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND );
+                    WaterHeight_Texture = transform.Renderer.CreateTextureFromSurface( WaterHeight_Surface );
                     
                     transform.MainForm.UpdateStatusMessage( string.Format( txtCreateTextures, (int)100 ) );
                     _textureLoadQueued = false;

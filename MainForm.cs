@@ -259,6 +259,26 @@ namespace Border_Builder
             sbiProgress.Maximum = max;
         }
         
+        public void UpdateMouseCellGrid( string message )
+        {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { UpdateMouseCellGrid( message ); }, null );
+                return;
+            }
+            sbiMouseToCellGrid.Text = message;
+        }
+        
+        public void UpdateMouseWorldPos( string message )
+        {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { UpdateMouseWorldPos( message ); }, null );
+                return;
+            }
+            sbiMouseToWorldspace.Text = message;
+        }
+        
         #endregion
         
         #region Grouped form control reset/update
@@ -467,6 +487,8 @@ namespace Border_Builder
             tbWorldspaceWaterHeightsTexture.Text = worldspace.WaterHeights_Texture_File;
             
             ResetRenderWindowControls( true );
+            
+            TryUpdateRenderWindow();
         }
         
         #endregion
@@ -624,12 +646,12 @@ namespace Border_Builder
         
         void TryUpdateRenderWindow()
         {
-            SetEnableState( false );
-            
             if( transform != null )
+            {
+                SetEnableState( false );
                 UpdateRenderWindow();
-            
-            SetEnableState( true );
+                SetEnableState( true );
+            }
         }
         
         // This is called syncronously in the renderer thread
@@ -637,20 +659,24 @@ namespace Border_Builder
         {
             Console.WriteLine( "ResetForNewTransform()" );
             
-            DestroyWorldspaceTextures();
+            DestroyWorldspaceTextures( false );
         }
         
-        void DestroyWorldspaceTextures()
+        void DestroyWorldspaceTextures( bool destroySurfaces )
         {
             foreach( var worldspace in bbGlobal.Worldspaces )
+            {
                 worldspace.DestroyTextures();
+                if( destroySurfaces)
+                    worldspace.DestroySurfaces();
+            }
         }
         
         void DestroyTransform()
         {
             SetEnableState( false );
             
-            DestroyWorldspaceTextures();
+            DestroyWorldspaceTextures( true );
             
             if( editor != null )
                 editor.Dispose();
@@ -815,6 +841,22 @@ namespace Border_Builder
             TryUpdateRenderWindow();
         }
         
+        void ToggleSelectedParents( List<VolumeParent> parents )
+        {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { ToggleSelectedParents( parents ); }, null );
+                return;
+            }
+            foreach( var parent in parents )
+            {
+                if( lbVolumeParents.SelectedItems.Contains( parent.FormID ) )
+                    lbVolumeParents.SelectedItems.Remove( parent.FormID );
+                else
+                    lbVolumeParents.SelectedItems.Add( parent.FormID );
+            }
+        }
+        
         #endregion
         
         #region Target Panel events
@@ -875,20 +917,12 @@ namespace Border_Builder
             if( !transform.ImportMod.TryGetVolumesFromPos( mouseWorldPos, out parents, out volumes, transform.RenderVolumes ) )
                 return;
             
-            foreach( var parent in parents )
-            {
-                if( lbVolumeParents.SelectedItems.Contains( parent.FormID ) )
-                    lbVolumeParents.SelectedItems.Remove( parent.FormID );
-                else
-                    lbVolumeParents.SelectedItems.Add( parent.FormID );
-            }
+            ToggleSelectedParents( parents );
         }
         
         void RenderWindow_MouseMove( SDLRenderer renderer, SDL.SDL_Event e )
         {
             var mouseWorldPos = transform.ScreenspaceToWorldspace( e.motion.x, e.motion.y );
-            sbiMouseToCellGrid.Text = mouseWorldPos.WorldspaceToCellGrid().ToString();
-            sbiMouseToWorldspace.Text = mouseWorldPos.ToString();
             
             List<VolumeParent> parents = null;
             List<BuildVolume> volumes = null;
@@ -902,6 +936,8 @@ namespace Border_Builder
                     status = status + ", " + parents[ i ].FormID;
             }
             
+            UpdateMouseCellGrid( mouseWorldPos.WorldspaceToCellGrid().ToString() );
+            UpdateMouseWorldPos( mouseWorldPos.ToString() );
             UpdateStatusMessage( status );
             
             var rthlParents = transform.HighlightParents;
@@ -939,28 +975,12 @@ namespace Border_Builder
             
             transform.HighlightParents = parents;
             transform.HighlightVolumes = volumes;
-            
-            // The editor will handle redrawing the scene
-            /*
-            if(
-                ( editor != null )&&
-                ( editor.MouseSelectionMode )
-            ) return;
-            
-            // The editor won't handle redrawing the scene
-            bool renderNonPlayable, renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, renderSelectedOnly, exportPNG;
-            GetRenderOptions( out renderNonPlayable, out renderLand, out renderWater, out renderCellGrid, out renderBuildVolumes, out renderBorders, out renderSelectedOnly, out exportPNG );
-            
-            renderLand = false;
-            renderWater = false;
-            transform.RenderScene( renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, false, false );
-            */
         }
         
         void RenderWindow_MouseWheel( SDLRenderer renderer, SDL.SDL_Event e )
         {
             var scale = transform.GetScale();
-            scale += (float)e.wheel.y * 0.05f;
+            scale += (float)e.wheel.y * 0.0125f;
             transform.SetScale( scale );
         }
         
@@ -968,7 +988,7 @@ namespace Border_Builder
         {
             var kms = SDL.SDL_GetModState();
             var viewCentre = transform.GetViewCentre();
-            var invScale = transform.GetInvScale() * ( ( kms | SDL.SDL_Keymod.KMOD_SHIFT ) != 0 ? 10f : 1f );
+            var invScale = transform.GetInvScale() * ( ( kms & SDL.SDL_Keymod.KMOD_SHIFT ) != 0 ? 10f : 1f );
             
             var code = e.key.keysym.sym;
             if( code == SDL.SDL_Keycode.SDLK_LEFT )     viewCentre.X -= invScale;

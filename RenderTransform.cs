@@ -384,6 +384,8 @@ namespace Border_Builder
             set
             {
                 if( value == null ) return;
+                if( worldspace != null )
+                    worldspace.DestroySurfaces();
                 worldspace = value;
                 UpdateCellClipper( worldspace.CellNW, worldspace.CellSE, false );
                 SetViewCentre( WorldspaceClipperCentre(), false );

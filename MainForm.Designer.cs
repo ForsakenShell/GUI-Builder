@@ -78,6 +78,7 @@ namespace Border_Builder
 		private System.Windows.Forms.Label lblWeldThreshold;
 		private System.Windows.Forms.Panel pnMainForm;
 		private System.Windows.Forms.CheckBox cbWindowedRenderer;
+		private System.Windows.Forms.GroupBox gbRenderer;
 		
 		/// <summary>
 		/// Disposes resources used by the form.
@@ -149,6 +150,7 @@ namespace Border_Builder
 		    this.pnRenderWindow = new System.Windows.Forms.Panel();
 		    this.btnCellWindowRedraw = new System.Windows.Forms.Button();
 		    this.gbRenderOptions = new System.Windows.Forms.GroupBox();
+		    this.gbRenderer = new System.Windows.Forms.GroupBox();
 		    this.cbWindowedRenderer = new System.Windows.Forms.CheckBox();
 		    this.cbRenderOverRegion = new System.Windows.Forms.CheckBox();
 		    this.cbExportPNG = new System.Windows.Forms.CheckBox();
@@ -173,6 +175,7 @@ namespace Border_Builder
 		    this.gbSourceMod.SuspendLayout();
 		    this.gbWeldThreshold.SuspendLayout();
 		    this.gbRenderOptions.SuspendLayout();
+		    this.gbRenderer.SuspendLayout();
 		    this.gbRenderSelectedOnly.SuspendLayout();
 		    this.gbEditOptions.SuspendLayout();
 		    this.pnMainForm.SuspendLayout();
@@ -286,7 +289,7 @@ namespace Border_Builder
 		    // 
 		    this.sbiCaption.AutoToolTip = true;
 		    this.sbiCaption.Name = "sbiCaption";
-		    this.sbiCaption.Size = new System.Drawing.Size(1, 17);
+		    this.sbiCaption.Size = new System.Drawing.Size(357, 15);
 		    this.sbiCaption.Spring = true;
 		    this.sbiCaption.Text = "Operation being performed la la la, this is really long to test, la la la";
 		    this.sbiCaption.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -309,7 +312,7 @@ namespace Border_Builder
 		    // toolStripStatusLabel1
 		    // 
 		    this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-		    this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+		    this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 0);
 		    // 
 		    // sbiMouseToWorldspace
 		    // 
@@ -638,9 +641,9 @@ namespace Border_Builder
 		    // 
 		    // btnCellWindowRedraw
 		    // 
-		    this.btnCellWindowRedraw.Location = new System.Drawing.Point(129, 163);
+		    this.btnCellWindowRedraw.Location = new System.Drawing.Point(9, 19);
 		    this.btnCellWindowRedraw.Name = "btnCellWindowRedraw";
-		    this.btnCellWindowRedraw.Size = new System.Drawing.Size(152, 23);
+		    this.btnCellWindowRedraw.Size = new System.Drawing.Size(134, 23);
 		    this.btnCellWindowRedraw.TabIndex = 7;
 		    this.btnCellWindowRedraw.Tag = "";
 		    this.btnCellWindowRedraw.Text = "Show Map";
@@ -649,10 +652,9 @@ namespace Border_Builder
 		    // 
 		    // gbRenderOptions
 		    // 
-		    this.gbRenderOptions.Controls.Add(this.cbWindowedRenderer);
+		    this.gbRenderOptions.Controls.Add(this.gbRenderer);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderOverRegion);
 		    this.gbRenderOptions.Controls.Add(this.cbExportPNG);
-		    this.gbRenderOptions.Controls.Add(this.btnCellWindowRedraw);
 		    this.gbRenderOptions.Controls.Add(this.gbRenderSelectedOnly);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderBorders);
 		    this.gbRenderOptions.Controls.Add(this.cbRenderBuildVolumes);
@@ -666,11 +668,23 @@ namespace Border_Builder
 		    this.gbRenderOptions.TabStop = false;
 		    this.gbRenderOptions.Text = "Render Options";
 		    // 
+		    // gbRenderer
+		    // 
+		    this.gbRenderer.Controls.Add(this.cbWindowedRenderer);
+		    this.gbRenderer.Controls.Add(this.btnCellWindowRedraw);
+		    this.gbRenderer.Location = new System.Drawing.Point(129, 136);
+		    this.gbRenderer.Name = "gbRenderer";
+		    this.gbRenderer.Size = new System.Drawing.Size(152, 51);
+		    this.gbRenderer.TabIndex = 18;
+		    this.gbRenderer.TabStop = false;
+		    // 
 		    // cbWindowedRenderer
 		    // 
-		    this.cbWindowedRenderer.Location = new System.Drawing.Point(129, 139);
+		    this.cbWindowedRenderer.Checked = true;
+		    this.cbWindowedRenderer.CheckState = System.Windows.Forms.CheckState.Checked;
+		    this.cbWindowedRenderer.Location = new System.Drawing.Point(9, 0);
 		    this.cbWindowedRenderer.Name = "cbWindowedRenderer";
-		    this.cbWindowedRenderer.Size = new System.Drawing.Size(109, 18);
+		    this.cbWindowedRenderer.Size = new System.Drawing.Size(77, 18);
 		    this.cbWindowedRenderer.TabIndex = 17;
 		    this.cbWindowedRenderer.Text = "Windowed";
 		    this.cbWindowedRenderer.UseVisualStyleBackColor = true;
@@ -860,6 +874,7 @@ namespace Border_Builder
 		    this.gbWeldThreshold.ResumeLayout(false);
 		    this.gbWeldThreshold.PerformLayout();
 		    this.gbRenderOptions.ResumeLayout(false);
+		    this.gbRenderer.ResumeLayout(false);
 		    this.gbRenderSelectedOnly.ResumeLayout(false);
 		    this.gbEditOptions.ResumeLayout(false);
 		    this.gbEditOptions.PerformLayout();
