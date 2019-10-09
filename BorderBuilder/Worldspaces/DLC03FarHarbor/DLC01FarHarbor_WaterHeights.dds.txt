@@ -1,1 +1,0 @@
-Place the water height map for the worldspace here with this file name (-.txt)

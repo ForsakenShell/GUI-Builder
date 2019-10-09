@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectGuid>{42DB441B-7AE5-46F2-A45A-47652BDFC4F7}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>GetScriptFromForm</RootNamespace>
+    <AssemblyName>GetScriptFromForm</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <NoStdLib>False</NoStdLib>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <BaseAddress>4194304</BaseAddress>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <FileAlignment>4096</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\DebugLog.cs">
+      <Link>DebugLog.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GenCollection.cs">
+      <Link>GenCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GenFilePath.cs">
+      <Link>GenFilePath.cs</Link>
+    </Compile>
+    <Compile Include="..\..\GenString.cs">
+      <Link>GenString.cs</Link>
+    </Compile>
+    <Compile Include="..\..\XeLibSharp\ScriptPropertyHandle.cs">
+      <Link>ScriptPropertyHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\TestCommon_XeLib.cs">
+      <Link>TestCommon_XeLib.cs</Link>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Common.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Elements.cs" />
+    <Compile Include="..\..\XeLibSharp\API\ElementValues.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Errors.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Files.cs" />
+    <Compile Include="..\..\XeLibSharp\API\FileValues.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Filters.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Groups.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Masters.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Messages.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Meta.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Records.cs" />
+    <Compile Include="..\..\XeLibSharp\API\RecordValues.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Serialization.cs" />
+    <Compile Include="..\..\XeLibSharp\API\Setup.cs" />
+    <Compile Include="..\..\XeLibSharp\FileHandle.cs" />
+    <Compile Include="..\..\XeLibSharp\ElementHandle.cs" />
+    <Compile Include="..\..\XeLibSharp\HandleGroup.cs" />
+    <Compile Include="..\..\XeLibSharp\Internal\Functions.cs" />
+    <Compile Include="..\..\XeLibSharp\Internal\Helpers.cs" />
+    <Compile Include="..\..\XeLibSharp\NodeHandle.cs" />
+    <Compile Include="..\..\XeLibSharp\FormHandle.cs" />
+    <Compile Include="..\..\XeLibSharp\ScriptHandle.cs" />
+    <Compile Include="..\..\XeLibSharp\XeLibException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ContentWithTargetPath Include="..\..\XeLibSharp\XEditLib\Fallout4.Hardcoded.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Fallout4.Hardcoded.dat</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="..\..\XeLibSharp\XEditLib\XEditLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>XEditLib.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+</Project>

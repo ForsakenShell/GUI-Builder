@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+# SharpDevelop 5.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CopyRefrToNewCell", "CopyRefrToNewCell.csproj", "{58186BD1-403F-4EEA-BC4C-F7196BD93FAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XeLibSharp", "..\..\XeLibSharp\XeLibSharp.csproj", "{13A01625-D0DC-4E60-B965-0EB949CDE14E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58186BD1-403F-4EEA-BC4C-F7196BD93FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58186BD1-403F-4EEA-BC4C-F7196BD93FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58186BD1-403F-4EEA-BC4C-F7196BD93FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58186BD1-403F-4EEA-BC4C-F7196BD93FAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13A01625-D0DC-4E60-B965-0EB949CDE14E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13A01625-D0DC-4E60-B965-0EB949CDE14E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13A01625-D0DC-4E60-B965-0EB949CDE14E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13A01625-D0DC-4E60-B965-0EB949CDE14E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

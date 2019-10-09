@@ -10,45 +10,53 @@
  */
 using System;
 
-namespace Border_Builder
+namespace Maths
 {
-    /// <summary>
-    /// Description of Maths.
-    /// </summary>
-    public static partial class Maths
+    
+    public static class Constant
     {
         
         public const float DEG_TO_RAD = (float)( Math.PI / 180.0d );
-        
-        #region Approximate equality
         
         // Can't be a non-zero difference less than epsilon so double it
         public const float FLOAT_EPSILON = float.Epsilon * 2f;
         public const double DOUBLE_EPSILON = Double.Epsilon * 2f;
         
-        public static bool ApproximatelyEquals( this float left, float right, float threshold = FLOAT_EPSILON )
+    }
+    
+    #region Approximate equality
+    
+    public static class Equation
+    {
+        
+        public static bool ApproximatelyEquals( this float left, float right, float threshold = Constant.FLOAT_EPSILON )
         {
             return Math.Abs( left - right ) < threshold;
         }
         
-        public static bool ApproximatelyEquals( this double left, double right, double threshold = DOUBLE_EPSILON )
+        public static bool ApproximatelyEquals( this double left, double right, double threshold = Constant.DOUBLE_EPSILON )
         {
             return Math.Abs( left - right ) < threshold;
         }
         
-        public static bool ApproximatelyEquals( this float left, double right, double threshold = DOUBLE_EPSILON )
+        public static bool ApproximatelyEquals( this float left, double right, double threshold = Constant.DOUBLE_EPSILON )
         {
             return ApproximatelyEquals( (double)left, right, threshold );
         }
         
-        public static bool ApproximatelyEquals( this double left, float right, double threshold = DOUBLE_EPSILON )
+        public static bool ApproximatelyEquals( this double left, float right, double threshold = Constant.DOUBLE_EPSILON )
         {
             return ApproximatelyEquals( left, (double)right, threshold );
         }
         
-        #endregion
-        
-        #region Math clamp
+    }
+    
+    #endregion
+    
+    #region Math clamp
+    
+    public static class Clamps
+    {
         
         public static T Clamp<T>( this T value, T lower, T upper ) where T : IComparable<T>
         {
@@ -57,9 +65,14 @@ namespace Border_Builder
                 value;
         }
         
-        #endregion
-        
-        #region Math Lerp
+    }
+    
+    #endregion
+    
+    #region Math Lerp
+    
+    public static class Lerps
+    {
         
         public static float Lerp( float min, float max, float amount )
         {
@@ -71,7 +84,8 @@ namespace Border_Builder
             return max - ( max - min ) * amount;
         }
         
-        #endregion
-        
     }
+    
+    #endregion
+    
 }

@@ -1,0 +1,443 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <ProjectGuid>{71DB0BAB-5FAE-48C5-8C0E-4481ED75F9DB}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>GUIBuilder</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <NoStdLib>False</NoStdLib>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <WarningLevel>4</WarningLevel>
+    <NoWin32Manifest>False</NoWin32Manifest>
+    <SignAssembly>False</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <TargetFrameworkProfile />
+    <RunCodeAnalysis>False</RunCodeAnalysis>
+    <ApplicationIcon>Images\GuiBuilder.ico</ApplicationIcon>
+    <NoWarn>0162;0429</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <BaseAddress>4194304</BaseAddress>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <FileAlignment>4096</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <Optimize>False</Optimize>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE;</DefineConstants>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+    <StartAction>Project</StartAction>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <Optimize>True</Optimize>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <DefineConstants>TRACE;</DefineConstants>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AnnexTheCommonwealth\BorderEnabler.cs" />
+    <Compile Include="AnnexTheCommonwealth\BuildAreaVolume.cs" />
+    <Compile Include="AnnexTheCommonwealth\ControllerPosition.cs" />
+    <Compile Include="AnnexTheCommonwealth\Volume.cs" />
+    <Compile Include="AnnexTheCommonwealth\EdgeFlag.cs" />
+    <Compile Include="AnnexTheCommonwealth\Settlement.cs" />
+    <Compile Include="AnnexTheCommonwealth\SubDivision.cs" />
+    <Compile Include="CachedGetSetIXHandle.cs" />
+    <Compile Include="CachedProperty.cs" />
+    <Compile Include="DebugLog.cs" />
+    <Compile Include="DirectX\DDS_Header.cs" />
+    <Compile Include="Engine\Plugin\Attributes\ClassAssociation.cs" />
+    <Compile Include="Engine\Plugin\Attributes\FormAssociation.cs" />
+    <Compile Include="Engine\Plugin\Attributes\ScriptAssociation.cs" />
+    <Compile Include="Engine\Plugin\ConflictStatus.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedColorField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedFloatField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedIntField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedStringField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedUIntField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedVector2iField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedVector3fField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\CachedVector3iField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Cell\Flags.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Cell\WaterHeight.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ValueField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\LocationReference.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\PersistentLocation.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\RawField.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Record\EditorID.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Record\FormID.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Record\RecordFlags.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\LandData.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\Location.cs" />
+    <Compile Include="Engine\Plugin\Forms\Formlist.cs" />
+    <Compile Include="Engine\Plugin\Interface\ICollection.cs" />
+    <Compile Include="Engine\Plugin\Interface\ISyncedGUIList.cs" />
+    <Compile Include="Engine\Plugin\Interface\ISyncedGUIObject.cs" />
+    <Compile Include="Engine\Plugin\TargetHandle.cs" />
+    <Compile Include="GUIBuilder\Windows\PluginSelector.cs" />
+    <Compile Include="GUIBuilder\Windows\PluginSelector.Designer.cs">
+      <DependentUpon>PluginSelector.cs</DependentUpon>
+    </Compile>
+    <None Include="GodObject\Plugin\Data\Obsolete\BaseForm.cs" />
+    <Compile Include="GenCollection.cs" />
+    <Compile Include="GenFilePath.cs" />
+    <Compile Include="GenIXHandle.cs" />
+    <Compile Include="GenReflection.cs" />
+    <Compile Include="GenRenderTransform.cs" />
+    <Compile Include="GenStream.cs" />
+    <Compile Include="GodObject\Plugin\Data\Root.cs" />
+    <Compile Include="GodObject\Plugin\Data\Data.cs" />
+    <Compile Include="GodObject\Plugin\Data\Files.cs" />
+    <Compile Include="GodObject\XmlConfig.cs" />
+    <Compile Include="GUIBuilder\BorderBatch.cs" />
+    <Compile Include="GUIBuilder\BorderNode.cs" />
+    <Compile Include="GUIBuilder\BorderSegment.cs" />
+    <Compile Include="GUIBuilder\ConflictStatusHelpers.cs" />
+    <Compile Include="GUIBuilder\Constants.cs" />
+    <Compile Include="GUIBuilder\Obsolete\ImportMod.cs" />
+    <Compile Include="GUIBuilder\Obsolete\NodeSegment.cs" />
+    <Compile Include="GUIBuilder\Obsolete\VolumeEditor.cs" />
+    <Compile Include="GUIBuilder\Obsolete\WeldPoints.cs" />
+    <Compile Include="GUIBuilder\Windows\About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\BatchImport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\BatchImport.Designer.cs">
+      <DependentUpon>BatchImport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\BorderBatch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\BorderBatch.Designer.cs">
+      <DependentUpon>BorderBatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Controls\SyncedListView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Controls\SyncedListView.Designer.cs">
+      <DependentUpon>SyncedListView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\FormEditor\SubDivision.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\FormEditor\SubDivision.Designer.cs">
+      <DependentUpon>SubDivision.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\FormImport\ErrorTypes.cs" />
+    <Compile Include="GUIBuilder\FormImport\FormTarget.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportBorderEnablerReference.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportBuildVolumeReference.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportEdgeFlagReference.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportLayer.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportSandboxReference.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportBase.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportBorderReference.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportBorderStatic.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportStates.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportTarget.cs" />
+    <Compile Include="GUIBuilder\FormImport\ObjectReferenceTarget.cs" />
+    <Compile Include="GUIBuilder\FormImport\ScriptTarget.cs" />
+    <Compile Include="GUIBuilder\SubDivisionBatch.cs" />
+    <Compile Include="GUIBuilder\IMouseOver.cs" />
+    <Compile Include="GUIBuilder\SpaceConversions.cs" />
+    <Compile Include="Engine\Constants.cs" />
+    <Compile Include="Engine\Plugin\Constants.cs" />
+    <Compile Include="Engine\Plugin\Collection.cs" />
+    <Compile Include="Engine\Plugin\Collections\Cells.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\Primitive.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Shared\FullName.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Shared\Model.cs" />
+    <Compile Include="Engine\Plugin\Form.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Activator\MarkerColor.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Cell\Grid.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Keyword\Color.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Keyword\Notes.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Layer\Parent.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Location\ParentLocation.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Location\WorldLocationRadius.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\EnableParent.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\Layer.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\LinkedRefs.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\Name.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\Position.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\Rotation.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Shared\ObjectBounds.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Static\DistantLOD.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\MapData.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\WorldBounds.cs" />
+    <Compile Include="Engine\Plugin\Forms\Container.cs" />
+    <Compile Include="Engine\Plugin\Forms\Layer.cs" />
+    <Compile Include="Engine\Plugin\Forms\ObjectReference.cs" />
+    <Compile Include="Engine\Plugin\Forms\Cell.cs" />
+    <Compile Include="Engine\Plugin\Forms\Location.cs" />
+    <Compile Include="Engine\Plugin\Forms\Static.cs" />
+    <Compile Include="Engine\Plugin\Forms\Keyword.cs" />
+    <Compile Include="Engine\Plugin\Forms\Activator.cs" />
+    <Compile Include="Engine\Plugin\Forms\Worldspace.cs" />
+    <Compile Include="Engine\Plugin\File.cs" />
+    <Compile Include="Engine\Plugin\Interface\IXHandle.cs" />
+    <Compile Include="Engine\Plugin\PapyrusScript.cs" />
+    <Compile Include="Engine\SpaceConversions.cs" />
+    <Compile Include="Fallout4\WorkshopScript.cs" />
+    <Compile Include="GodObject\CoreForms.cs" />
+    <Compile Include="GodObject\Master.cs" />
+    <Compile Include="GodObject\Paths.cs" />
+    <Compile Include="GodObject\Plugin.cs" />
+    <Compile Include="GodObject\WorldspaceHeightmap.cs" />
+    <Compile Include="GodObject\Windows.cs" />
+    <Compile Include="GUIBuilder\Windows\FormEditor\SyncedFormEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\FormEditor\SyncedFormEditor.Designer.cs">
+      <DependentUpon>SyncedFormEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Main.Designer.cs">
+      <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Render.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\Render.Designer.cs">
+      <DependentUpon>Render.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\RenderChild\RenderTransform.cs" />
+    <Compile Include="GUIBuilder\Windows\RenderChild\SyncObjectTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\RenderChild\SyncObjectTool.Designer.cs">
+      <DependentUpon>SyncObjectTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\RenderChild\WorldspaceTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\RenderChild\WorldspaceTool.Designer.cs">
+      <DependentUpon>WorldspaceTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\SubDivisionBatch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\SubDivisionBatch.Designer.cs">
+      <DependentUpon>SubDivisionBatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IndexedProperty.cs" />
+    <Compile Include="Maths\HalfVector2f.cs" />
+    <Compile Include="Maths\Vector3i.cs" />
+    <Compile Include="NIFBuilder\Mesh.cs" />
+    <Compile Include="NIFBuilder\NIFBuilder.cs" />
+    <Compile Include="NIFBuilder\Preset.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Include="GenString.cs" />
+    <Compile Include="WorkerThreadPool.cs" />
+    <Compile Include="Maths\ByteVector3.cs" />
+    <Compile Include="Maths\Geometry.cs" />
+    <Compile Include="Maths\HalfFloat.cs" />
+    <Compile Include="Maths\Maths.cs" />
+    <Compile Include="Maths\Vector2f.cs" />
+    <Compile Include="Maths\Vector2i.cs" />
+    <Compile Include="Maths\Vector3f.cs" />
+    <Compile Include="NoBSFileAccess.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XeLibHelper\ObjectReference.cs" />
+    <Compile Include="XeLibHelper\Thread.cs" />
+    <Compile Include="XeLibSharp\API\Common.cs" />
+    <Compile Include="XeLibSharp\API\Elements.cs" />
+    <Compile Include="XeLibSharp\API\ElementValues.cs" />
+    <Compile Include="XeLibSharp\API\Errors.cs" />
+    <Compile Include="XeLibSharp\API\Files.cs" />
+    <Compile Include="XeLibSharp\API\FileValues.cs" />
+    <Compile Include="XeLibSharp\API\Filters.cs" />
+    <Compile Include="XeLibSharp\API\Groups.cs" />
+    <Compile Include="XeLibSharp\API\Masters.cs" />
+    <Compile Include="XeLibSharp\API\Messages.cs" />
+    <Compile Include="XeLibSharp\API\Meta.cs" />
+    <Compile Include="XeLibSharp\API\Records.cs" />
+    <Compile Include="XeLibSharp\API\RecordValues.cs" />
+    <Compile Include="XeLibSharp\API\Serialization.cs" />
+    <Compile Include="XeLibSharp\API\Setup.cs" />
+    <Compile Include="XeLibSharp\FileHandle.cs" />
+    <Compile Include="XeLibSharp\ElementHandle.cs" />
+    <Compile Include="XeLibSharp\HandleGroup.cs" />
+    <Compile Include="XeLibSharp\Internal\Functions.cs" />
+    <Compile Include="XeLibSharp\Internal\Helpers.cs" />
+    <Compile Include="XeLibSharp\NodeHandle.cs" />
+    <Compile Include="XeLibSharp\FormHandle.cs" />
+    <Compile Include="XeLibSharp\ScriptHandle.cs" />
+    <Compile Include="XeLibSharp\ScriptPropertyHandle.cs" />
+    <Compile Include="XeLibSharp\XeLibException.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Font.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_SDLColors.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Text.cs" />
+    <Compile Include="SDL2ThinLayer\Platform.cs" />
+    <Compile Include="SDL2ThinLayer\SDL2-CS\SDL2.cs" />
+    <Compile Include="SDL2ThinLayer\SDL2-CS\SDL2_image.cs" />
+    <Compile Include="SDL2ThinLayer\SDL2-CS\SDL2_mixer.cs" />
+    <Compile Include="SDL2ThinLayer\SDL2-CS\SDL2_ttf.cs" />
+    <Compile Include="SDL2ThinLayer\Extensions.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Blitters.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_FileTypes.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Image.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_SDLThread_BeginInvoke.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Surface.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Primitives.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_SDLThread.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_StateMachine.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_SDLThread_EventDispatcher.cs" />
+    <Compile Include="SDL2ThinLayer\SDLRenderer_Texture.cs" />
+    <Compile Include="SDL2ThinLayer\WinAPI.cs" />
+    <None Include="Images\GuiBuilder.ico" />
+    <None Include="Images\RenderTransform\Circle_r128.png" />
+    <None Include="Images\RenderTransform\X_128.png" />
+    <None Include="Images\RenderWindow\Toolstrip\Borders.png" />
+    <None Include="Images\RenderWindow\Toolstrip\BuildVolumes.png" />
+    <None Include="Images\RenderWindow\Toolstrip\CellGrid.png" />
+    <None Include="Images\RenderWindow\Toolstrip\Checked.png" />
+    <None Include="Images\RenderWindow\Toolstrip\EdgeFlag.png" />
+    <None Include="Images\RenderWindow\Toolstrip\EdgeFlagLink.png" />
+    <None Include="Images\RenderWindow\Toolstrip\HelperFlag.png" />
+    <None Include="Images\RenderWindow\Toolstrip\LandHeight.png" />
+    <None Include="Images\RenderWindow\Toolstrip\NonPlayableRegion.png" />
+    <None Include="Images\RenderWindow\Toolstrip\Repaint.png" />
+    <None Include="Images\RenderWindow\Toolstrip\SandboxVolumes.png" />
+    <None Include="Images\RenderWindow\Toolstrip\Settlement.png" />
+    <None Include="Images\RenderWindow\Toolstrip\SubDivision.png" />
+    <None Include="Images\RenderWindow\Toolstrip\Unchecked.png" />
+    <None Include="Images\RenderWindow\Toolstrip\WaterHeight.png" />
+    <None Include="Images\RenderWindow\Toolstrip\Workshop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GUIBuilder\Windows\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\BatchImport.resx">
+      <DependentUpon>BatchImport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\BorderBatch.resx">
+      <DependentUpon>BorderBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\Controls\SyncedListView.resx">
+      <DependentUpon>SyncedListView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\FormEditor\SubDivision.resx">
+      <DependentUpon>SubDivision.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\FormEditor\SyncedFormEditor.resx">
+      <DependentUpon>SyncedFormEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\Main.resx">
+      <DependentUpon>Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\PluginSelector.resx">
+      <DependentUpon>PluginSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\Render.resx">
+      <DependentUpon>Render.cs</DependentUpon>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RenderWindow.Designer1.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\RenderChild\SyncObjectTool.resx">
+      <DependentUpon>SyncObjectTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\RenderChild\WorldspaceTool.resx">
+      <DependentUpon>WorldspaceTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\SubDivisionBatch.resx">
+      <DependentUpon>SubDivisionBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Engine\Plugin\Forms\Fields\Record" />
+    <Folder Include="GUIBuilder\Obsolete" />
+    <Folder Include="GUIBuilder\Windows" />
+    <Folder Include="GUIBuilder\Windows\Controls" />
+    <Folder Include="GUIBuilder\Windows\RenderChild" />
+  </ItemGroup>
+  <ItemGroup>
+    <ContentWithTargetPath Include="XeLibSharp\XEditLib\Fallout4.Hardcoded.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>Fallout4.Hardcoded.dat</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="XeLibSharp\XEditLib\XEditLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>XEditLib.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>SDL2.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>SDL2_image.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\SDL2_ttf.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>SDL2_ttf.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\libfreetype-6.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>libfreetype-6.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\libpng16-16.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>libpng16-16.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\libtiff-5.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>libtiff-5.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="SDL2ThinLayer\SDL2\zlib1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>zlib1.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
