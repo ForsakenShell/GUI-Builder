@@ -1180,8 +1180,9 @@ namespace GUIBuilder.Windows.RenderChild
             if( _renderWorkshops )
                 AddMouseOverFrom( ref newMoos, _workshops, mwpos, maxDistance );
             if( _renderBorders )
-                foreach( var s in _subdivisions )
-                    AddMouseOverFrom( ref newMoos, s.BorderEnablers, mwpos, maxDistance );
+                if( !_subdivisions.NullOrEmpty() )
+                    foreach( var s in _subdivisions )
+                        AddMouseOverFrom( ref newMoos, s.BorderEnablers, mwpos, maxDistance );
             if( _renderEdgeFlags )
             {
                 AddMouseOverFrom( ref newMoos, _associatedEdgeFlags, mwpos, maxDistance );
