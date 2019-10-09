@@ -110,13 +110,14 @@ namespace GUIBuilder.Windows
             
             GodObject.Windows.SetMainWindow( this, false );
             
-            //if( System.IO.File.Exists( 
-            //var options = new XmlDocument();
-            //options.Load( GodObject.BorderBuilderPath + "\\GUIBuilder_Options.xml" );
-            
             ClearStatusBar();
             
             onLoadComplete = true;
+            
+            var configFile = GodObject.Paths.GUIBuilderConfigFile;
+            if( ( !string.IsNullOrEmpty( configFile ) )&&( !System.IO.File.Exists( configFile ) ) )
+                GodObject.Windows.GetOptionsWindow( true );
+            
         }
         
         void OnFormClosing( object sender, FormClosingEventArgs e )

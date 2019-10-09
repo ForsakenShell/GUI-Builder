@@ -44,7 +44,7 @@ namespace GodObject
                         return null;
                     
                     var configFile = GodObject.Paths.GUIBuilderConfigFile;
-                    if( !string.IsNullOrEmpty( configFile ) )
+                    if( ( !string.IsNullOrEmpty( configFile ) )&&( System.IO.File.Exists( configFile ) ) )
                     {
                         _Document.Load( configFile );
                         _RootNode = _Document.SelectSingleNode( Root );
@@ -132,7 +132,9 @@ namespace GodObject
                     key, value, commit ) );
             */
             knode.InnerText = value;
-            return !commit || Commit();
+            
+            if( !commit ) return true;
+            return Commit();
         }
         
         public static string ReadStringValue( string xpath, string key, string defaultValue = null )
