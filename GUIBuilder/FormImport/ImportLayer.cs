@@ -63,7 +63,7 @@ namespace GUIBuilder.FormImport
             if( string.Compare( oldEDID, NewEditorID, StringComparison.InvariantCulture ) != 0 )
                 tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -72,7 +72,7 @@ namespace GUIBuilder.FormImport
             
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )

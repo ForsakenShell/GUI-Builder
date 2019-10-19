@@ -86,7 +86,7 @@ namespace GUIBuilder.FormImport
             if( stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( NIFFilePath ) )
                 tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -98,7 +98,7 @@ namespace GUIBuilder.FormImport
             tmp.Add( string.Format( "Max Bounds {0}", MaxBounds.ToString() ) );
             tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )

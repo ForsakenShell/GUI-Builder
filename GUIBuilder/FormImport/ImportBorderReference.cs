@@ -142,7 +142,7 @@ namespace GUIBuilder.FormImport
             if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -174,7 +174,7 @@ namespace GUIBuilder.FormImport
                         ftLinkKeyword.DisplayIDInfo()
                 ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )

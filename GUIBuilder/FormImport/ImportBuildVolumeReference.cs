@@ -176,7 +176,7 @@ namespace GUIBuilder.FormImport
                 {
                     if( lr != null )
                         tmp.Add(
-                            GenIDataSync.ExtraInfoFor( lr, format: "Unlink build volume from {0}" ) );
+                            GenIXHandle.ExtraInfoFor( lr, format: "Unlink build volume from {0}" ) );
                     tmp.Add(
                         string.Format(
                             "Link to {0} using keyword {1}",
@@ -189,7 +189,7 @@ namespace GUIBuilder.FormImport
             if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -220,7 +220,7 @@ namespace GUIBuilder.FormImport
                         ftLinkKeyword.DisplayIDInfo()
                 ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )
@@ -371,7 +371,7 @@ namespace GUIBuilder.FormImport
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new ObjectReference instance of {0} in cell {1}",
                         ftBaseActi.DisplayIDInfo( unresolveableSuffix: "unresolved" ),
-                        GenIDataSync.ExtraInfoFor( cell, unresolveable: "unresolved" ) ) );
+                        GenIXHandle.ExtraInfoFor( cell, unresolveable: "unresolved" ) ) );
                     return false;
                 }
                 refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseActi.FormID );
@@ -395,7 +395,7 @@ namespace GUIBuilder.FormImport
                 AddErrorMessage( ErrorTypes.Import, string.Format(
                     "An exception occured when trying to create a new ObjectReference instance of {0} in cell {1}\nInner Exception:\n{2}",
                     ftBaseActi.DisplayIDInfo( unresolveableSuffix: "unresolved" ),
-                    GenIDataSync.ExtraInfoFor( cell, unresolveable: "unresolved" ),
+                    GenIXHandle.ExtraInfoFor( cell, unresolveable: "unresolved" ),
                     e.ToString() ) );
             }
             return false;

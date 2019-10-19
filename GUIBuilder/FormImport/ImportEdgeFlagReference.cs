@@ -60,7 +60,7 @@ namespace GUIBuilder.FormImport
             if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
                 tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -69,13 +69,13 @@ namespace GUIBuilder.FormImport
             
             tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
             
-            return GenIDataSync.ConcatDisplayInfo( tmp );
+            return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )
         {
             var flagBase = GodObject.CoreForms.SubDivisionEdgeFlag( TargetRef.GetName( target ) );
-            return GenIDataSync.ExtraInfoFor( flagBase, format: "Placed instance of {0}", unresolveable: "unresolved" );
+            return GenIXHandle.ExtraInfoFor( flagBase, format: "Placed instance of {0}", unresolveable: "unresolved" );
         }
         
         public override int             InjectPriority { get { return 9000; } }

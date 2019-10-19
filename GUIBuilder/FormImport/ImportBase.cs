@@ -349,7 +349,7 @@ namespace GUIBuilder.FormImport
                 errorMessage = string.Format(
                     "\n{0} :: CopyToWorkingFile<T>() :: Unable to copy override for {1}!",
                     this.GetType().ToString(),
-                    GenIDataSync.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
+                    GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
                     );
             }
             catch( Exception e )
@@ -357,7 +357,7 @@ namespace GUIBuilder.FormImport
                 errorMessage = string.Format(
                     "\n{0} :: CopyToWorkingFile<T>() :: An exception occured when trying to copy override for {1}\nInner Exception:\n{2}",
                         this.GetType().ToString(),
-                        GenIDataSync.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
+                        GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
                         e.ToString() );
             }
             
@@ -600,7 +600,7 @@ namespace GUIBuilder.FormImport
             get
             {
                 //DebugLog.Write( "ConflictStatus.get()" );
-                if( !GenIDataSync.Resolveable( _Target.Value, _Target.FormID, _Target.EditorID ) )
+                if( !GenIXHandle.Resolveable( _Target.Value, _Target.FormID, _Target.EditorID ) )
                     return Engine.Plugin.ConflictStatus.NewForm;
                     //return Engine.Plugin.ConflictStatus.Invalid;
                 var targetForm = TargetForm;
@@ -713,7 +713,7 @@ namespace GUIBuilder.FormImport
             else if( !TargetRecordFlagsMatch )
                 tmp.Add( string.Format( "Record Flags 0x{0}", RecordFlags.ToString( "X8" ) ) );
             
-            var tmp2 = GenIDataSync.ConcatDisplayInfo( tmp );
+            var tmp2 = GenIXHandle.ConcatDisplayInfo( tmp );
             return prefix + tmp2;
         }
         
