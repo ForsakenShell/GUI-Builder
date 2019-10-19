@@ -1,7 +1,7 @@
 ﻿/*
- * GenIDataSync.cs
+ * GenIXHandle.cs
  * 
- * Generic functions for IDataSync
+ * Generic functions for IXHandle
  * 
  * User: 1000101
  * Date: 27/11/2017
@@ -20,7 +20,7 @@ using System.Reflection;
 /// <summary>
 /// Description of GenIXHandle.
 /// </summary>
-public static class GenIDataSync
+public static class GenIXHandle
 {
     
     #region IDataSync Display Info
