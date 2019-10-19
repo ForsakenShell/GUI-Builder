@@ -23,7 +23,7 @@ using System.Reflection;
 public static class GenIXHandle
 {
     
-    #region IDataSync Display Info
+    #region IXHandle Display Info
     
     public static bool              Resolveable<T>( this T target, uint formID, string editorID ) where T : Engine.Plugin.Interface.IXHandle
     {
