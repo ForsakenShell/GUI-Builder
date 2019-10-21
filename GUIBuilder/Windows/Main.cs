@@ -478,7 +478,8 @@ namespace GUIBuilder.Windows
                 foreach( var master in GodObject.Master.Files )
                     if( master.AlwaysSelect )
                         sp.Add( master.Filename );
-                sp.Add( wf );
+                if( !sp.Contains( wf ) )
+                	sp.Add( wf );
                 
                 // If the plugin loader returns true, the loader thread will re-enable the GUI
                 reEnableGUI &= !GodObject.Plugin.Load( wf, sp, orwol );
