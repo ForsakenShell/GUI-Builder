@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<GUIBuilder>
+    <MainWindow.Title>GUIBuilder</MainWindow.Title>
+    <MainWindow.FileMenu>File</MainWindow.FileMenu>
+    <MainWindow.FileMenu.Load>Load ESM/ESP</MainWindow.FileMenu.Load>
+    <MainWindow.FileMenu.Save>Save</MainWindow.FileMenu.Save>
+    <MainWindow.FileMenu.Close>Close Files</MainWindow.FileMenu.Close>
+    <MainWindow.FileMenu.Exit>Exit</MainWindow.FileMenu.Exit>
+    <MainWindow.ToolMenu>Tools</MainWindow.ToolMenu>
+    <MainWindow.ToolMenu.SubDivisions>Sub-Division Batch</MainWindow.ToolMenu.SubDivisions>
+    <MainWindow.ToolMenu.Borders>Border Batch</MainWindow.ToolMenu.Borders>
+    <MainWindow.ToolMenu.Render>Render Window</MainWindow.ToolMenu.Render>
+    <MainWindow.ToolMenu.About>About</MainWindow.ToolMenu.About>
+    <MainWindow.ToolMenu.Options>Options</MainWindow.ToolMenu.Options>
+    <OptionsWindow.Title>GUIBuilder Options</OptionsWindow.Title>
+    <OptionsWindow.Masters>Always Select Masters</OptionsWindow.Masters>
+    <OptionsWindow.Conflict>Conflict Status</OptionsWindow.Conflict>
+    <OptionsWindow.Conflict.Error>Error State</OptionsWindow.Conflict.Error>
+    <OptionsWindow.Conflict.Uneditable>Uneditable Form</OptionsWindow.Conflict.Uneditable>
+    <OptionsWindow.Conflict.NewForm>New Form</OptionsWindow.Conflict.NewForm>
+    <OptionsWindow.Conflict.None>No Conflict</OptionsWindow.Conflict.None>
+    <OptionsWindow.Conflict.OverrideAncestor>Override in Ancestor</OptionsWindow.Conflict.OverrideAncestor>
+    <OptionsWindow.Conflict.OverrideWorking>Override in Working File</OptionsWindow.Conflict.OverrideWorking>
+    <OptionsWindow.Conflict.OverrideRequired>Requires Override</OptionsWindow.Conflict.OverrideRequired>
+    <OptionsWindow.Language>Language</OptionsWindow.Language>
+    <OptionsWindow.LanguageRestart>Changing languages will not take effect until you restart GUIBuilder.</OptionsWindow.LanguageRestart>
+    <OptionsWindow.SDLHint>SDL Hints</OptionsWindow.SDLHint>
+    <OptionsWindow.SDLHint.Warning>GUIBuilder will create very large textures that are "non-power-of-two" depending on the worldspace.  The Commonwealth (for example) is 6145x6145, if your hardware cannot support this you should override the below setting with "{0}".</OptionsWindow.SDLHint.Warning>
+    <OptionsWindow.SDLHint.VideoDriver>Video Driver:</OptionsWindow.SDLHint.VideoDriver>
+    <AboutWindow.Title>About GUIBuilder</AboutWindow.Title>
+    <AboutWindow.ComicTitle>GUIBuilder</AboutWindow.ComicTitle>
+    <AboutWindow.Author>by 1000101</AboutWindow.Author>
+    <AboutWindow.ReleaseLicenseTitle>Released under the Unlicense</AboutWindow.ReleaseLicenseTitle>
+    <AboutWindow.ReleaseLicenseBody>This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to http://unlicense.org/</AboutWindow.ReleaseLicenseBody>
+    <RenderWindow.Title>Render Window</RenderWindow.Title>
+    <RenderWindow.NonPlayableRegions>Non-Playable Regions</RenderWindow.NonPlayableRegions>
+    <RenderWindow.HMLand>Land Heightmap</RenderWindow.HMLand>
+    <RenderWindow.HMWater>Water Heightmap</RenderWindow.HMWater>
+    <RenderWindow.Grid>Cell Grid</RenderWindow.Grid>
+    <RenderWindow.MinScale>Minimum scaled size of objects</RenderWindow.MinScale>
+    <RenderWindow.SelectedOnly>Render selected objects only</RenderWindow.SelectedOnly>
+    <RenderWindow.Repaint>Repaint all objects</RenderWindow.Repaint>
+    <RenderWindow.Workshops>Workshop Workbenches</RenderWindow.Workshops>
+    <RenderWindow.Settlements>Settlement Controllers</RenderWindow.Settlements>
+    <RenderWindow.SubDivisions>Sub-Division Controllers</RenderWindow.SubDivisions>
+    <RenderWindow.Borders>Borders and Border Enablers</RenderWindow.Borders>
+    <RenderWindow.EdgeFlags>Sub-Division Edge Flags</RenderWindow.EdgeFlags>
+    <RenderWindow.EdgeFlagLinks>Sub-Division Edge Flag Links</RenderWindow.EdgeFlagLinks>
+    <RenderWindow.BuildVolumes>Build Volumes</RenderWindow.BuildVolumes>
+    <RenderWindow.SandboxVolumes>Sandbox Volumes</RenderWindow.SandboxVolumes>
+    <RenderWindow.Worldspaces>Worldspaces</RenderWindow.Worldspaces>
+    <RenderWindow.Worldspace.FormID>FormID:</RenderWindow.Worldspace.FormID>
+    <RenderWindow.Worldspace.MapHeight>Map Height</RenderWindow.Worldspace.MapHeight>
+    <RenderWindow.Worldspace.MapHeight.Max>Max:</RenderWindow.Worldspace.MapHeight.Max>
+    <RenderWindow.Worldspace.MapHeight.Min>Min:</RenderWindow.Worldspace.MapHeight.Min>
+    <RenderWindow.Worldspace.Textures>Textures</RenderWindow.Worldspace.Textures>
+    <RenderWindow.Worldspace.EditorID>EditorID:</RenderWindow.Worldspace.EditorID>
+    <RenderWindow.Worldspace.GridRange>Grid Range</RenderWindow.Worldspace.GridRange>
+    <RenderWindow.FPS>FPS (Actual/Potential): {0}/{1} :: Average Frame Time: {2}ms :: Average Frame Ticks: {3}</RenderWindow.FPS>
+    <RenderWindow.UpdateTransform>Updating render transform...</RenderWindow.UpdateTransform>
+    <SubDivisionBatchWindow.Title>Sub-Division Batch</SubDivisionBatchWindow.Title>
+    <SubDivisionBatchWindow.Elements>Elements</SubDivisionBatchWindow.Elements>
+    <SubDivisionBatchWindow.SandboxVolumes></SubDivisionBatchWindow.SandboxVolumes>
+    <SubDivisionBatchWindow.EdgeFlags>Edge Flags</SubDivisionBatchWindow.EdgeFlags>
+    <SubDivisionBatchWindow.BorderEnablers>Border Enablers</SubDivisionBatchWindow.BorderEnablers>
+    <SubDivisionBatchWindow.Functions>Functions</SubDivisionBatchWindow.Functions>
+    <SubDivisionBatchWindow.Function.NormalizeBuildVolumes>Normalize Build Volumes</SubDivisionBatchWindow.Function.NormalizeBuildVolumes>
+    <SubDivisionBatchWindow.Function.OptimizeVolumes>Optimize Volumes</SubDivisionBatchWindow.Function.OptimizeVolumes>
+    <SubDivisionBatchWindow.Function.CheckElements>Check For Missing Elements</SubDivisionBatchWindow.Function.CheckElements>
+    <SubDivisionBatchWindow.Function.FinalizeElements>Finalize All Elements</SubDivisionBatchWindow.Function.FinalizeElements>
+    <SubDivisionBatchWindow.BuildVolumes>Build Volumes</SubDivisionBatchWindow.BuildVolumes>
+    <SubDivisionBatchWindow.CheckingElements>Checking for missing sub-division elements...</SubDivisionBatchWindow.CheckingElements>
+    <BorderBatchWindow.Title>Border Batch</BorderBatchWindow.Title>
+    <BorderBatchWindow.Functions>Functions</BorderBatchWindow.Functions>
+    <BorderBatchWindow.Function.ClearNodes>Clear Nodes</BorderBatchWindow.Function.ClearNodes>
+    <BorderBatchWindow.Function.GenerateNodes>Gen. Nodes</BorderBatchWindow.Function.GenerateNodes>
+    <BorderBatchWindow.Function.BuildNIFs>Build NIFs</BorderBatchWindow.Function.BuildNIFs>
+    <BorderBatchWindow.Function.ImportNIFs>Import NIFs</BorderBatchWindow.Function.ImportNIFs>
+    <BorderBatchWindow.TargetDirectory>Target Folder</BorderBatchWindow.TargetDirectory>
+    <BorderBatchWindow.Tab.SubDivisions>Sub-Divisions</BorderBatchWindow.Tab.SubDivisions>
+    <BorderBatchWindow.Tab.Workshops>Workshops</BorderBatchWindow.Tab.Workshops>
+    <BorderBatchWindow.NodesAndNIFs>Node and NIF Generation</BorderBatchWindow.NodesAndNIFs>
+    <BorderBatchWindow.NodesAndNIFs.Preset>Preset:</BorderBatchWindow.NodesAndNIFs.Preset>
+    <BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>Target Sub-Folder:</BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>
+    <BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>Mesh Sub-Folder:</BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>
+    <BorderBatchWindow.NodesAndNIFs.FilePrefix>File Prefix:</BorderBatchWindow.NodesAndNIFs.FilePrefix>
+    <BorderBatchWindow.NodesAndNIFs.FileSuffix>File Suffix:</BorderBatchWindow.NodesAndNIFs.FileSuffix>
+    <BorderBatchWindow.NodesAndNIFs.NodeLength>Node Length:</BorderBatchWindow.NodesAndNIFs.NodeLength>
+    <BorderBatchWindow.NodesAndNIFs.SlopeAllowance>Slope Allowance:</BorderBatchWindow.NodesAndNIFs.SlopeAllowance>
+    <BorderBatchWindow.NodesAndNIFs.GradientHeight>Gradient Height:</BorderBatchWindow.NodesAndNIFs.GradientHeight>
+    <BorderBatchWindow.NodesAndNIFs.GroundOffset>Ground Offset:</BorderBatchWindow.NodesAndNIFs.GroundOffset>
+    <BorderBatchWindow.NodesAndNIFs.GroundSink>Ground Sink:</BorderBatchWindow.NodesAndNIFs.GroundSink>
+    <BorderBatchWindow.NodesAndNIFs.CreateImports>Create Import Data</BorderBatchWindow.NodesAndNIFs.CreateImports>
+    <BorderBatchWindow.NodeDetection>Node Detection</BorderBatchWindow.NodeDetection>
+    <BorderBatchWindow.NodeDetection.Restrict>Restrict to:</BorderBatchWindow.NodeDetection.Restrict>
+    <BorderBatchWindow.NodeDetection.WorkshopKeyword>Workshop Link Keyword:</BorderBatchWindow.NodeDetection.WorkshopKeyword>
+    <BorderBatchWindow.NodeDetection.ForcedZStatic>Forced Z Static Object:</BorderBatchWindow.NodeDetection.ForcedZStatic>
+    <BorderBatchWindow.SearchingForKeyword>Searching for default keyword...</BorderBatchWindow.SearchingForKeyword>
+    <BorderBatchWindow.SearchingForForcedZStatic>Searching for default static object...</BorderBatchWindow.SearchingForForcedZStatic>
+    <BorderBatchWindow.BuildingWorkshopBorders>Building workhop borders...</BorderBatchWindow.BuildingWorkshopBorders>
+    <BorderBatchWindow.BuildingSubDivisionBorders>Building sub-division borders...</BorderBatchWindow.BuildingSubDivisionBorders>
+    <BorderBatchWindow.ImportNIFsTitle>Select NIFBuilder export file to import</BorderBatchWindow.ImportNIFsTitle>
+    <BorderBatchWindow.ImportExportFilter>NIFBuilder Export File</BorderBatchWindow.ImportExportFilter>
+    <BorderBatchWindow.ImportAllFilter>All Files</BorderBatchWindow.ImportAllFilter>
+    <BorderBatchWindow.PresetCustom>Custom</BorderBatchWindow.PresetCustom>
+    <BatchImportWindow.Title>Batch Import</BatchImportWindow.Title>
+    <BatchImportWindow.Import>Import</BatchImportWindow.Import>
+    <BatchImportWindow.Close>Close</BatchImportWindow.Close>
+    <BatchImportWindow.Analyzing>Analyzing import data...</BatchImportWindow.Analyzing>
+    <BatchImportWindow.ImportingForms>Importing selected forms...</BatchImportWindow.ImportingForms>
+    <BatchImportWindow.Sorting>Sorting imports...</BatchImportWindow.Sorting>
+    <BatchImportWindow.ImportingForm>Importing {0}: 0x{1} - "{2}"...</BatchImportWindow.ImportingForm>
+    <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
+    <PluginSelectorWindow.Title>Select Plugin[s]</PluginSelectorWindow.Title>
+    <PluginSelectorWindow.WorkingFile>Working File</PluginSelectorWindow.WorkingFile>
+    <PluginSelectorWindow.OpenRenderWindow>Open Render Window On Load</PluginSelectorWindow.OpenRenderWindow>
+    <PluginSelectorWindow.Load>Load</PluginSelectorWindow.Load>
+    <PluginSelectorWindow.Cancel>Cancel</PluginSelectorWindow.Cancel>
+    <PluginSelectorWindow.None>NONE</PluginSelectorWindow.None>
+    <SyncedListView.Edit>Edit</SyncedListView.Edit>
+    <SyncedListView.SelectAll>Select All</SyncedListView.SelectAll>
+    <SyncedListView.SelectNone>Select None</SyncedListView.SelectNone>
+    <SyncedListView.OnlyChangedOrNew>Only Changed or New</SyncedListView.OnlyChangedOrNew>
+    <SyncedListView.HideUnchanged>Hide Unchanged</SyncedListView.HideUnchanged>
+    <SyncedListView.LoadOrder>LO</SyncedListView.LoadOrder>
+    <SyncedListView.Filename>Filename</SyncedListView.Filename>
+    <SyncedListView.Type>Type</SyncedListView.Type>
+    <SyncedListView.FormID>FormID</SyncedListView.FormID>
+    <SyncedListView.EditorID>EditorID</SyncedListView.EditorID>
+    <SyncedListView.ExtraInfo>Extra Info</SyncedListView.ExtraInfo>
+    <FormEditor.UID.Title>Unique Identifiers</FormEditor.UID.Title>
+    <FormEditor.UID.FormID>FormID:</FormEditor.UID.FormID>
+    <FormEditor.UID.EditorID>EditorID:</FormEditor.UID.EditorID>
+    <FormEditor.Apply>Apply</FormEditor.Apply>
+    <FormEditor.Cancel>Cancel</FormEditor.Cancel>
+    <FormEditor.SubDivision.Title>Sub-Division</FormEditor.SubDivision.Title>
+    <FormEditor.SubDivision.Location>Location:</FormEditor.SubDivision.Location>
+    <FormEditor.SubDivision.Location.FormID>FormID:</FormEditor.SubDivision.Location.FormID>
+    <FormEditor.SubDivision.Location.EditorID>EditorID:</FormEditor.SubDivision.Location.EditorID>
+    <BorderBatch.ParsingImportFile>Parsing border import file...</BorderBatch.ParsingImportFile>
+    <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for "{1}"...</BorderBatch.CreateNIFsFor>
+    <SubDivisionBatch.ClearingBordersFor>Clearing borders for "{0}"...</SubDivisionBatch.ClearingBordersFor>
+    <SubDivisionBatch.CalculatingBordersFor>Calculating borders for "{0}"...</SubDivisionBatch.CalculatingBordersFor>
+    <SubDivisionBatch.WarnMissingEnablers.Title>Cannot generate border segments</SubDivisionBatch.WarnMissingEnablers.Title>
+    <SubDivisionBatch.WarnMissingEnablers.Body>Must automatically generate or manually create missing border enablers before calculating border segments from edge flags.</SubDivisionBatch.WarnMissingEnablers.Body>
+    <SubDivisionBatch.CheckingElements>Checking for missing sub-division elements...</SubDivisionBatch.CheckingElements>
+    <SubDivisionBatch.CheckingMissingBorderEnablers>Checking for missing border enablers..."</SubDivisionBatch.CheckingMissingBorderEnablers>
+    <SubDivisionBatch.CheckingBorderEnablersFor>Checking border enablers for "{0}"...</SubDivisionBatch.CheckingBorderEnablersFor>
+    <SubDivisionBatch.CalculatingSandboxes>Calculating sandbox volumes...</SubDivisionBatch.CalculatingSandboxes>
+    <SubDivisionBatch.CheckingSandboxFor>Checking sandbox for "{0}"...</SubDivisionBatch.CheckingSandboxFor>
+    <SubDivisionBatch.CalculatingSandboxFor>Calculating sanbox for "{0}"...</SubDivisionBatch.CalculatingSandboxFor>
+    <SubDivisionBatch.CheckingBuildVolumes>Checking build volumes...</SubDivisionBatch.CheckingBuildVolumes>
+    <SubDivisionBatch.CheckingBuildVolumesFor>Checking build volumes for "{0}"...</SubDivisionBatch.CheckingBuildVolumesFor>
+    <SubDivisionBatch.OptimizingBuildVolumesFor>Optimizing build volumes for "{0}"...</SubDivisionBatch.OptimizingBuildVolumesFor>
+    <NIFBuilder.Preset.VanillaWorkshop>Vanilla Workshop</NIFBuilder.Preset.VanillaWorkshop>
+    <NIFBuilder.Preset.VanillaWorkshopGS>Vanilla Workshop w/GS</NIFBuilder.Preset.VanillaWorkshopGS>
+    <NIFBuilder.Preset.ATCTall>Tall</NIFBuilder.Preset.ATCTall>
+    <NIFBuilder.Preset.ATCMedium>Medium</NIFBuilder.Preset.ATCMedium>
+    <NIFBuilder.Preset.ATCSmall>Vanilla Workshop</NIFBuilder.Preset.ATCSmall>
+    <NIFBuilder.Preset.ATCNone>None</NIFBuilder.Preset.ATCNone>
+    <NIFBuilder.Preset.ATCAll>Full ATC Set</NIFBuilder.Preset.ATCAll>
+    <WorldspaceDataPool.CreatingTextures>Creating textures...</WorldspaceDataPool.CreatingTextures>
+    <WorldspaceDataPool.CreatingTexturesP>Creating textures...{0}%</WorldspaceDataPool.CreatingTexturesP>
+    <WorldspaceDataPool.CreatingTextureFrom>Creating texture from "{0}"...</WorldspaceDataPool.CreatingTextureFrom>
+    <WorldspaceDataPool.Loading>Loading "{0}"...</WorldspaceDataPool.Loading>
+    <WorldspaceDataPool.LoadingP>Loading...{0}%</WorldspaceDataPool.LoadingP>
+    <Plugin.LoadBaseForms>Loading required base forms...</Plugin.LoadBaseForms>
+    <Plugin.LoadingFile>Loading "{0}"...</Plugin.LoadingFile>
+    <Plugin.Master>Master</Plugin.Master>
+    <Plugin.Plugin>Plugin</Plugin.Plugin>
+    <Plugin.LightPlugin>Light Plugin</Plugin.LightPlugin>
+    <Plugin.Unknown>Unknown</Plugin.Unknown>
+    <Plugin.LoadingReferencesOf>Loading all references of 0x{0} - "{1}"...</Plugin.LoadingReferencesOf>
+    <Plugin.PostLoadReferencesOf>PostLoad() for all references of 0x{0} - "{1}"...</Plugin.PostLoadReferencesOf>
+</GUIBuilder>

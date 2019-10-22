@@ -103,47 +103,52 @@ namespace GUIBuilder.Windows
             this.mbiExit});
 		    this.mbiFile.Name = "mbiFile";
 		    this.mbiFile.Size = new System.Drawing.Size(35, 20);
-		    this.mbiFile.Text = "File";
+		    this.mbiFile.Tag = "MainWindow.FileMenu";
+		    this.mbiFile.Text = "Flie";
 		    // 
 		    // mbiLoadESMESP
 		    // 
 		    this.mbiLoadESMESP.Name = "mbiLoadESMESP";
 		    this.mbiLoadESMESP.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
-		    this.mbiLoadESMESP.Size = new System.Drawing.Size(179, 22);
-		    this.mbiLoadESMESP.Text = "Load ESM/ESP";
+		    this.mbiLoadESMESP.Size = new System.Drawing.Size(152, 22);
+		    this.mbiLoadESMESP.Tag = "MainWindow.FileMenu.Load";
+		    this.mbiLoadESMESP.Text = "Load";
 		    this.mbiLoadESMESP.Click += new System.EventHandler(this.OnMenuLoadESMESPClick);
 		    // 
 		    // mbiFileSave
 		    // 
 		    this.mbiFileSave.Name = "mbiFileSave";
 		    this.mbiFileSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-		    this.mbiFileSave.Size = new System.Drawing.Size(179, 22);
+		    this.mbiFileSave.Size = new System.Drawing.Size(152, 22);
+		    this.mbiFileSave.Tag = "MainWindow.FileMenu.Save";
 		    this.mbiFileSave.Text = "Save";
 		    this.mbiFileSave.Click += new System.EventHandler(this.OnMenuFileSaveClick);
 		    // 
 		    // mbiFileSeparator1
 		    // 
 		    this.mbiFileSeparator1.Name = "mbiFileSeparator1";
-		    this.mbiFileSeparator1.Size = new System.Drawing.Size(176, 6);
+		    this.mbiFileSeparator1.Size = new System.Drawing.Size(149, 6);
 		    // 
 		    // mbiCloseFiles
 		    // 
 		    this.mbiCloseFiles.Name = "mbiCloseFiles";
 		    this.mbiCloseFiles.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-		    this.mbiCloseFiles.Size = new System.Drawing.Size(179, 22);
-		    this.mbiCloseFiles.Text = "Close Files";
+		    this.mbiCloseFiles.Size = new System.Drawing.Size(152, 22);
+		    this.mbiCloseFiles.Tag = "MainWindow.FileMenu.Close";
+		    this.mbiCloseFiles.Text = "Close";
 		    this.mbiCloseFiles.Click += new System.EventHandler(this.OnMenuCloseFileClick);
 		    // 
 		    // mbiFileSeparator2
 		    // 
 		    this.mbiFileSeparator2.Name = "mbiFileSeparator2";
-		    this.mbiFileSeparator2.Size = new System.Drawing.Size(176, 6);
+		    this.mbiFileSeparator2.Size = new System.Drawing.Size(149, 6);
 		    // 
 		    // mbiExit
 		    // 
 		    this.mbiExit.Name = "mbiExit";
 		    this.mbiExit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.X)));
-		    this.mbiExit.Size = new System.Drawing.Size(179, 22);
+		    this.mbiExit.Size = new System.Drawing.Size(152, 22);
+		    this.mbiExit.Tag = "MainWindow.FileMenu.Exit";
 		    this.mbiExit.Text = "Exit";
 		    this.mbiExit.Click += new System.EventHandler(this.OnMenuExitClick);
 		    // 
@@ -158,48 +163,54 @@ namespace GUIBuilder.Windows
             this.mbiToolsOptions});
 		    this.mbiTools.Name = "mbiTools";
 		    this.mbiTools.Size = new System.Drawing.Size(44, 20);
+		    this.mbiTools.Tag = "MainWindow.ToolMenu";
 		    this.mbiTools.Text = "Tools";
 		    // 
 		    // mbiToolsSubDivisionBatch
 		    // 
 		    this.mbiToolsSubDivisionBatch.Enabled = false;
 		    this.mbiToolsSubDivisionBatch.Name = "mbiToolsSubDivisionBatch";
-		    this.mbiToolsSubDivisionBatch.Size = new System.Drawing.Size(162, 22);
-		    this.mbiToolsSubDivisionBatch.Text = "Sub-Division Batch";
+		    this.mbiToolsSubDivisionBatch.Size = new System.Drawing.Size(152, 22);
+		    this.mbiToolsSubDivisionBatch.Tag = "MainWindow.ToolMenu.SubDivisions";
+		    this.mbiToolsSubDivisionBatch.Text = "SubDivisions";
 		    this.mbiToolsSubDivisionBatch.Click += new System.EventHandler(this.mbiToolsSubDivisionBatchClick);
 		    // 
 		    // mbiToolsBorderBatch
 		    // 
 		    this.mbiToolsBorderBatch.Enabled = false;
 		    this.mbiToolsBorderBatch.Name = "mbiToolsBorderBatch";
-		    this.mbiToolsBorderBatch.Size = new System.Drawing.Size(162, 22);
-		    this.mbiToolsBorderBatch.Text = "Border Batch";
+		    this.mbiToolsBorderBatch.Size = new System.Drawing.Size(152, 22);
+		    this.mbiToolsBorderBatch.Tag = "MainWindow.ToolMenu.Borders";
+		    this.mbiToolsBorderBatch.Text = "Borders";
 		    this.mbiToolsBorderBatch.Click += new System.EventHandler(this.mbiWindowsBorderBatchClick);
 		    // 
 		    // mbiToolsRendererWindow
 		    // 
 		    this.mbiToolsRendererWindow.Enabled = false;
 		    this.mbiToolsRendererWindow.Name = "mbiToolsRendererWindow";
-		    this.mbiToolsRendererWindow.Size = new System.Drawing.Size(162, 22);
-		    this.mbiToolsRendererWindow.Text = "Render Window";
+		    this.mbiToolsRendererWindow.Size = new System.Drawing.Size(152, 22);
+		    this.mbiToolsRendererWindow.Tag = "MainWindow.ToolMenu.Render";
+		    this.mbiToolsRendererWindow.Text = "Render";
 		    this.mbiToolsRendererWindow.Click += new System.EventHandler(this.mbiWindowsRendererClick);
 		    // 
 		    // toolStripSeparator1
 		    // 
 		    this.toolStripSeparator1.Name = "toolStripSeparator1";
-		    this.toolStripSeparator1.Size = new System.Drawing.Size(159, 6);
+		    this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
 		    // 
 		    // mbiToolsAbout
 		    // 
 		    this.mbiToolsAbout.Name = "mbiToolsAbout";
-		    this.mbiToolsAbout.Size = new System.Drawing.Size(162, 22);
+		    this.mbiToolsAbout.Size = new System.Drawing.Size(152, 22);
+		    this.mbiToolsAbout.Tag = "MainWindow.ToolMenu.About";
 		    this.mbiToolsAbout.Text = "About";
 		    this.mbiToolsAbout.Click += new System.EventHandler(this.mbiWindowsAboutClick);
 		    // 
 		    // mbiToolsOptions
 		    // 
 		    this.mbiToolsOptions.Name = "mbiToolsOptions";
-		    this.mbiToolsOptions.Size = new System.Drawing.Size(162, 22);
+		    this.mbiToolsOptions.Size = new System.Drawing.Size(152, 22);
+		    this.mbiToolsOptions.Tag = "MainWindow.ToolMenu.Options";
 		    this.mbiToolsOptions.Text = "Options";
 		    this.mbiToolsOptions.Click += new System.EventHandler(this.mbiToolsOptionsClick);
 		    // 
@@ -265,7 +276,8 @@ namespace GUIBuilder.Windows
 		    this.MaximumSize = new System.Drawing.Size(65536, 73);
 		    this.MinimumSize = new System.Drawing.Size(700, 73);
 		    this.Name = "Main";
-		    this.Text = "GUI Builder";
+		    this.Tag = "MainWindow.Title";
+		    this.Text = "Title";
 		    this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
 		    this.Load += new System.EventHandler(this.OnFormLoad);
 		    this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);

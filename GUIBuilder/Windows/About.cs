@@ -40,6 +40,8 @@ namespace GUIBuilder.Windows
         
         void HelpAboutFormLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             

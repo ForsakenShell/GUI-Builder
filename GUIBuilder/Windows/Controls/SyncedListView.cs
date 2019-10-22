@@ -119,7 +119,7 @@ namespace GUIBuilder.Windows.Controls
                     if( !ForceDefaultWidth )
                         DefaultWidth = GodObject.XmlConfig.ReadInt( XmlPath, XmlWidth, defaultWidth );
                     Header = new System.Windows.Forms.ColumnHeader();
-                    Header.Text = Name;
+                    Header.Text = string.IsNullOrEmpty( Name ) ? "" : Name.Translate();
                     Header.Width = DefaultWidth;
                     Parent.lvSyncObjects.Columns.Add( Header );
                     Index = Parent.lvSyncObjects.Columns.IndexOf( Header );
@@ -386,6 +386,8 @@ namespace GUIBuilder.Windows.Controls
         void SyncedListViewLoad( object sender, EventArgs e )
         {
             //DebugLog.Write( string.Format( "\n{0} :: SyncedListViewLoad() :: Name = {1}", this.GetType().ToString(), this.Name ) );
+            this.Translate( true );
+            
             RecreateColumns();
             Sorter = null;
             if( AllowOverrideColumnSorting )
@@ -405,13 +407,13 @@ namespace GUIBuilder.Windows.Controls
             lvSyncObjects.Columns.Clear();
             ColumnCount = 0;
             Columns = new Column[]{
-                new Column( this, SyncedColumnID.Checkbox     , ""            ,  24, true , _CheckboxColumn  ),
-                new Column( this, SyncedColumnID.LoadOrder    , "LO"          ,  28, true , _LoadOrderColumn ),
-                new Column( this, SyncedColumnID.Filename     , "Filename"    , 160, false, _FilenameColumn  ),
-                new Column( this, SyncedColumnID.SignatureType, "Type"        ,  60, false, _TypeColumn      ),
-                new Column( this, SyncedColumnID.FormID       , "FormID"      ,  80, true , _FormIDColumn    ),
-                new Column( this, SyncedColumnID.EditorID     , "EditorID"    , 256, false, _EditorIDColumn  ),
-                new Column( this, SyncedColumnID.ExtraInfo    , "Extra Info"  , 512, false, _ExtraInfoColumn )
+                new Column( this, SyncedColumnID.Checkbox     , ""                        ,  24, true , _CheckboxColumn  ),
+                new Column( this, SyncedColumnID.LoadOrder    , "SyncedListView.LoadOrder",  28, true , _LoadOrderColumn ),
+                new Column( this, SyncedColumnID.Filename     , "SyncedListView.Filename" , 160, false, _FilenameColumn  ),
+                new Column( this, SyncedColumnID.SignatureType, "SyncedListView.Type"     ,  60, false, _TypeColumn      ),
+                new Column( this, SyncedColumnID.FormID       , "SyncedListView.FormID"   ,  80, true , _FormIDColumn    ),
+                new Column( this, SyncedColumnID.EditorID     , "SyncedListView.EditorID" , 256, false, _EditorIDColumn  ),
+                new Column( this, SyncedColumnID.ExtraInfo    , "SyncedListView.ExtraInfo", 512, false, _ExtraInfoColumn )
             };
             RegisterListViewForEvents( true );
             lvSyncObjects.Enabled = true;

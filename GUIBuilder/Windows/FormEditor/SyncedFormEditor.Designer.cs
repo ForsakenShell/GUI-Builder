@@ -62,6 +62,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.gbUIDs.Size = new System.Drawing.Size(298, 73);
             this.gbUIDs.TabIndex = 0;
             this.gbUIDs.TabStop = false;
+            this.gbUIDs.Tag = "FormEditor.UID.Title";
             this.gbUIDs.Text = "Unique Identifiers";
             // 
             // tbEditorID
@@ -77,6 +78,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblEditorID.Name = "lblEditorID";
             this.lblEditorID.Size = new System.Drawing.Size(100, 23);
             this.lblEditorID.TabIndex = 6;
+            this.lblEditorID.Tag = "FormEditor.UID.EditorID";
             this.lblEditorID.Text = "EditorID:";
             // 
             // tbFormID
@@ -94,6 +96,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblFormID.Name = "lblFormID";
             this.lblFormID.Size = new System.Drawing.Size(100, 23);
             this.lblFormID.TabIndex = 4;
+            this.lblFormID.Tag = "FormEditor.UID.FormID";
             this.lblFormID.Text = "FormID:";
             // 
             // btnCancel
@@ -104,6 +107,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 1;
+            this.btnCancel.Tag = "FormEditor.Cancel";
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancelClick);
@@ -116,6 +120,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(75, 23);
             this.btnApply.TabIndex = 2;
+            this.btnApply.Tag = "FormEditor.Apply";
             this.btnApply.Text = "Apply";
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.btnApplyClick);

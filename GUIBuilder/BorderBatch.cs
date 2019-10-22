@@ -48,7 +48,7 @@ namespace GUIBuilder
             
             #region Parse import file
             
-            m.SetCurrentStatusMessage( "Parsing border import file..." );
+            m.SetCurrentStatusMessage( "BorderBatch.ParsingImportFile".Translate() );
             
             for( int index = 0; index < count; index++ )
             {
@@ -138,7 +138,7 @@ namespace GUIBuilder
                 
                 foreach( var workshop in workshops )
                 {   // Build a workshop border
-                    m.SetCurrentStatusMessage( string.Format( "Creating \"{0}\" NIFs for {1}...", borderSetName, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     var subList = workshop.CreateBorderNIFs(
                         gradientHeight, groundOffset, groundSink,
                         targetPath, targetSuffix,
@@ -198,7 +198,7 @@ namespace GUIBuilder
                 
                 foreach( var subdivision in subdivisions )
                 {
-                    m.SetCurrentStatusMessage( string.Format( "Creating \"{0}\" NIFs for {1}...", borderSetName, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     var subList = subdivision.CreateBorderNIFs(
                         gradientHeight, groundOffset, groundSink,
                         targetPath, targetSuffix,

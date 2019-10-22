@@ -73,11 +73,11 @@ namespace GUIBuilder.Windows
             this.tsRenderWorkshops = new System.Windows.Forms.ToolStripButton();
             this.tsRenderSettlements = new System.Windows.Forms.ToolStripButton();
             this.tsRenderSubDivisions = new System.Windows.Forms.ToolStripButton();
+            this.tsRenderBorders = new System.Windows.Forms.ToolStripButton();
             this.tsRenderEdgeFlags = new System.Windows.Forms.ToolStripButton();
             this.tsRenderEdgeFlagLinks = new System.Windows.Forms.ToolStripButton();
             this.tsRenderBuildVolumes = new System.Windows.Forms.ToolStripButton();
             this.tsRenderSandboxVolumes = new System.Windows.Forms.ToolStripButton();
-            this.tsRenderBorders = new System.Windows.Forms.ToolStripButton();
             this.tslMouseToCellGrid = new System.Windows.Forms.ToolStripLabel();
             this.tslMouseToWorldspace = new System.Windows.Forms.ToolStripLabel();
             this.tslEditorSelectionMode = new System.Windows.Forms.ToolStripLabel();
@@ -172,7 +172,8 @@ namespace GUIBuilder.Windows
             this.tsRenderOverRegion.Name = "tsRenderOverRegion";
             this.tsRenderOverRegion.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.tsRenderOverRegion.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderOverRegion.ToolTipText = "Non-Playable Regions";
+            this.tsRenderOverRegion.Tag = "ToolTip:RenderWindow.NonPlayableRegions";
+            this.tsRenderOverRegion.ToolTipText = "Regions";
             this.tsRenderOverRegion.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsRenderLandHeight
@@ -185,7 +186,8 @@ namespace GUIBuilder.Windows
             this.tsRenderLandHeight.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderLandHeight.Name = "tsRenderLandHeight";
             this.tsRenderLandHeight.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderLandHeight.ToolTipText = "Land Heightmap";
+            this.tsRenderLandHeight.Tag = "ToolTip:RenderWindow.HMLand";
+            this.tsRenderLandHeight.ToolTipText = "Land";
             this.tsRenderLandHeight.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsRenderWaterHeight
@@ -198,7 +200,8 @@ namespace GUIBuilder.Windows
             this.tsRenderWaterHeight.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderWaterHeight.Name = "tsRenderWaterHeight";
             this.tsRenderWaterHeight.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderWaterHeight.ToolTipText = "Water Heightmap";
+            this.tsRenderWaterHeight.Tag = "ToolTip:RenderWindow.HMWater";
+            this.tsRenderWaterHeight.ToolTipText = "Water";
             this.tsRenderWaterHeight.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsRenderCellGrid
@@ -211,16 +214,18 @@ namespace GUIBuilder.Windows
             this.tsRenderCellGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderCellGrid.Name = "tsRenderCellGrid";
             this.tsRenderCellGrid.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderCellGrid.ToolTipText = "Cell Grid";
+            this.tsRenderCellGrid.Tag = "ToolTip:RenderWindow.Grid";
+            this.tsRenderCellGrid.ToolTipText = "Grid";
             this.tsRenderCellGrid.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsMinSettlementObjectsRenderSize
             // 
             this.tsMinSettlementObjectsRenderSize.Name = "tsMinSettlementObjectsRenderSize";
             this.tsMinSettlementObjectsRenderSize.Size = new System.Drawing.Size(32, 21);
+            this.tsMinSettlementObjectsRenderSize.Tag = "ToolTip:RenderWindow.MinScale";
             this.tsMinSettlementObjectsRenderSize.Text = "4.0";
             this.tsMinSettlementObjectsRenderSize.TextBoxTextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tsMinSettlementObjectsRenderSize.ToolTipText = "Minimum scaled size of objects";
+            this.tsMinSettlementObjectsRenderSize.ToolTipText = "Min Scale";
             this.tsMinSettlementObjectsRenderSize.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tsMinSettlementObjectsRenderSizeKeyPress);
             this.tsMinSettlementObjectsRenderSize.TextChanged += new System.EventHandler(this.tsMinSettlementObjectsRenderSizeTextChanged);
             // 
@@ -232,7 +237,8 @@ namespace GUIBuilder.Windows
             this.tsRenderSelectedOnly.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderSelectedOnly.Name = "tsRenderSelectedOnly";
             this.tsRenderSelectedOnly.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderSelectedOnly.ToolTipText = "Render selected objects only";
+            this.tsRenderSelectedOnly.Tag = "ToolTip:RenderWindow.SelectedOnly";
+            this.tsRenderSelectedOnly.ToolTipText = "Selected only";
             this.tsRenderSelectedOnly.CheckStateChanged += new System.EventHandler(this.tsRenderSelectedOnlyCheckStateChanged);
             // 
             // tsRepaintAllObjects
@@ -242,7 +248,8 @@ namespace GUIBuilder.Windows
             this.tsRepaintAllObjects.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRepaintAllObjects.Name = "tsRepaintAllObjects";
             this.tsRepaintAllObjects.Size = new System.Drawing.Size(23, 20);
-            this.tsRepaintAllObjects.ToolTipText = "Repaint all objects";
+            this.tsRepaintAllObjects.Tag = "ToolTip:RenderWindow.Repaint";
+            this.tsRepaintAllObjects.ToolTipText = "Repent!";
             this.tsRepaintAllObjects.Click += new System.EventHandler(this.tsRepaintAllObjectsClick);
             // 
             // tsRenderWorkshops
@@ -255,7 +262,8 @@ namespace GUIBuilder.Windows
             this.tsRenderWorkshops.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderWorkshops.Name = "tsRenderWorkshops";
             this.tsRenderWorkshops.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderWorkshops.ToolTipText = "Workshops";
+            this.tsRenderWorkshops.Tag = "ToolTip:RenderWindow.Workshops";
+            this.tsRenderWorkshops.ToolTipText = "F4:WS";
             this.tsRenderWorkshops.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsRenderSettlements
@@ -268,7 +276,8 @@ namespace GUIBuilder.Windows
             this.tsRenderSettlements.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderSettlements.Name = "tsRenderSettlements";
             this.tsRenderSettlements.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderSettlements.ToolTipText = "Settlements";
+            this.tsRenderSettlements.Tag = "ToolTip:RenderWindow.Settlements";
+            this.tsRenderSettlements.ToolTipText = "ATC:Set";
             this.tsRenderSettlements.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsRenderSubDivisions
@@ -281,54 +290,9 @@ namespace GUIBuilder.Windows
             this.tsRenderSubDivisions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderSubDivisions.Name = "tsRenderSubDivisions";
             this.tsRenderSubDivisions.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderSubDivisions.ToolTipText = "Sub-Divisions";
+            this.tsRenderSubDivisions.Tag = "ToolTip:RenderWindow.SubDivisions";
+            this.tsRenderSubDivisions.ToolTipText = "ATC:Subs";
             this.tsRenderSubDivisions.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
-            // 
-            // tsRenderEdgeFlags
-            // 
-            this.tsRenderEdgeFlags.Checked = true;
-            this.tsRenderEdgeFlags.CheckOnClick = true;
-            this.tsRenderEdgeFlags.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.tsRenderEdgeFlags.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRenderEdgeFlags.Image = global::Properties.Resources.tsIconEdgeFlag;
-            this.tsRenderEdgeFlags.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRenderEdgeFlags.Name = "tsRenderEdgeFlags";
-            this.tsRenderEdgeFlags.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderEdgeFlags.ToolTipText = "Sub-Division Edge Flags";
-            this.tsRenderEdgeFlags.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
-            // 
-            // tsRenderEdgeFlagLinks
-            // 
-            this.tsRenderEdgeFlagLinks.CheckOnClick = true;
-            this.tsRenderEdgeFlagLinks.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRenderEdgeFlagLinks.Image = global::Properties.Resources.tsIconEdgeFlagLink;
-            this.tsRenderEdgeFlagLinks.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRenderEdgeFlagLinks.Name = "tsRenderEdgeFlagLinks";
-            this.tsRenderEdgeFlagLinks.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderEdgeFlagLinks.ToolTipText = "Sub-Division Edge Flag Links";
-            this.tsRenderEdgeFlagLinks.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
-            // 
-            // tsRenderBuildVolumes
-            // 
-            this.tsRenderBuildVolumes.CheckOnClick = true;
-            this.tsRenderBuildVolumes.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRenderBuildVolumes.Image = global::Properties.Resources.tsIconBuildVolumes;
-            this.tsRenderBuildVolumes.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRenderBuildVolumes.Name = "tsRenderBuildVolumes";
-            this.tsRenderBuildVolumes.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderBuildVolumes.ToolTipText = "Build Volumes";
-            this.tsRenderBuildVolumes.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
-            // 
-            // tsRenderSandboxVolumes
-            // 
-            this.tsRenderSandboxVolumes.CheckOnClick = true;
-            this.tsRenderSandboxVolumes.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRenderSandboxVolumes.Image = global::Properties.Resources.tsIconSandboxVolumes;
-            this.tsRenderSandboxVolumes.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRenderSandboxVolumes.Name = "tsRenderSandboxVolumes";
-            this.tsRenderSandboxVolumes.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderSandboxVolumes.ToolTipText = "Sandbox Volumes";
-            this.tsRenderSandboxVolumes.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tsRenderBorders
             // 
@@ -340,8 +304,59 @@ namespace GUIBuilder.Windows
             this.tsRenderBorders.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRenderBorders.Name = "tsRenderBorders";
             this.tsRenderBorders.Size = new System.Drawing.Size(23, 20);
-            this.tsRenderBorders.ToolTipText = "Borders";
+            this.tsRenderBorders.Tag = "ToolTip:RenderWindow.Borders";
+            this.tsRenderBorders.ToolTipText = "ATC:Border";
             this.tsRenderBorders.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
+            // 
+            // tsRenderEdgeFlags
+            // 
+            this.tsRenderEdgeFlags.Checked = true;
+            this.tsRenderEdgeFlags.CheckOnClick = true;
+            this.tsRenderEdgeFlags.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.tsRenderEdgeFlags.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRenderEdgeFlags.Image = global::Properties.Resources.tsIconEdgeFlag;
+            this.tsRenderEdgeFlags.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRenderEdgeFlags.Name = "tsRenderEdgeFlags";
+            this.tsRenderEdgeFlags.Size = new System.Drawing.Size(23, 20);
+            this.tsRenderEdgeFlags.Tag = "ToolTip:RenderWindow.EdgeFlags";
+            this.tsRenderEdgeFlags.ToolTipText = "ATC:EFs";
+            this.tsRenderEdgeFlags.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
+            // 
+            // tsRenderEdgeFlagLinks
+            // 
+            this.tsRenderEdgeFlagLinks.CheckOnClick = true;
+            this.tsRenderEdgeFlagLinks.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRenderEdgeFlagLinks.Image = global::Properties.Resources.tsIconEdgeFlagLink;
+            this.tsRenderEdgeFlagLinks.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRenderEdgeFlagLinks.Name = "tsRenderEdgeFlagLinks";
+            this.tsRenderEdgeFlagLinks.Size = new System.Drawing.Size(23, 20);
+            this.tsRenderEdgeFlagLinks.Tag = "ToolTip:RenderWindow.EdgeFlagLinks";
+            this.tsRenderEdgeFlagLinks.ToolTipText = "ATC:EFLs";
+            this.tsRenderEdgeFlagLinks.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
+            // 
+            // tsRenderBuildVolumes
+            // 
+            this.tsRenderBuildVolumes.CheckOnClick = true;
+            this.tsRenderBuildVolumes.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRenderBuildVolumes.Image = global::Properties.Resources.tsIconBuildVolumes;
+            this.tsRenderBuildVolumes.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRenderBuildVolumes.Name = "tsRenderBuildVolumes";
+            this.tsRenderBuildVolumes.Size = new System.Drawing.Size(23, 20);
+            this.tsRenderBuildVolumes.Tag = "ToolTip:RenderWindow.BuildVolumes";
+            this.tsRenderBuildVolumes.ToolTipText = "ATC:BVs";
+            this.tsRenderBuildVolumes.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
+            // 
+            // tsRenderSandboxVolumes
+            // 
+            this.tsRenderSandboxVolumes.CheckOnClick = true;
+            this.tsRenderSandboxVolumes.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRenderSandboxVolumes.Image = global::Properties.Resources.tsIconSandboxVolumes;
+            this.tsRenderSandboxVolumes.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRenderSandboxVolumes.Name = "tsRenderSandboxVolumes";
+            this.tsRenderSandboxVolumes.Size = new System.Drawing.Size(23, 20);
+            this.tsRenderSandboxVolumes.Tag = "ToolTip:RenderWindow.SandboxVolumes";
+            this.tsRenderSandboxVolumes.ToolTipText = "ATC:SVs";
+            this.tsRenderSandboxVolumes.CheckedChanged += new System.EventHandler(this.RenderStateControlChanged);
             // 
             // tslMouseToCellGrid
             // 
@@ -407,7 +422,8 @@ namespace GUIBuilder.Windows
             this.MinimumSize = new System.Drawing.Size(420, 360);
             this.Name = "Render";
             this.ShowInTaskbar = false;
-            this.Text = "Render Window";
+            this.Tag = "RenderWindow.Title";
+            this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);

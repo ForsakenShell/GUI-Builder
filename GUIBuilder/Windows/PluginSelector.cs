@@ -52,6 +52,8 @@ namespace GUIBuilder.Windows
         
         void PluginSelectorLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
@@ -91,7 +93,7 @@ namespace GUIBuilder.Windows
             }
             
             cbWorkingFile.Items.Clear();
-            cbWorkingFile.Items.Add( " [NONE] " );
+            cbWorkingFile.Items.Add( string.Format( " [{0}] ", "PluginSelectorWindow.None".Translate() ) );
             cbWorkingFile.SelectedIndex = 0;
             onLoadComplete = true;
         }

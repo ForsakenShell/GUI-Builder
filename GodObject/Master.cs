@@ -133,12 +133,12 @@ namespace GodObject
                 get
                 {
                     return Name.EndsWith( ".esm", StringComparison.InvariantCultureIgnoreCase )
-                        ? "Master (ESM)"
+                        ? string.Format( "{0} (ESM)", "Plugin.Master".Translate() )
                         : Name.EndsWith( ".esl", StringComparison.InvariantCultureIgnoreCase )
-                        ? "Light Plugin (ESL)"
+                        ? string.Format( "{0} (ESL)", "Plugin.LightPlugin".Translate() )
                         : Name.EndsWith( ".esp", StringComparison.InvariantCultureIgnoreCase )
-                        ? "Plugin (ESP)"
-                        : "Unknown";
+                        ? string.Format( "{0} (ESP)", "Plugin.Plugin".Translate() )
+                        : "Plugin.Unknown".Translate();
                 }
             }
             

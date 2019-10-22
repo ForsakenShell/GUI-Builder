@@ -97,6 +97,77 @@ namespace GodObject
             }
         }
         
+        static readonly string XmlLanguageKey = "Language";
+        static string _Language = string.Empty;
+        public static string Language
+        {
+            get
+            {
+                if( string.IsNullOrEmpty( _Language ) )
+                    _Language = XmlConfig.ReadStringValue( "Options", XmlLanguageKey, GUIBuilder.Constant.DefaultLanguage );
+                return _Language;
+            }
+            set
+            {
+                var bbPath = BorderBuilder;
+                if( string.IsNullOrEmpty( bbPath ) )
+                    return;
+                if(
+                    ( string.IsNullOrEmpty( value ) )||
+                    ( !string.Format( "{0}{1}/{2}/{3}", bbPath, GUIBuilder.Constant.LanguageSubPath, value, GUIBuilder.Constant.LanguageFile ).FileExists() )
+                )   value = GUIBuilder.Constant.DefaultLanguage;
+                _Language = value;
+                XmlConfig.WriteStringValue( "Options", XmlLanguageKey, value );
+            }
+        }
+        
+        static string _GUIBuilderLanguageFile = string.Empty;
+        public static string GUIBuilderLanguageFile
+        {
+            get
+            {
+                if( string.IsNullOrEmpty( _GUIBuilderLanguageFile ) )
+                {
+                    var bbPath = BorderBuilder;
+                    if( string.IsNullOrEmpty( bbPath ) )
+                        return null;
+                    var language = Language;
+                    if( string.IsNullOrEmpty( language ) )
+                        return null;
+                    var tryFile = string.Format( "{0}{1}/{2}/{3}", bbPath, GUIBuilder.Constant.LanguageSubPath, language, GUIBuilder.Constant.LanguageFile );
+                    if( !tryFile.TryAssignFile( ref _GUIBuilderLanguageFile ) )
+                        return null;
+                }
+                return _GUIBuilderLanguageFile;
+            }
+        }
+        
+        static List<string> _LanguageOptions = null;
+        public static List<string> LanguageOptions
+        {
+            get
+            {
+                if( _LanguageOptions.NullOrEmpty() )
+                {
+                    var bbPath = BorderBuilder;
+                    if( string.IsNullOrEmpty( bbPath ) )
+                        return null;
+                    var langPath = bbPath + GUIBuilder.Constant.LanguageSubPath;
+                    var langPaths = new List<string>( System.IO.Directory.EnumerateDirectories( langPath ) );
+                    var languages = new List<string>();
+                    foreach( var lang in langPaths )
+                    {
+                        var testFile = string.Format( "{0}/{1}", lang, GUIBuilder.Constant.LanguageFile );
+                        if( testFile.FileExists() )
+                            languages.Add( lang.Substring( lang.LastIndexOf( "\\", StringComparison.Ordinal ) + 1 ) );
+                    }
+                    if( !languages.NullOrEmpty() )
+                        _LanguageOptions = languages;
+                }
+                return _LanguageOptions;
+            }
+        }
+        
         static string _GUIBuilderConfigFile = string.Empty;
         public static string GUIBuilderConfigFile
         {

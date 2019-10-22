@@ -41,7 +41,6 @@ namespace GUIBuilder.Windows
         /// </summary>
         void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblCredit = new System.Windows.Forms.Label();
             this.lblVersion = new System.Windows.Forms.Label();
@@ -60,7 +59,8 @@ namespace GUIBuilder.Windows
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(485, 68);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "GUI Builder";
+            this.lblTitle.Tag = "AboutWindow.ComicTitle";
+            this.lblTitle.Text = "Comic";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblCredit
@@ -71,6 +71,7 @@ namespace GUIBuilder.Windows
             this.lblCredit.Name = "lblCredit";
             this.lblCredit.Size = new System.Drawing.Size(485, 23);
             this.lblCredit.TabIndex = 1;
+            this.lblCredit.Tag = "AboutWindow.Author";
             this.lblCredit.Text = "by 1000101";
             this.lblCredit.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -106,7 +107,8 @@ namespace GUIBuilder.Windows
             this.lblLicense.Name = "lblLicense";
             this.lblLicense.Size = new System.Drawing.Size(485, 23);
             this.lblLicense.TabIndex = 5;
-            this.lblLicense.Text = "Released under the Unlicense";
+            this.lblLicense.Tag = "AboutWindow.ReleaseLicenseTitle";
+            this.lblLicense.Text = "Release license title";
             this.lblLicense.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tbLicense
@@ -122,7 +124,8 @@ namespace GUIBuilder.Windows
             this.tbLicense.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.tbLicense.Size = new System.Drawing.Size(479, 154);
             this.tbLicense.TabIndex = 6;
-            this.tbLicense.Text = resources.GetString("tbLicense.Text");
+            this.tbLicense.Tag = "AboutWindow.ReleaseLicenseBody";
+            this.tbLicense.Text = "Release license body";
             // 
             // lblAuthor
             // 
@@ -137,7 +140,7 @@ namespace GUIBuilder.Windows
             this.lblAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblAuthorLinkClicked);
             // 
-            // AboutWindow
+            // About
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -154,9 +157,10 @@ namespace GUIBuilder.Windows
             this.MaximumSize = new System.Drawing.Size(503, 560);
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(503, 376);
-            this.Name = "AboutWindow";
+            this.Name = "About";
             this.ShowInTaskbar = false;
-            this.Text = "About GUI Builder";
+            this.Tag = "AboutWindow.Title";
+            this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AboutWindowFormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.Load += new System.EventHandler(this.HelpAboutFormLoad);

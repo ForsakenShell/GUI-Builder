@@ -18,7 +18,7 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.Button btnCheckMissingElements;
         System.Windows.Forms.Button btnFinalizeElements;
         GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision> lvSubDivisions;
-        System.Windows.Forms.Button btnNormalizeSandboxVolumes;
+        System.Windows.Forms.Button btnNormalizeBuildVolumes;
         System.Windows.Forms.GroupBox gbElements;
         System.Windows.Forms.CheckBox cbElementBorderEnablers;
         System.Windows.Forms.CheckBox cbElementSandboxVolumes;
@@ -53,7 +53,7 @@ namespace GUIBuilder.Windows
             this.cbElementBorderEnablers = new System.Windows.Forms.CheckBox();
             this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.gbSubDivisionFunctions = new System.Windows.Forms.GroupBox();
-            this.btnNormalizeSandboxVolumes = new System.Windows.Forms.Button();
+            this.btnNormalizeBuildVolumes = new System.Windows.Forms.Button();
             this.btnOptimizeVolumes = new System.Windows.Forms.Button();
             this.btnCheckMissingElements = new System.Windows.Forms.Button();
             this.btnFinalizeElements = new System.Windows.Forms.Button();
@@ -88,6 +88,7 @@ namespace GUIBuilder.Windows
             this.gbElements.TabIndex = 12;
             this.gbElements.TabStop = false;
             this.gbElements.Text = "Elements";
+            this.gbElements.Tag = "SubDivisionBatchWindow.Elements";
             // 
             // cbElementSandboxVolumes
             // 
@@ -98,6 +99,7 @@ namespace GUIBuilder.Windows
             this.cbElementSandboxVolumes.Size = new System.Drawing.Size(168, 17);
             this.cbElementSandboxVolumes.TabIndex = 2;
             this.cbElementSandboxVolumes.Text = "Sandbox Volumes";
+            this.cbElementSandboxVolumes.Tag = "SubDivisionBatchWindow.SandboxVolumes";
             this.cbElementSandboxVolumes.UseVisualStyleBackColor = true;
             // 
             // cbElementsEdgeFlags
@@ -109,6 +111,7 @@ namespace GUIBuilder.Windows
             this.cbElementsEdgeFlags.Size = new System.Drawing.Size(168, 17);
             this.cbElementsEdgeFlags.TabIndex = 1;
             this.cbElementsEdgeFlags.Text = "Edge Flags";
+            this.cbElementsEdgeFlags.Tag = "SubDivisionBatchWindow.EdgeFlags";
             this.cbElementsEdgeFlags.UseVisualStyleBackColor = true;
             // 
             // cbElementBorderEnablers
@@ -120,6 +123,7 @@ namespace GUIBuilder.Windows
             this.cbElementBorderEnablers.Size = new System.Drawing.Size(168, 17);
             this.cbElementBorderEnablers.TabIndex = 0;
             this.cbElementBorderEnablers.Text = "Border Enablers";
+            this.cbElementBorderEnablers.Tag = "SubDivisionBatchWindow.BorderEnablers";
             this.cbElementBorderEnablers.UseVisualStyleBackColor = true;
             // 
             // lvSubDivisions
@@ -147,7 +151,7 @@ namespace GUIBuilder.Windows
             // 
             // gbSubDivisionFunctions
             // 
-            this.gbSubDivisionFunctions.Controls.Add(this.btnNormalizeSandboxVolumes);
+            this.gbSubDivisionFunctions.Controls.Add(this.btnNormalizeBuildVolumes);
             this.gbSubDivisionFunctions.Controls.Add(this.btnOptimizeVolumes);
             this.gbSubDivisionFunctions.Controls.Add(this.btnCheckMissingElements);
             this.gbSubDivisionFunctions.Controls.Add(this.btnFinalizeElements);
@@ -157,15 +161,17 @@ namespace GUIBuilder.Windows
             this.gbSubDivisionFunctions.TabIndex = 10;
             this.gbSubDivisionFunctions.TabStop = false;
             this.gbSubDivisionFunctions.Text = "Functions";
+            this.gbSubDivisionFunctions.Tag = "SubDivisionBatchWindow.Functions";
             // 
             // btnNormalizeSandboxVolumes
             // 
-            this.btnNormalizeSandboxVolumes.Location = new System.Drawing.Point(6, 48);
-            this.btnNormalizeSandboxVolumes.Name = "btnNormalizeSandboxVolumes";
-            this.btnNormalizeSandboxVolumes.Size = new System.Drawing.Size(168, 23);
-            this.btnNormalizeSandboxVolumes.TabIndex = 3;
-            this.btnNormalizeSandboxVolumes.Text = "Normalize Build Volumes";
-            this.btnNormalizeSandboxVolumes.UseVisualStyleBackColor = true;
+            this.btnNormalizeBuildVolumes.Location = new System.Drawing.Point(6, 48);
+            this.btnNormalizeBuildVolumes.Name = "btnNormalizeBuildVolumes";
+            this.btnNormalizeBuildVolumes.Size = new System.Drawing.Size(168, 23);
+            this.btnNormalizeBuildVolumes.TabIndex = 3;
+            this.btnNormalizeBuildVolumes.Text = "Normalize Build Volumes";
+            this.btnNormalizeBuildVolumes.Tag = "SubDivisionBatchWindow.Function.NormalizeBuildVolumes";
+            this.btnNormalizeBuildVolumes.UseVisualStyleBackColor = true;
             // 
             // btnOptimizeVolumes
             // 
@@ -174,6 +180,7 @@ namespace GUIBuilder.Windows
             this.btnOptimizeVolumes.Size = new System.Drawing.Size(168, 23);
             this.btnOptimizeVolumes.TabIndex = 0;
             this.btnOptimizeVolumes.Text = "Optimize Volumes";
+            this.btnOptimizeVolumes.Tag = "SubDivisionBatchWindow.Function.OptimizeVolumes";
             this.btnOptimizeVolumes.UseVisualStyleBackColor = true;
             this.btnOptimizeVolumes.Click += new System.EventHandler(this.btnOptimizeClick);
             // 
@@ -184,6 +191,7 @@ namespace GUIBuilder.Windows
             this.btnCheckMissingElements.Size = new System.Drawing.Size(168, 23);
             this.btnCheckMissingElements.TabIndex = 1;
             this.btnCheckMissingElements.Text = "Check For Missing Elements";
+            this.btnCheckMissingElements.Tag = "SubDivisionBatchWindow.Function.CheckElements";
             this.btnCheckMissingElements.UseVisualStyleBackColor = true;
             this.btnCheckMissingElements.Click += new System.EventHandler(this.btnCheckMissingElementsClick);
             // 
@@ -194,6 +202,7 @@ namespace GUIBuilder.Windows
             this.btnFinalizeElements.Size = new System.Drawing.Size(168, 23);
             this.btnFinalizeElements.TabIndex = 2;
             this.btnFinalizeElements.Text = "Finalize All Elements";
+            this.btnFinalizeElements.Tag = "SubDivisionBatchWindow.Function.FinalizeElements";
             this.btnFinalizeElements.UseVisualStyleBackColor = true;
             // 
             // cbElementBuildVolumes
@@ -205,6 +214,7 @@ namespace GUIBuilder.Windows
             this.cbElementBuildVolumes.Size = new System.Drawing.Size(168, 17);
             this.cbElementBuildVolumes.TabIndex = 3;
             this.cbElementBuildVolumes.Text = "Build Volumes";
+            this.cbElementBuildVolumes.Tag = "SubDivisionBatchWindow.BuildVolumes";
             this.cbElementBuildVolumes.UseVisualStyleBackColor = true;
             // 
             // SubDivisionBatchWindow
@@ -220,7 +230,8 @@ namespace GUIBuilder.Windows
             this.Name = "SubDivisionBatchWindow";
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "Sub-Division Batch";
+            this.Text = "title";
+            this.Tag = "SubDivisionBatchWindow.Title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);

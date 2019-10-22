@@ -39,7 +39,7 @@ namespace GUIBuilder
             
             foreach( var subdivision in subdivisions )
             {
-                m.SetCurrentStatusMessage( string.Format( "Clear borders for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.ClearingBordersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 subdivision.ClearBorderEnablerEdgeFlags( true );
             }
             
@@ -71,7 +71,7 @@ namespace GUIBuilder
             
             foreach( var workshop in workshops )
             {
-                m.SetCurrentStatusMessage( string.Format( "Calculating borders for {0}...", workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 workshop.BuildBorders( keyword, forcedZ, nodeLength, slopeAllowance, updateMapUIData );
             }
             
@@ -112,10 +112,10 @@ namespace GUIBuilder
                     GodObject.Plugin.Data.BorderEnablers.ResumeObjectDataChangedEvents( true );
                     if( !allImportsMatchTarget )
                     {
-                        var msg = "Must automatically generate or manually create missing border enablers before calculating border segments from edge flags.";
+                        var msg = "SubDivisionBatch.WarnMissingEnablers.Body".Translate();
                         var retry = MessageBox.Show(
                             msg,
-                            "Cannot generate border segments",
+                            "SubDivisionBatch.WarnMissingEnablers.Title".Translate(),
                             MessageBoxButtons.RetryCancel,
                             MessageBoxIcon.Exclamation );
                         if( retry == DialogResult.Cancel )
@@ -129,7 +129,7 @@ namespace GUIBuilder
             
             foreach( var subdivision in subdivisions )
             {
-                m.SetCurrentStatusMessage( string.Format( "Calculating borders for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 subdivision.BuildSegmentsFromEdgeFlags( nodeLength, slopeAllowance, updateMapUIData );
             }
             
@@ -150,7 +150,7 @@ namespace GUIBuilder
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Checking for missing sub-division elements..." );
+            m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingElements".Translate() );
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
@@ -171,14 +171,14 @@ namespace GUIBuilder
             DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateMissingBorderEnablers()" );
             
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Checking for missing border enablers..." );
+            m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingMissingBorderEnablers".Translate() );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
             string msg;
             foreach( var subdivision in subdivisions )
             {
-                msg = string.Format( "Checking border enablers for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "SubDivisionBatch.CheckingBorderEnablersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 FormImport.ImportBase.AddToList( ref list, subdivision.GenerateMissingBorderEnablersFromEdgeFlags() );
             }
@@ -192,7 +192,7 @@ namespace GUIBuilder
         {
             DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateSandboxes()" );
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Calculating sandbox volumes..." );
+            m.SetCurrentStatusMessage( "SubDivisionBatch.CalculatingSandboxes".Translate() );
             string msg;
             m.StartSyncTimer();
             var fStart = m.SyncTimerElapsed();
@@ -200,7 +200,7 @@ namespace GUIBuilder
             foreach( var subdivision in subdivisions )
             {
                 m.PushStatusMessage();
-                msg = string.Format( "Checking sandbox for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "SubDivisionBatch.CheckingSandboxFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 
                 var sandbox = subdivision.SandboxVolume;
@@ -214,7 +214,7 @@ namespace GUIBuilder
                     continue;
                 }
                 
-                msg = string.Format( "Calculating sandbox for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "SubDivisionBatch.CalculatingSandboxFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
@@ -266,7 +266,7 @@ namespace GUIBuilder
             DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateBuildVolumes()" );
             
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Calculating build volumes..." );
+            m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingBuildVolumes".Translate() );
             string msg;
             m.StartSyncTimer();
             var fStart = m.SyncTimerElapsed();
@@ -274,7 +274,7 @@ namespace GUIBuilder
             foreach( var subdivision in subdivisions )
             {
                 m.PushStatusMessage();
-                msg = string.Format( "Checking build volumes for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "SubDivisionBatch.CheckingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 
                 var volumes = subdivision.BuildVolumes;
@@ -289,7 +289,7 @@ namespace GUIBuilder
                     continue;
                 }
                 
-                msg = string.Format( "Calculating build volumes for {0}...", subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "SubDivisionBatch.OptimizingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();

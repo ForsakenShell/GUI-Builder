@@ -108,6 +108,31 @@ namespace GUIBuilder.Windows
             this.lblMeshDirectory = new System.Windows.Forms.Label();
             this.tbMeshDirectory = new System.Windows.Forms.TextBox();
             this.tcObjectSelect = new System.Windows.Forms.TabControl();
+            this.tpSubDivisions = new System.Windows.Forms.TabPage();
+            this.gbSubDivisionNodeAndNIFGeneration = new System.Windows.Forms.GroupBox();
+            this.tbSubDivisionGroundSink = new System.Windows.Forms.TextBox();
+            this.tbSubDivisionFileSuffix = new System.Windows.Forms.TextBox();
+            this.cbSubDivisionCreateImportData = new System.Windows.Forms.CheckBox();
+            this.lbSubDivisionSlopeAllowance = new System.Windows.Forms.Label();
+            this.lblSubDivisionFileSuffix = new System.Windows.Forms.Label();
+            this.tbSubDivisionGroundOffset = new System.Windows.Forms.TextBox();
+            this.tbSubDivisionTargetSuffix = new System.Windows.Forms.TextBox();
+            this.tbSubDivisionGradientHeight = new System.Windows.Forms.TextBox();
+            this.lblSubDivisionGradientHeight = new System.Windows.Forms.Label();
+            this.lblSubDivisionTargetSuffix = new System.Windows.Forms.Label();
+            this.tbSubDivisionSlopeAllowance = new System.Windows.Forms.TextBox();
+            this.cbSubDivisionPresets = new System.Windows.Forms.ComboBox();
+            this.lblSubDivisionGroundSink = new System.Windows.Forms.Label();
+            this.tbSubDivisionMeshSubDirectory = new System.Windows.Forms.TextBox();
+            this.lblSubDivisionGroundOffset = new System.Windows.Forms.Label();
+            this.lblSubDivisionPresets = new System.Windows.Forms.Label();
+            this.tbNIFBuilderSubDivisionSampleFilePath = new System.Windows.Forms.TextBox();
+            this.lbSubDivisionNodeLength = new System.Windows.Forms.Label();
+            this.lblSubDivisionMeshSubDirectory = new System.Windows.Forms.Label();
+            this.tbSubDivisionNodeLength = new System.Windows.Forms.TextBox();
+            this.tbSubDivisionFilePrefix = new System.Windows.Forms.TextBox();
+            this.lblSubDivisionFilePrefix = new System.Windows.Forms.Label();
+            this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.tpWorkshops = new System.Windows.Forms.TabPage();
             this.gbWorkshopNodeDetection = new System.Windows.Forms.GroupBox();
             this.cbRestrictWorkshopBorderKeywords = new System.Windows.Forms.CheckBox();
@@ -139,31 +164,6 @@ namespace GUIBuilder.Windows
             this.lblWorkshopMeshSubDirectory = new System.Windows.Forms.Label();
             this.lblWorkshopFilePrefix = new System.Windows.Forms.Label();
             this.lvWorkshops = new GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript>();
-            this.tpSubDivisions = new System.Windows.Forms.TabPage();
-            this.gbSubDivisionNodeAndNIFGeneration = new System.Windows.Forms.GroupBox();
-            this.tbSubDivisionGroundSink = new System.Windows.Forms.TextBox();
-            this.tbSubDivisionFileSuffix = new System.Windows.Forms.TextBox();
-            this.cbSubDivisionCreateImportData = new System.Windows.Forms.CheckBox();
-            this.lbSubDivisionSlopeAllowance = new System.Windows.Forms.Label();
-            this.lblSubDivisionFileSuffix = new System.Windows.Forms.Label();
-            this.tbSubDivisionGroundOffset = new System.Windows.Forms.TextBox();
-            this.tbSubDivisionTargetSuffix = new System.Windows.Forms.TextBox();
-            this.tbSubDivisionGradientHeight = new System.Windows.Forms.TextBox();
-            this.lblSubDivisionGradientHeight = new System.Windows.Forms.Label();
-            this.lblSubDivisionTargetSuffix = new System.Windows.Forms.Label();
-            this.tbSubDivisionSlopeAllowance = new System.Windows.Forms.TextBox();
-            this.cbSubDivisionPresets = new System.Windows.Forms.ComboBox();
-            this.lblSubDivisionGroundSink = new System.Windows.Forms.Label();
-            this.tbSubDivisionMeshSubDirectory = new System.Windows.Forms.TextBox();
-            this.lblSubDivisionGroundOffset = new System.Windows.Forms.Label();
-            this.lblSubDivisionPresets = new System.Windows.Forms.Label();
-            this.tbNIFBuilderSubDivisionSampleFilePath = new System.Windows.Forms.TextBox();
-            this.lbSubDivisionNodeLength = new System.Windows.Forms.Label();
-            this.lblSubDivisionMeshSubDirectory = new System.Windows.Forms.Label();
-            this.tbSubDivisionNodeLength = new System.Windows.Forms.TextBox();
-            this.tbSubDivisionFilePrefix = new System.Windows.Forms.TextBox();
-            this.lblSubDivisionFilePrefix = new System.Windows.Forms.Label();
-            this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.gbBorderFunctions = new System.Windows.Forms.GroupBox();
             this.btnImportNIFs = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
@@ -172,11 +172,11 @@ namespace GUIBuilder.Windows
             this.pnWindow.SuspendLayout();
             this.gbTargetFolder.SuspendLayout();
             this.tcObjectSelect.SuspendLayout();
+            this.tpSubDivisions.SuspendLayout();
+            this.gbSubDivisionNodeAndNIFGeneration.SuspendLayout();
             this.tpWorkshops.SuspendLayout();
             this.gbWorkshopNodeDetection.SuspendLayout();
             this.gbWorkshopNodeAndNIFGeneration.SuspendLayout();
-            this.tpSubDivisions.SuspendLayout();
-            this.gbSubDivisionNodeAndNIFGeneration.SuspendLayout();
             this.gbBorderFunctions.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -195,14 +195,15 @@ namespace GUIBuilder.Windows
             // 
             // gbTargetFolder
             // 
+            this.gbTargetFolder.Controls.Add(this.tbMeshDirectory);
             this.gbTargetFolder.Controls.Add(this.tbTargetFolder);
             this.gbTargetFolder.Controls.Add(this.lblMeshDirectory);
-            this.gbTargetFolder.Controls.Add(this.tbMeshDirectory);
             this.gbTargetFolder.Location = new System.Drawing.Point(339, 6);
             this.gbTargetFolder.Name = "gbTargetFolder";
             this.gbTargetFolder.Size = new System.Drawing.Size(330, 68);
             this.gbTargetFolder.TabIndex = 5;
             this.gbTargetFolder.TabStop = false;
+            this.gbTargetFolder.Tag = "BorderBatchWindow.TargetDirectory";
             this.gbTargetFolder.Text = "Target Folder";
             // 
             // tbTargetFolder
@@ -218,15 +219,15 @@ namespace GUIBuilder.Windows
             // 
             this.lblMeshDirectory.Location = new System.Drawing.Point(6, 45);
             this.lblMeshDirectory.Name = "lblMeshDirectory";
-            this.lblMeshDirectory.Size = new System.Drawing.Size(94, 17);
+            this.lblMeshDirectory.Size = new System.Drawing.Size(56, 17);
             this.lblMeshDirectory.TabIndex = 8;
             this.lblMeshDirectory.Text = "Meshes\\";
             // 
             // tbMeshDirectory
             // 
-            this.tbMeshDirectory.Location = new System.Drawing.Point(103, 42);
+            this.tbMeshDirectory.Location = new System.Drawing.Point(60, 42);
             this.tbMeshDirectory.Name = "tbMeshDirectory";
-            this.tbMeshDirectory.Size = new System.Drawing.Size(221, 20);
+            this.tbMeshDirectory.Size = new System.Drawing.Size(264, 20);
             this.tbMeshDirectory.TabIndex = 9;
             this.tbMeshDirectory.TextChanged += new System.EventHandler(this.uiUpdateWorkshopNIFFilePathSample);
             // 
@@ -244,6 +245,274 @@ namespace GUIBuilder.Windows
             this.tcObjectSelect.TabIndex = 0;
             this.tcObjectSelect.SelectedIndexChanged += new System.EventHandler(this.tcObjectSelectSelectedIndexChanged);
             // 
+            // tpSubDivisions
+            // 
+            this.tpSubDivisions.Controls.Add(this.gbSubDivisionNodeAndNIFGeneration);
+            this.tpSubDivisions.Controls.Add(this.lvSubDivisions);
+            this.tpSubDivisions.Location = new System.Drawing.Point(4, 22);
+            this.tpSubDivisions.Name = "tpSubDivisions";
+            this.tpSubDivisions.Padding = new System.Windows.Forms.Padding(3);
+            this.tpSubDivisions.Size = new System.Drawing.Size(664, 399);
+            this.tpSubDivisions.TabIndex = 1;
+            this.tpSubDivisions.Tag = "BorderBatchWindow.Tab.SubDivisions";
+            this.tpSubDivisions.Text = "Sub-Divisions";
+            this.tpSubDivisions.UseVisualStyleBackColor = true;
+            // 
+            // gbSubDivisionNodeAndNIFGeneration
+            // 
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionGroundSink);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionFileSuffix);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.cbSubDivisionCreateImportData);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lbSubDivisionSlopeAllowance);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionFileSuffix);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionGroundOffset);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionTargetSuffix);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionGradientHeight);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionGradientHeight);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionTargetSuffix);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionSlopeAllowance);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.cbSubDivisionPresets);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionGroundSink);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionMeshSubDirectory);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionGroundOffset);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionPresets);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbNIFBuilderSubDivisionSampleFilePath);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lbSubDivisionNodeLength);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionMeshSubDirectory);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionNodeLength);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionFilePrefix);
+            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionFilePrefix);
+            this.gbSubDivisionNodeAndNIFGeneration.Location = new System.Drawing.Point(0, 0);
+            this.gbSubDivisionNodeAndNIFGeneration.Name = "gbSubDivisionNodeAndNIFGeneration";
+            this.gbSubDivisionNodeAndNIFGeneration.Size = new System.Drawing.Size(330, 251);
+            this.gbSubDivisionNodeAndNIFGeneration.TabIndex = 11;
+            this.gbSubDivisionNodeAndNIFGeneration.TabStop = false;
+            this.gbSubDivisionNodeAndNIFGeneration.Tag = "BorderBatchWindow.NodesAndNIFs";
+            this.gbSubDivisionNodeAndNIFGeneration.Text = "Node and NIF Generation";
+            // 
+            // tbSubDivisionGroundSink
+            // 
+            this.tbSubDivisionGroundSink.Location = new System.Drawing.Point(261, 204);
+            this.tbSubDivisionGroundSink.Name = "tbSubDivisionGroundSink";
+            this.tbSubDivisionGroundSink.Size = new System.Drawing.Size(63, 20);
+            this.tbSubDivisionGroundSink.TabIndex = 8;
+            this.tbSubDivisionGroundSink.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbSubDivisionGroundSink.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // tbSubDivisionFileSuffix
+            // 
+            this.tbSubDivisionFileSuffix.Location = new System.Drawing.Point(103, 112);
+            this.tbSubDivisionFileSuffix.Name = "tbSubDivisionFileSuffix";
+            this.tbSubDivisionFileSuffix.Size = new System.Drawing.Size(221, 20);
+            this.tbSubDivisionFileSuffix.TabIndex = 28;
+            this.tbSubDivisionFileSuffix.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
+            // 
+            // cbSubDivisionCreateImportData
+            // 
+            this.cbSubDivisionCreateImportData.AutoEllipsis = true;
+            this.cbSubDivisionCreateImportData.Location = new System.Drawing.Point(6, 225);
+            this.cbSubDivisionCreateImportData.Name = "cbSubDivisionCreateImportData";
+            this.cbSubDivisionCreateImportData.Size = new System.Drawing.Size(317, 21);
+            this.cbSubDivisionCreateImportData.TabIndex = 5;
+            this.cbSubDivisionCreateImportData.Tag = "BorderBatchWindow.NodesAndNIFs.CreateImports";
+            this.cbSubDivisionCreateImportData.Text = "Create Import Data";
+            this.cbSubDivisionCreateImportData.UseVisualStyleBackColor = true;
+            this.cbSubDivisionCreateImportData.CheckedChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // lbSubDivisionSlopeAllowance
+            // 
+            this.lbSubDivisionSlopeAllowance.Location = new System.Drawing.Point(6, 184);
+            this.lbSubDivisionSlopeAllowance.Name = "lbSubDivisionSlopeAllowance";
+            this.lbSubDivisionSlopeAllowance.Size = new System.Drawing.Size(90, 17);
+            this.lbSubDivisionSlopeAllowance.TabIndex = 6;
+            this.lbSubDivisionSlopeAllowance.Tag = "BorderBatchWindow.NodesAndNIFs.SlopeAllowance";
+            this.lbSubDivisionSlopeAllowance.Text = "Slope Allowance:";
+            // 
+            // lblSubDivisionFileSuffix
+            // 
+            this.lblSubDivisionFileSuffix.Location = new System.Drawing.Point(6, 115);
+            this.lblSubDivisionFileSuffix.Name = "lblSubDivisionFileSuffix";
+            this.lblSubDivisionFileSuffix.Size = new System.Drawing.Size(101, 17);
+            this.lblSubDivisionFileSuffix.TabIndex = 27;
+            this.lblSubDivisionFileSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.FileSuffix";
+            this.lblSubDivisionFileSuffix.Text = "File Suffix:";
+            // 
+            // tbSubDivisionGroundOffset
+            // 
+            this.tbSubDivisionGroundOffset.Location = new System.Drawing.Point(261, 181);
+            this.tbSubDivisionGroundOffset.Name = "tbSubDivisionGroundOffset";
+            this.tbSubDivisionGroundOffset.Size = new System.Drawing.Size(63, 20);
+            this.tbSubDivisionGroundOffset.TabIndex = 7;
+            this.tbSubDivisionGroundOffset.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbSubDivisionGroundOffset.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // tbSubDivisionTargetSuffix
+            // 
+            this.tbSubDivisionTargetSuffix.Location = new System.Drawing.Point(103, 43);
+            this.tbSubDivisionTargetSuffix.Name = "tbSubDivisionTargetSuffix";
+            this.tbSubDivisionTargetSuffix.Size = new System.Drawing.Size(221, 20);
+            this.tbSubDivisionTargetSuffix.TabIndex = 22;
+            this.tbSubDivisionTargetSuffix.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
+            // 
+            // tbSubDivisionGradientHeight
+            // 
+            this.tbSubDivisionGradientHeight.Location = new System.Drawing.Point(261, 158);
+            this.tbSubDivisionGradientHeight.Name = "tbSubDivisionGradientHeight";
+            this.tbSubDivisionGradientHeight.Size = new System.Drawing.Size(63, 20);
+            this.tbSubDivisionGradientHeight.TabIndex = 6;
+            this.tbSubDivisionGradientHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbSubDivisionGradientHeight.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // lblSubDivisionGradientHeight
+            // 
+            this.lblSubDivisionGradientHeight.Location = new System.Drawing.Point(170, 161);
+            this.lblSubDivisionGradientHeight.Name = "lblSubDivisionGradientHeight";
+            this.lblSubDivisionGradientHeight.Size = new System.Drawing.Size(90, 16);
+            this.lblSubDivisionGradientHeight.TabIndex = 2;
+            this.lblSubDivisionGradientHeight.Tag = "BorderBatchWindow.NodesAndNIFs.GradientHeight";
+            this.lblSubDivisionGradientHeight.Text = "Gradient Height:";
+            // 
+            // lblSubDivisionTargetSuffix
+            // 
+            this.lblSubDivisionTargetSuffix.Location = new System.Drawing.Point(6, 46);
+            this.lblSubDivisionTargetSuffix.Name = "lblSubDivisionTargetSuffix";
+            this.lblSubDivisionTargetSuffix.Size = new System.Drawing.Size(101, 17);
+            this.lblSubDivisionTargetSuffix.TabIndex = 23;
+            this.lblSubDivisionTargetSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.TargetSubDirectory";
+            this.lblSubDivisionTargetSuffix.Text = "Target Sub-Folder:";
+            // 
+            // tbSubDivisionSlopeAllowance
+            // 
+            this.tbSubDivisionSlopeAllowance.Location = new System.Drawing.Point(97, 181);
+            this.tbSubDivisionSlopeAllowance.Name = "tbSubDivisionSlopeAllowance";
+            this.tbSubDivisionSlopeAllowance.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.tbSubDivisionSlopeAllowance.Size = new System.Drawing.Size(63, 20);
+            this.tbSubDivisionSlopeAllowance.TabIndex = 7;
+            this.tbSubDivisionSlopeAllowance.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbSubDivisionSlopeAllowance.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // cbSubDivisionPresets
+            // 
+            this.cbSubDivisionPresets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSubDivisionPresets.Location = new System.Drawing.Point(75, 19);
+            this.cbSubDivisionPresets.Name = "cbSubDivisionPresets";
+            this.cbSubDivisionPresets.Size = new System.Drawing.Size(249, 21);
+            this.cbSubDivisionPresets.TabIndex = 16;
+            this.cbSubDivisionPresets.SelectedIndexChanged += new System.EventHandler(this.cbSubDivisionPresetsSelectedIndexChanged);
+            // 
+            // lblSubDivisionGroundSink
+            // 
+            this.lblSubDivisionGroundSink.Location = new System.Drawing.Point(170, 207);
+            this.lblSubDivisionGroundSink.Name = "lblSubDivisionGroundSink";
+            this.lblSubDivisionGroundSink.Size = new System.Drawing.Size(90, 16);
+            this.lblSubDivisionGroundSink.TabIndex = 1;
+            this.lblSubDivisionGroundSink.Tag = "BorderBatchWindow.NodesAndNIFs.GroundSink";
+            this.lblSubDivisionGroundSink.Text = "Ground Sink:";
+            // 
+            // tbSubDivisionMeshSubDirectory
+            // 
+            this.tbSubDivisionMeshSubDirectory.Location = new System.Drawing.Point(103, 66);
+            this.tbSubDivisionMeshSubDirectory.Name = "tbSubDivisionMeshSubDirectory";
+            this.tbSubDivisionMeshSubDirectory.Size = new System.Drawing.Size(221, 20);
+            this.tbSubDivisionMeshSubDirectory.TabIndex = 5;
+            this.tbSubDivisionMeshSubDirectory.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
+            // 
+            // lblSubDivisionGroundOffset
+            // 
+            this.lblSubDivisionGroundOffset.Location = new System.Drawing.Point(170, 184);
+            this.lblSubDivisionGroundOffset.Name = "lblSubDivisionGroundOffset";
+            this.lblSubDivisionGroundOffset.Size = new System.Drawing.Size(90, 16);
+            this.lblSubDivisionGroundOffset.TabIndex = 3;
+            this.lblSubDivisionGroundOffset.Tag = "BorderBatchWindow.NodesAndNIFs.GroundOffset";
+            this.lblSubDivisionGroundOffset.Text = "Ground Offset:";
+            // 
+            // lblSubDivisionPresets
+            // 
+            this.lblSubDivisionPresets.Location = new System.Drawing.Point(6, 22);
+            this.lblSubDivisionPresets.Name = "lblSubDivisionPresets";
+            this.lblSubDivisionPresets.Size = new System.Drawing.Size(66, 16);
+            this.lblSubDivisionPresets.TabIndex = 15;
+            this.lblSubDivisionPresets.Tag = "BorderBatchWindow.NodesAndNIFs.Preset";
+            this.lblSubDivisionPresets.Text = "Preset:";
+            // 
+            // tbNIFBuilderSubDivisionSampleFilePath
+            // 
+            this.tbNIFBuilderSubDivisionSampleFilePath.BackColor = System.Drawing.SystemColors.Control;
+            this.tbNIFBuilderSubDivisionSampleFilePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbNIFBuilderSubDivisionSampleFilePath.Location = new System.Drawing.Point(6, 135);
+            this.tbNIFBuilderSubDivisionSampleFilePath.Name = "tbNIFBuilderSubDivisionSampleFilePath";
+            this.tbNIFBuilderSubDivisionSampleFilePath.Size = new System.Drawing.Size(318, 20);
+            this.tbNIFBuilderSubDivisionSampleFilePath.TabIndex = 7;
+            this.tbNIFBuilderSubDivisionSampleFilePath.Text = "pickles";
+            // 
+            // lbSubDivisionNodeLength
+            // 
+            this.lbSubDivisionNodeLength.Location = new System.Drawing.Point(6, 161);
+            this.lbSubDivisionNodeLength.Name = "lbSubDivisionNodeLength";
+            this.lbSubDivisionNodeLength.Size = new System.Drawing.Size(90, 16);
+            this.lbSubDivisionNodeLength.TabIndex = 0;
+            this.lbSubDivisionNodeLength.Tag = "BorderBatchWindow.NodesAndNIFs.NodeLength";
+            this.lbSubDivisionNodeLength.Text = "Node Length:";
+            // 
+            // lblSubDivisionMeshSubDirectory
+            // 
+            this.lblSubDivisionMeshSubDirectory.Location = new System.Drawing.Point(6, 69);
+            this.lblSubDivisionMeshSubDirectory.Name = "lblSubDivisionMeshSubDirectory";
+            this.lblSubDivisionMeshSubDirectory.Size = new System.Drawing.Size(101, 17);
+            this.lblSubDivisionMeshSubDirectory.TabIndex = 10;
+            this.lblSubDivisionMeshSubDirectory.Tag = "BorderBatchWindow.NodesAndNIFs.MeshSubDirectory";
+            this.lblSubDivisionMeshSubDirectory.Text = "Mesh Sub-Folder:";
+            // 
+            // tbSubDivisionNodeLength
+            // 
+            this.tbSubDivisionNodeLength.Location = new System.Drawing.Point(97, 158);
+            this.tbSubDivisionNodeLength.Name = "tbSubDivisionNodeLength";
+            this.tbSubDivisionNodeLength.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.tbSubDivisionNodeLength.Size = new System.Drawing.Size(63, 20);
+            this.tbSubDivisionNodeLength.TabIndex = 4;
+            this.tbSubDivisionNodeLength.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbSubDivisionNodeLength.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // tbSubDivisionFilePrefix
+            // 
+            this.tbSubDivisionFilePrefix.Location = new System.Drawing.Point(103, 89);
+            this.tbSubDivisionFilePrefix.Name = "tbSubDivisionFilePrefix";
+            this.tbSubDivisionFilePrefix.Size = new System.Drawing.Size(221, 20);
+            this.tbSubDivisionFilePrefix.TabIndex = 9;
+            this.tbSubDivisionFilePrefix.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
+            // 
+            // lblSubDivisionFilePrefix
+            // 
+            this.lblSubDivisionFilePrefix.Location = new System.Drawing.Point(6, 92);
+            this.lblSubDivisionFilePrefix.Name = "lblSubDivisionFilePrefix";
+            this.lblSubDivisionFilePrefix.Size = new System.Drawing.Size(101, 17);
+            this.lblSubDivisionFilePrefix.TabIndex = 8;
+            this.lblSubDivisionFilePrefix.Tag = "BorderBatchWindow.NodesAndNIFs.FilePrefix";
+            this.lblSubDivisionFilePrefix.Text = "File Prefix:";
+            // 
+            // lvSubDivisions
+            // 
+            this.lvSubDivisions.AllowHidingItems = true;
+            this.lvSubDivisions.AllowOverrideColumnSorting = true;
+            this.lvSubDivisions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvSubDivisions.CheckBoxes = true;
+            this.lvSubDivisions.EditorIDColumn = true;
+            this.lvSubDivisions.ExtraInfoColumn = false;
+            this.lvSubDivisions.FilenameColumn = false;
+            this.lvSubDivisions.FormIDColumn = true;
+            this.lvSubDivisions.LoadOrderColumn = false;
+            this.lvSubDivisions.Location = new System.Drawing.Point(336, 0);
+            this.lvSubDivisions.MultiSelect = true;
+            this.lvSubDivisions.Name = "lvSubDivisions";
+            this.lvSubDivisions.Size = new System.Drawing.Size(328, 399);
+            this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
+            this.lvSubDivisions.SyncedEditorFormType = null;
+            this.lvSubDivisions.SyncObjects = null;
+            this.lvSubDivisions.TabIndex = 10;
+            this.lvSubDivisions.TypeColumn = false;
+            // 
             // tpWorkshops
             // 
             this.tpWorkshops.Controls.Add(this.gbWorkshopNodeDetection);
@@ -254,6 +523,7 @@ namespace GUIBuilder.Windows
             this.tpWorkshops.Padding = new System.Windows.Forms.Padding(3);
             this.tpWorkshops.Size = new System.Drawing.Size(664, 399);
             this.tpWorkshops.TabIndex = 0;
+            this.tpWorkshops.Tag = "BorderBatchWindow.Tab.Workshops";
             this.tpWorkshops.Text = "Workshops";
             this.tpWorkshops.UseVisualStyleBackColor = true;
             // 
@@ -269,6 +539,7 @@ namespace GUIBuilder.Windows
             this.gbWorkshopNodeDetection.Size = new System.Drawing.Size(330, 142);
             this.gbWorkshopNodeDetection.TabIndex = 17;
             this.gbWorkshopNodeDetection.TabStop = false;
+            this.gbWorkshopNodeDetection.Tag = "BorderBatchWindow.NodeDetection";
             this.gbWorkshopNodeDetection.Text = "Node Detection";
             // 
             // cbRestrictWorkshopBorderKeywords
@@ -297,6 +568,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopBorderKeyword.Name = "lblWorkshopBorderKeyword";
             this.lblWorkshopBorderKeyword.Size = new System.Drawing.Size(198, 17);
             this.lblWorkshopBorderKeyword.TabIndex = 12;
+            this.lblWorkshopBorderKeyword.Tag = "BorderBatchWindow.NodeDetection.WorkshopKeyword";
             this.lblWorkshopBorderKeyword.Text = "Workshop Link Keyword:";
             // 
             // cbWorkshopBorderKeyword
@@ -313,6 +585,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopForcedZStatic.Name = "lblWorkshopForcedZStatic";
             this.lblWorkshopForcedZStatic.Size = new System.Drawing.Size(198, 17);
             this.lblWorkshopForcedZStatic.TabIndex = 15;
+            this.lblWorkshopForcedZStatic.Tag = "BorderBatchWindow.NodeDetection.ForcedZStatic";
             this.lblWorkshopForcedZStatic.Text = "Forced Z Static Object:";
             // 
             // gbWorkshopNodeAndNIFGeneration
@@ -344,6 +617,7 @@ namespace GUIBuilder.Windows
             this.gbWorkshopNodeAndNIFGeneration.Size = new System.Drawing.Size(330, 251);
             this.gbWorkshopNodeAndNIFGeneration.TabIndex = 10;
             this.gbWorkshopNodeAndNIFGeneration.TabStop = false;
+            this.gbWorkshopNodeAndNIFGeneration.Tag = "BorderBatchWindow.NodesAndNIFs";
             this.gbWorkshopNodeAndNIFGeneration.Text = "Node and NIF Generation";
             // 
             // cbWorkshopCreateImportData
@@ -389,6 +663,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopFileSuffix.Name = "lblWorkshopFileSuffix";
             this.lblWorkshopFileSuffix.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopFileSuffix.TabIndex = 25;
+            this.lblWorkshopFileSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.FileSuffix";
             this.lblWorkshopFileSuffix.Text = "File Suffix:";
             // 
             // tbWorkshopGradientHeight
@@ -414,6 +689,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopGradientHeight.Name = "lblWorkshopGradientHeight";
             this.lblWorkshopGradientHeight.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopGradientHeight.TabIndex = 20;
+            this.lblWorkshopGradientHeight.Tag = "BorderBatchWindow.NodesAndNIFs.GradientHeight";
             this.lblWorkshopGradientHeight.Text = "Gradient Height:";
             // 
             // tbWorkshopMeshSubDirectory
@@ -430,6 +706,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopGroundSink.Name = "lblWorkshopGroundSink";
             this.lblWorkshopGroundSink.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopGroundSink.TabIndex = 19;
+            this.lblWorkshopGroundSink.Tag = "BorderBatchWindow.NodesAndNIFs.GroundSink";
             this.lblWorkshopGroundSink.Text = "Ground Sink:";
             // 
             // tbWorkshopTargetSuffix
@@ -446,6 +723,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopGroundOffset.Name = "lblWorkshopGroundOffset";
             this.lblWorkshopGroundOffset.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopGroundOffset.TabIndex = 21;
+            this.lblWorkshopGroundOffset.Tag = "BorderBatchWindow.NodesAndNIFs.GroundOffset";
             this.lblWorkshopGroundOffset.Text = "Ground Offset:";
             // 
             // lblWorkshopTargetSuffix
@@ -454,6 +732,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopTargetSuffix.Name = "lblWorkshopTargetSuffix";
             this.lblWorkshopTargetSuffix.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopTargetSuffix.TabIndex = 21;
+            this.lblWorkshopTargetSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.TargetSubDirectory";
             this.lblWorkshopTargetSuffix.Text = "Target Sub-Folder:";
             // 
             // lblWorkshopSlopeAllowance
@@ -462,6 +741,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopSlopeAllowance.Name = "lblWorkshopSlopeAllowance";
             this.lblWorkshopSlopeAllowance.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopSlopeAllowance.TabIndex = 17;
+            this.lblWorkshopSlopeAllowance.Tag = "BorderBatchWindow.NodesAndNIFs.SlopeAllowance";
             this.lblWorkshopSlopeAllowance.Text = "Slope Allowance:";
             // 
             // cbWorkshopPresets
@@ -489,6 +769,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopPresets.Name = "lblWorkshopPresets";
             this.lblWorkshopPresets.Size = new System.Drawing.Size(66, 16);
             this.lblWorkshopPresets.TabIndex = 10;
+            this.lblWorkshopPresets.Tag = "BorderBatchWindow.NodesAndNIFs.Preset";
             this.lblWorkshopPresets.Text = "Preset:";
             // 
             // lblWorkshopNodeLength
@@ -497,6 +778,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopNodeLength.Name = "lblWorkshopNodeLength";
             this.lblWorkshopNodeLength.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopNodeLength.TabIndex = 15;
+            this.lblWorkshopNodeLength.Tag = "BorderBatchWindow.NodesAndNIFs.NodeLength";
             this.lblWorkshopNodeLength.Text = "Node Length:";
             // 
             // tbWorkshopNodeLength
@@ -526,6 +808,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopMeshSubDirectory.Name = "lblWorkshopMeshSubDirectory";
             this.lblWorkshopMeshSubDirectory.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopMeshSubDirectory.TabIndex = 5;
+            this.lblWorkshopMeshSubDirectory.Tag = "BorderBatchWindow.NodesAndNIFs.MeshSubDirectory";
             this.lblWorkshopMeshSubDirectory.Text = "Mesh Sub-Folder:";
             // 
             // lblWorkshopFilePrefix
@@ -534,6 +817,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopFilePrefix.Name = "lblWorkshopFilePrefix";
             this.lblWorkshopFilePrefix.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopFilePrefix.TabIndex = 0;
+            this.lblWorkshopFilePrefix.Tag = "BorderBatchWindow.NodesAndNIFs.FilePrefix";
             this.lblWorkshopFilePrefix.Text = "File Prefix:";
             // 
             // lvWorkshops
@@ -559,261 +843,6 @@ namespace GUIBuilder.Windows
             this.lvWorkshops.TabIndex = 11;
             this.lvWorkshops.TypeColumn = false;
             // 
-            // tpSubDivisions
-            // 
-            this.tpSubDivisions.Controls.Add(this.gbSubDivisionNodeAndNIFGeneration);
-            this.tpSubDivisions.Controls.Add(this.lvSubDivisions);
-            this.tpSubDivisions.Location = new System.Drawing.Point(4, 22);
-            this.tpSubDivisions.Name = "tpSubDivisions";
-            this.tpSubDivisions.Padding = new System.Windows.Forms.Padding(3);
-            this.tpSubDivisions.Size = new System.Drawing.Size(664, 399);
-            this.tpSubDivisions.TabIndex = 1;
-            this.tpSubDivisions.Text = "Sub-Divisions";
-            this.tpSubDivisions.UseVisualStyleBackColor = true;
-            // 
-            // gbSubDivisionNodeAndNIFGeneration
-            // 
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionGroundSink);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionFileSuffix);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.cbSubDivisionCreateImportData);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lbSubDivisionSlopeAllowance);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionFileSuffix);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionGroundOffset);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionTargetSuffix);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionGradientHeight);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionGradientHeight);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionTargetSuffix);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionSlopeAllowance);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.cbSubDivisionPresets);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionGroundSink);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionMeshSubDirectory);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionGroundOffset);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionPresets);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbNIFBuilderSubDivisionSampleFilePath);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lbSubDivisionNodeLength);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionMeshSubDirectory);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionNodeLength);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.tbSubDivisionFilePrefix);
-            this.gbSubDivisionNodeAndNIFGeneration.Controls.Add(this.lblSubDivisionFilePrefix);
-            this.gbSubDivisionNodeAndNIFGeneration.Location = new System.Drawing.Point(0, 0);
-            this.gbSubDivisionNodeAndNIFGeneration.Name = "gbSubDivisionNodeAndNIFGeneration";
-            this.gbSubDivisionNodeAndNIFGeneration.Size = new System.Drawing.Size(330, 251);
-            this.gbSubDivisionNodeAndNIFGeneration.TabIndex = 11;
-            this.gbSubDivisionNodeAndNIFGeneration.TabStop = false;
-            this.gbSubDivisionNodeAndNIFGeneration.Text = "Node and NIF Generation";
-            // 
-            // tbSubDivisionGroundSink
-            // 
-            this.tbSubDivisionGroundSink.Location = new System.Drawing.Point(261, 204);
-            this.tbSubDivisionGroundSink.Name = "tbSubDivisionGroundSink";
-            this.tbSubDivisionGroundSink.Size = new System.Drawing.Size(63, 20);
-            this.tbSubDivisionGroundSink.TabIndex = 8;
-            this.tbSubDivisionGroundSink.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbSubDivisionGroundSink.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
-            // 
-            // tbSubDivisionFileSuffix
-            // 
-            this.tbSubDivisionFileSuffix.Location = new System.Drawing.Point(103, 112);
-            this.tbSubDivisionFileSuffix.Name = "tbSubDivisionFileSuffix";
-            this.tbSubDivisionFileSuffix.Size = new System.Drawing.Size(221, 20);
-            this.tbSubDivisionFileSuffix.TabIndex = 28;
-            this.tbSubDivisionFileSuffix.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
-            // 
-            // cbSubDivisionCreateImportData
-            // 
-            this.cbSubDivisionCreateImportData.AutoEllipsis = true;
-            this.cbSubDivisionCreateImportData.Location = new System.Drawing.Point(6, 225);
-            this.cbSubDivisionCreateImportData.Name = "cbSubDivisionCreateImportData";
-            this.cbSubDivisionCreateImportData.Size = new System.Drawing.Size(317, 21);
-            this.cbSubDivisionCreateImportData.TabIndex = 5;
-            this.cbSubDivisionCreateImportData.Text = "Create Import Data";
-            this.cbSubDivisionCreateImportData.UseVisualStyleBackColor = true;
-            this.cbSubDivisionCreateImportData.CheckedChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
-            // 
-            // lbSubDivisionSlopeAllowance
-            // 
-            this.lbSubDivisionSlopeAllowance.Location = new System.Drawing.Point(6, 184);
-            this.lbSubDivisionSlopeAllowance.Name = "lbSubDivisionSlopeAllowance";
-            this.lbSubDivisionSlopeAllowance.Size = new System.Drawing.Size(90, 17);
-            this.lbSubDivisionSlopeAllowance.TabIndex = 6;
-            this.lbSubDivisionSlopeAllowance.Text = "Slope Allowance:";
-            // 
-            // lblSubDivisionFileSuffix
-            // 
-            this.lblSubDivisionFileSuffix.Location = new System.Drawing.Point(6, 115);
-            this.lblSubDivisionFileSuffix.Name = "lblSubDivisionFileSuffix";
-            this.lblSubDivisionFileSuffix.Size = new System.Drawing.Size(101, 17);
-            this.lblSubDivisionFileSuffix.TabIndex = 27;
-            this.lblSubDivisionFileSuffix.Text = "File Suffix:";
-            // 
-            // tbSubDivisionGroundOffset
-            // 
-            this.tbSubDivisionGroundOffset.Location = new System.Drawing.Point(261, 181);
-            this.tbSubDivisionGroundOffset.Name = "tbSubDivisionGroundOffset";
-            this.tbSubDivisionGroundOffset.Size = new System.Drawing.Size(63, 20);
-            this.tbSubDivisionGroundOffset.TabIndex = 7;
-            this.tbSubDivisionGroundOffset.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbSubDivisionGroundOffset.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
-            // 
-            // tbSubDivisionTargetSuffix
-            // 
-            this.tbSubDivisionTargetSuffix.Location = new System.Drawing.Point(103, 43);
-            this.tbSubDivisionTargetSuffix.Name = "tbSubDivisionTargetSuffix";
-            this.tbSubDivisionTargetSuffix.Size = new System.Drawing.Size(221, 20);
-            this.tbSubDivisionTargetSuffix.TabIndex = 22;
-            this.tbSubDivisionTargetSuffix.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
-            // 
-            // tbSubDivisionGradientHeight
-            // 
-            this.tbSubDivisionGradientHeight.Location = new System.Drawing.Point(261, 158);
-            this.tbSubDivisionGradientHeight.Name = "tbSubDivisionGradientHeight";
-            this.tbSubDivisionGradientHeight.Size = new System.Drawing.Size(63, 20);
-            this.tbSubDivisionGradientHeight.TabIndex = 6;
-            this.tbSubDivisionGradientHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbSubDivisionGradientHeight.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
-            // 
-            // lblSubDivisionGradientHeight
-            // 
-            this.lblSubDivisionGradientHeight.Location = new System.Drawing.Point(170, 161);
-            this.lblSubDivisionGradientHeight.Name = "lblSubDivisionGradientHeight";
-            this.lblSubDivisionGradientHeight.Size = new System.Drawing.Size(90, 16);
-            this.lblSubDivisionGradientHeight.TabIndex = 2;
-            this.lblSubDivisionGradientHeight.Text = "Gradient Height:";
-            // 
-            // lblSubDivisionTargetSuffix
-            // 
-            this.lblSubDivisionTargetSuffix.Location = new System.Drawing.Point(6, 46);
-            this.lblSubDivisionTargetSuffix.Name = "lblSubDivisionTargetSuffix";
-            this.lblSubDivisionTargetSuffix.Size = new System.Drawing.Size(101, 17);
-            this.lblSubDivisionTargetSuffix.TabIndex = 23;
-            this.lblSubDivisionTargetSuffix.Text = "Target Sub-Folder:";
-            // 
-            // tbSubDivisionSlopeAllowance
-            // 
-            this.tbSubDivisionSlopeAllowance.Location = new System.Drawing.Point(97, 181);
-            this.tbSubDivisionSlopeAllowance.Name = "tbSubDivisionSlopeAllowance";
-            this.tbSubDivisionSlopeAllowance.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.tbSubDivisionSlopeAllowance.Size = new System.Drawing.Size(63, 20);
-            this.tbSubDivisionSlopeAllowance.TabIndex = 7;
-            this.tbSubDivisionSlopeAllowance.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbSubDivisionSlopeAllowance.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
-            // 
-            // cbSubDivisionPresets
-            // 
-            this.cbSubDivisionPresets.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbSubDivisionPresets.Location = new System.Drawing.Point(75, 19);
-            this.cbSubDivisionPresets.Name = "cbSubDivisionPresets";
-            this.cbSubDivisionPresets.Size = new System.Drawing.Size(249, 21);
-            this.cbSubDivisionPresets.TabIndex = 16;
-            this.cbSubDivisionPresets.SelectedIndexChanged += new System.EventHandler(this.cbSubDivisionPresetsSelectedIndexChanged);
-            // 
-            // lblSubDivisionGroundSink
-            // 
-            this.lblSubDivisionGroundSink.Location = new System.Drawing.Point(170, 207);
-            this.lblSubDivisionGroundSink.Name = "lblSubDivisionGroundSink";
-            this.lblSubDivisionGroundSink.Size = new System.Drawing.Size(90, 16);
-            this.lblSubDivisionGroundSink.TabIndex = 1;
-            this.lblSubDivisionGroundSink.Text = "Ground Sink:";
-            // 
-            // tbSubDivisionMeshSubDirectory
-            // 
-            this.tbSubDivisionMeshSubDirectory.Location = new System.Drawing.Point(103, 66);
-            this.tbSubDivisionMeshSubDirectory.Name = "tbSubDivisionMeshSubDirectory";
-            this.tbSubDivisionMeshSubDirectory.Size = new System.Drawing.Size(221, 20);
-            this.tbSubDivisionMeshSubDirectory.TabIndex = 5;
-            this.tbSubDivisionMeshSubDirectory.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
-            // 
-            // lblSubDivisionGroundOffset
-            // 
-            this.lblSubDivisionGroundOffset.Location = new System.Drawing.Point(170, 184);
-            this.lblSubDivisionGroundOffset.Name = "lblSubDivisionGroundOffset";
-            this.lblSubDivisionGroundOffset.Size = new System.Drawing.Size(90, 16);
-            this.lblSubDivisionGroundOffset.TabIndex = 3;
-            this.lblSubDivisionGroundOffset.Text = "Ground Offset:";
-            // 
-            // lblSubDivisionPresets
-            // 
-            this.lblSubDivisionPresets.Location = new System.Drawing.Point(6, 22);
-            this.lblSubDivisionPresets.Name = "lblSubDivisionPresets";
-            this.lblSubDivisionPresets.Size = new System.Drawing.Size(66, 16);
-            this.lblSubDivisionPresets.TabIndex = 15;
-            this.lblSubDivisionPresets.Text = "Preset:";
-            // 
-            // tbNIFBuilderSubDivisionSampleFilePath
-            // 
-            this.tbNIFBuilderSubDivisionSampleFilePath.BackColor = System.Drawing.SystemColors.Control;
-            this.tbNIFBuilderSubDivisionSampleFilePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbNIFBuilderSubDivisionSampleFilePath.Location = new System.Drawing.Point(6, 135);
-            this.tbNIFBuilderSubDivisionSampleFilePath.Name = "tbNIFBuilderSubDivisionSampleFilePath";
-            this.tbNIFBuilderSubDivisionSampleFilePath.Size = new System.Drawing.Size(318, 20);
-            this.tbNIFBuilderSubDivisionSampleFilePath.TabIndex = 7;
-            this.tbNIFBuilderSubDivisionSampleFilePath.Text = "pickles";
-            // 
-            // lbSubDivisionNodeLength
-            // 
-            this.lbSubDivisionNodeLength.Location = new System.Drawing.Point(6, 161);
-            this.lbSubDivisionNodeLength.Name = "lbSubDivisionNodeLength";
-            this.lbSubDivisionNodeLength.Size = new System.Drawing.Size(90, 16);
-            this.lbSubDivisionNodeLength.TabIndex = 0;
-            this.lbSubDivisionNodeLength.Text = "Node Length:";
-            // 
-            // lblSubDivisionMeshSubDirectory
-            // 
-            this.lblSubDivisionMeshSubDirectory.Location = new System.Drawing.Point(6, 69);
-            this.lblSubDivisionMeshSubDirectory.Name = "lblSubDivisionMeshSubDirectory";
-            this.lblSubDivisionMeshSubDirectory.Size = new System.Drawing.Size(101, 17);
-            this.lblSubDivisionMeshSubDirectory.TabIndex = 10;
-            this.lblSubDivisionMeshSubDirectory.Text = "Mesh Sub-Folder:";
-            // 
-            // tbSubDivisionNodeLength
-            // 
-            this.tbSubDivisionNodeLength.Location = new System.Drawing.Point(97, 158);
-            this.tbSubDivisionNodeLength.Name = "tbSubDivisionNodeLength";
-            this.tbSubDivisionNodeLength.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.tbSubDivisionNodeLength.Size = new System.Drawing.Size(63, 20);
-            this.tbSubDivisionNodeLength.TabIndex = 4;
-            this.tbSubDivisionNodeLength.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbSubDivisionNodeLength.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
-            // 
-            // tbSubDivisionFilePrefix
-            // 
-            this.tbSubDivisionFilePrefix.Location = new System.Drawing.Point(103, 89);
-            this.tbSubDivisionFilePrefix.Name = "tbSubDivisionFilePrefix";
-            this.tbSubDivisionFilePrefix.Size = new System.Drawing.Size(221, 20);
-            this.tbSubDivisionFilePrefix.TabIndex = 9;
-            this.tbSubDivisionFilePrefix.TextChanged += new System.EventHandler(this.uiUpdateSubDivisionNIFFilePathSample);
-            // 
-            // lblSubDivisionFilePrefix
-            // 
-            this.lblSubDivisionFilePrefix.Location = new System.Drawing.Point(6, 92);
-            this.lblSubDivisionFilePrefix.Name = "lblSubDivisionFilePrefix";
-            this.lblSubDivisionFilePrefix.Size = new System.Drawing.Size(101, 17);
-            this.lblSubDivisionFilePrefix.TabIndex = 8;
-            this.lblSubDivisionFilePrefix.Text = "File Prefix:";
-            // 
-            // lvSubDivisions
-            // 
-            this.lvSubDivisions.AllowHidingItems = true;
-            this.lvSubDivisions.AllowOverrideColumnSorting = true;
-            this.lvSubDivisions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvSubDivisions.CheckBoxes = true;
-            this.lvSubDivisions.EditorIDColumn = true;
-            this.lvSubDivisions.ExtraInfoColumn = false;
-            this.lvSubDivisions.FilenameColumn = false;
-            this.lvSubDivisions.FormIDColumn = true;
-            this.lvSubDivisions.LoadOrderColumn = false;
-            this.lvSubDivisions.Location = new System.Drawing.Point(336, 0);
-            this.lvSubDivisions.MultiSelect = true;
-            this.lvSubDivisions.Name = "lvSubDivisions";
-            this.lvSubDivisions.Size = new System.Drawing.Size(328, 399);
-            this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
-            this.lvSubDivisions.SyncedEditorFormType = null;
-            this.lvSubDivisions.SyncObjects = null;
-            this.lvSubDivisions.TabIndex = 10;
-            this.lvSubDivisions.TypeColumn = false;
-            // 
             // gbBorderFunctions
             // 
             this.gbBorderFunctions.Controls.Add(this.btnImportNIFs);
@@ -825,6 +854,7 @@ namespace GUIBuilder.Windows
             this.gbBorderFunctions.Size = new System.Drawing.Size(330, 68);
             this.gbBorderFunctions.TabIndex = 9;
             this.gbBorderFunctions.TabStop = false;
+            this.gbBorderFunctions.Tag = "BorderBatchWindow.Functions";
             this.gbBorderFunctions.Text = "Functions";
             // 
             // btnImportNIFs
@@ -833,6 +863,7 @@ namespace GUIBuilder.Windows
             this.btnImportNIFs.Name = "btnImportNIFs";
             this.btnImportNIFs.Size = new System.Drawing.Size(75, 23);
             this.btnImportNIFs.TabIndex = 3;
+            this.btnImportNIFs.Tag = "BorderBatchWindow.Function.ImportNIFs";
             this.btnImportNIFs.Text = "Import NIFs";
             this.btnImportNIFs.UseVisualStyleBackColor = true;
             this.btnImportNIFs.Click += new System.EventHandler(this.btnImportNIFsClick);
@@ -843,6 +874,7 @@ namespace GUIBuilder.Windows
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(75, 23);
             this.btnClear.TabIndex = 0;
+            this.btnClear.Tag = "BorderBatchWindow.Function.ClearNodes";
             this.btnClear.Text = "Clear Nodes";
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClearClick);
@@ -853,6 +885,7 @@ namespace GUIBuilder.Windows
             this.btnGenNodes.Name = "btnGenNodes";
             this.btnGenNodes.Size = new System.Drawing.Size(75, 23);
             this.btnGenNodes.TabIndex = 1;
+            this.btnGenNodes.Tag = "BorderBatchWindow.Function.GenerateNodes";
             this.btnGenNodes.Text = "Gen. Nodes";
             this.btnGenNodes.UseVisualStyleBackColor = true;
             this.btnGenNodes.Click += new System.EventHandler(this.btnGenNodesClick);
@@ -863,11 +896,12 @@ namespace GUIBuilder.Windows
             this.btnBuildNIFs.Name = "btnBuildNIFs";
             this.btnBuildNIFs.Size = new System.Drawing.Size(75, 23);
             this.btnBuildNIFs.TabIndex = 2;
+            this.btnBuildNIFs.Tag = "BorderBatchWindow.Function.BuildNIFs";
             this.btnBuildNIFs.Text = "Build NIFs";
             this.btnBuildNIFs.UseVisualStyleBackColor = true;
             this.btnBuildNIFs.Click += new System.EventHandler(this.btnBuildNIFsClick);
             // 
-            // BorderBatchWindow
+            // BorderBatch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -877,9 +911,10 @@ namespace GUIBuilder.Windows
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(680, 530);
-            this.Name = "BorderBatchWindow";
+            this.Name = "BorderBatch";
             this.ShowInTaskbar = false;
-            this.Text = "Border Batch";
+            this.Tag = "BorderBatchWindow.Title";
+            this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
@@ -888,13 +923,13 @@ namespace GUIBuilder.Windows
             this.gbTargetFolder.ResumeLayout(false);
             this.gbTargetFolder.PerformLayout();
             this.tcObjectSelect.ResumeLayout(false);
+            this.tpSubDivisions.ResumeLayout(false);
+            this.gbSubDivisionNodeAndNIFGeneration.ResumeLayout(false);
+            this.gbSubDivisionNodeAndNIFGeneration.PerformLayout();
             this.tpWorkshops.ResumeLayout(false);
             this.gbWorkshopNodeDetection.ResumeLayout(false);
             this.gbWorkshopNodeAndNIFGeneration.ResumeLayout(false);
             this.gbWorkshopNodeAndNIFGeneration.PerformLayout();
-            this.tpSubDivisions.ResumeLayout(false);
-            this.gbSubDivisionNodeAndNIFGeneration.ResumeLayout(false);
-            this.gbSubDivisionNodeAndNIFGeneration.PerformLayout();
             this.gbBorderFunctions.ResumeLayout(false);
             this.ResumeLayout(false);
 

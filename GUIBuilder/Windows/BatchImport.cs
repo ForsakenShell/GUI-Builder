@@ -54,6 +54,8 @@ namespace GUIBuilder.Windows
             
             // This is a modal window which is created, data added, then displayed
             // At this point we just need to sort the data and populate the form
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
@@ -71,7 +73,7 @@ namespace GUIBuilder.Windows
             }
             */
             
-            m.SetCurrentStatusMessage( "Analyzing import data..." );
+            m.SetCurrentStatusMessage( "BatchImportWindow.Analyzing".Translate() );
             lvImportForms.SyncObjects = ImportForms;
             //SortImportForms();
             //RepopulateImportListView( false );
@@ -191,18 +193,18 @@ namespace GUIBuilder.Windows
             
             #region Apply Imports
             
-            var msg = "Importing selected forms...";
+            var msg = "BatchImportWindow.ImportingForms".Translate();
             m.SetCurrentStatusMessage( msg );
             
             var selectedImportForms = lvImportForms.GetSelectedSyncObjects();
             if( !selectedImportForms.NullOrEmpty() )
             {
                 m.PushStatusMessage();
-                m.SetCurrentStatusMessage( "Sorting imports..." );
+                m.SetCurrentStatusMessage( "BatchImportWindow.Sorting".Translate() );
                 SortImportForms( selectedImportForms, true );
                 foreach( var importForm in selectedImportForms )
                 {
-                    msg = string.Format( "Importing {0}: 0x{1} - \"{2}\"...", importForm.Signature, importForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), importForm.Signature, importForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                     m.SetCurrentStatusMessage( msg );
                     AddImportMessage( msg );
                     importForm.Apply( this );
@@ -218,7 +220,7 @@ namespace GUIBuilder.Windows
             
             foreach( var mod in GodObject.Plugin.Data.Files.Loaded )
             {
-                msg = string.Format( "Updating reference information for {0}...", mod.Filename );
+                msg = string.Format( "BatchImportWindow.UpdatingReferences".Translate(), mod.Filename );
                 //m.SetCurrentStatusMessage( msg );
                 AddImportMessage( msg );
                 

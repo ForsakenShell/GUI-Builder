@@ -15,6 +15,7 @@ using Engine.Plugin;
 public static class ConflictStatusHelpers
 {
     
+    // TODO: Make this user configurable
     public static Color GetConflictStatusBackColor( this ConflictStatus conflictStatus )
     {
         switch( conflictStatus  )

@@ -506,7 +506,7 @@ namespace GodObject
                     
                     _ScriptForms = new Dictionary<uint,TScript>();
                     
-                    m.SetCurrentStatusMessage( string.Format( "Loading all references of 0x{0} - \"{1}\"...", string.Format( "X8", bfEID ), bfEID ) );
+                    m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), bfFID.ToString( "X8" ), bfEID ) );
                     var max = iforms.Count;
                     for( int index = 0; index < max; index++ )
                     {
@@ -556,7 +556,7 @@ namespace GodObject
                     var m = GodObject.Windows.GetMainWindow();
                     m.PushStatusMessage();
                     m.PushItemOfItems();
-                    m.SetCurrentStatusMessage( string.Format( "PostLoad() for all references of 0x{0} - \"{1}\"...", _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferencesOf".Translate(), _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     m.StartSyncTimer();
                     var tStart = m.SyncTimerElapsed();
                     

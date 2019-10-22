@@ -18,6 +18,7 @@ namespace GUIBuilder.Windows
         
         const string XmlLocation = "Location";
         const string XmlSize = "Size";
+        
         bool onLoadComplete = false;
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent
@@ -35,11 +36,25 @@ namespace GUIBuilder.Windows
         
         void OnFormLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            tbSDLVideoRenderWarning.Text = string.Format( "OptionsWindow.SDLHint.Warning".Translate(), GodObject.Windows.SDLVideoDriverSoftware );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );
             
             lvAlwaysSelectMasters.SyncObjects = GodObject.Master.Files;
             UpdateCSColors();
+            
+            cbLanguage.Items.Clear();
+            var languages = GodObject.Paths.LanguageOptions;
+            foreach( var lang in languages )
+                cbLanguage.Items.Add( lang );
+            cbLanguage.SelectedIndex = languages.IndexOf( GodObject.Paths.Language );
+            
+            cbSDLVideoDriver.Items.Clear();
+            for( int i = 0; i < GodObject.Windows.SDLVideoDrivers.Length; i++ )
+                cbSDLVideoDriver.Items.Add( GodObject.Windows.SDLVideoDrivers[ i ] );
+            cbSDLVideoDriver.SelectedIndex = GodObject.Windows.SDLVideoDriverIndex;
             
             this.BringToFront();
             onLoadComplete = true;
@@ -62,6 +77,20 @@ namespace GUIBuilder.Windows
             if( !onLoadComplete )
                 return;
             GodObject.XmlConfig.WriteSize( XmlPath, XmlSize, this.Size, true );
+        }
+        
+        void cbLanguageSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if( !onLoadComplete )
+                return;
+            GodObject.Paths.Language = cbLanguage.Text;
+        }
+        
+        void cbSDLVideoDriverSelectedIndexChanged( object sender, EventArgs e )
+        {
+            if( !onLoadComplete )
+                return;
+            GodObject.Windows.SDLVideoDriverIndex = cbSDLVideoDriver.SelectedIndex;
         }
         
         #region Conflict Status

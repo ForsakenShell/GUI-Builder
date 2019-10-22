@@ -23,6 +23,10 @@ namespace GUIBuilder
         
         public const string GUIBuilderConfigFile = "GUIBuilder_Options.xml";
         
+        public static readonly string DefaultLanguage = "English (UK)";
+        public static readonly string LanguageSubPath = "Lang";
+        public static readonly string LanguageFile = "Translate.xml";
+        
         public const float MaxPictureBoxSize = 16384f;
         public const float MaxZoom = Engine.Constant.WorldMap_Resolution / MaxPictureBoxSize;
         public const float MinZoom = Engine.Constant.HeightMap_Resolution / MaxPictureBoxSize;

@@ -265,6 +265,7 @@
       <AutoGen>True</AutoGen>
     </Compile>
     <Compile Include="GenString.cs" />
+    <Compile Include="Translator.cs" />
     <Compile Include="WorkerThreadPool.cs" />
     <Compile Include="Maths\ByteVector3.cs" />
     <Compile Include="Maths\Geometry.cs" />

@@ -10,6 +10,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 using System.Drawing;
@@ -55,6 +56,10 @@ namespace SDL2ThinLayer
             public readonly bool                FastRender                  = false;
             public readonly bool                ShowCursorOverControl       = false;
             
+            // In order to be valid, values must be the same length as hints (as they map 1:1)
+            public readonly List<string>        SDLHints                    = null;
+            public readonly List<string>        SDLHintValues               = null;
+            
             #endregion
             
             #region Filled by constructor
@@ -75,7 +80,9 @@ namespace SDL2ThinLayer
                 int                 drawsPerSecond          = DEFAULT_DRAWS_PER_SECOND,
                 int                 eventsPerSecond         = DEFAULT_EVENTS_PER_SECOND,
                 bool                fastRender              = true,
-                bool                showCursorOverControl   = true
+                bool                showCursorOverControl   = true,
+                List<string>        sdlHints                = null,
+                List<string>        sdlHintValues           = null
             ){
                 if( parentForm == null )
                     throw new ArgumentException( "parentForm cannot be null!" );
@@ -85,6 +92,10 @@ namespace SDL2ThinLayer
                     throw new ArgumentException( "drawsPerSecond must be greater than 0!" );
                 if( eventsPerSecond < 1 )
                     throw new ArgumentException( "eventsPerSecond must be greater than 0!" );
+                int sdlHL  = sdlHints.NullOrEmpty()      ? 0 : sdlHints.Count;
+                int sdlHVL = sdlHintValues.NullOrEmpty() ? 0 : sdlHintValues.Count;
+                if( sdlHL != sdlHVL )
+                    throw new ArgumentException( "sdlHints and sdlHintValues must be the same length (or both null)!" );
                 
                 ParentForm                  = parentForm;
                 TargetControl               = targetControl;
@@ -96,6 +107,11 @@ namespace SDL2ThinLayer
                 TargetEventsPerSecond       = eventsPerSecond;
                 FastRender                  = fastRender;
                 ShowCursorOverControl       = showCursorOverControl;
+                if( sdlHL > 0 )
+                {
+                    SDLHints                = sdlHints.Clone();
+                    SDLHintValues           = sdlHintValues.Clone();
+                }
                 
                 ParentControl               = TargetControl;
                 ParentFormHandle            = ParentForm.Handle;
@@ -115,7 +131,9 @@ namespace SDL2ThinLayer
                 int                 drawsPerSecond          = DEFAULT_DRAWS_PER_SECOND,
                 int                 eventsPerSecond         = DEFAULT_EVENTS_PER_SECOND,
                 bool                fastRender              = true,
-                bool                showCursorOverControl   = true
+                bool                showCursorOverControl   = true,
+                List<string>        sdlHints                = null,
+                List<string>        sdlHintValues           = null
             ){
                 if( parentForm == null )
                     throw new ArgumentException( "parentForm cannot be null!" );
@@ -131,6 +149,10 @@ namespace SDL2ThinLayer
                     throw new ArgumentException( "drawsPerSecond must be greater than 0!" );
                 if( eventsPerSecond < 1 )
                     throw new ArgumentException( "eventsPerSecond must be greater than 0!" );
+                int sdlHL  = sdlHints.NullOrEmpty()      ? 0 : sdlHints.Count;
+                int sdlHVL = sdlHintValues.NullOrEmpty() ? 0 : sdlHintValues.Count;
+                if( sdlHL != sdlHVL )
+                    throw new ArgumentException( "sdlHints and sdlHintValues must be the same length (or both null)!" );
                 
                 ParentForm                  = parentForm;
                 //TargetControl               = null;
@@ -142,6 +164,11 @@ namespace SDL2ThinLayer
                 TargetEventsPerSecond       = eventsPerSecond;
                 FastRender                  = fastRender;
                 ShowCursorOverControl       = showCursorOverControl;
+                if( sdlHL > 0 )
+                {
+                    SDLHints                = sdlHints.Clone();
+                    SDLHintValues           = sdlHintValues.Clone();
+                }
                 
                 ParentControl               = ParentForm;
                 ParentFormHandle            = ParentForm.Handle;
