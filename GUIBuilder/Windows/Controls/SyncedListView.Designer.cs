@@ -95,6 +95,7 @@ namespace GUIBuilder.Windows.Controls
             // 
             this.tsmiEditObject.Name = "tsmiEditObject";
             this.tsmiEditObject.Size = new System.Drawing.Size(179, 22);
+            this.tsmiEditObject.Tag = "SyncedListView.Edit";
             this.tsmiEditObject.Text = "Edit";
             this.tsmiEditObject.Visible = false;
             this.tsmiEditObject.Click += new System.EventHandler(this.tsmiEditObjectClick);
@@ -109,6 +110,7 @@ namespace GUIBuilder.Windows.Controls
             // 
             this.tsmiSelectAll.Name = "tsmiSelectAll";
             this.tsmiSelectAll.Size = new System.Drawing.Size(179, 22);
+            this.tsmiSelectAll.Tag = "SyncedListView.SelectAll";
             this.tsmiSelectAll.Text = "Select All";
             this.tsmiSelectAll.Click += new System.EventHandler(this.tsmiSelectAllClick);
             // 
@@ -116,6 +118,7 @@ namespace GUIBuilder.Windows.Controls
             // 
             this.tsmiSelectNone.Name = "tsmiSelectNone";
             this.tsmiSelectNone.Size = new System.Drawing.Size(179, 22);
+            this.tsmiSelectNone.Tag = "SyncedListView.SelectNone";
             this.tsmiSelectNone.Text = "Select None";
             this.tsmiSelectNone.Click += new System.EventHandler(this.tsmiSelectNoneClick);
             // 
@@ -123,6 +126,7 @@ namespace GUIBuilder.Windows.Controls
             // 
             this.tsmiOnlyChangedOrNew.Name = "tsmiOnlyChangedOrNew";
             this.tsmiOnlyChangedOrNew.Size = new System.Drawing.Size(179, 22);
+            this.tsmiOnlyChangedOrNew.Tag = "SyncedListView.OnlyChangedOrNew";
             this.tsmiOnlyChangedOrNew.Text = "Only Changed or New";
             this.tsmiOnlyChangedOrNew.Click += new System.EventHandler(this.tsmiOnlyChangedOrNewClick);
             // 
@@ -135,6 +139,7 @@ namespace GUIBuilder.Windows.Controls
             // 
             this.tsmiHideUnchanged.Name = "tsmiHideUnchanged";
             this.tsmiHideUnchanged.Size = new System.Drawing.Size(179, 22);
+            this.tsmiHideUnchanged.Tag = "SyncedListView.HideUnchanged";
             this.tsmiHideUnchanged.Text = "Hide Unchanged";
             this.tsmiHideUnchanged.Click += new System.EventHandler(this.tsmiHideUnchangedClick);
             // 

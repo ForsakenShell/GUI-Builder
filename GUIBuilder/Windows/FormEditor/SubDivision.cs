@@ -26,6 +26,8 @@ namespace GUIBuilder.Windows.FormEditor
         
         void SubDivisionLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            
             cbLocation.Items.Clear();
             var cLocations = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Location>( true, true );
             if( cLocations != null )

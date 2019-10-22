@@ -39,6 +39,8 @@ namespace GUIBuilder.Windows.RenderChild
         void OnFormLoad( object sender, EventArgs e )
         {
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormLoad() :: Start" );
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
             onLoadComplete = true;
         }

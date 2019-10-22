@@ -33,10 +33,10 @@ namespace GUIBuilder.Windows.RenderChild
         
         public string XmlPath { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
         
-        public SyncObjectTool( string title, Engine.Plugin.Interface.ISyncedGUIList<TSync> ISyncedList = null, Type syncedEditorFormType = null )
+        public SyncObjectTool( string titleTranslationKey, Engine.Plugin.Interface.ISyncedGUIList<TSync> ISyncedList = null, Type syncedEditorFormType = null )
         {
             InitializeComponent();
-            this.Text = title;
+            this.Tag = titleTranslationKey;
             _ISyncedList = ISyncedList;
             lvSyncObjects.SyncedEditorFormType = syncedEditorFormType;
         }
@@ -44,6 +44,7 @@ namespace GUIBuilder.Windows.RenderChild
         void OnFormLoad( object sender, EventArgs e )
         {
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormLoad() :: Start" );
+            this.Translate( true );
             
             this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );

@@ -356,6 +356,11 @@ namespace SDL2ThinLayer
             // Since we are not a procedural language, we'll tell SDL to stfu.
             SDL.SDL_SetMainReady();
             
+            // Apply SDL hints (typically render options for legacy graphics)
+            if( !_InitParams.SDLHints.NullOrEmpty() )
+                for( int i = 0; i < _InitParams.SDLHints.Count; i++ )
+                    SDL.SDL_SetHint( _InitParams.SDLHints[ i ], _InitParams.SDLHintValues[ i ] );
+            
             // Initialize SDL
             _sdlInitialized = INTERNAL_Init_SDLSystems(
                 SDL.SDL_INIT_TIMER |

@@ -61,7 +61,8 @@ namespace GUIBuilder.Windows.FormEditor
             this.gbLocation.Size = new System.Drawing.Size(298, 80);
             this.gbLocation.TabIndex = 5;
             this.gbLocation.TabStop = false;
-            this.gbLocation.Text = "Location:    ";
+            this.gbLocation.Tag = "FormEditor.SubDivision.Location";
+            this.gbLocation.Text = "Location:";
             // 
             // pnLocation
             // 
@@ -96,6 +97,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblLocationFormID.Name = "lblLocationFormID";
             this.lblLocationFormID.Size = new System.Drawing.Size(100, 23);
             this.lblLocationFormID.TabIndex = 4;
+            this.lblLocationFormID.Tag = "FormEditor.SubDivision.Location.FormID";
             this.lblLocationFormID.Text = "FormID:";
             // 
             // lblLocationEditorID
@@ -104,6 +106,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblLocationEditorID.Name = "lblLocationEditorID";
             this.lblLocationEditorID.Size = new System.Drawing.Size(100, 23);
             this.lblLocationEditorID.TabIndex = 6;
+            this.lblLocationEditorID.Tag = "FormEditor.SubDivision.Location.EditorID";
             this.lblLocationEditorID.Text = "EditorID:";
             // 
             // cbLocation
@@ -122,6 +125,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.ClientSize = new System.Drawing.Size(304, 192);
             this.Controls.Add(this.gbLocation);
             this.Name = "SubDivision";
+            this.Tag = "FormEditor.SubDivision.Title";
             this.Text = "Sub-Division";
             this.Load += new System.EventHandler(this.SubDivisionLoad);
             this.Controls.SetChildIndex(this.gbLocation, 0);

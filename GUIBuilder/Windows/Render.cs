@@ -72,6 +72,8 @@ namespace GUIBuilder.Windows
             
             //_SetEnableState( false );
             
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );
             
@@ -81,9 +83,9 @@ namespace GUIBuilder.Windows
             tslMouseToWorldspace.Text = "";
             
             twWorldspaces = new Windows.RenderChild.WorldspaceTool();
-            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "Workshops", GodObject.Plugin.Data.Workshops );
-            twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "Settlements", GodObject.Plugin.Data.Settlements );
-            twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "Sub-Divisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
+            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops );
+            twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
+            twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
             
             AddOwnedForm( twWorldspaces );
             AddOwnedForm( twWorkshops );
@@ -100,7 +102,17 @@ namespace GUIBuilder.Windows
                 twWorldspaces.SyncObjects = cWorldspaces.ToList<Engine.Plugin.Forms.Worldspace>();
             
             //ResetGUIElements();
-            var initParams = new SDL2ThinLayer.SDLRenderer.InitParams( GodObject.Windows.GetMainWindow(), pnRenderTarget, showCursorOverControl: false );
+            List<string> hints = null;
+            List<string> hintValues = null;
+            int sdlVideoHint = GodObject.Windows.SDLVideoDriverIndex;
+            if( GodObject.Windows.SDLVideoDriverIndex != GodObject.Windows.SDLVideoDriverDefaultIndex )
+            {
+                hints = new List<string>();
+                hintValues = new List<string>();
+                hints.Add( SDL2.SDL.SDL_HINT_RENDER_DRIVER );
+                hintValues.Add( GodObject.Windows.SDLVideoDriver );
+            }
+            var initParams = new SDL2ThinLayer.SDLRenderer.InitParams( GodObject.Windows.GetMainWindow(), pnRenderTarget, showCursorOverControl: false, sdlHints: hints, sdlHintValues: hintValues );
             WorkerThreadPool.CreateWorker( initParams, THREAD_RENDER_Init, null ).Start();
             
             onLoadComplete = true;
@@ -227,7 +239,7 @@ namespace GUIBuilder.Windows
                 return;
             }
             var str = string.Format(
-                "FPS (Actual/Potential): {0}/{1} :: Average Frame Time: {2}ms :: Average Frame Ticks: {3}",
+                "RenderWindow.FPS".Translate(),
                 transform.Renderer.ActualFPS,
                 transform.Renderer.PotentialFPS,
                 transform.Renderer.AverageFrameTimeMS,
@@ -857,7 +869,7 @@ namespace GUIBuilder.Windows
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Updating render transform..." );
+            m.SetCurrentStatusMessage( "RenderWindow.UpdateTransform".Translate() );
             
             transform.SyncSceneUpdate( true );
             

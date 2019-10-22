@@ -71,6 +71,7 @@ namespace GUIBuilder.Windows
             this.cbOpenRenderWindowOnLoad.Name = "cbOpenRenderWindowOnLoad";
             this.cbOpenRenderWindowOnLoad.Size = new System.Drawing.Size(272, 18);
             this.cbOpenRenderWindowOnLoad.TabIndex = 2;
+            this.cbOpenRenderWindowOnLoad.Tag = "PluginSelectorWindow.OpenRenderWindow";
             this.cbOpenRenderWindowOnLoad.Text = "Open Render Window On Load";
             this.cbOpenRenderWindowOnLoad.UseVisualStyleBackColor = true;
             // 
@@ -81,6 +82,7 @@ namespace GUIBuilder.Windows
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 3;
+            this.btnLoad.Tag = "PluginSelectorWindow.Load";
             this.btnLoad.Text = "Load";
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoadClick);
@@ -93,6 +95,7 @@ namespace GUIBuilder.Windows
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
+            this.btnCancel.Tag = "PluginSelectorWindow.Cancel";
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancelClick);
@@ -119,6 +122,7 @@ namespace GUIBuilder.Windows
             this.gbWorkingFile.Size = new System.Drawing.Size(272, 45);
             this.gbWorkingFile.TabIndex = 6;
             this.gbWorkingFile.TabStop = false;
+            this.gbWorkingFile.Tag = "PluginSelectorWindow.WorkingFile";
             this.gbWorkingFile.Text = "Working File";
             // 
             // PluginSelector
@@ -139,7 +143,8 @@ namespace GUIBuilder.Windows
             this.Name = "PluginSelector";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "PluginSelector";
+            this.Tag = "PluginSelectorWindow.Title";
+            this.Text = "title";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.PluginSelectorLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);

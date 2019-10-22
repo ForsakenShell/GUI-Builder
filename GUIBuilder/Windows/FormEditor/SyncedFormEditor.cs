@@ -68,6 +68,8 @@ namespace GUIBuilder.Windows.FormEditor
         
         void OnFormLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
             if( _AllowResizing )
                 this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );

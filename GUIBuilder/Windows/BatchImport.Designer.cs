@@ -133,6 +133,7 @@ namespace GUIBuilder.Windows
             this.btnImportSelected.Name = "btnImportSelected";
             this.btnImportSelected.Size = new System.Drawing.Size(75, 23);
             this.btnImportSelected.TabIndex = 14;
+            this.btnImportSelected.Tag = "BatchImportWindow.Import";
             this.btnImportSelected.Text = "Import";
             this.btnImportSelected.UseVisualStyleBackColor = true;
             this.btnImportSelected.Click += new System.EventHandler(this.btnImportSelectedClick);
@@ -144,11 +145,12 @@ namespace GUIBuilder.Windows
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 13;
+            this.btnClose.Tag = "BatchImportWindow.Close";
             this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnCloseClick);
             // 
-            // BatchImportWindow
+            // BatchImport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -156,8 +158,9 @@ namespace GUIBuilder.Windows
             this.Controls.Add(this.pnMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(950, 572);
-            this.Name = "BatchImportWindow";
-            this.Text = "Batch Import";
+            this.Name = "BatchImport";
+            this.Tag = "BatchImportWindow.Title";
+            this.Text = "title";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);

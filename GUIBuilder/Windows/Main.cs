@@ -4,6 +4,10 @@
  * Main window for GUI Builder.
  * 
  */
+
+// Uncomment this line to use the native Windows dialog to load a single (the working) plugin instead of the multi-plugin loader
+//#define USE_SINGLE_LOADER
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -22,8 +26,6 @@ namespace GUIBuilder.Windows
         readonly Size SIZE_ZERO = new Size( 0, 0 );
         readonly Size MIN_RENDER_SIZE = new Size( 640, 480 );
         
-        const string RootWindowTitle = "GUI Builder";
-        
         const string XmlNode = "MainWindow";
         const string XmlLocation = "Location";
         const string XmlSize = "Size";
@@ -36,7 +38,6 @@ namespace GUIBuilder.Windows
         public Main()
         {
             InitializeComponent();
-            this.Text = RootWindowTitle;
         }
         
         bool _already_shutdown = false;
@@ -104,6 +105,8 @@ namespace GUIBuilder.Windows
                 return;
             }
             */
+            
+            this.Translate( true );
             
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
@@ -394,7 +397,7 @@ namespace GUIBuilder.Windows
             
             GodObject.Plugin.Unload();
             
-            this.Text = RootWindowTitle;
+            this.Translate();
             
         localReturnResult:
             GodObject.Windows.SetEnableState( true );
@@ -449,7 +452,7 @@ namespace GUIBuilder.Windows
             
             GodObject.Windows.CloseAllChildWindows();
             
-            // *
+#if USE_SINGLE_LOADER
             var dlg = new OpenFileDialog();
             dlg.Title = "Select Bethesda file to work with";
             dlg.Filter = "Bethesda Plugin File|*.esp|Bethesda Master File|*.esm|All Files|*.*";
@@ -459,17 +462,21 @@ namespace GUIBuilder.Windows
             dlg.CheckFileExists = true;
             dlg.CheckPathExists = true;
             dlg.Multiselect = false;
-            // * /
-            //var dlg = new PluginSelector();
-            //if( ( dlg.ShowDialog() == DialogResult.OK )&&( !dlg.SelectedPlugins.NullOrEmpty() )&&( !string.IsNullOrEmpty( dlg.WorkingFile ) ) )
+            
+#else
+            var dlg = new PluginSelector();
+            
+#endif
+            
+#if USE_SINGLE_LOADER
             if( ( dlg.ShowDialog() == DialogResult.OK )&&( !string.IsNullOrEmpty( dlg.FileName ) ) )
+#else
+            if( ( dlg.ShowDialog() == DialogResult.OK )&&( !dlg.SelectedPlugins.NullOrEmpty() )&&( !string.IsNullOrEmpty( dlg.WorkingFile ) ) )
+#endif
             {
                 ClearStatusBar();
                 
-                //var wf = dlg.WorkingFile;
-                //var sp = dlg.SelectedPlugins;
-                //var orwol = dlg.OpenRenderWindowOnLoad
-                
+#if USE_SINGLE_LOADER
                 string path;
                 var wf = GenFilePath.FilenameFromPathname( dlg.FileName, out path );
                 var sp = new List<string>();
@@ -480,6 +487,13 @@ namespace GUIBuilder.Windows
                         sp.Add( master.Filename );
                 if( !sp.Contains( wf ) )
                 	sp.Add( wf );
+                
+#else
+                var wf = dlg.WorkingFile;
+                var sp = dlg.SelectedPlugins;
+                var orwol = dlg.OpenRenderWindowOnLoad;
+                
+#endif
                 
                 // If the plugin loader returns true, the loader thread will re-enable the GUI
                 reEnableGUI &= !GodObject.Plugin.Load( wf, sp, orwol );

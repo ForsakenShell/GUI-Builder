@@ -64,6 +64,8 @@ namespace GUIBuilder.Windows
         
         void OnFormLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
@@ -82,7 +84,7 @@ namespace GUIBuilder.Windows
             RepopulatePresetComboBoxes( cbWorkshopPresets   , NIFBuilder.Preset.WorkshopPresets   );
             RepopulatePresetComboBoxes( cbSubDivisionPresets, NIFBuilder.Preset.SubDivisionPresets );
             
-            cbRestrictWorkshopBorderKeywords.Text = string.Format( "Restrict to:\n{0}", GodObject.Plugin.Data.Files.Working.Filename );
+            cbRestrictWorkshopBorderKeywords.Text = string.Format( "{0}\n{1}", "BorderBatchWindow.NodeDetection.Restrict".Translate(), GodObject.Plugin.Data.Files.Working.Filename );
             
             lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
@@ -227,7 +229,7 @@ namespace GUIBuilder.Windows
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( message + "..." );
+            m.SetCurrentStatusMessage( message );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
@@ -265,7 +267,7 @@ namespace GUIBuilder.Windows
             #region Keywords
             
             RepopulateWorkshopNodeDetectionControl<Engine.Plugin.Forms.Keyword>(
-                "Searching for default keyword",
+                "BorderBatchWindow.SearchingForKeyword".Translate(),
                 cbWorkshopBorderKeyword,
                 filter,
                 "_WorkshopBorderGenerator",
@@ -276,7 +278,7 @@ namespace GUIBuilder.Windows
             #region Statics
             
             RepopulateWorkshopNodeDetectionControl<Engine.Plugin.Forms.Static>(
-                "Searching for default static object",
+                "BorderBatchWindow.SearchingForForcedZStatic".Translate(),
                 cbWorkshopForcedZStatic,
                 filter,
                 "_ForcedZ",
@@ -507,7 +509,7 @@ namespace GUIBuilder.Windows
             if( !workshops.NullOrEmpty() )
             {
                 m.PushStatusMessage();
-                m.SetCurrentStatusMessage( "Building workshop borders..." );
+                m.SetCurrentStatusMessage( "BorderBatchWindow.BuildingWorkshopBorders".Translate() );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
                 
@@ -553,7 +555,7 @@ namespace GUIBuilder.Windows
             if( !subDivisions.NullOrEmpty() )
             {
                 m.PushStatusMessage();
-                m.SetCurrentStatusMessage( "Building sub-division borders..." );
+                m.SetCurrentStatusMessage( "BorderBatchWindow.BuildingSubDivisionBorders".Translate() );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
                 
@@ -746,8 +748,8 @@ namespace GUIBuilder.Windows
             else if( !string.IsNullOrEmpty( _reImportFile ) )
             {
                 var dlg = new OpenFileDialog();
-                dlg.Title = "Select NIFBuilder export file to import";
-                dlg.Filter = "NIFBuilder Export|NIFBuilder_BorderNIFs_*.txt|All Files|*.*";
+                dlg.Title = "BorderBatchWindow.ImportNIFsTitle".Translate();
+                dlg.Filter = string.Format( "{0}|NIFBuilder_BorderNIFs_*.txt|{1}|*.*", "BorderBatchWindow.ImportExportFilter".Translate(), "BorderBatchWindow.ImportAllFilter".Translate() );
                 dlg.InitialDirectory = GodObject.Paths.DefaultNIFBuilderOutput;
                 dlg.FileName = _reImportFile;
                 dlg.RestoreDirectory = true;
@@ -811,7 +813,7 @@ namespace GUIBuilder.Windows
         static void RepopulatePresetComboBoxes( ComboBox cb, List<NIFBuilder.Preset> presets )
         {
             cb.Items.Clear();
-            cb.Items.Add( "Custom" );
+            cb.Items.Add( "BorderBatchWindow.PresetCustom".Translate() );
             var count = presets == null ? 0 : presets.Count;
             if( count > 0 )
             {

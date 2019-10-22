@@ -35,8 +35,8 @@ namespace GodObject
         const string WaterHeight_Texture_File_Suffix = "_WaterHeights.dds";
         
         // User feedback strings in the status area
-        const string txtCreateTexturesNP = "Creating textures...";
-        const string txtCreateTextures = "Creating textures...{0}%";
+        static readonly string txtCreateTexturesNP = "WorldspaceDataPool.CreatingTextures".Translate();
+        static readonly string txtCreateTextures = "WorldspaceDataPool.CreatingTexturesP".Translate();
         
         public class PoolEntry : IDisposable
         {
@@ -467,7 +467,7 @@ namespace GodObject
                 
                 LoadHeightMapData();
                 
-                m.SetCurrentStatusMessage( "Creating texture from land heightmap..." );
+                m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), LandHeights_Texture_File ) );
                 if( LandHeight_Texture != null )
                 {
                     LandHeight_Texture.Dispose();
@@ -479,7 +479,7 @@ namespace GodObject
                 }
                 LandHeight_Texture = renderer.CreateTextureFromSurface( LandHeight_Surface );
                 
-                m.SetCurrentStatusMessage( "Creating texture from water heightmap..." );
+                m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), WaterHeights_Texture_File ) );
                 
                 if( WaterHeight_Texture != null )
                 {
@@ -620,7 +620,7 @@ namespace GodObject
                 
                 var m = GodObject.Windows.GetMainWindow();
                 m.PushStatusMessage();
-                m.SetCurrentStatusMessage( string.Format( "Loading {0}...", ddsFile ) );
+                m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.Loading".Translate(), ddsFile ) );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
                 

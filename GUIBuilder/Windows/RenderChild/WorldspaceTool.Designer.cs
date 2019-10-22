@@ -156,6 +156,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceFormID.Size = new System.Drawing.Size(99, 23);
             this.lWorldspaceFormID.TabIndex = 6;
             this.lWorldspaceFormID.Text = "FormID:";
+            this.lWorldspaceFormID.Tag = "RenderWindow.Worldspace.FormID";
             // 
             // gbWorldspaceMapHeightRange
             // 
@@ -169,6 +170,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.gbWorldspaceMapHeightRange.TabIndex = 5;
             this.gbWorldspaceMapHeightRange.TabStop = false;
             this.gbWorldspaceMapHeightRange.Text = "Map Height";
+            this.gbWorldspaceMapHeightRange.Tag = "RenderWindow.Worldspace.MapHeight";
             // 
             // lWorldspaceMapHeightMax
             // 
@@ -177,6 +179,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceMapHeightMax.Size = new System.Drawing.Size(36, 23);
             this.lWorldspaceMapHeightMax.TabIndex = 3;
             this.lWorldspaceMapHeightMax.Text = "Max:";
+            this.lWorldspaceMapHeightMax.Tag = "RenderWindow.Worldspace.MapHeight.Max";
             // 
             // lWorldspaceMapHeightMin
             // 
@@ -185,6 +188,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceMapHeightMin.Size = new System.Drawing.Size(36, 23);
             this.lWorldspaceMapHeightMin.TabIndex = 2;
             this.lWorldspaceMapHeightMin.Text = "Min:";
+            this.lWorldspaceMapHeightMin.Tag = "RenderWindow.Worldspace.MapHeight.Min";
             // 
             // tbWorldspaceMapHeightMax
             // 
@@ -218,6 +222,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.gbWorldspaceTextures.TabIndex = 4;
             this.gbWorldspaceTextures.TabStop = false;
             this.gbWorldspaceTextures.Text = "Textures";
+            this.gbWorldspaceTextures.Tag = "RenderWindow.Worldspace.Textures";
             // 
             // tbWorldspaceWaterHeightsTexture
             // 
@@ -246,6 +251,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceEditorID.Size = new System.Drawing.Size(99, 23);
             this.lWorldspaceEditorID.TabIndex = 2;
             this.lWorldspaceEditorID.Text = "EditorID:";
+            this.lWorldspaceEditorID.Tag = "RenderWindow.Worldspace.EditorID";
             // 
             // gbWorldspaceGridRange
             // 
@@ -262,6 +268,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.gbWorldspaceGridRange.TabIndex = 0;
             this.gbWorldspaceGridRange.TabStop = false;
             this.gbWorldspaceGridRange.Text = "Grid Range";
+            this.gbWorldspaceGridRange.Tag = "RenderWindow.Worldspace.GridRange";
             // 
             // tbWorldspaceGridBottomX
             // 
@@ -354,7 +361,8 @@ namespace GUIBuilder.Windows.RenderChild
             this.Name = "RenderWindowWorldspaceToolWindow";
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "Worldspaces";
+            this.Text = "title";
+            this.Tag = "RenderWindow.Worldspaces";
             this.TopMost = true;
             this.Activated += new System.EventHandler(this.OnActivated);
             this.Deactivate += new System.EventHandler(this.OnDeactivate);

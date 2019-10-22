@@ -209,7 +209,7 @@ namespace GodObject
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Loading required base forms..." );
+            m.SetCurrentStatusMessage( "Plugin.LoadBaseForms".Translate() );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
@@ -267,7 +267,7 @@ namespace GodObject
                 
                 #region Load plugins
                 
-                m.SetCurrentStatusMessage( string.Format( "Loading {0}...", _workingFile ) );
+                m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingFile".Translate(), _workingFile ) );
                 Messages.ClearMessages();
                 Setup.LoadPlugins( _loadPlugins );
                 

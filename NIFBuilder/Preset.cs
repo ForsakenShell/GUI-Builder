@@ -61,18 +61,18 @@ public static partial class NIFBuilder
         
         public static class Workshop
         {
-            public static Preset        VanillaGroundSink   = new Preset( "Vanilla Workshop w/GS"   ,  128.000f,    0.0100f,  256.0000f,    0.0000f,   64.0000f,  "Workshop"            , "WorkshopBorder" );
-            public static Preset        Vanilla             = new Preset( "Vanilla Workshop"        ,  128.000f,    0.0100f,  256.0000f,    0.0000f,    0.0000f,  "Workshop"            , "WorkshopBorder" );
+            public static Preset        VanillaGroundSink   = new Preset( "NIFBuilder.Preset.VanillaWorkshopGS".Translate(),  128.000f,    0.0100f,  256.0000f,    0.0000f,   64.0000f,  "Workshop"            , "WorkshopBorder" );
+            public static Preset        Vanilla             = new Preset( "NIFBuilder.Preset.VanillaWorkshop".Translate()  ,  128.000f,    0.0100f,  256.0000f,    0.0000f,    0.0000f,  "Workshop"            , "WorkshopBorder" );
             
         }
         
         public static class SubDivision
         {
-            public static Preset        Tall                = new Preset( "Tall"                    ,  128.000f,    0.0100f, 1024.0000f, 1024.0000f,   64.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "Tall Height"      , "Border", true );
-            public static Preset        Medium              = new Preset( "Medium"                  ,  128.000f,    0.0100f,  512.0000f,  512.0000f,   64.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "Medium Height"    , "Border" );
-            public static Preset        Vanilla             = new Preset( "Vanilla Workshop"        ,  128.000f,    0.0100f,  256.0000f,    0.0000f,   64.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "Vanilla Height"   , "Border" );
-            public static Preset        None                = new Preset( "None"                    ,  128.000f,    0.0100f,    0.0000f,    0.0000f,    0.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "No Border"        , "Border" );
-            public static Preset        FullSet             = new Preset( "Full ATC Set"            ,  128.000f,    0.0100f, new List<Preset>{ SubDivision.Tall, SubDivision.Medium, SubDivision.Vanilla, SubDivision.None } );
+            public static Preset        Tall                = new Preset( "NIFBuilder.Preset.ATCTall".Translate()          ,  128.000f,    0.0100f, 1024.0000f, 1024.0000f,   64.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "Tall Height"      , "Border", true );
+            public static Preset        Medium              = new Preset( "NIFBuilder.Preset.ATCMedium".Translate()        ,  128.000f,    0.0100f,  512.0000f,  512.0000f,   64.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "Medium Height"    , "Border" );
+            public static Preset        Vanilla             = new Preset( "NIFBuilder.Preset.ATCSmall".Translate()         ,  128.000f,    0.0100f,  256.0000f,    0.0000f,   64.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "Vanilla Height"   , "Border" );
+            public static Preset        None                = new Preset( "NIFBuilder.Preset.ATCNone".Translate()          ,  128.000f,    0.0100f,    0.0000f,    0.0000f,    0.0000f, @"ESM\ATC\SubDivisions", "ESM_ATC_", "No Border"        , "Border" );
+            public static Preset        FullSet             = new Preset( "NIFBuilder.Preset.ATCAll".Translate()           ,  128.000f,    0.0100f, new List<Preset>{ SubDivision.Tall, SubDivision.Medium, SubDivision.Vanilla, SubDivision.None } );
         }
         
         public static List<Preset>      WorkshopPresets     = new List<Preset>{ Workshop.VanillaGroundSink, Workshop.Vanilla };

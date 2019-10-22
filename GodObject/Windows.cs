@@ -176,6 +176,47 @@ namespace GodObject
         
         #region Render Window
         
+        static readonly string XmlSDLVideoDriver = "SDLVideoDriver";
+        static public readonly string SDLVideoDriverDefault = "Default";
+        static public readonly string SDLVideoDriverSoftware = "Software";
+        static public readonly int SDLVideoDriverDefaultIndex = 0;
+        static public readonly string[] SDLVideoDrivers = new [] { SDLVideoDriverDefault, "Direct3D", "OpenGL", "OpenGLES", "OpenGLES2", "Metal", SDLVideoDriverSoftware };
+        
+        static int GetDriverIndexFromName( string name )
+        {
+            if( string.IsNullOrEmpty( name ) ) return SDLVideoDriverDefaultIndex;
+            for( int i = 0; i < SDLVideoDrivers.Length; i++ )
+                if( name.InsensitiveInvariantMatch( SDLVideoDrivers[ i ] ) ) return i;
+            return SDLVideoDriverDefaultIndex;
+        }
+        
+        static public string SDLVideoDriver
+        {
+            get
+            {
+                return GodObject.XmlConfig.ReadStringValue( "Options", XmlSDLVideoDriver, SDLVideoDriverDefault );
+            }
+            set
+            {
+                int i = GetDriverIndexFromName( value );
+                GodObject.XmlConfig.WriteStringValue( "Options", XmlSDLVideoDriver, SDLVideoDrivers[ i ], true );
+            }
+        }
+        static public int SDLVideoDriverIndex
+        {
+            get
+            {
+                return GetDriverIndexFromName( SDLVideoDriver );
+            }
+            set
+            {
+                int i = ( value < 0 )||( value > SDLVideoDrivers.Length )
+                    ? SDLVideoDriverDefaultIndex
+                    : value;
+                GodObject.XmlConfig.WriteStringValue( "Options", XmlSDLVideoDriver, SDLVideoDrivers[ i ], true );
+            }
+        }
+        
         static GWindow.Render _RenderWindow;
         
         public static GWindow.Render GetRenderWindow( bool showWindow = false )

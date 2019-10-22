@@ -34,6 +34,8 @@ namespace GUIBuilder.Windows
         
         void OnFormLoad( object sender, EventArgs e )
         {
+            this.Translate( true );
+            
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
@@ -107,7 +109,7 @@ namespace GUIBuilder.Windows
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( "Checking for missing sub-division elements..." );
+            m.SetCurrentStatusMessage( "SubDivisionBatchWindow.CheckingElements".Translate() );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
