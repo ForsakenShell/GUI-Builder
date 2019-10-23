@@ -8,8 +8,6 @@
 *.sln.docstates
 *.dds
 *.DDS
-*.png
-*.PNG
 
 # Build results
 [Dd]ebug/
