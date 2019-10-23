@@ -99,6 +99,7 @@
     <Compile Include="GUIBuilder\Windows\PluginSelector.Designer.cs">
       <DependentUpon>PluginSelector.cs</DependentUpon>
     </Compile>
+    <None Include="BorderBuilder\Lang\English %28UK%29\Translate.xml" />
     <None Include="GodObject\Plugin\Data\Obsolete\BaseForm.cs" />
     <Compile Include="GenCollection.cs" />
     <Compile Include="GenFilePath.cs" />
@@ -209,7 +210,7 @@
     <Compile Include="GodObject\Master.cs" />
     <Compile Include="GodObject\Paths.cs" />
     <Compile Include="GodObject\Plugin.cs" />
-    <Compile Include="GodObject\WorldspaceHeightmap.cs" />
+    <Compile Include="GodObject\WorldspaceDataPool.cs" />
     <Compile Include="GodObject\Windows.cs" />
     <Compile Include="GUIBuilder\Windows\FormEditor\SyncedFormEditor.cs">
       <SubType>Form</SubType>
@@ -396,6 +397,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="BorderBuilder" />
+    <Folder Include="BorderBuilder\Lang" />
+    <Folder Include="BorderBuilder\Lang\English %28UK%29" />
     <Folder Include="Engine\Plugin\Forms\Fields\Record" />
     <Folder Include="GUIBuilder\Obsolete" />
     <Folder Include="GUIBuilder\Windows" />

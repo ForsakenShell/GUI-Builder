@@ -128,7 +128,7 @@ namespace GUIBuilder.Windows
             this.gbConflictStatus.Size = new System.Drawing.Size(309, 116);
             this.gbConflictStatus.TabIndex = 1;
             this.gbConflictStatus.TabStop = false;
-            this.gbConflictStatus.Tag = "OptionsWindow.Conflict";
+            this.gbConflictStatus.Tag = "OptionsWindow.ConflictStatus";
             this.gbConflictStatus.Text = "Conflicts";
             // 
             // tbCSUneditable
@@ -141,7 +141,7 @@ namespace GUIBuilder.Windows
             this.tbCSUneditable.ReadOnly = true;
             this.tbCSUneditable.Size = new System.Drawing.Size(292, 13);
             this.tbCSUneditable.TabIndex = 1;
-            this.tbCSUneditable.Tag = "OptionsWindow.Conflict.Uneditable";
+            this.tbCSUneditable.Tag = "Conflict.Uneditable";
             this.tbCSUneditable.Text = "Uneditable";
             // 
             // tbCSRequiresOverride
@@ -155,7 +155,7 @@ namespace GUIBuilder.Windows
             this.tbCSRequiresOverride.ReadOnly = true;
             this.tbCSRequiresOverride.Size = new System.Drawing.Size(292, 13);
             this.tbCSRequiresOverride.TabIndex = 6;
-            this.tbCSRequiresOverride.Tag = "OptionsWindow.Conflict.OverrideRequired";
+            this.tbCSRequiresOverride.Tag = "Conflict.OverrideRequired";
             this.tbCSRequiresOverride.Text = "Requires Override";
             // 
             // tbCSNoConflict
@@ -168,7 +168,7 @@ namespace GUIBuilder.Windows
             this.tbCSNoConflict.ReadOnly = true;
             this.tbCSNoConflict.Size = new System.Drawing.Size(292, 13);
             this.tbCSNoConflict.TabIndex = 3;
-            this.tbCSNoConflict.Tag = "OptionsWindow.Conflict.None";
+            this.tbCSNoConflict.Tag = "Conflict.None";
             this.tbCSNoConflict.Text = "No Conflict";
             // 
             // tbCSOverrideInWorkingFile
@@ -181,7 +181,7 @@ namespace GUIBuilder.Windows
             this.tbCSOverrideInWorkingFile.ReadOnly = true;
             this.tbCSOverrideInWorkingFile.Size = new System.Drawing.Size(292, 13);
             this.tbCSOverrideInWorkingFile.TabIndex = 5;
-            this.tbCSOverrideInWorkingFile.Tag = "OptionsWindow.Conflict.OverrideWorking";
+            this.tbCSOverrideInWorkingFile.Tag = "Conflict.OverrideInWorkingFile";
             this.tbCSOverrideInWorkingFile.Text = "Override in Working File";
             // 
             // tbCSOverrideInAncestor
@@ -194,7 +194,7 @@ namespace GUIBuilder.Windows
             this.tbCSOverrideInAncestor.ReadOnly = true;
             this.tbCSOverrideInAncestor.Size = new System.Drawing.Size(292, 13);
             this.tbCSOverrideInAncestor.TabIndex = 4;
-            this.tbCSOverrideInAncestor.Tag = "OptionsWindow.Conflict.OverrideAncestor";
+            this.tbCSOverrideInAncestor.Tag = "Conflict.OverrideInAncestor";
             this.tbCSOverrideInAncestor.Text = "Override in Ancestor";
             // 
             // tbCSNewForm
@@ -207,7 +207,7 @@ namespace GUIBuilder.Windows
             this.tbCSNewForm.ReadOnly = true;
             this.tbCSNewForm.Size = new System.Drawing.Size(292, 13);
             this.tbCSNewForm.TabIndex = 2;
-            this.tbCSNewForm.Tag = "OptionsWindow.Conflict.NewForm";
+            this.tbCSNewForm.Tag = "Conflict.NewForm";
             this.tbCSNewForm.Text = "New Form";
             // 
             // tbCSInvalid
@@ -220,7 +220,7 @@ namespace GUIBuilder.Windows
             this.tbCSInvalid.ReadOnly = true;
             this.tbCSInvalid.Size = new System.Drawing.Size(292, 13);
             this.tbCSInvalid.TabIndex = 0;
-            this.tbCSInvalid.Tag = "OptionsWindow.Conflict.Error";
+            this.tbCSInvalid.Tag = "Conflict.Error";
             this.tbCSInvalid.Text = "Error State";
             // 
             // gbSDLHints
@@ -271,7 +271,7 @@ namespace GUIBuilder.Windows
             this.lblSDLVideoDriver.Name = "lblSDLVideoDriver";
             this.lblSDLVideoDriver.Size = new System.Drawing.Size(100, 21);
             this.lblSDLVideoDriver.TabIndex = 0;
-            this.lblSDLVideoDriver.Tag = "OptionsWindow.SDLHint.VideoDriver";
+            this.lblSDLVideoDriver.Tag = "OptionsWindow.SDLHint.VideoDriver:";
             this.lblSDLVideoDriver.Text = "Driver";
             // 
             // gbLanguage

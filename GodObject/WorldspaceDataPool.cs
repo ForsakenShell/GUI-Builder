@@ -1,5 +1,5 @@
 ﻿/*
- * WorldspaceHeightmap.cs
+ * WorldspaceDataPool.cs
  *
  * Worldspace heightmap data.
  * 

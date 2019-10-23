@@ -156,7 +156,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceFormID.Size = new System.Drawing.Size(99, 23);
             this.lWorldspaceFormID.TabIndex = 6;
             this.lWorldspaceFormID.Text = "FormID:";
-            this.lWorldspaceFormID.Tag = "RenderWindow.Worldspace.FormID";
+            this.lWorldspaceFormID.Tag = "Form.FormID:";
             // 
             // gbWorldspaceMapHeightRange
             // 
@@ -179,7 +179,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceMapHeightMax.Size = new System.Drawing.Size(36, 23);
             this.lWorldspaceMapHeightMax.TabIndex = 3;
             this.lWorldspaceMapHeightMax.Text = "Max:";
-            this.lWorldspaceMapHeightMax.Tag = "RenderWindow.Worldspace.MapHeight.Max";
+            this.lWorldspaceMapHeightMax.Tag = "RenderWindow.Worldspace.MapHeight.Max:";
             // 
             // lWorldspaceMapHeightMin
             // 
@@ -188,7 +188,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceMapHeightMin.Size = new System.Drawing.Size(36, 23);
             this.lWorldspaceMapHeightMin.TabIndex = 2;
             this.lWorldspaceMapHeightMin.Text = "Min:";
-            this.lWorldspaceMapHeightMin.Tag = "RenderWindow.Worldspace.MapHeight.Min";
+            this.lWorldspaceMapHeightMin.Tag = "RenderWindow.Worldspace.MapHeight.Min:";
             // 
             // tbWorldspaceMapHeightMax
             // 
@@ -251,7 +251,7 @@ namespace GUIBuilder.Windows.RenderChild
             this.lWorldspaceEditorID.Size = new System.Drawing.Size(99, 23);
             this.lWorldspaceEditorID.TabIndex = 2;
             this.lWorldspaceEditorID.Text = "EditorID:";
-            this.lWorldspaceEditorID.Tag = "RenderWindow.Worldspace.EditorID";
+            this.lWorldspaceEditorID.Tag = "Form.EditorID:";
             // 
             // gbWorldspaceGridRange
             // 

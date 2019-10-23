@@ -3,6 +3,14 @@
  *
  * Translation handler for GUIBuilder.
  *
+ * Translations for Controls are taken from the Control.Tag and replace the Control.Text.
+ * 
+ * Prefixing "ToolTip:" to the ToolStripItem.Tag will instead replace the ToolStripItem.ToolTip with the translation.
+ *     NOTE:  This is handled in the translation method for ToolStripItem.
+ * 
+ * Suffixing the translation key (including Control.Tag) with a colon (":") will add a colon to the end of the translation.
+ *     NOTE:  This is handled in the core string.Translate() method that all Translate() methods use.
+ * 
  */
 using System;
 using System.Collections.Generic;
@@ -46,15 +54,30 @@ public static class Translator
     
     #endregion
     
+    /// <summary>
+    /// Get the language translation from a translation key.
+    /// </summary>
+    /// <param name="key">Key in the translation file to return the translation of.</param>
+    /// <returns></returns>
     public static string Translate( this string key )
     {
         if( RootNode == null ) return MissingTranslation;
         if( _Translations == null )
             _Translations = new Dictionary<string, string>();
+        bool colonSuffix = false;
+        string wKey = (string)key.Clone();
         string result = null;
-        if( _Translations.TryGetValue( key, out result ) )
+        if( wKey.EndsWith( ":", StringComparison.Ordinal ) )
+        {
+            colonSuffix = true;
+            wKey = wKey.Substring( 0, wKey.Length - 1 );
+        }
+        if( _Translations.TryGetValue( wKey, out result ) )
+        {
+            if( colonSuffix ) result += ":";
             return result;
-        var knode = RootNode.SelectSingleNode( key );
+        }
+        var knode = RootNode.SelectSingleNode( wKey );
         if( knode == null )
         {
             DebugLog.WriteLine( string.Format( "{0} :: \"{1}\"", MissingTranslation, key ) );
@@ -62,10 +85,16 @@ public static class Translator
         }
         else
             result = knode.InnerText;
-        _Translations.Add( key, result );
+        _Translations.Add( wKey, result );
+        if( colonSuffix ) result += ":";
         return result;
     }
     
+    /// <summary>
+    /// Translate a Control.Tag into the language appropriate Control.Text.
+    /// </summary>
+    /// <param name="control">Control to translate.</param>
+    /// <param name="translateChildControls">Recursively translate child Control.Controls, ToolStrip.Items and, TabControl.TabPages?</param>
     public static void Translate( this System.Windows.Forms.Control control, bool translateChildControls = false )
     {
         if( control == null ) return;
@@ -90,6 +119,11 @@ public static class Translator
                 tabControl.TabPages[ i ].Translate( true );
     }
     
+    /// <summary>
+    /// Translate a ToolStripItem.Tag into the language appropriate ToolStripItem.Text.
+    /// </summary>
+    /// <param name="item">ToolStripItem to translate.</param>
+    /// <param name="translateChildItems">Recursively translate child ToolStripItem.Items?</param>
     public static void Translate( this System.Windows.Forms.ToolStripItem item, bool translateChildItems = false )
     {
         if( item == null ) return;

@@ -325,7 +325,7 @@ namespace GUIBuilder.Windows
             this.lbSubDivisionSlopeAllowance.Name = "lbSubDivisionSlopeAllowance";
             this.lbSubDivisionSlopeAllowance.Size = new System.Drawing.Size(90, 17);
             this.lbSubDivisionSlopeAllowance.TabIndex = 6;
-            this.lbSubDivisionSlopeAllowance.Tag = "BorderBatchWindow.NodesAndNIFs.SlopeAllowance";
+            this.lbSubDivisionSlopeAllowance.Tag = "BorderBatchWindow.NodesAndNIFs.SlopeAllowance:";
             this.lbSubDivisionSlopeAllowance.Text = "Slope Allowance:";
             // 
             // lblSubDivisionFileSuffix
@@ -334,7 +334,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionFileSuffix.Name = "lblSubDivisionFileSuffix";
             this.lblSubDivisionFileSuffix.Size = new System.Drawing.Size(101, 17);
             this.lblSubDivisionFileSuffix.TabIndex = 27;
-            this.lblSubDivisionFileSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.FileSuffix";
+            this.lblSubDivisionFileSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.FileSuffix:";
             this.lblSubDivisionFileSuffix.Text = "File Suffix:";
             // 
             // tbSubDivisionGroundOffset
@@ -369,7 +369,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionGradientHeight.Name = "lblSubDivisionGradientHeight";
             this.lblSubDivisionGradientHeight.Size = new System.Drawing.Size(90, 16);
             this.lblSubDivisionGradientHeight.TabIndex = 2;
-            this.lblSubDivisionGradientHeight.Tag = "BorderBatchWindow.NodesAndNIFs.GradientHeight";
+            this.lblSubDivisionGradientHeight.Tag = "BorderBatchWindow.NodesAndNIFs.GradientHeight:";
             this.lblSubDivisionGradientHeight.Text = "Gradient Height:";
             // 
             // lblSubDivisionTargetSuffix
@@ -378,7 +378,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionTargetSuffix.Name = "lblSubDivisionTargetSuffix";
             this.lblSubDivisionTargetSuffix.Size = new System.Drawing.Size(101, 17);
             this.lblSubDivisionTargetSuffix.TabIndex = 23;
-            this.lblSubDivisionTargetSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.TargetSubDirectory";
+            this.lblSubDivisionTargetSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.TargetSubDirectory:";
             this.lblSubDivisionTargetSuffix.Text = "Target Sub-Folder:";
             // 
             // tbSubDivisionSlopeAllowance
@@ -406,7 +406,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionGroundSink.Name = "lblSubDivisionGroundSink";
             this.lblSubDivisionGroundSink.Size = new System.Drawing.Size(90, 16);
             this.lblSubDivisionGroundSink.TabIndex = 1;
-            this.lblSubDivisionGroundSink.Tag = "BorderBatchWindow.NodesAndNIFs.GroundSink";
+            this.lblSubDivisionGroundSink.Tag = "BorderBatchWindow.NodesAndNIFs.GroundSink:";
             this.lblSubDivisionGroundSink.Text = "Ground Sink:";
             // 
             // tbSubDivisionMeshSubDirectory
@@ -423,7 +423,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionGroundOffset.Name = "lblSubDivisionGroundOffset";
             this.lblSubDivisionGroundOffset.Size = new System.Drawing.Size(90, 16);
             this.lblSubDivisionGroundOffset.TabIndex = 3;
-            this.lblSubDivisionGroundOffset.Tag = "BorderBatchWindow.NodesAndNIFs.GroundOffset";
+            this.lblSubDivisionGroundOffset.Tag = "BorderBatchWindow.NodesAndNIFs.GroundOffset:";
             this.lblSubDivisionGroundOffset.Text = "Ground Offset:";
             // 
             // lblSubDivisionPresets
@@ -432,7 +432,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionPresets.Name = "lblSubDivisionPresets";
             this.lblSubDivisionPresets.Size = new System.Drawing.Size(66, 16);
             this.lblSubDivisionPresets.TabIndex = 15;
-            this.lblSubDivisionPresets.Tag = "BorderBatchWindow.NodesAndNIFs.Preset";
+            this.lblSubDivisionPresets.Tag = "BorderBatchWindow.NodesAndNIFs.Preset:";
             this.lblSubDivisionPresets.Text = "Preset:";
             // 
             // tbNIFBuilderSubDivisionSampleFilePath
@@ -451,7 +451,7 @@ namespace GUIBuilder.Windows
             this.lbSubDivisionNodeLength.Name = "lbSubDivisionNodeLength";
             this.lbSubDivisionNodeLength.Size = new System.Drawing.Size(90, 16);
             this.lbSubDivisionNodeLength.TabIndex = 0;
-            this.lbSubDivisionNodeLength.Tag = "BorderBatchWindow.NodesAndNIFs.NodeLength";
+            this.lbSubDivisionNodeLength.Tag = "BorderBatchWindow.NodesAndNIFs.NodeLength:";
             this.lbSubDivisionNodeLength.Text = "Node Length:";
             // 
             // lblSubDivisionMeshSubDirectory
@@ -460,7 +460,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionMeshSubDirectory.Name = "lblSubDivisionMeshSubDirectory";
             this.lblSubDivisionMeshSubDirectory.Size = new System.Drawing.Size(101, 17);
             this.lblSubDivisionMeshSubDirectory.TabIndex = 10;
-            this.lblSubDivisionMeshSubDirectory.Tag = "BorderBatchWindow.NodesAndNIFs.MeshSubDirectory";
+            this.lblSubDivisionMeshSubDirectory.Tag = "BorderBatchWindow.NodesAndNIFs.MeshSubDirectory:";
             this.lblSubDivisionMeshSubDirectory.Text = "Mesh Sub-Folder:";
             // 
             // tbSubDivisionNodeLength
@@ -487,7 +487,7 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionFilePrefix.Name = "lblSubDivisionFilePrefix";
             this.lblSubDivisionFilePrefix.Size = new System.Drawing.Size(101, 17);
             this.lblSubDivisionFilePrefix.TabIndex = 8;
-            this.lblSubDivisionFilePrefix.Tag = "BorderBatchWindow.NodesAndNIFs.FilePrefix";
+            this.lblSubDivisionFilePrefix.Tag = "BorderBatchWindow.NodesAndNIFs.FilePrefix:";
             this.lblSubDivisionFilePrefix.Text = "File Prefix:";
             // 
             // lvSubDivisions
@@ -550,7 +550,7 @@ namespace GUIBuilder.Windows
             this.cbRestrictWorkshopBorderKeywords.Name = "cbRestrictWorkshopBorderKeywords";
             this.cbRestrictWorkshopBorderKeywords.Size = new System.Drawing.Size(318, 30);
             this.cbRestrictWorkshopBorderKeywords.TabIndex = 14;
-            this.cbRestrictWorkshopBorderKeywords.Text = "Restrict to:\r\n{0}\r\n";
+            this.cbRestrictWorkshopBorderKeywords.Text = "Restrict to:\r\n{0}";
             this.cbRestrictWorkshopBorderKeywords.UseVisualStyleBackColor = true;
             this.cbRestrictWorkshopBorderKeywords.CheckStateChanged += new System.EventHandler(this.cbRestrictWorkshopBorderKeywordsChanged);
             // 
@@ -568,7 +568,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopBorderKeyword.Name = "lblWorkshopBorderKeyword";
             this.lblWorkshopBorderKeyword.Size = new System.Drawing.Size(198, 17);
             this.lblWorkshopBorderKeyword.TabIndex = 12;
-            this.lblWorkshopBorderKeyword.Tag = "BorderBatchWindow.NodeDetection.WorkshopKeyword";
+            this.lblWorkshopBorderKeyword.Tag = "BorderBatchWindow.NodeDetection.WorkshopKeyword:";
             this.lblWorkshopBorderKeyword.Text = "Workshop Link Keyword:";
             // 
             // cbWorkshopBorderKeyword
@@ -585,7 +585,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopForcedZStatic.Name = "lblWorkshopForcedZStatic";
             this.lblWorkshopForcedZStatic.Size = new System.Drawing.Size(198, 17);
             this.lblWorkshopForcedZStatic.TabIndex = 15;
-            this.lblWorkshopForcedZStatic.Tag = "BorderBatchWindow.NodeDetection.ForcedZStatic";
+            this.lblWorkshopForcedZStatic.Tag = "BorderBatchWindow.NodeDetection.ForcedZStatic:";
             this.lblWorkshopForcedZStatic.Text = "Forced Z Static Object:";
             // 
             // gbWorkshopNodeAndNIFGeneration
@@ -663,7 +663,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopFileSuffix.Name = "lblWorkshopFileSuffix";
             this.lblWorkshopFileSuffix.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopFileSuffix.TabIndex = 25;
-            this.lblWorkshopFileSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.FileSuffix";
+            this.lblWorkshopFileSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.FileSuffix:";
             this.lblWorkshopFileSuffix.Text = "File Suffix:";
             // 
             // tbWorkshopGradientHeight
@@ -689,7 +689,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopGradientHeight.Name = "lblWorkshopGradientHeight";
             this.lblWorkshopGradientHeight.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopGradientHeight.TabIndex = 20;
-            this.lblWorkshopGradientHeight.Tag = "BorderBatchWindow.NodesAndNIFs.GradientHeight";
+            this.lblWorkshopGradientHeight.Tag = "BorderBatchWindow.NodesAndNIFs.GradientHeight:";
             this.lblWorkshopGradientHeight.Text = "Gradient Height:";
             // 
             // tbWorkshopMeshSubDirectory
@@ -706,7 +706,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopGroundSink.Name = "lblWorkshopGroundSink";
             this.lblWorkshopGroundSink.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopGroundSink.TabIndex = 19;
-            this.lblWorkshopGroundSink.Tag = "BorderBatchWindow.NodesAndNIFs.GroundSink";
+            this.lblWorkshopGroundSink.Tag = "BorderBatchWindow.NodesAndNIFs.GroundSink:";
             this.lblWorkshopGroundSink.Text = "Ground Sink:";
             // 
             // tbWorkshopTargetSuffix
@@ -723,7 +723,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopGroundOffset.Name = "lblWorkshopGroundOffset";
             this.lblWorkshopGroundOffset.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopGroundOffset.TabIndex = 21;
-            this.lblWorkshopGroundOffset.Tag = "BorderBatchWindow.NodesAndNIFs.GroundOffset";
+            this.lblWorkshopGroundOffset.Tag = "BorderBatchWindow.NodesAndNIFs.GroundOffset:";
             this.lblWorkshopGroundOffset.Text = "Ground Offset:";
             // 
             // lblWorkshopTargetSuffix
@@ -732,7 +732,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopTargetSuffix.Name = "lblWorkshopTargetSuffix";
             this.lblWorkshopTargetSuffix.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopTargetSuffix.TabIndex = 21;
-            this.lblWorkshopTargetSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.TargetSubDirectory";
+            this.lblWorkshopTargetSuffix.Tag = "BorderBatchWindow.NodesAndNIFs.TargetSubDirectory:";
             this.lblWorkshopTargetSuffix.Text = "Target Sub-Folder:";
             // 
             // lblWorkshopSlopeAllowance
@@ -741,7 +741,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopSlopeAllowance.Name = "lblWorkshopSlopeAllowance";
             this.lblWorkshopSlopeAllowance.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopSlopeAllowance.TabIndex = 17;
-            this.lblWorkshopSlopeAllowance.Tag = "BorderBatchWindow.NodesAndNIFs.SlopeAllowance";
+            this.lblWorkshopSlopeAllowance.Tag = "BorderBatchWindow.NodesAndNIFs.SlopeAllowance:";
             this.lblWorkshopSlopeAllowance.Text = "Slope Allowance:";
             // 
             // cbWorkshopPresets
@@ -769,7 +769,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopPresets.Name = "lblWorkshopPresets";
             this.lblWorkshopPresets.Size = new System.Drawing.Size(66, 16);
             this.lblWorkshopPresets.TabIndex = 10;
-            this.lblWorkshopPresets.Tag = "BorderBatchWindow.NodesAndNIFs.Preset";
+            this.lblWorkshopPresets.Tag = "BorderBatchWindow.NodesAndNIFs.Preset:";
             this.lblWorkshopPresets.Text = "Preset:";
             // 
             // lblWorkshopNodeLength
@@ -778,7 +778,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopNodeLength.Name = "lblWorkshopNodeLength";
             this.lblWorkshopNodeLength.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopNodeLength.TabIndex = 15;
-            this.lblWorkshopNodeLength.Tag = "BorderBatchWindow.NodesAndNIFs.NodeLength";
+            this.lblWorkshopNodeLength.Tag = "BorderBatchWindow.NodesAndNIFs.NodeLength:";
             this.lblWorkshopNodeLength.Text = "Node Length:";
             // 
             // tbWorkshopNodeLength
@@ -808,7 +808,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopMeshSubDirectory.Name = "lblWorkshopMeshSubDirectory";
             this.lblWorkshopMeshSubDirectory.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopMeshSubDirectory.TabIndex = 5;
-            this.lblWorkshopMeshSubDirectory.Tag = "BorderBatchWindow.NodesAndNIFs.MeshSubDirectory";
+            this.lblWorkshopMeshSubDirectory.Tag = "BorderBatchWindow.NodesAndNIFs.MeshSubDirectory:";
             this.lblWorkshopMeshSubDirectory.Text = "Mesh Sub-Folder:";
             // 
             // lblWorkshopFilePrefix
@@ -817,7 +817,7 @@ namespace GUIBuilder.Windows
             this.lblWorkshopFilePrefix.Name = "lblWorkshopFilePrefix";
             this.lblWorkshopFilePrefix.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopFilePrefix.TabIndex = 0;
-            this.lblWorkshopFilePrefix.Tag = "BorderBatchWindow.NodesAndNIFs.FilePrefix";
+            this.lblWorkshopFilePrefix.Tag = "BorderBatchWindow.NodesAndNIFs.FilePrefix:";
             this.lblWorkshopFilePrefix.Text = "File Prefix:";
             // 
             // lvWorkshops

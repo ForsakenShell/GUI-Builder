@@ -78,7 +78,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblEditorID.Name = "lblEditorID";
             this.lblEditorID.Size = new System.Drawing.Size(100, 23);
             this.lblEditorID.TabIndex = 6;
-            this.lblEditorID.Tag = "FormEditor.UID.EditorID";
+            this.lblEditorID.Tag = "Form.EditorID:";
             this.lblEditorID.Text = "EditorID:";
             // 
             // tbFormID
@@ -96,7 +96,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblFormID.Name = "lblFormID";
             this.lblFormID.Size = new System.Drawing.Size(100, 23);
             this.lblFormID.TabIndex = 4;
-            this.lblFormID.Tag = "FormEditor.UID.FormID";
+            this.lblFormID.Tag = "Form.FormID:";
             this.lblFormID.Text = "FormID:";
             // 
             // btnCancel

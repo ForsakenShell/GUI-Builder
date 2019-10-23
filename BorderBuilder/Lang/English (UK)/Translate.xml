@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <GUIBuilder>
+    <Form.FormID>FormID</Form.FormID>
+    <Form.EditorID>EditorID</Form.EditorID>
+    <Conflict.Error>Error State</Conflict.Error>
+    <Conflict.Uneditable>Uneditable Form</Conflict.Uneditable>
+    <Conflict.NewForm>New Form</Conflict.NewForm>
+    <Conflict.None>No Conflict</Conflict.None>
+    <Conflict.OverrideInAncestor>Override in Ancestor</Conflict.OverrideInAncestor>
+    <Conflict.OverrideInWorkingFile>Override in Working File</Conflict.OverrideInWorkingFile>
+    <Conflict.OverrideRequired>Requires Override</Conflict.OverrideRequired>
     <MainWindow.Title>GUIBuilder</MainWindow.Title>
     <MainWindow.FileMenu>File</MainWindow.FileMenu>
     <MainWindow.FileMenu.Load>Load ESM/ESP</MainWindow.FileMenu.Load>
@@ -14,19 +23,12 @@
     <MainWindow.ToolMenu.Options>Options</MainWindow.ToolMenu.Options>
     <OptionsWindow.Title>GUIBuilder Options</OptionsWindow.Title>
     <OptionsWindow.Masters>Always Select Masters</OptionsWindow.Masters>
-    <OptionsWindow.Conflict>Conflict Status</OptionsWindow.Conflict>
-    <OptionsWindow.Conflict.Error>Error State</OptionsWindow.Conflict.Error>
-    <OptionsWindow.Conflict.Uneditable>Uneditable Form</OptionsWindow.Conflict.Uneditable>
-    <OptionsWindow.Conflict.NewForm>New Form</OptionsWindow.Conflict.NewForm>
-    <OptionsWindow.Conflict.None>No Conflict</OptionsWindow.Conflict.None>
-    <OptionsWindow.Conflict.OverrideAncestor>Override in Ancestor</OptionsWindow.Conflict.OverrideAncestor>
-    <OptionsWindow.Conflict.OverrideWorking>Override in Working File</OptionsWindow.Conflict.OverrideWorking>
-    <OptionsWindow.Conflict.OverrideRequired>Requires Override</OptionsWindow.Conflict.OverrideRequired>
+    <OptionsWindow.ConflictStatus>Conflict Status</OptionsWindow.ConflictStatus>
     <OptionsWindow.Language>Language</OptionsWindow.Language>
     <OptionsWindow.LanguageRestart>Changing languages will not take effect until you restart GUIBuilder.</OptionsWindow.LanguageRestart>
     <OptionsWindow.SDLHint>SDL Hints</OptionsWindow.SDLHint>
     <OptionsWindow.SDLHint.Warning>GUIBuilder will create very large textures that are "non-power-of-two" depending on the worldspace.  The Commonwealth (for example) is 6145x6145, if your hardware cannot support this you should override the below setting with "{0}".</OptionsWindow.SDLHint.Warning>
-    <OptionsWindow.SDLHint.VideoDriver>Video Driver:</OptionsWindow.SDLHint.VideoDriver>
+    <OptionsWindow.SDLHint.VideoDriver>Video Driver</OptionsWindow.SDLHint.VideoDriver>
     <AboutWindow.Title>About GUIBuilder</AboutWindow.Title>
     <AboutWindow.ComicTitle>GUIBuilder</AboutWindow.ComicTitle>
     <AboutWindow.Author>by 1000101</AboutWindow.Author>
@@ -72,18 +74,16 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <RenderWindow.BuildVolumes>Build Volumes</RenderWindow.BuildVolumes>
     <RenderWindow.SandboxVolumes>Sandbox Volumes</RenderWindow.SandboxVolumes>
     <RenderWindow.Worldspaces>Worldspaces</RenderWindow.Worldspaces>
-    <RenderWindow.Worldspace.FormID>FormID:</RenderWindow.Worldspace.FormID>
     <RenderWindow.Worldspace.MapHeight>Map Height</RenderWindow.Worldspace.MapHeight>
-    <RenderWindow.Worldspace.MapHeight.Max>Max:</RenderWindow.Worldspace.MapHeight.Max>
-    <RenderWindow.Worldspace.MapHeight.Min>Min:</RenderWindow.Worldspace.MapHeight.Min>
+    <RenderWindow.Worldspace.MapHeight.Max>Max</RenderWindow.Worldspace.MapHeight.Max>
+    <RenderWindow.Worldspace.MapHeight.Min>Min</RenderWindow.Worldspace.MapHeight.Min>
     <RenderWindow.Worldspace.Textures>Textures</RenderWindow.Worldspace.Textures>
-    <RenderWindow.Worldspace.EditorID>EditorID:</RenderWindow.Worldspace.EditorID>
     <RenderWindow.Worldspace.GridRange>Grid Range</RenderWindow.Worldspace.GridRange>
     <RenderWindow.FPS>FPS (Actual/Potential): {0}/{1} :: Average Frame Time: {2}ms :: Average Frame Ticks: {3}</RenderWindow.FPS>
     <RenderWindow.UpdateTransform>Updating render transform...</RenderWindow.UpdateTransform>
     <SubDivisionBatchWindow.Title>Sub-Division Batch</SubDivisionBatchWindow.Title>
     <SubDivisionBatchWindow.Elements>Elements</SubDivisionBatchWindow.Elements>
-    <SubDivisionBatchWindow.SandboxVolumes></SubDivisionBatchWindow.SandboxVolumes>
+    <SubDivisionBatchWindow.SandboxVolumes>Sandbox Volumes</SubDivisionBatchWindow.SandboxVolumes>
     <SubDivisionBatchWindow.EdgeFlags>Edge Flags</SubDivisionBatchWindow.EdgeFlags>
     <SubDivisionBatchWindow.BorderEnablers>Border Enablers</SubDivisionBatchWindow.BorderEnablers>
     <SubDivisionBatchWindow.Functions>Functions</SubDivisionBatchWindow.Functions>
@@ -103,21 +103,21 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.Tab.SubDivisions>Sub-Divisions</BorderBatchWindow.Tab.SubDivisions>
     <BorderBatchWindow.Tab.Workshops>Workshops</BorderBatchWindow.Tab.Workshops>
     <BorderBatchWindow.NodesAndNIFs>Node and NIF Generation</BorderBatchWindow.NodesAndNIFs>
-    <BorderBatchWindow.NodesAndNIFs.Preset>Preset:</BorderBatchWindow.NodesAndNIFs.Preset>
-    <BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>Target Sub-Folder:</BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>
-    <BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>Mesh Sub-Folder:</BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>
-    <BorderBatchWindow.NodesAndNIFs.FilePrefix>File Prefix:</BorderBatchWindow.NodesAndNIFs.FilePrefix>
-    <BorderBatchWindow.NodesAndNIFs.FileSuffix>File Suffix:</BorderBatchWindow.NodesAndNIFs.FileSuffix>
-    <BorderBatchWindow.NodesAndNIFs.NodeLength>Node Length:</BorderBatchWindow.NodesAndNIFs.NodeLength>
-    <BorderBatchWindow.NodesAndNIFs.SlopeAllowance>Slope Allowance:</BorderBatchWindow.NodesAndNIFs.SlopeAllowance>
-    <BorderBatchWindow.NodesAndNIFs.GradientHeight>Gradient Height:</BorderBatchWindow.NodesAndNIFs.GradientHeight>
-    <BorderBatchWindow.NodesAndNIFs.GroundOffset>Ground Offset:</BorderBatchWindow.NodesAndNIFs.GroundOffset>
-    <BorderBatchWindow.NodesAndNIFs.GroundSink>Ground Sink:</BorderBatchWindow.NodesAndNIFs.GroundSink>
+    <BorderBatchWindow.NodesAndNIFs.Preset>Preset</BorderBatchWindow.NodesAndNIFs.Preset>
+    <BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>Target Sub-Folder</BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>
+    <BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>Mesh Sub-Folder</BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>
+    <BorderBatchWindow.NodesAndNIFs.FilePrefix>File Prefix</BorderBatchWindow.NodesAndNIFs.FilePrefix>
+    <BorderBatchWindow.NodesAndNIFs.FileSuffix>File Suffix</BorderBatchWindow.NodesAndNIFs.FileSuffix>
+    <BorderBatchWindow.NodesAndNIFs.NodeLength>Node Length</BorderBatchWindow.NodesAndNIFs.NodeLength>
+    <BorderBatchWindow.NodesAndNIFs.SlopeAllowance>Slope Allowance</BorderBatchWindow.NodesAndNIFs.SlopeAllowance>
+    <BorderBatchWindow.NodesAndNIFs.GradientHeight>Gradient Height</BorderBatchWindow.NodesAndNIFs.GradientHeight>
+    <BorderBatchWindow.NodesAndNIFs.GroundOffset>Ground Offset</BorderBatchWindow.NodesAndNIFs.GroundOffset>
+    <BorderBatchWindow.NodesAndNIFs.GroundSink>Ground Sink</BorderBatchWindow.NodesAndNIFs.GroundSink>
     <BorderBatchWindow.NodesAndNIFs.CreateImports>Create Import Data</BorderBatchWindow.NodesAndNIFs.CreateImports>
     <BorderBatchWindow.NodeDetection>Node Detection</BorderBatchWindow.NodeDetection>
-    <BorderBatchWindow.NodeDetection.Restrict>Restrict to:</BorderBatchWindow.NodeDetection.Restrict>
-    <BorderBatchWindow.NodeDetection.WorkshopKeyword>Workshop Link Keyword:</BorderBatchWindow.NodeDetection.WorkshopKeyword>
-    <BorderBatchWindow.NodeDetection.ForcedZStatic>Forced Z Static Object:</BorderBatchWindow.NodeDetection.ForcedZStatic>
+    <BorderBatchWindow.NodeDetection.Restrict>Restrict to</BorderBatchWindow.NodeDetection.Restrict>
+    <BorderBatchWindow.NodeDetection.WorkshopKeyword>Workshop Link Keyword</BorderBatchWindow.NodeDetection.WorkshopKeyword>
+    <BorderBatchWindow.NodeDetection.ForcedZStatic>Forced Z Static Object</BorderBatchWindow.NodeDetection.ForcedZStatic>
     <BorderBatchWindow.SearchingForKeyword>Searching for default keyword...</BorderBatchWindow.SearchingForKeyword>
     <BorderBatchWindow.SearchingForForcedZStatic>Searching for default static object...</BorderBatchWindow.SearchingForForcedZStatic>
     <BorderBatchWindow.BuildingWorkshopBorders>Building workhop borders...</BorderBatchWindow.BuildingWorkshopBorders>
@@ -148,18 +148,12 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <SyncedListView.LoadOrder>LO</SyncedListView.LoadOrder>
     <SyncedListView.Filename>Filename</SyncedListView.Filename>
     <SyncedListView.Type>Type</SyncedListView.Type>
-    <SyncedListView.FormID>FormID</SyncedListView.FormID>
-    <SyncedListView.EditorID>EditorID</SyncedListView.EditorID>
     <SyncedListView.ExtraInfo>Extra Info</SyncedListView.ExtraInfo>
     <FormEditor.UID.Title>Unique Identifiers</FormEditor.UID.Title>
-    <FormEditor.UID.FormID>FormID:</FormEditor.UID.FormID>
-    <FormEditor.UID.EditorID>EditorID:</FormEditor.UID.EditorID>
     <FormEditor.Apply>Apply</FormEditor.Apply>
     <FormEditor.Cancel>Cancel</FormEditor.Cancel>
     <FormEditor.SubDivision.Title>Sub-Division</FormEditor.SubDivision.Title>
-    <FormEditor.SubDivision.Location>Location:</FormEditor.SubDivision.Location>
-    <FormEditor.SubDivision.Location.FormID>FormID:</FormEditor.SubDivision.Location.FormID>
-    <FormEditor.SubDivision.Location.EditorID>EditorID:</FormEditor.SubDivision.Location.EditorID>
+    <FormEditor.SubDivision.Location>Location</FormEditor.SubDivision.Location>
     <BorderBatch.ParsingImportFile>Parsing border import file...</BorderBatch.ParsingImportFile>
     <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for "{1}"...</BorderBatch.CreateNIFsFor>
     <SubDivisionBatch.ClearingBordersFor>Clearing borders for "{0}"...</SubDivisionBatch.ClearingBordersFor>

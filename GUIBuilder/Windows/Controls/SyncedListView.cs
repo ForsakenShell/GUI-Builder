@@ -411,8 +411,8 @@ namespace GUIBuilder.Windows.Controls
                 new Column( this, SyncedColumnID.LoadOrder    , "SyncedListView.LoadOrder",  28, true , _LoadOrderColumn ),
                 new Column( this, SyncedColumnID.Filename     , "SyncedListView.Filename" , 160, false, _FilenameColumn  ),
                 new Column( this, SyncedColumnID.SignatureType, "SyncedListView.Type"     ,  60, false, _TypeColumn      ),
-                new Column( this, SyncedColumnID.FormID       , "SyncedListView.FormID"   ,  80, true , _FormIDColumn    ),
-                new Column( this, SyncedColumnID.EditorID     , "SyncedListView.EditorID" , 256, false, _EditorIDColumn  ),
+                new Column( this, SyncedColumnID.FormID       , "Form.FormID"             ,  80, true , _FormIDColumn    ),
+                new Column( this, SyncedColumnID.EditorID     , "Form.EditorID"           , 256, false, _EditorIDColumn  ),
                 new Column( this, SyncedColumnID.ExtraInfo    , "SyncedListView.ExtraInfo", 512, false, _ExtraInfoColumn )
             };
             RegisterListViewForEvents( true );

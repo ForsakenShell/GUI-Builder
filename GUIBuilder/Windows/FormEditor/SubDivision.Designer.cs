@@ -61,7 +61,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.gbLocation.Size = new System.Drawing.Size(298, 80);
             this.gbLocation.TabIndex = 5;
             this.gbLocation.TabStop = false;
-            this.gbLocation.Tag = "FormEditor.SubDivision.Location";
+            this.gbLocation.Tag = "FormEditor.SubDivision.Location:";
             this.gbLocation.Text = "Location:";
             // 
             // pnLocation
@@ -97,7 +97,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblLocationFormID.Name = "lblLocationFormID";
             this.lblLocationFormID.Size = new System.Drawing.Size(100, 23);
             this.lblLocationFormID.TabIndex = 4;
-            this.lblLocationFormID.Tag = "FormEditor.SubDivision.Location.FormID";
+            this.lblLocationFormID.Tag = "Form.FormID:";
             this.lblLocationFormID.Text = "FormID:";
             // 
             // lblLocationEditorID
@@ -106,7 +106,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.lblLocationEditorID.Name = "lblLocationEditorID";
             this.lblLocationEditorID.Size = new System.Drawing.Size(100, 23);
             this.lblLocationEditorID.TabIndex = 6;
-            this.lblLocationEditorID.Tag = "FormEditor.SubDivision.Location.EditorID";
+            this.lblLocationEditorID.Tag = "Form.EditorID:";
             this.lblLocationEditorID.Text = "EditorID:";
             // 
             // cbLocation
