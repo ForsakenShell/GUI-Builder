@@ -57,7 +57,7 @@ namespace AnnexTheCommonwealth
             get
             {
                 var primitive = Reference.Primitive;
-                return primitive.GetBounds( Engine.Plugin.TargetHandle.Working );
+                return primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             }
         }
         

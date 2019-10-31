@@ -53,6 +53,8 @@ namespace Engine.Plugin
         
         // Handle "double-free" by combinations of explicit disposal[s] and GC disposal
         
+        protected bool                  Disposed = false;
+        
                                        ~File()
         {
             Dispose( true );
@@ -65,9 +67,14 @@ namespace Engine.Plugin
         
         protected virtual void          Dispose( bool disposing )
         {
+            if( Disposed )
+                return;
+            
             if( _Handle.IsValid() )
                 _Handle.Dispose();
             _Handle = null;
+            
+            Disposed = true;
         }
         
         #endregion
@@ -85,7 +92,21 @@ namespace Engine.Plugin
         
         public override int             GetHashCode()               { return _Filename.GetHashCode(); }
         
-        public override string          ToString()                  { return _Filename; }
+        public override string          ToString()
+        {
+            if( this == null )
+                return "[null]";
+            if( Disposed )
+                return "[disposed]";
+            var strH = ( _Handle == null ? "[null]" : _Handle.ToString() );
+            var str = string.Format(
+                "[{0} :: typeof( File ) = {1}{2}]",
+                _Filename,
+                this.GetType().ToString(),
+                ( strH == null ? null : string.Format( " :: handle = {0}", strH ) )
+            );
+            return str;
+        }
         
         #region Required Properties
         

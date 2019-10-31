@@ -204,7 +204,7 @@ namespace GUIBuilder.Windows
                 SortImportForms( selectedImportForms, true );
                 foreach( var importForm in selectedImportForms )
                 {
-                    msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), importForm.Signature, importForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), importForm.Signature, importForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                     m.SetCurrentStatusMessage( msg );
                     AddImportMessage( msg );
                     importForm.Apply( this );

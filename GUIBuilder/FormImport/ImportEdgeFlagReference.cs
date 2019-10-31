@@ -54,11 +54,11 @@ namespace GUIBuilder.FormImport
             var tmp = new List<string>();
             var refr = TargetRef;
             
-            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
+            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
-            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
-                tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
+            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                tmp.Add( string.Format( "Layer {0}", GenIXHandle.ExtraInfoFor( GodObject.CoreForms.ESM_ATC_LAYR_Controllers ) ) );
             
             return GenIXHandle.ConcatDisplayInfo( tmp );
         }
@@ -88,8 +88,8 @@ namespace GUIBuilder.FormImport
             
             return
                 ( TargetRecordFlagsMatch )&&
-                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) == Engine.Plugin.Constant.FormID_None )&&
-                ( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
+                ( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
         
         protected override bool         ApplyImport()
@@ -97,7 +97,7 @@ namespace GUIBuilder.FormImport
             var refr = TargetRef;
             
             ApplyRecordFlagsToTarget();
-            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             // Remove unwanted elements automagically added by the CK/XeLib
             refr.LocationReference.DeleteRootElement( false, false );

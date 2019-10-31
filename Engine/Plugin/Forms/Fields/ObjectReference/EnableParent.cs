@@ -49,7 +49,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             if( value == null )
                 cache_R.DeleteRootElement( true, true );
             else
-                SetReferenceID( target, value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                SetReferenceID( target, value.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
         
         public uint GetFlags( TargetHandle target )

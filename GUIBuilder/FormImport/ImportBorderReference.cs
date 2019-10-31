@@ -74,7 +74,7 @@ namespace GUIBuilder.FormImport
             CellGrid        = new Vector2i(
                 cell == null
                 ? Vector2i.MinValue
-                : cell.CellGrid.GetGrid( Engine.Plugin.TargetHandle.Working ) );
+                : cell.CellGrid.GetGrid( Engine.Plugin.TargetHandle.Master ) );
             Position        = new Vector3f( position );
             stEnableParent  = new ScriptTarget( this, typeof( AnnexTheCommonwealth.BorderEnabler ), borderEnabler );
             ftLinkRef       = new FormTarget( this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
@@ -122,7 +122,7 @@ namespace GUIBuilder.FormImport
             
             if(
                 ( stEnableParent.Resolveable() )&&
-                ( !stEnableParent.Matches( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.Working ), false ) )
+                ( !stEnableParent.Matches( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )
             )   tmp.Add( ftLayer.DisplayIDInfo( "Enabled Parent {0}" ) );
             
             if(
@@ -139,7 +139,7 @@ namespace GUIBuilder.FormImport
                     ) );
             }
             
-            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
+            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
             return GenIXHandle.ConcatDisplayInfo( tmp );
@@ -204,9 +204,9 @@ namespace GUIBuilder.FormImport
                 ( ftWorldspace.Matches( refr.Worldspace, false ) )&&
                 ( ftCell.Matches( refr.Cell, false ) )&&
                 ( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
-                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) == Engine.Plugin.Constant.FormID_None )&&
+                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
                 ( ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
-                ( stEnableParent.Matches( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.Working ), !stEnableParent.Resolveable() ) )||
+                ( stEnableParent.Matches( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), !stEnableParent.Resolveable() ) )||
                 ( ftLinkRef.Matches( lr, !lwk ) );
         }
         
@@ -237,7 +237,7 @@ namespace GUIBuilder.FormImport
                             this.GetType().ToString(),
                             ftBaseStat.FormID.ToString( "X8" ),
                             ftBaseStat.EditorID,
-                            border.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) ) );
+                            border.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
                     SetTarget( border );
                 }
             }

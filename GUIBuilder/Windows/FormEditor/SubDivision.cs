@@ -45,7 +45,7 @@ namespace GUIBuilder.Windows.FormEditor
                     {
                         var location = _Locations[ index ];
                         cbLocation.Items.Add( location.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                        if( location.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == formID )
+                        if( location.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID )
                             selectedIndex = index;
                     }
                 }
@@ -63,7 +63,7 @@ namespace GUIBuilder.Windows.FormEditor
                 tbLocationEditorID.Text = "";
                 return;
             }
-            tbLocationFormID.Text = location.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" );
+            tbLocationFormID.Text = location.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" );
             tbLocationEditorID.Text = location.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             
             pnLocation.Enabled = true;

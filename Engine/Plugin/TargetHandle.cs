@@ -16,8 +16,9 @@ namespace Engine.Plugin
         Master,
         LastFullRequired,
         Working,
-        WorkingOrLastFullRequired, // Will probably need to change many functions to refer to this as a safety catch
-        LastFullOptional
+        WorkingOrLastFullRequired,
+        LastFullOptional,
+        LastValid
     }
     
 }

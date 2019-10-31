@@ -116,6 +116,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void UpdateSyncedList( Engine.Plugin.Forms.Worldspace worldspace )
         {
+            DebugLog.WriteLine( string.Format( "{0} :: UpdateSyncedList() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
             SyncObjects = worldspace == null ? null : _ISyncedList.FindAllInWorldspace( worldspace );
         }
         
@@ -132,6 +133,7 @@ namespace GUIBuilder.Windows.RenderChild
             }
             set
             {
+                DebugLog.WriteLine( string.Format( "{0} :: Worldspace :: worldspace ? {1}", this.GetType().ToString(), value == null ? "null" : value.ToString() ) );
                 _Worldspace = value;
                 UpdateSyncedList( _Worldspace );
             }

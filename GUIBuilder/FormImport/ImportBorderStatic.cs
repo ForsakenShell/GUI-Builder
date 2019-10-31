@@ -77,10 +77,10 @@ namespace GUIBuilder.FormImport
             if( string.Compare( oldEDID, NewEditorID, StringComparison.InvariantCulture ) != 0 )
                 tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
-            if( stat.ObjectBounds.GetMinValue( Engine.Plugin.TargetHandle.Working ) != MinBounds )
+            if( stat.ObjectBounds.GetMinValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != MinBounds )
                 tmp.Add( string.Format( "Min Bounds {0}", MinBounds.ToString() ) );
             
-            if( stat.ObjectBounds.GetMaxValue( Engine.Plugin.TargetHandle.Working ) != MaxBounds )
+            if( stat.ObjectBounds.GetMaxValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != MaxBounds )
                 tmp.Add( string.Format( "Max Bounds {0}", MaxBounds.ToString() ) );
             
             if( stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( NIFFilePath ) )

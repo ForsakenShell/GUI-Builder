@@ -99,12 +99,13 @@ namespace GUIBuilder.Windows.RenderChild
             var rw = GodObject.Windows.GetRenderWindow( false );
             
             var worldspace = _SelectedWorldspace;
+            DebugLog.WriteLine( string.Format( "{0} :: UpdateGUIElements() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
             if( worldspace != null )
             {
                 var poolEntry = worldspace.PoolEntry;
                 var mapData = worldspace.MapData;
-                tbWorldspaceFormID.Text = worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" );
-                tbWorldspaceEditorID.Text = worldspace.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                tbWorldspaceFormID.Text = worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" );
+                tbWorldspaceEditorID.Text = worldspace.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
                 tbWorldspaceMapHeightMax.Text = poolEntry.MaxHeight.ToString( "n6" );
                 tbWorldspaceMapHeightMin.Text = poolEntry.MinHeight.ToString( "n6" );
                 var cellNW = mapData.GetCellNW( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
@@ -139,6 +140,7 @@ namespace GUIBuilder.Windows.RenderChild
             var lie = e as ListViewItemSelectionChangedEventArgs;
             if( lie != null )
                 _SelectedWorldspace = lvWorldspaces.SyncObjectFromListViewItem( lie.Item );
+            DebugLog.WriteLine( string.Format( "{0} :: lvWorldspacesItemSelectionChanged() :: worldspace ? {1}", this.GetType().ToString(), _SelectedWorldspace == null ? "null" : _SelectedWorldspace.ToString() ) );
             UpdateGUIElements();
         }
         

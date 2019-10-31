@@ -26,7 +26,7 @@ namespace Engine.Plugin.Forms.Fields.Location
             if( value == null )
                 DeleteRootElement( true, true );
             else
-                SetValue( target, value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                SetValue( target, value.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
     }
     

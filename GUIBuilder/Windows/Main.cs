@@ -417,7 +417,7 @@ namespace GUIBuilder.Windows
             
             var wfn = wf.Filename;
             //var wfn = GodObject.Fallout4DataPath + @"\ATC_test.esp";
-            var saveMsg = string.Format( "Saving \"{0}\"...", wfn );
+            var saveMsg = string.Format( "MainWindow.SavingFile".Translate(), wfn );
             DebugLog.WriteLine( saveMsg );
             SetCurrentStatusMessage( saveMsg );
             
@@ -432,7 +432,7 @@ namespace GUIBuilder.Windows
             else if( !string.IsNullOrEmpty( saveMsg ) )
                 DebugLog.WriteLine( saveMsg );
             
-            saveMsg = string.Format( "\"{0}\" saved.", wfn );
+            saveMsg = string.Format( "MainWindow.FileSaved".Translate(), wfn );
             DebugLog.WriteLine( saveMsg );
             SetCurrentStatusMessage( saveMsg );
             

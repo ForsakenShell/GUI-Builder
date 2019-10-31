@@ -138,7 +138,7 @@ namespace GUIBuilder
                 
                 foreach( var workshop in workshops )
                 {   // Build a workshop border
-                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, workshop.GetFormID( Engine.Plugin.TargetHandle.Master ), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     var subList = workshop.CreateBorderNIFs(
                         gradientHeight, groundOffset, groundSink,
                         targetPath, targetSuffix,
@@ -198,7 +198,7 @@ namespace GUIBuilder
                 
                 foreach( var subdivision in subdivisions )
                 {
-                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, subdivision.GetFormID( Engine.Plugin.TargetHandle.Master ), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     var subList = subdivision.CreateBorderNIFs(
                         gradientHeight, groundOffset, groundSink,
                         targetPath, targetSuffix,
@@ -216,7 +216,7 @@ namespace GUIBuilder
             }
             catch( Exception e )
             {
-                DebugLog.WriteLine( "GUIBuilder.BorderBatch.CreateNIFs() :: An exception occured while generating NIFBuilder import file\n\n" + e.ToString() );
+                DebugLog.WriteLine( "GUIBuilder.BorderBatch :: CreateNIFs() :: An exception occured while generating NIFBuilder import file\n\n" + e.ToString() );
             }
             
             m.StopSyncTimer( "GUIBuilder.BorderBatch :: CreateNIFs() :: Completed (" + borderSetName + ") in {0}", tStart.Ticks );

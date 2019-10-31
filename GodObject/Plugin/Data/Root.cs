@@ -144,11 +144,11 @@ namespace GodObject
                 {
                     if( !syncObject.IsValid() ) return;
                     
-                    if( syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ValidFormID() )
+                    if( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ValidFormID() )
                     {
                         if( _ByFormID == null )
                             _ByFormID = new Dictionary<uint, IXHandle>();
-                        _ByFormID[ syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ] = syncObject;
+                        _ByFormID[ syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = syncObject;
                     }
                     
                     var eid = syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
@@ -166,7 +166,7 @@ namespace GodObject
                     if( !syncObject.IsValid() ) return;
                     
                     if( _ByFormID != null )
-                        _ByFormID.Remove( syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        _ByFormID.Remove( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                     
                     var eid = syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                     if( eid.ValidEditorID() )
@@ -374,7 +374,7 @@ namespace GodObject
                     
                     // Now return the forms from the records
                 localReturnResult:
-                    //DebugLog.CloseIndentLevel<IDataSync>( resultList );
+                    //DebugLog.CloseIndentLevel<IXHandle>( "IXHandle tree", resultList );
                     return resultList.NullOrEmpty()
                         ? null
                         : resultList;
@@ -387,9 +387,18 @@ namespace GodObject
                     foreach( var h in handles )
                     {
                         if( syncObjects.NullOrEmpty() )
+                        {
+                            //DebugLog.WriteLine( new [] { "Dispose", "Empty syncObjectList{", h.ToString(), "}" } );
                             h.Dispose();
+                        }
                         else
-                            if( !syncObjects.Any( (f)=> f.IsHandleFor( h ) ) ) h.Dispose();
+                        {
+                            if( !syncObjects.Any( (f)=> f.IsHandleFor( h ) ) )
+                            {
+                                //DebugLog.WriteLine( new [] { "Dispose", "Unused handle{", h.ToString(), "}" } );
+                                h.Dispose();
+                            }
+                        }
                     }
                     //DebugLog.CloseIndentLevel();
                 }
@@ -450,7 +459,7 @@ namespace GodObject
                         : forms.Last(); // Last form is the one we want
                     
                 localReturnResult:
-                    //DebugLog.CloseIndentLevel<IDataSync>( result );
+                    //DebugLog.CloseIndentLevel<IXHandle>( "result", result );
                     return result;
                 }
                 

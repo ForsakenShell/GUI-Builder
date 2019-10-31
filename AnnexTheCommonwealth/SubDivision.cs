@@ -91,7 +91,7 @@ namespace AnnexTheCommonwealth
                 _EdgeFlagKeyword = keyword;
             }
             _EdgeFlags.Insert( index, flag );
-            flag.kywdSubDivision[ keyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ] = this;
+            flag.kywdSubDivision[ keyword.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = this;
         }
         
         bool INTERNAL_AddEdgeFlag( EdgeFlag flag, Engine.Plugin.Forms.Keyword keyword )
@@ -102,7 +102,7 @@ namespace AnnexTheCommonwealth
                 _EdgeFlagKeyword = keyword;
             }
             _EdgeFlags.Add( flag );
-            flag.kywdSubDivision[ keyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ] = this;
+            flag.kywdSubDivision[ keyword.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = this;
             return true;
         }
         
@@ -111,7 +111,7 @@ namespace AnnexTheCommonwealth
             if( ( !_EdgeFlags.NullOrEmpty() )&&( !forceReset ) )
                 return true;
             
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", "forceReset = " + forceReset.ToString() + "\n", "forceStopAt = " + ( forceStopAt == null ? "[null]" : forceStopAt.ToString() ) + "\n", this.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", "forceReset = " + forceReset.ToString() + "\n", "forceStopAt = " + ( forceStopAt == null ? "[null]" : forceStopAt.ToString() ) + "\n", this.ToString() } );
             var result = false;
             
             if( forceReset )
@@ -124,7 +124,7 @@ namespace AnnexTheCommonwealth
                 goto localReturnResult;
             }
             
-            var fid = GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var fid = GetFormID( Engine.Plugin.TargetHandle.Master );
             var flag = (EdgeFlag)null;
             uint fkFID = Engine.Plugin.Constant.FormID_None;
             
@@ -185,9 +185,9 @@ namespace AnnexTheCommonwealth
                         {
                             DebugLog.WriteWarning( this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", string.Format(
                                 "Sub-division has an edge flag that points to the middle of the chain!\n\tSubDivision: 0x{0} - \"{1}\"\n\tEdgeFlag: 0x{2}\n\tKeyword: 0x{3} - \"{4}\"",
-                                GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                                prevFlag.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
-                                keyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), keyword.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                                GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                                prevFlag.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
+                                keyword.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), keyword.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                             
                             // Bad linking, truncate the list to this flags element
                             _EdgeFlags.RemoveRange( flagIndex + 1, _EdgeFlags.Count - flagIndex - 1 );
@@ -217,7 +217,7 @@ namespace AnnexTheCommonwealth
             
         localReturnResult:
             //DebugLog.CloseIndentLevel( result.ToString() );
-            DebugLog.CloseIndentLevel<EdgeFlag>( "EdgeFlags", _EdgeFlags );
+            //DebugLog.CloseIndentLevel<EdgeFlag>( "EdgeFlags", _EdgeFlags );
             return result;
         }
         
@@ -358,9 +358,9 @@ namespace AnnexTheCommonwealth
                     if( linkKeyword == null )
                         return null;
                     
-                    var thisFID = Reference.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    var volumeFID = volumeActivator.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    var keywordFID = linkKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    var thisFID = Reference.GetFormID( Engine.Plugin.TargetHandle.Master );
+                    var volumeFID = volumeActivator.GetFormID( Engine.Plugin.TargetHandle.Master );
+                    var keywordFID = linkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master );
                     
                     var list = new List<BuildAreaVolume>();
                     
@@ -415,7 +415,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                return Reference.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxEdge.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                return Reference.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxEdge.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             }
         }
         
@@ -423,7 +423,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                var sandboxRef = Reference.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxVolume.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                var sandboxRef = Reference.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxVolume.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 return sandboxRef == null
                     ? null
                     : sandboxRef.GetScript<AnnexTheCommonwealth.Volume>();
@@ -855,7 +855,7 @@ namespace AnnexTheCommonwealth
                 goto localReturnResult;
             }
             
-            var kfid = _EdgeFlagKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var kfid = _EdgeFlagKeyword.GetFormID( Engine.Plugin.TargetHandle.Master );
             
             _BorderEnablers = _BorderEnablers ?? new List<BorderEnabler>();
             
@@ -863,12 +863,12 @@ namespace AnnexTheCommonwealth
             
             // Go through the edge flags and find which ones are consecutively shared with other sub-divisions (so no shares on multiple independant flags)
             const uint nullFID = Engine.Plugin.Constant.FormID_None;
-            var thisFID = this.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var thisFID = this.GetFormID( Engine.Plugin.TargetHandle.Master );
             var prevFlag = _EdgeFlags[ 0 ];
             for( int i = _EdgeFlags.Count - 1; i >= 0; i-- )
             {
                 var flag = _EdgeFlags[ i ];
-                var flagFID = flag.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var flagFID = flag.GetFormID( Engine.Plugin.TargetHandle.Master );
                 if( flag.kywdSubDivision.Count == 1 )
                 {
                     // Main border only
@@ -879,13 +879,13 @@ namespace AnnexTheCommonwealth
                     if( !flag.HasAnySharedAssociations( prevFlag, thisFID ) )
                     {
                         // Main border too
-                        AddNodeToSubCount( nullFID, subCount, prevFlag.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ); // Previous flag
+                        AddNodeToSubCount( nullFID, subCount, prevFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) ); // Previous flag
                         AddNodeToSubCount( nullFID, subCount, flagFID ); // this flag
                     }
                     // And the rest
                     foreach( var ksp in flag.kywdSubDivision )
                         if( ksp.Key != kfid )
-                            AddNodeToSubCount( ksp.Value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), subCount, flagFID );
+                            AddNodeToSubCount( ksp.Value.GetFormID( Engine.Plugin.TargetHandle.Master ), subCount, flagFID );
                 }
                 prevFlag = flag;
             }
@@ -916,7 +916,7 @@ namespace AnnexTheCommonwealth
                             //DebugLog.WriteLine( "_BorderEnablers.Find() :: ? 0x" + ( b.Neighbour == null ? 0 : b.Neighbour.FormID ).ToString( "X8" ) );
                             if( isMain ) return b.Neighbour == null;
                             if( b.Neighbour == null ) return false;
-                            return b.Neighbour.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == sc.Key;
+                            return b.Neighbour.GetFormID( Engine.Plugin.TargetHandle.Master ) == sc.Key;
                         } );
                     //DebugLog.CloseIndentLevel();
                     if( e != null )
@@ -1016,7 +1016,12 @@ namespace AnnexTheCommonwealth
         
         public void BuildSegmentsFromEdgeFlags( float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.ToString() } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) } );
+            
+            var m = GodObject.Windows.GetMainWindow();
+            m.PushStatusMessage();
+            m.StartSyncTimer();
+            var tStart = m.SyncTimerElapsed();
             
             if( _BorderEnablers.NullOrEmpty() )
             {
@@ -1025,12 +1030,18 @@ namespace AnnexTheCommonwealth
             }
             
             foreach( var enabler in _BorderEnablers )
+            {
+                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), enabler.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 enabler.BuildSegmentsFromSubDivisionEdgeFlags( approximateNodeLength, slopeAllowance, updateMapUIData );
+            }
             
             SendObjectDataChangedEvent();
             
         localReturnResult:
-            DebugLog.CloseIndentLevel();
+            var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
+            m.StopSyncTimer( string.Format( "{0} :: {1} :: {2} :: {3}", this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "Completed in {0}" ), tStart.Ticks );
+            m.PopStatusMessage();
+            DebugLog.CloseIndentLevel( tEnd );
         }
         
         public List<GUIBuilder.FormImport.ImportBase> CreateBorderNIFs(
@@ -1103,7 +1114,7 @@ namespace AnnexTheCommonwealth
                     {
                         moel.Add(
                             string.Format( "\t0x{0} - \"{1}\"",
-                                enabler.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
+                                enabler.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
                                 enabler.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                         var emoel = enabler.MouseOverExtra;
                         if( !emoel.NullOrEmpty() )
@@ -1116,7 +1127,7 @@ namespace AnnexTheCommonwealth
                     moel.Add( "EdgeFlags:" );
                     moel.Add(
                         string.Format( "\tKeyword: 0x{0} - \"{1}\"",
-                            _EdgeFlagKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
+                            _EdgeFlagKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
                             _EdgeFlagKeyword.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     moel.Add(
                         string.Format( "\tClosed Loop: {0}",
@@ -1125,7 +1136,7 @@ namespace AnnexTheCommonwealth
                     {
                         moel.Add(
                             string.Format( "\t\t0x{0} - \"{1}\"",
-                                flag.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
+                                flag.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
                                 flag.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                         var fmoel = flag.MouseOverExtra;
                         if( !fmoel.NullOrEmpty() )

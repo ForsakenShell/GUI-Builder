@@ -87,7 +87,7 @@ namespace XeLib
         
         public override uint LoadOrder      { get { return Files.GetFileLoadOrderEx( this.XHandle ); } }
         
-        public override string Signature    { get { return IsESM ? "Master (ESM)" : IsESL ? "Light Plugin (ESL)" : "Plugin (ESP)"; } }
+        public override string Signature    { get { return IsESM ? "Plugin.Master".Translate() + " (ESM)" : IsESL ? "PLugin.LightPlugin".Translate() + " (ESL)" : "Plugin.Plugin".Translate() + " (ESP)"; } }
         
         public bool IsESM
         {

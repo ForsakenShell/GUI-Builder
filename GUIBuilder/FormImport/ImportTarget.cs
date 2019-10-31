@@ -92,7 +92,7 @@ namespace GUIBuilder.FormImport
                     ( !Resolveable() )
                 )
             )   return false;
-            var otherFormID     = ( other != null ) ? other.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) : Engine.Plugin.Constant.FormID_None;
+            var otherFormID     = ( other != null ) ? other.GetFormID( Engine.Plugin.TargetHandle.Master ) : Engine.Plugin.Constant.FormID_None;
             var otherEditorID   = ( other != null ) ? other.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) : null;
             var fm = Matches( otherFormID, allowClearing );
             var em = Matches( otherEditorID );
@@ -183,7 +183,7 @@ namespace GUIBuilder.FormImport
         {
             if( _Value != null )
             {
-                FormID = Value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                FormID = Value.GetFormID( Engine.Plugin.TargetHandle.Master );
                 EditorID = Value.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             }
         }

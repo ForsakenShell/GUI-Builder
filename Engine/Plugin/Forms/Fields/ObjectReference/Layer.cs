@@ -28,7 +28,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             if( value == null )
                 DeleteRootElement( true, true );
             else
-                SetValue( target, value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                SetValue( target, value.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
         
         public override string ToString( TargetHandle target, string format = null )

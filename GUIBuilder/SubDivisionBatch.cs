@@ -136,9 +136,10 @@ namespace GUIBuilder
             result = true;
             
         localReturnResult:
+            var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
             m.StopSyncTimer( "GUIBuilder.SubDivisionBatch :: CalculateSubDivisionEdgeFlagSegments() :: Completed in {0}", tStart.Ticks );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel();
+            DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
             return result;
         }
         

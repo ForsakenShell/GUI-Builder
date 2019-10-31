@@ -155,7 +155,7 @@ public static partial class NIFBuilder
                         : Mesh.MatchKeys( group.Mesh.nifFile );
                     // Create an import for the Static Object
                     var orgStat = group.BestStaticFormFromOriginalsFor( originalForms, keys, true );
-                    var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_None : orgStat.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_None : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
                     var statEditorID = group.Mesh.nifFile;
                     GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, group.MinBounds, group.MaxBounds ) );
                     // Create an import for the Object Reference

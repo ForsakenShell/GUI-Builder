@@ -31,7 +31,7 @@ namespace Engine.Plugin.Forms.Fields.Worldspace
             if( value == null )
                 DeleteRootElement( true, true );
             else
-                SetValue( target, value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                SetValue( target, value.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
         
         /* TODO:  Reimplement as Field<> ToString( TargetHandle target ) override

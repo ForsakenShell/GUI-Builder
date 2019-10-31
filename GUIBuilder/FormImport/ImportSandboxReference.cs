@@ -124,7 +124,7 @@ namespace GUIBuilder.FormImport
             var refrRefs = refr.References;
             if( refrRefs.NullOrEmpty() ) return null;
             
-            var keywordFormID = linkKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var keywordFormID = linkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master );
             
             foreach( var form in refrRefs )
             {
@@ -168,7 +168,7 @@ namespace GUIBuilder.FormImport
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
                 tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            if( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.Working ) != Bounds )
+            if( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Bounds )
                 tmp.Add( string.Format( "Bounds {0}", Bounds.ToString() ) );
             
             if( !ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
@@ -193,7 +193,7 @@ namespace GUIBuilder.FormImport
                 }
             }
             
-            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
+            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
             return GenIXHandle.ConcatDisplayInfo( tmp );
@@ -261,8 +261,8 @@ namespace GUIBuilder.FormImport
                 //( TargetCell == refr.Cell )&&
                 ( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
                 ( refr.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Rotation )&&
-                ( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.Working ) == Bounds )&&
-                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) == Engine.Plugin.Constant.FormID_None )&&
+                ( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Bounds )&&
+                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
                 ( ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
                 ( ftLinkRef.Matches( lr, false ) );
         }
@@ -380,7 +380,7 @@ namespace GUIBuilder.FormImport
                         GenIXHandle.ExtraInfoFor( cell, unresolveable: "unresolved" ) ) );
                     return false;
                 }
-                refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseActi.FormID );
+                refr.SetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftBaseActi.FormID );
                 var newVolume = new Volume( refr );
                 if( newVolume == null )
                 {
@@ -427,10 +427,10 @@ namespace GUIBuilder.FormImport
             {
                 if( orgParent != null )
                 {
-                    orgParent.LinkedRefs.Remove( refr.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    orgParent.LinkedRefs.Remove( refr.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                     orgParent.SendObjectDataChangedEvent();
                 }
-                newParent.LinkedRefs.SetLinkedRef( refr.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), ftLinkKeyword.FormID );
+                newParent.LinkedRefs.SetLinkedRef( refr.GetFormID( Engine.Plugin.TargetHandle.Master ), ftLinkKeyword.FormID );
                 newParent.SendObjectDataChangedEvent();
             }
             

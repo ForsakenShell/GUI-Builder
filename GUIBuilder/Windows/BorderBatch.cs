@@ -242,11 +242,11 @@ namespace GUIBuilder.Windows
                 list = cForms.ToList<TForm>( filter );
                 if( !list.NullOrEmpty() )
                 {
-                    list.Sort( (x, y)=>( x.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) < y.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ? -1 : 1 ) );
+                    list.Sort( (x, y)=>( x.GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 1 ) );
                     
                     var c = list.Count();
                     foreach( var form in list )
-                        AddWorkshopNodeDetectionFormControlItem( control, string.Format( "0x{0} - \"{1}\"", form.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                        AddWorkshopNodeDetectionFormControlItem( control, string.Format( "0x{0} - \"{1}\"", form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     
                     // Try to find the "default" form
                     FindAndSetWorkshopNodeDetectionFormControlDefault( control, list, detectionSuffix );
@@ -368,8 +368,6 @@ namespace GUIBuilder.Windows
         {
             GodObject.Windows.SetEnableState( false );
             
-            DebugLog.OpenIndentLevel();
-            
             var workshops = lvWorkshops.GetSelectedSyncObjects();
             if( !workshops.NullOrEmpty() )
             {
@@ -426,7 +424,6 @@ namespace GUIBuilder.Windows
                 }
             }
             
-            DebugLog.CloseIndentLevel();
             GodObject.Windows.SetEnableState( true );
         }
         
@@ -439,7 +436,7 @@ namespace GUIBuilder.Windows
         
         void UpdateNIFFilePathSampleInternal()
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "UpdateNIFFilePathSampleInternal()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "UpdateNIFFilePathSampleInternal()" } );
             
             var target = tbTargetFolder.Text;
             if( ( !string.IsNullOrEmpty( target ) )&&( target[ target.Length - 1 ] != '\\' ) )
@@ -484,7 +481,7 @@ namespace GUIBuilder.Windows
             tbNIFBuilderSubDivisionSampleFilePath.Text = sdSample;
             tbNIFBuilderSubDivisionFilePathSampleToolTip.SetToolTip( tbNIFBuilderSubDivisionSampleFilePath, sdSample );
             
-            DebugLog.CloseIndentLevel();
+            //DebugLog.CloseIndentLevel();
         }
         
         #region Build NIFs

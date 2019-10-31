@@ -410,7 +410,7 @@ namespace XeLib
                     refTree.Insert( 0, rhContainer );
                 hContainer = hContainer.GetContainerRecord();
             }
-            //DebugLog.WriteList<RecordHandle>( this.GetType().ToString() + " :: GetContainerRecordTree() :: result", refTree );
+            //DebugLog.WriteList<FormHandle>( this.GetType().ToString() + " :: GetContainerRecordTree() :: result", refTree );
             return refTree.ToArray();
         }
         

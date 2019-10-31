@@ -1126,7 +1126,7 @@ namespace GUIBuilder.Windows.RenderChild
                 ( !_subdivisions.NullOrEmpty() )&&
                 ( _subdivisions.Count > 1 )
                ) return;
-            var filename = _subdivisions.NullOrEmpty() ? _worldspace.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) : _subdivisions[ 0 ].GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) + ".png";
+            var filename = _subdivisions.NullOrEmpty() ? _worldspace.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) : _subdivisions[ 0 ].GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) + ".png";
             //bmpTarget.Save( filename, System.Drawing.Imaging.ImageFormat.Png );
             // TODO:  Implement SDLRenderer PNG Save
         }
@@ -1438,7 +1438,7 @@ namespace GUIBuilder.Windows.RenderChild
             if( volumes.NullOrEmpty() )
                 return;
             
-            var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
             
             try
             {
@@ -1461,7 +1461,7 @@ namespace GUIBuilder.Windows.RenderChild
                     
                     foreach( var volume in volumes )
                     {
-                        if( wsFID != volume.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                        if( wsFID != volume.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                             continue;
                         
                         var useColor = editorEnabled ? cMid : cLow;
@@ -1563,8 +1563,8 @@ namespace GUIBuilder.Windows.RenderChild
                 if( volume == null )
                     return;
                 
-                var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                if( wsFID != volume.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
+                if( wsFID != volume.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                     return;
                 
                 var c = Color.FromArgb( 255, 204, 76, 51 );
@@ -1850,7 +1850,7 @@ namespace GUIBuilder.Windows.RenderChild
             
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawBorders()" } );
             
-            var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
             var c = Color.FromArgb( 255, 0, 255, 0 );
             
             try
@@ -1870,7 +1870,7 @@ namespace GUIBuilder.Windows.RenderChild
                             continue;
                         }
                         
-                        if( wsFID != refr.Worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                        if( wsFID != refr.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                             continue;
                         
                         var pos = refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );

@@ -143,13 +143,13 @@ namespace Engine.Plugin
                 _AllForms = new List<IXHandle>();
             _AllForms.AddOnce( syncObject );
             
-            if( syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ValidFormID() )
+            if( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ValidFormID() )
             {
                 _ByFormID = _ByFormID ?? new Dictionary<uint, IXHandle>();
-                _ByFormID[ syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ] = syncObject;
+                _ByFormID[ syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = syncObject;
             }
             
-            var soEDID = syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var soEDID = syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
             if( !string.IsNullOrEmpty( soEDID ) )
             {
                 _ByEditorID = _ByEditorID ?? new Dictionary<string, IXHandle>();
@@ -183,10 +183,10 @@ namespace Engine.Plugin
             if( _AllForms != null )
                 _AllForms.Remove( syncObject );
             
-            if( ( Engine.Plugin.Constant.ValidFormID( syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )&&( _ByFormID != null ) )
-                _ByFormID.Remove( syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            if( ( Engine.Plugin.Constant.ValidFormID( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ) ) )&&( _ByFormID != null ) )
+                _ByFormID.Remove( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
-            var soEDID = syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var soEDID = syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
             if( ( Engine.Plugin.Constant.ValidEditorID( soEDID ) )&&( _ByEditorID != null ) )
                 _ByEditorID.Remove( soEDID.ToLower() );
             
@@ -199,7 +199,7 @@ namespace Engine.Plugin
         
         #region Add From Record, Create New
         
-        public IXHandle                 AddFromRecord( Engine.Plugin.File mod, ElementHandle handle )
+        public IXHandle                 AddFromRecord( IXHandle ancestor, ElementHandle handle )
         {
             if( !this.IsValid() )
             {
@@ -220,7 +220,13 @@ namespace Engine.Plugin
                 return null;
             }
             
-            var syncObject = Activator.CreateInstance( _Association.ClassType, new Object[] { this, mod, handle } ) as IXHandle; //IDataSync;
+            if( ( ancestor == null )&&( !_Association.AllowRootCollection ) )
+            {
+                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Class does not allow root collections! :: {0}",  _Association.ClassType.ToString() ) );
+                return null;
+            }
+            
+            var syncObject = Activator.CreateInstance( _Association.ClassType, new Object[] { this, ancestor, handle } ) as IXHandle; //IDataSync;
             if( syncObject == null )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Unable to create new {0}!", _Association.ClassType.ToString() ) );
@@ -229,11 +235,11 @@ namespace Engine.Plugin
             
             if( !syncObject.Load() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false!", syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), _Association.ClassType.ToString() ) );
+                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false!", syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
                 return null;
             }
             
-            var formid = syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var formid = syncObject.GetFormID( Engine.Plugin.TargetHandle.Master );
             foreach( var file in GodObject.Plugin.Data.Files.Loaded )
             {
                 if( file.LoadOrder > syncObject.LoadOrder )
@@ -244,7 +250,7 @@ namespace Engine.Plugin
                         //syncObject.UpdateHandles( hOverride ); // Shouldn't need to do this now...?
                         if( !syncObject.Load() )
                         {
-                            DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false for override handle!", syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), _Association.ClassType.ToString() ) );
+                            DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false for override handle!", syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
                             return null;
                         }
                     }
@@ -253,7 +259,7 @@ namespace Engine.Plugin
             
             if( !syncObject.PostLoad() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.PostLoad() returned false!", syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), _Association.ClassType.ToString() ) );
+                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.PostLoad() returned false!", syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
                 return null;
             }
             
@@ -325,14 +331,14 @@ namespace Engine.Plugin
             var iiwf = pForm.CopyAsOverride(); //pForm.IsInWorkingFile( true );           // Am I in the working file?
             if( !iiwf.IsValid() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to override parent \"{0}\" Form in {3} :: 0x{1} - \"{2}\"", pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), wf.Filename ) );
+                DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to override parent \"{0}\" Form in {3} :: 0x{1} - \"{2}\"", pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), wf.Filename ) );
                 return null;
             }
             
             var resHandle = pForm.WorkingFileHandle.AddElement<FormHandle>( _Association.Signature );
             if( !resHandle.IsValid() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to create new child \"{0}\" Form in parent \"{1}\" Form in {4} :: 0x{2} - \"{3}\"", _Association.Signature, pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), wf.Filename ) );
+                DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to create new child \"{0}\" Form in parent \"{1}\" Form in {4} :: 0x{2} - \"{3}\"", _Association.Signature, pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), wf.Filename ) );
                 return null;
             }
             
@@ -340,7 +346,7 @@ namespace Engine.Plugin
             var resObject = AddFromRecord( wf, resHandle );
             if( resObject == null )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to add new child \"{0}\" Form to parent \"{1}\" Form in {4} :: 0x{2} - \"{3}\"", _Association.Signature, pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), wf.Filename ) );
+                DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to add new child \"{0}\" Form to parent \"{1}\" Form in {4} :: 0x{2} - \"{3}\"", _Association.Signature, pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), wf.Filename ) );
                 return null;
             }
             
@@ -432,11 +438,15 @@ namespace Engine.Plugin
                 goto localReturnResult;
             }
             
-            // Create a new data sync object of the appropriate type
-            result = AddFromRecord( file, record );
+            // Create a new data sync object (Form) of the appropriate type
+            //result = AddFromRecord( file, record );
+            var ancestor = _Ancestor;
+            if( !ancestor.IsValid() )
+                ancestor = file;
+            result = AddFromRecord( ancestor, record );
             if( result == null )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "TryLoad()", string.Format( "Unable to create {0}", _Association.ClassType.ToString() ) );
+                DebugLog.WriteError( this.GetType().ToString(), "TryLoad()", string.Format( "Unable to create {0} in {1}", _Association.ClassType.ToString(), ancestor.ToString() ) );
                 goto localReturnResult;
             }
             
@@ -843,8 +853,10 @@ namespace Engine.Plugin
         {
             var m = GodObject.Windows.GetMainWindow();
             m.PushItemOfItems();
+            m.StartSyncTimer();
+            var tStart = m.SyncTimerElapsed();
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "LoadFrom()", source.ToString(), handle.ToString() } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "LoadFromEx()", source.ToString(), handle.ToString() } );
             var result = false;
             try
             {
@@ -854,7 +866,7 @@ namespace Engine.Plugin
                 if( records.NullOrEmpty() )
                 {
                     result = true;
-                    DebugLog.WriteWarning( this.GetType().ToString(), "LoadFrom()", string.Format( "No records found with signature \"{0}\"", _Association.Signature ) );
+                    DebugLog.WriteWarning( this.GetType().ToString(), "LoadFromEx()", string.Format( "No records found with signature \"{0}\"\nsource = {1}\nhandle = {2}\n{3}", _Association.Signature, source.ToString(), handle.ToString(), System.Environment.StackTrace ) );
                     goto localReturnResult;
                 }
                 
@@ -884,7 +896,8 @@ namespace Engine.Plugin
                     // Try to find this form in the global data tree.
                     // Things like object references they may be moved to a different cell, or;
                     // A mod changed the form type;
-                    // Either way we will need to update the container the form is in
+                    // Either way we will need to update the container the form is in.
+                    // Do NOT, however try to load it if it isn't in the master table, we're doing that now.
                     var syncObject = GodObject.Plugin.Data.Root.Find( record, false );
                     if( syncObject != null )
                     {
@@ -904,7 +917,7 @@ namespace Engine.Plugin
                     syncObject = Activator.CreateInstance( _Association.ClassType, new Object[] { this, source, record } ) as IXHandle;
                     if( syncObject == null )
                     {
-                        DebugLog.WriteError( this.GetType().ToString(), "LoadFrom()", string.Format( "Unable to create {0} for record 0x{1}!", _Association.ClassType.ToString(), record.ToString() ) );
+                        DebugLog.WriteError( this.GetType().ToString(), "LoadFromEx()", string.Format( "Unable to create {0} for record 0x{1}!", _Association.ClassType.ToString(), record.ToString() ) );
                         goto localSkipRecord;
                     }
                     consumedRecord = true;
@@ -917,7 +930,7 @@ namespace Engine.Plugin
                     // Now sync form from source
                     if( !syncObject.Load() )
                     {
-                        DebugLog.WriteError( this.GetType().ToString(), "LoadFrom()", string.Format( "Load for {0} FormID 0x{1} returned false!", _Association.ClassType.ToString(), syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) ) );
+                        DebugLog.WriteError( this.GetType().ToString(), "LoadFromEx()", string.Format( "Load for {0} FormID 0x{1} returned false!", _Association.ClassType.ToString(), syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
                         goto localReturnResult;
                     }
                     
@@ -931,16 +944,17 @@ namespace Engine.Plugin
             }
             catch( Exception e )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "LoadFrom()", string.Format( "An exception occured during Load of {0}! :: Exception:\n{1}", this.ToString(), e.ToString() ) );
+                DebugLog.WriteError( this.GetType().ToString(), "LoadFromEx()", string.Format( "An exception occured during Load of {0}! :: Exception:\n{1}", this.ToString(), e.ToString() ) );
                 goto localReturnResult;
             }
             
             result = true;
             
         localReturnResult:
-            //DebugLog.CloseIndentLevel( result.ToString() );
-            
+            var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
+            m.StopSyncTimer( string.Format( "{0} :: LoadFromEx() :: Completed in {1}", this.GetType().ToString(), "{0}" ), tStart.Ticks );
             m.PopItemOfItems();
+            DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
             return result;
         }
         
@@ -957,7 +971,7 @@ namespace Engine.Plugin
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
-            m.SetCurrentStatusMessage( string.Format( "Loading {0} forms from {1}...", _Association.Signature, ( ParentForm == null ? "plugin files" : ParentForm.ExtraInfoFor() ) ) );
+            m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingSigFormsFromAncestor".Translate(), _Association.Signature, ( ParentForm == null ? "Plugin.PluginFiles".Translate() : ParentForm.ExtraInfoFor() ) ) );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
@@ -966,7 +980,8 @@ namespace Engine.Plugin
             {
                 foreach( var file in GodObject.Plugin.Data.Files.Loaded )
                 {
-                    if( !LoadFrom( file ) ) goto localReturnResult;
+                    //if( !LoadFrom( file ) ) goto localReturnResult;
+                    LoadFrom( file ); // If the plugin doesn't contain a root form, this isn't an error
                 }
             }
             else
@@ -1018,7 +1033,7 @@ namespace Engine.Plugin
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
             m.PushItemOfItems();
-            m.SetCurrentStatusMessage( string.Format( "Post load of {0} forms...", _Association.Signature ) );
+            m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferenceOfSig".Translate(), _Association.Signature ) );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
@@ -1032,7 +1047,7 @@ namespace Engine.Plugin
                     // Now sync form
                     if( !li.PostLoad() )
                     {
-                        DebugLog.WriteError( this.GetType().ToString(), "PostLoad()", string.Format( "{0} FormID 0x{1} returned false!", _Association.ClassType.ToString(), li.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) ) );
+                        DebugLog.WriteError( this.GetType().ToString(), "PostLoad()", string.Format( "{0} FormID 0x{1} returned false!", _Association.ClassType.ToString(), li.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
                         goto LocalAbort;
                     }
                 }

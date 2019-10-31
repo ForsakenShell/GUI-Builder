@@ -10,6 +10,8 @@
     <Conflict.OverrideInWorkingFile>Override in Working File</Conflict.OverrideInWorkingFile>
     <Conflict.OverrideRequired>Requires Override</Conflict.OverrideRequired>
     <MainWindow.Title>GUIBuilder</MainWindow.Title>
+    <MainWindow.SavingFile>Saving "{0}"...</MainWindow.SavingFile>
+    <MainWindow.FileSaved>"{0}" saved.</MainWindow.FileSaved>
     <MainWindow.FileMenu>File</MainWindow.FileMenu>
     <MainWindow.FileMenu.Load>Load ESM/ESP</MainWindow.FileMenu.Load>
     <MainWindow.FileMenu.Save>Save</MainWindow.FileMenu.Save>
@@ -134,6 +136,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BatchImportWindow.Sorting>Sorting imports...</BatchImportWindow.Sorting>
     <BatchImportWindow.ImportingForm>Importing {0}: 0x{1} - "{2}"...</BatchImportWindow.ImportingForm>
     <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
+    <BatchImportWindow.Create>Creating import window...</BatchImportWindow.Create>
     <PluginSelectorWindow.Title>Select Plugin[s]</PluginSelectorWindow.Title>
     <PluginSelectorWindow.WorkingFile>Working File</PluginSelectorWindow.WorkingFile>
     <PluginSelectorWindow.OpenRenderWindow>Open Render Window On Load</PluginSelectorWindow.OpenRenderWindow>
@@ -155,9 +158,10 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <FormEditor.SubDivision.Title>Sub-Division</FormEditor.SubDivision.Title>
     <FormEditor.SubDivision.Location>Location</FormEditor.SubDivision.Location>
     <BorderBatch.ParsingImportFile>Parsing border import file...</BorderBatch.ParsingImportFile>
-    <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for "{1}"...</BorderBatch.CreateNIFsFor>
+    <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for 0x{1} - "{2}"...</BorderBatch.CreateNIFsFor>
     <SubDivisionBatch.ClearingBordersFor>Clearing borders for "{0}"...</SubDivisionBatch.ClearingBordersFor>
     <SubDivisionBatch.CalculatingBordersFor>Calculating borders for "{0}"...</SubDivisionBatch.CalculatingBordersFor>
+    <SubDivisionBatch.CalculatingBordersForWith>Calculating borders for "{0}" - "{1}"</SubDivisionBatch.CalculatingBordersForWith>
     <SubDivisionBatch.WarnMissingEnablers.Title>Cannot generate border segments</SubDivisionBatch.WarnMissingEnablers.Title>
     <SubDivisionBatch.WarnMissingEnablers.Body>Must automatically generate or manually create missing border enablers before calculating border segments from edge flags.</SubDivisionBatch.WarnMissingEnablers.Body>
     <SubDivisionBatch.CheckingElements>Checking for missing sub-division elements...</SubDivisionBatch.CheckingElements>
@@ -183,10 +187,14 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <WorldspaceDataPool.LoadingP>Loading...{0}%</WorldspaceDataPool.LoadingP>
     <Plugin.LoadBaseForms>Loading required base forms...</Plugin.LoadBaseForms>
     <Plugin.LoadingFile>Loading "{0}"...</Plugin.LoadingFile>
+    <Plugin.PluginFiles>plugin files</Plugin.PluginFiles>
     <Plugin.Master>Master</Plugin.Master>
     <Plugin.Plugin>Plugin</Plugin.Plugin>
     <Plugin.LightPlugin>Light Plugin</Plugin.LightPlugin>
     <Plugin.Unknown>Unknown</Plugin.Unknown>
     <Plugin.LoadingReferencesOf>Loading all references of 0x{0} - "{1}"...</Plugin.LoadingReferencesOf>
     <Plugin.PostLoadReferencesOf>PostLoad() for all references of 0x{0} - "{1}"...</Plugin.PostLoadReferencesOf>
+    <Plugin.PostLoadReferenceOfSig>Post load of {0} Forms...</Plugin.PostLoadReferenceOfSig>
+    <Plugin.LoadingSigFormsFromAncestor>Loading {0} forms from {1}...</Plugin.LoadingSigFormsFromAncestor>
+    <Cells.LoadingRange>Loading Cells from {0} {1} in {2}...</Cells.LoadingRange>
 </GUIBuilder>

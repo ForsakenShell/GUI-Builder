@@ -57,7 +57,7 @@ namespace Engine.Plugin.Attributes
         
         public bool                     HasChildCollections { get { return !ChildTypes.NullOrEmpty(); } }
         
-        public bool                     HasChildOrGrandchildAssociationOf( ClassAssociation association )
+        public bool                     HasChildOrGrandchildAssociationOf( ClassAssociation association, bool includeGrandchildren = true )
         {
             if( !HasChildCollections ) return false;
             foreach( var childType in ChildTypes )
@@ -66,13 +66,13 @@ namespace Engine.Plugin.Attributes
                 if( !childAssociation.IsValid() ) continue;
                 if(
                     ( childAssociation == association )||
-                    ( childAssociation.HasChildOrGrandchildAssociationOf( association ) )
+                    ( includeGrandchildren &&( childAssociation.HasChildOrGrandchildAssociationOf( association ) ) )
                 )   return true;
             }
             return false;
         }
         
-        public bool                     HasChildOrGrandchildAssociationOf( Type type )
+        public bool                     HasChildOrGrandchildAssociationOf( Type type, bool includeGrandchildren = true )
         {
             if( !HasChildCollections ) return false;
             foreach( var childType in ChildTypes )
@@ -81,13 +81,13 @@ namespace Engine.Plugin.Attributes
                 if( !childAssociation.IsValid() ) continue;
                 if(
                     ( childAssociation.ClassType == type )||
-                    ( childAssociation.HasChildOrGrandchildAssociationOf( type ) )
+                    ( includeGrandchildren &&( childAssociation.HasChildOrGrandchildAssociationOf( type ) ) )
                 )   return true;
             }
             return false;
         }
         
-        public bool                     HasChildOrGrandchildAssociationOf( string signature )
+        public bool                     HasChildOrGrandchildAssociationOf( string signature, bool includeGrandchildren = true )
         {
             if( !HasChildCollections ) return false;
             foreach( var childType in ChildTypes )
@@ -96,7 +96,7 @@ namespace Engine.Plugin.Attributes
                 if( !childAssociation.IsValid() ) continue;
                 if(
                     ( childAssociation.Signature == signature )||
-                    ( childAssociation.HasChildOrGrandchildAssociationOf( signature ) )
+                    ( includeGrandchildren &&( childAssociation.HasChildOrGrandchildAssociationOf( signature ) ) )
                 )   return true;
             }
             return false;
@@ -314,8 +314,10 @@ namespace Engine.Plugin.Attributes
             if( !____doDebugDumpOnce )
             {
                 ____doDebugDumpOnce = true;
+                DebugLog.OpenIndentLevel(  new [] { "Engine.Plugin.Attributes.Reflection", "GetAllAssociations()" } );
                 for( int i = 0; i < result.Count; i++ )
                     result[ i ].Dump( string.Format( "ClassAssociation[ {0} ]", i ) );
+                DebugLog.CloseIndentLevel();
             }
             
             #endif

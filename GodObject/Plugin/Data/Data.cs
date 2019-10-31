@@ -474,7 +474,7 @@ namespace GodObject
                 
                 public bool Load()
                 {
-                    DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Load()", _ScriptForm.ToString() } );
+                    DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.ScriptedObjects", "Load()", _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.Master ), _ScriptForm.ToString() } );
                     
                     var m = GodObject.Windows.GetMainWindow();
                     m.PushStatusMessage();
@@ -501,7 +501,7 @@ namespace GodObject
                     
                     //DebugLog.WriteList<Engine.Plugin.Form>( _ScriptForm.ToString(), iforms );
                     
-                    uint bfFID = _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    uint bfFID = _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.Master );
                     string bfEID = _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                     
                     _ScriptForms = new Dictionary<uint,TScript>();
@@ -516,7 +516,7 @@ namespace GodObject
                         //DebugLog.WriteLine( string.Format( "[ {0} ] :: Load() :: {1}\n{{", index, ( refr == null ? "[null]" : refr.ToString() ) ) );
                         if( refr != null )
                         {
-                            var rFID = refr.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                            var rFID = refr.GetFormID( Engine.Plugin.TargetHandle.Master );
                             TScript s;
                             if( !_ScriptForms.TryGetValue( rFID, out s ) )
                             {
@@ -556,7 +556,7 @@ namespace GodObject
                     var m = GodObject.Windows.GetMainWindow();
                     m.PushStatusMessage();
                     m.PushItemOfItems();
-                    m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferencesOf".Translate(), _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferencesOf".Translate(), _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     m.StartSyncTimer();
                     var tStart = m.SyncTimerElapsed();
                     
@@ -632,14 +632,14 @@ namespace GodObject
                 {
                     if( _ScriptForms == null )
                         _ScriptForms = new Dictionary<uint,TScript>();
-                    _ScriptForms[ item.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ] = item;
+                    _ScriptForms[ item.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = item;
                     SendObjectDataChangedEvent();
                 }
                 
                 public bool Remove( TScript item )
                 {
                     if( _ScriptForms != null ) return false;
-                    var result =_ScriptForms.Remove( item.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    var result =_ScriptForms.Remove( item.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                     if( result )
                         SendObjectDataChangedEvent();
                     return result;
@@ -687,26 +687,41 @@ namespace GodObject
                     var worldspace = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Worldspace>( editorid );
                     return worldspace == null
                         ? null
-                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
                 
                 public List<TScript> FindAllInWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
                 {
+                    //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
                     return worldspace == null
                         ? null
-                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
                 
+                bool doOnce = false;
                 public List<TScript> FindAllInWorldspace( uint formid )
                 {
+                    //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? 0x{1}", this.GetType().ToString(), formid.ToString( "X8" ) ) );
                     if( ( _ScriptForms == null )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
                         return null;
                     
                     var list = new List<TScript>();
                     
                     foreach( var kv in _ScriptForms )
-                        if( ( kv.Value.Reference.Worldspace != null )&&( kv.Value.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == formid ) )
+                    {
+                        /*
+                        if( !doOnce )
+                        {
+                            var refr = kv.Value.Reference;
+                            var cell = refr == null ? null : refr.Cell;
+                            var wrld = cell == null ? null : cell.Worldspace;
+                            DebugLog.WriteLine( new [] { kv.Value.ToString(), refr == null ? "null" : refr.ToString(), cell == null ? "null" : cell.ToString(), wrld == null ? "null" : wrld.ToString() } );
+                        }
+                        */
+                        if( ( kv.Value.Reference.Worldspace != null )&&( kv.Value.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) == formid ) )
                             list.Add( kv.Value );
+                    }
+                    doOnce = true;
                     
                     return list.Count == 0
                         ? null
@@ -934,14 +949,14 @@ namespace GodObject
                     var worldspace = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Worldspace>( editorid );
                     return worldspace == null
                         ? null
-                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
                 
                 public static List<EdgeFlag> FindAllInWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
                 {
                     return worldspace == null
                         ? null
-                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
                 
                 public static List<EdgeFlag> FindAllInWorldspace( uint formid )

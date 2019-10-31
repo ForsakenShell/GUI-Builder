@@ -108,18 +108,18 @@ namespace GUIBuilder.FormImport
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
                 tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
-                tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
+            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                tmp.Add( string.Format( "Layer {0}", GenIXHandle.ExtraInfoFor( GodObject.CoreForms.ESM_ATC_LAYR_Controllers ) ) );
             
-            var ownSub = refr.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            var ownSub = refr.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( !stSubDivision.Matches( ownSub, false ) )
                 tmp.Add( stSubDivision.DisplayIDInfo( "Linked to Sub-Division {0}" ) );
             
-            var naySub = refr.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            var naySub = refr.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( !stNeighbour.Matches( naySub, true ) )
                 tmp.Add( stNeighbour.DisplayIDInfo( "Linked to neighbour {0}" ) );
             
-            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
+            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
             return GenIXHandle.ConcatDisplayInfo( tmp );
@@ -129,7 +129,7 @@ namespace GUIBuilder.FormImport
         {
             var tmp = new List<string>();
             
-            tmp.Add( string.Format( "Placed instance of {0}", GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.ToString() ) );
+            tmp.Add( string.Format( "Placed instance of {0}", GenIXHandle.ExtraInfoFor( GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler ) ) );
             
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
@@ -137,7 +137,7 @@ namespace GUIBuilder.FormImport
             tmp.Add( ftCell.DisplayIDInfo( "Cell {0}", "unresolved" ) );
             tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
+            tmp.Add( string.Format( "Layer {0}", GenIXHandle.ExtraInfoFor( GodObject.CoreForms.ESM_ATC_LAYR_Controllers ) ) );
             
             tmp.Add( stSubDivision.DisplayIDInfo( "Linked to Sub-Division {0}" ) );
             
@@ -166,8 +166,8 @@ namespace GUIBuilder.FormImport
             
             var targetRef = targetScript.Reference;
             
-            var ownSub = targetRef.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-            var naySub = targetRef.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            var ownSub = targetRef.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var naySub = targetRef.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             var result = 
                 ( TargetRecordFlagsMatch )&&
@@ -175,8 +175,8 @@ namespace GUIBuilder.FormImport
                 ( ftWorldspace.Matches( targetRef.Worldspace, true ) )&&
                 ( ftCell.Matches( targetRef.Cell, false ) )&&
                 ( targetRef.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
-                ( targetRef.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) == Engine.Plugin.Constant.FormID_None )&&
-                ( targetRef.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )&&
+                ( targetRef.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
+                ( targetRef.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )&&
                 ( stSubDivision.Matches( ownSub, false ) )&&
                 ( stNeighbour.Matches( naySub, !stNeighbour.Resolveable() ) );
             return result;
@@ -264,7 +264,7 @@ namespace GUIBuilder.FormImport
                         ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
-                refr.SetName( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                refr.SetName( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 var newenablerscript = new BorderEnabler( refr );
                 if( newenablerscript == null )
                 {
@@ -306,20 +306,20 @@ namespace GUIBuilder.FormImport
             ApplyRecordFlagsToTarget();
             refr.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
-            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
-            var oldSubdivisionRefr = refr.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-            refr.LinkedRefs.SetLinkedRef( stSubDivision.FormID, GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            var oldSubdivisionRefr = refr.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            refr.LinkedRefs.SetLinkedRef( stSubDivision.FormID, GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             var nayFID = stNeighbour.IsResolved ? stNeighbour.FormID : Engine.Plugin.Constant.FormID_None;
-            refr.LinkedRefs.SetLinkedRef( nayFID, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            refr.LinkedRefs.SetLinkedRef( nayFID, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             // Remove invalid elements automagically added by the CK/XeLib
             refr.LocationReference.DeleteRootElement( false, false );
             
             // Inform old linked refs of changes as needed
             var subdivision = stSubDivision.Script as AnnexTheCommonwealth.SubDivision;
-            if( ( oldSubdivisionRefr != null )&&( subdivision.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != oldSubdivisionRefr.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+            if( ( oldSubdivisionRefr != null )&&( subdivision.GetFormID( Engine.Plugin.TargetHandle.Master ) != oldSubdivisionRefr.GetFormID( Engine.Plugin.TargetHandle.Master ) ) )
             {
                 var oldSubdivision = oldSubdivisionRefr.GetScript<AnnexTheCommonwealth.SubDivision>();
                 if( oldSubdivision != null )

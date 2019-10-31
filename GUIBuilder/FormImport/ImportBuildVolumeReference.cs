@@ -161,7 +161,7 @@ namespace GUIBuilder.FormImport
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
                 tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            if( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.Working ) != Bounds )
+            if( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Bounds )
                 tmp.Add( string.Format( "Bounds {0}", Bounds.ToString() ) );
             
             if( !ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
@@ -186,7 +186,7 @@ namespace GUIBuilder.FormImport
                 }
             }
             
-            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) != Engine.Plugin.Constant.FormID_None )
+            if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
             return GenIXHandle.ConcatDisplayInfo( tmp );
@@ -254,8 +254,8 @@ namespace GUIBuilder.FormImport
                 ( ftCell.Matches( refr.Cell, false ) )&&
                 ( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
                 ( refr.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Rotation )&&
-                ( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.Working ) == Bounds )&&
-                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.Working ) == Engine.Plugin.Constant.FormID_None )&&
+                ( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Bounds )&&
+                ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
                 ( ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
                 ( ftLinkRef.Matches( lr, false ) );
         }

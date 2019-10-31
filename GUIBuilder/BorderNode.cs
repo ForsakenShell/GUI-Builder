@@ -221,7 +221,7 @@ namespace GUIBuilder
                 for( int i = 0; i < originalForms.Count; i++  )
                 {
                     var form = originalForms[ i ];
-                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] = \"{1}\" - 0x{2} - \"{3}\"", i, form.Signature, form.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] = \"{1}\" - 0x{2} - \"{3}\"", i, form.Signature, form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 }
             }
             if( !keys.NullOrEmpty() )
@@ -242,7 +242,7 @@ namespace GUIBuilder
                 "\tmatch result:\n\t\tindex = {0}\n\t\tform = \"{1}\" - 0x{2} - \"{3}\"\n\t\tscore = {4}",
                 bestMatchIndex,
                 ( match == null ? null : match.Signature ),
-                ( match == null ? Engine.Plugin.Constant.FormID_Invalid : match.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ).ToString( "X8" ),
+                ( match == null ? Engine.Plugin.Constant.FormID_Invalid : match.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
                 ( match == null ? "unresolved" : match.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ),
                 bestMatchCount ) );
         }
@@ -558,7 +558,7 @@ namespace GUIBuilder
             foreach( var flag in flags )
             {
                 var p = new Vector3f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null )||( forcedZ.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != flag.Reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( ( forcedZ == null )||( forcedZ.GetFormID( Engine.Plugin.TargetHandle.Master ) != flag.Reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                     p.Z = float.MinValue;
                 
                 refPoints.Add( p );
@@ -574,7 +574,7 @@ namespace GUIBuilder
             foreach( var reference in references )
             {
                 var p = new Vector3f( reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null )||( forcedZ.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( ( forcedZ == null )||( forcedZ.GetFormID( Engine.Plugin.TargetHandle.Master ) != reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                     p.Z = float.MinValue;
                 
                 refPoints.Add( p );
@@ -799,6 +799,7 @@ namespace GUIBuilder
                 if( node.P.Y > maxY ) maxY = node.P.Y;
                 if( averageZ )
                     totZ += node.P.Z;
+                else
                 {
                     if( node.P.Z < minZ ) minZ = node.P.Z;
                     if( node.P.Z > maxZ ) maxZ = node.P.Z;

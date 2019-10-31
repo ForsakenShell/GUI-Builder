@@ -218,25 +218,7 @@ namespace Engine.Plugin
             else
                 _Handles.Insert( insertAt, newHandle );
             
-            // Find:
-            //    Working file handle index
-            //    Last non-partial handle index the working file handle requires
-            //    Last non-partial handle index that is in an optionally loaded file
-            for( int i = 0; i < _Handles.Count; i++ )
-            {
-                if( _Handles[ i ].Filename.InsensitiveInvariantMatch( GodObject.Plugin.Data.Files.Working.Filename ) )
-                    _WorkingFileHandleIndex = i;
-                if( !( (FormHandle)_Handles[ i ] ).IsPartialRecord )
-                {
-                    if( newHandle.Requires( _Handles[ i ].Filename ) )
-                    {
-                        _LastFullRequiredHandleIndex = i;
-                        _LastFullOptionalHandleIndex = i;   // Can be the same, but the inverse is not true
-                    }
-                    else
-                        _LastFullOptionalHandleIndex = i;
-                }
-            }
+            RecalcHandleIndexes();
             
             return true;
         }
@@ -246,7 +228,7 @@ namespace Engine.Plugin
         
         public ElementHandle            LastFullRequiredHandle      { get { return HandleByIndex( _LastFullRequiredHandleIndex ); } }
         public ElementHandle            LastFullOptionalHandle      { get { return HandleByIndex( _LastFullOptionalHandleIndex ); } }
-        public ElementHandle            LastHandleBeforeWorkingFile { get { return HandleByIndex( _WorkingFileHandleIndex - 1 ); } }
+        public ElementHandle            LastHandleBeforeWorkingFile { get { return HandleByIndex( _WorkingFileHandleIndex <= 0 ? 0 :_WorkingFileHandleIndex - 1 ); } }
         
         // Return a cloned list so the caller cannot directly manipulate it.  Adding/Removing handles should be done through the proper API calls.
         public List<ElementHandle>      Handles                     { get { return !GetHandles() ? null : _Handles.Clone(); } }
@@ -273,25 +255,33 @@ namespace Engine.Plugin
                 }
             }
             
-            _LastFullRequiredHandleIndex = -1;
-            _LastFullOptionalHandleIndex = -1;
-            _WorkingFileHandleIndex = -1;
-            if( !_Handles.NullOrEmpty() )
-            {
-                var c = _Handles.Count;
-                _LastFullRequiredHandleIndex = c - 1;
-                for( int i = 0; i < c; i++ )
-                {
-                    if( _Handles[ i ].Filename.InsensitiveInvariantMatch( GodObject.Plugin.Data.Files.Working.Filename ) )
-                    {
-                        _WorkingFileHandleIndex = i;
-                        _LastFullOptionalHandleIndex = i - 1;
-                        break;
-                    }
-                }
-            }
+            RecalcHandleIndexes();
             
             return true;
+        }
+        
+        void                            RecalcHandleIndexes()
+        {
+            _LastFullRequiredHandleIndex = -1;
+            _LastFullOptionalHandleIndex = -1;
+            _WorkingFileHandleIndex      = -1;
+            var wLO = GodObject.Plugin.Data.Files.Working.LoadOrder;
+            
+            if( !_Handles.NullOrEmpty() )
+            {
+                var c = _Handles.Count();
+                for( int i = 0; i < c; i++ )
+                {
+                    var hOverride = _Handles[ i ];
+                    var hLO = hOverride.LoadOrder;
+                    if( hLO == wLO )
+                        _WorkingFileHandleIndex = i;
+                    if( hLO < wLO )
+                        _LastFullRequiredHandleIndex = i;
+                    if( hLO > wLO )
+                        _LastFullOptionalHandleIndex = i;
+                }
+            }
         }
         
         ElementHandle                   HandleByIndex( int index )

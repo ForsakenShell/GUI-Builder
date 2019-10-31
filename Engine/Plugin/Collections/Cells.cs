@@ -52,7 +52,12 @@ namespace Engine.Plugin.Collections
         public Plugin.Forms.Cell GetByGrid( Vector2i coords )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetByGrid()", "coords = " + coords.ToString(), "Worldspace = " + ( Worldspace == null ? "[null]" : Worldspace.ToString() ) } );
+            var m = GodObject.Windows.GetMainWindow();
+            //m.PushStatusMessage();
+            //m.StartSyncTimer();
+            //var tStart = m.SyncTimerElapsed();
             
+            var found = false;
             Plugin.Forms.Cell cell = null;
             
             if( !this.IsValid() )
@@ -60,20 +65,24 @@ namespace Engine.Plugin.Collections
                 DebugLog.WriteError( this.GetType().ToString(), "GetByGrid()", "Cell Collection is not valid!" );
                 goto localReturnResult;
             }
-            var wsMax = Worldspace.WorldBounds.GetMax( TargetHandle.WorkingOrLastFullRequired );
-            var wsMin = Worldspace.WorldBounds.GetMin( TargetHandle.WorkingOrLastFullRequired );
-            if(
-                ( coords.X > wsMax.X )||( coords.X < wsMin.X )||
-                ( coords.Y > wsMax.Y )||( coords.Y < wsMin.Y )
-            ){
-                DebugLog.WriteError( this.GetType().ToString(), "GetByGrid()", "Grid is out of bounds for the worldspace :: " + coords.ToString() + " :: " + wsMax.ToString() + " - " + wsMin.ToString() );
-                goto localReturnResult;
-            }
+            
+            //if( _ByGrid == null )
+            //    DebugLog.WriteLine( "No grid dictionary" + Worldspace == null ? null : string.Format( " for WRLD = 0x{0} - \"{1}\"", Worldspace.GetFormID( TargetHandle.Master ).ToString( "X8" ), Worldspace.GetEditorID( TargetHandle.LastValid ) ) );
             
             // Return now it's been loaded already
             if( ( _ByGrid != null )&&( _ByGrid.TryGetValue( coords, out cell ) ) )
             {
                 //DebugLog.WriteLine( "Found grid in dictionary" );
+                goto localReturnResult;
+            }
+            
+            var wsMax = Worldspace.WorldBounds.GetMax( TargetHandle.Master );
+            var wsMin = Worldspace.WorldBounds.GetMin( TargetHandle.Master );
+            if(
+                ( coords.X > wsMax.X )||( coords.X < wsMin.X )||
+                ( coords.Y > wsMax.Y )||( coords.Y < wsMin.Y )
+            ){
+                DebugLog.WriteError( this.GetType().ToString(), "GetByGrid()", "Grid is out of bounds for the worldspace :: " + coords.ToString() + " :: " + wsMax.ToString() + " - " + wsMin.ToString() );
                 goto localReturnResult;
             }
             
@@ -120,7 +129,7 @@ namespace Engine.Plugin.Collections
                 
                 // Look through every block in the worldspace
                 var bCount = bHandles.Length;
-                var found = false;
+                
                 for( int bIndex = 0; bIndex < bCount; bIndex++ )
                 {
                     ElementHandle[] sbHandles = null;
@@ -154,8 +163,11 @@ namespace Engine.Plugin.Collections
                             continue;
                         
                         // Found the sub-block, now load all the cells in this sub-group
+                        if( !found )
+                            m.PushStatusMessage();
                         found = true;
-                        //DebugLog.WriteLine( "Loading Cells from " + tbName + " " + tsbName + " in " + wsHandle.Filename );
+                        m.SetCurrentStatusMessage( string.Format( "Cells.LoadingRange".Translate(), tbName, tsbName, wsHandle.Filename ) );
+                        //DebugLog.WriteLine( "Loading Cells containing " + coords.ToString() + " from " + tbName + " " + tsbName + " in " + wsHandle.Filename );
                         LoadFromEx( ParentForm, sbHandle );
                         break;
                     }
@@ -177,7 +189,9 @@ namespace Engine.Plugin.Collections
                 _ByGrid.TryGetValue( coords, out cell );
             
         localReturnResult:
-            //DebugLog.CloseIndentLevel<Plugin.Forms.Cell>( cell );
+            if( found )
+                m.PopStatusMessage();
+            //DebugLog.CloseIndentLevel<Plugin.Forms.Cell>( "cell", cell );
             return cell;
         }
         
@@ -187,21 +201,24 @@ namespace Engine.Plugin.Collections
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Add()", syncObject.ToString() } );
             var result = false;
-            
-            // Do the base addition
-            if( !base.Add( syncObject ) )
-                goto localReturnResult;
+            var cell = syncObject as Plugin.Forms.Cell;
+            var interiorCell = false;
+            var persistentCell = false;
             
             // Not a cell?  wth?
-            var cell = syncObject as Plugin.Forms.Cell;
             if( cell == null )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "Add()", string.Format( "Invalid object to add to collection.\nCollection = {0}\nObject = {1}", this.ToString(), syncObject.ToString() ) );
                 goto localReturnResult;
             }
             
+            // Do the base addition
+            if( !base.Add( syncObject ) )
+                goto localReturnResult;
+            
             // Don't store interior cells by grid or persistence
-            if( cell.GetIsInterior( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+            interiorCell = cell.GetIsInterior( Engine.Plugin.TargetHandle.Master );
+            if( interiorCell )
             {
                 result = true;
                 goto localReturnResult;
@@ -215,7 +232,8 @@ namespace Engine.Plugin.Collections
             }
             
             // Store the worldspace's unique persistent cell
-            if( !cell.RecordFlags.GetPersistent( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+            persistentCell = cell.RecordFlags.GetPersistent( Engine.Plugin.TargetHandle.Master );
+            if( persistentCell )
             {
                 _Persistent = cell;
                 result = true;
@@ -223,19 +241,22 @@ namespace Engine.Plugin.Collections
             }
             
             // No grid?
-            if( !cell.CellGrid.HasValue( TargetHandle.WorkingOrLastFullRequired ) )
+            if( !cell.CellGrid.HasValue( TargetHandle.Master ) )
                 goto localReturnResult;
             
             // Store the worldspaces exterior cell in the grid dictionary
-            if( _ByGrid == null )
-                _ByGrid = new Dictionary<Vector2i, Engine.Plugin.Forms.Cell>();
+            _ByGrid = _ByGrid ?? new Dictionary<Vector2i, Engine.Plugin.Forms.Cell>();
             
-            _ByGrid[ cell.CellGrid.GetGrid( TargetHandle.WorkingOrLastFullRequired ) ] = cell;
+            //if( _ByGrid == null )
+            //    DebugLog.WriteLine( "No grid dictionary" + Worldspace == null ? null : string.Format( " for WRLD = 0x{0} - \"{1}\"", Worldspace.GetFormID( TargetHandle.Master ).ToString( "X8" ), Worldspace.GetEditorID( TargetHandle.LastValid ) ) );
+            
+            _ByGrid[ cell.CellGrid.GetGrid( TargetHandle.Master ) ] = cell;
             
             result = true;
             
         localReturnResult:
-            //DebugLog.CloseIndentLevel( result.ToString() );
+            //DebugLog.WriteLine( new [] { cell == null ? "SyncObject is not a CELL" : ( persistentCell ? "Persistent " : null ) + ( interiorCell ? "Interior " : null ) + string.Format( "CELL = {2}0x{0} - \"{1}\"", cell.GetFormID( TargetHandle.Master ).ToString( "X8" ), cell.GetEditorID( TargetHandle.LastValid ), ( !interiorCell && !persistentCell ) ? string.Format( "{0} :: ", cell.CellGrid.GetGrid( TargetHandle.Master ).ToString() ) : null ), Worldspace == null ? null : string.Format( "WRLD = 0x{0} - \"{1}\"", Worldspace.GetFormID( TargetHandle.Master ).ToString( "X8" ), Worldspace.GetEditorID( TargetHandle.LastValid ) ) } );
+            //DebugLog.CloseIndentLevel( "result", result.ToString() );
             return result;
         }
         
@@ -250,7 +271,7 @@ namespace Engine.Plugin.Collections
             if( cell == null )
                 return;
             
-            _ByGrid.Remove( cell.CellGrid.GetGrid( TargetHandle.Working ) );
+            _ByGrid.Remove( cell.CellGrid.GetGrid( TargetHandle.Master ) );
         }
         
         public Plugin.Forms.Worldspace Worldspace

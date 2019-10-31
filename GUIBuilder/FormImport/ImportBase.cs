@@ -349,7 +349,7 @@ namespace GUIBuilder.FormImport
                 errorMessage = string.Format(
                     "\n{0} :: CopyToWorkingFile<T>() :: Unable to copy override for {1}!",
                     this.GetType().ToString(),
-                    GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
+                    GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
                     );
             }
             catch( Exception e )
@@ -357,7 +357,7 @@ namespace GUIBuilder.FormImport
                 errorMessage = string.Format(
                     "\n{0} :: CopyToWorkingFile<T>() :: An exception occured when trying to copy override for {1}\nInner Exception:\n{2}",
                         this.GetType().ToString(),
-                        GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
+                        GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
                         e.ToString() );
             }
             
@@ -381,7 +381,7 @@ namespace GUIBuilder.FormImport
             get
             {
                 //return ( TargetForm != null )&&( TargetForm.RecordFlags.Value == RecordFlags );
-                return ( TargetForm != null )&&( TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.Working ) == RecordFlags );
+                return ( TargetForm != null )&&( TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == RecordFlags );
             }
         }
         
@@ -801,8 +801,8 @@ namespace GUIBuilder.FormImport
                     if( li.Signature.InsensitiveInvariantMatch( i.Signature ) )
                     {
                         if(
-                            ( !Engine.Plugin.Constant.ValidFormID( li.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )||
-                            ( !Engine.Plugin.Constant.ValidFormID( i .GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                            ( !Engine.Plugin.Constant.ValidFormID( li.GetFormID( Engine.Plugin.TargetHandle.Master ) ) )||
+                            ( !Engine.Plugin.Constant.ValidFormID( i .GetFormID( Engine.Plugin.TargetHandle.Master ) ) )
                         )
                         {
                             if( li.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( i.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
@@ -811,7 +811,7 @@ namespace GUIBuilder.FormImport
                                 return;
                             }
                         }
-                        else if( li.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == i.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                        else if( li.GetFormID( Engine.Plugin.TargetHandle.Master ) == i.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                         {
                             //DebugLog.Write( string.Format( "\nReject :: 0x{0} :: 0x{1}", li.FormID.ToString( "X8" ), i.FormID.ToString( "X8" ) ) );
                             return;
@@ -863,7 +863,7 @@ namespace GUIBuilder.FormImport
             
             #region Import window
             
-            m.SetCurrentStatusMessage( "Creating import window..." );
+            m.SetCurrentStatusMessage( "BatchImportWindow.Create".Translate() );
             
             var bbiw = new GUIBuilder.Windows.BatchImport();
             bbiw.EnableControlsOnClose = enableControlsOnClose;

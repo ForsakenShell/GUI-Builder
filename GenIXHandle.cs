@@ -72,8 +72,8 @@ public static class GenIXHandle
             format,
             string.Format(
                 "{2}0x{0} - \"{1}\"{3}",
-                ( target == null ? formID : target.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ).ToString( "X8" ),
-                ( target == null ? editorID : target.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ),
+                ( target == null ? formID : target.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
+                ( target == null ? editorID : target.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ),
                 ( includeSignature ? string.Format( "\"{0}\" ", target.Signature ) : null ),
                 ( includeFilename  ? string.Format( " {0}", fileNames ) : null )
             ),

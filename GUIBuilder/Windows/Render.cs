@@ -180,7 +180,7 @@ namespace GUIBuilder.Windows
         
         public void UpdateSettlementObjectChildWindowContentsForWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
         {
-            DebugLog.WriteLine( string.Format( "{0} :: UpdateSettlementObjectChildWindowContentsForWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "false" : "true" ) );
+            DebugLog.WriteLine( string.Format( "{0} :: UpdateSettlementObjectChildWindowContentsForWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
             twWorkshops.Worldspace = worldspace;
             twSettlements.Worldspace = worldspace;
             twSubDivisions.Worldspace = worldspace;

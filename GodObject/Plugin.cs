@@ -33,8 +33,8 @@ namespace GodObject
             DebugLog.WriteLine( string.Format(
                 "\t{0} :: 0x{1} - \"{2}\"",
                 o.GetType().ToString(),
-                o.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
-                o.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                o.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
+                o.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ) );
             if( o.Ancestor != null )
                 DumpAncestralTree( o.Ancestor, s );
         }
@@ -102,18 +102,16 @@ namespace GodObject
         
         public static bool Load( string workingFile, List<string> plugins, bool openRenderWindowOnLoad )
         {
-            var isLoading = _isLoading;
+            var result = false;
             
-            if( ( plugins.NullOrEmpty() )||( string.IsNullOrEmpty( workingFile ) ) )
-                return false;
+            if( (_isLoaded )||( plugins.NullOrEmpty() )||( string.IsNullOrEmpty( workingFile ) ) )
+                goto localAbort;
             
-            if( ( _isLoaded )&&( !_isLoading ) )
-            {
-                GodObject.Windows.SetEnableState( true );
-                return false;
-            }
             if( _isLoading )
-                return false;
+            {
+                result = true;
+                goto localAbort;
+            }
             
             //_plugin = plugin;
             _workingFile = workingFile;
@@ -130,7 +128,11 @@ namespace GodObject
             if( _isLoading )
                 _thread.Start();
             
-            return _isLoading;
+            result = _isLoading || _isLoaded;
+        localAbort:
+            if( !result )
+                GodObject.Windows.SetEnableState( true );
+            return result;
         }
         
         public static void Unload()
@@ -205,8 +207,6 @@ namespace GodObject
         
         static void THREAD_SyncGodObjects()
         {
-            DebugLog.OpenIndentLevel();
-            
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "Plugin.LoadBaseForms".Translate() );
@@ -220,7 +220,7 @@ namespace GodObject
                 {
                     var handle = form.MasterHandle;
                     if( !handle.IsValid() )
-                        throw new Exception( string.Format( "Unable to get handle for form 0x{0}", form.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) ) );
+                        throw new Exception( string.Format( "Unable to get handle for form 0x{0}", form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
                     
                     //form.DebugDump();
                 }
@@ -230,7 +230,6 @@ namespace GodObject
                 "GodObject.Plugin :: SyncGodObjects() :: Completed in {0}",
                 tStart.Ticks );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel();
         }
         
         static void THREAD_SyncGodObjectReferences()
@@ -243,8 +242,6 @@ namespace GodObject
         
         static void THREAD_PluginLoader()
         {
-            DebugLog.OpenIndentLevel();
-            
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
             m.StartSyncTimer();
@@ -380,8 +377,6 @@ namespace GodObject
             GodObject.Windows.SetEnableState( true );
             _workingFile = string.Empty;
             _isLoading = false;
-            
-            DebugLog.CloseIndentLevel();
         }
         
         #endregion

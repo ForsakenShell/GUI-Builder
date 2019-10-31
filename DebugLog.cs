@@ -99,7 +99,7 @@ public static class DebugLog
     {
         if( ( logInitialized )&&( !logClosed ) )
         {
-            _WriteLines( string.Format( "Log closed at {0}", DateTime.Now.ToString() ) );
+            _WriteLines( string.Format( "{2}{1}Log closed at {0}", DateTime.Now.ToString(), FormatNewLineChar, CloseIndentChar ) );
             logStream.Flush();
             logStream.Close();
             logClosed = true;
@@ -115,11 +115,13 @@ public static class DebugLog
             logStream = File.Open( Filename, FileMode.Create, FileAccess.Write, FileShare.Read );
             logInitialized = true;
             _WriteLines( string.Format(
-                "GUIBuilder {0} log for thread \"{1}\" with ID {2} opened at {3}",
+                "GUIBuilder {0} log for thread \"{1}\" with ID {2} opened at {3}{4}{5}",
                 Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                 ThreadName,
                 ThreadID,
-                DateTime.Now.ToString() ) );
+                DateTime.Now.ToString(),
+                FormatNewLineChar, OpenIndentChar
+            ) );
             logStream.Flush();
         }
         return Filename;
@@ -291,6 +293,18 @@ public static class DebugLog
         
         var tmp = new TimeSpan( elapsed );
         _WriteLines( string.Format( "Completed in {0}{3}{1} = {2}", tmp.ToString(), resultName, result, FormatNewLineChar ) );
+        _WriteLines( CloseIndentChar );
+        
+        logStream.Flush();
+    }
+    
+    public static void CloseIndentLevel( long elapsed )
+    {
+        if( logClosed ) return;
+        if( !logInitialized ) Open();
+        
+        var tmp = new TimeSpan( elapsed );
+        _WriteLines( string.Format( "Completed in {0}{1}", tmp.ToString(), FormatNewLineChar ) );
         _WriteLines( CloseIndentChar );
         
         logStream.Flush();

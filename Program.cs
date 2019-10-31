@@ -23,11 +23,10 @@ internal sealed class Program
     static void Main( string[] args )
     {
         System.Threading.Thread.CurrentThread.Name = "Main";
-        DebugLog.OpenIndentLevel();
+        DebugLog.Open();
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault( false );
         Application.Run( new GUIBuilder.Windows.Main() );
-        DebugLog.CloseIndentLevel();
         DebugLog.Close();
     }
     

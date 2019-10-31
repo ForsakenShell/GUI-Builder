@@ -41,7 +41,7 @@ namespace AnnexTheCommonwealth
             var result = true;
             
             foreach( var ks in kywdSubDivision )
-                if( ks.Value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == formid )
+                if( ks.Value.GetFormID( Engine.Plugin.TargetHandle.Master ) == formid )
                     goto localReturnResult;
             result = false;
             
@@ -54,7 +54,7 @@ namespace AnnexTheCommonwealth
         {
             return
                 ( subdivision == null )||
-                ( AssociatedWithSubDivision( subdivision.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                ( AssociatedWithSubDivision( subdivision.GetFormID( Engine.Plugin.TargetHandle.Master ) ) );
         }
         
         public bool HasAnySharedAssociations( EdgeFlag otherFlag, uint excludeSubDivision = Engine.Plugin.Constant.FormID_None )
@@ -65,7 +65,7 @@ namespace AnnexTheCommonwealth
             
             foreach( var ks in kywdSubDivision )
             {
-                var ksfid = ks.Value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var ksfid = ks.Value.GetFormID( Engine.Plugin.TargetHandle.Master );
                 if( ksfid == excludeSubDivision )
                     continue;
                 if( otherFlag.AssociatedWithSubDivision( ksfid ) )
@@ -99,7 +99,7 @@ namespace AnnexTheCommonwealth
                         moel.Add(
                             string.Format(
                                 "\tSub-Division: 0x{0} - \"{1}\" :: Keyword: 0x{2} - \"{3}\"",
-                                ks.Value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), ks.Value.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                                ks.Value.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), ks.Value.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
                                 ks.Key.ToString( "X8" ), k.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     }
                 }
@@ -115,7 +115,7 @@ namespace AnnexTheCommonwealth
                             string.Format(
                                 "\tEdgeFlag: 0x{0} :: Keyword: 0x{1} - \"{2}\"",
                                 rID.ToString( "X8" ),
-                                ( k == null ? 0 : k.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ).ToString( "X8" ),
+                                ( k == null ? 0 : k.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
                                 ( k == null ? "" : k.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) ) );
                     }
                 }

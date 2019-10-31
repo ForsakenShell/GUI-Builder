@@ -250,8 +250,8 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
                 DebugLog.WriteError( this.GetType().ToString(), "RemoveEx()", string.Format(
                     "Unable to RemoveElementOrParentEx() 0x{0} from 0x{1} - \"{2}\"",
                     lrHandle.ToString(),
-                    this.Form.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
-                    this.Form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    this.Form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
+                    this.Form.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ) );
                 return false;
             }
             _LinkedReferences.RemoveAt( index );
@@ -325,7 +325,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             
             var refID = value == null
                 ? Constant.FormID_None
-                : value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                : value.GetFormID( Engine.Plugin.TargetHandle.Master );
             
             _LinkedReferences[ index ].SetUIntValueEx( _Reference, refID );
             
@@ -399,7 +399,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             
             var keywordFormID = value == null
                 ? Constant.FormID_None
-                : value.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                : value.GetFormID( Engine.Plugin.TargetHandle.Master );
             
             _LinkedReferences[ index ].SetUIntValueEx( _Keyword, keywordFormID );
             

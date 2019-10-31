@@ -297,6 +297,15 @@ namespace GodObject
             
             public bool ComputeZHeightsFromVolumes( Vector2f[][] volumes, out float minZ, out float maxZ, out float averageZ, out float averageWaterZ, bool useWaterIfHigher = true, bool showScanlineProgress = false )
             {
+                DebugLog.OpenIndentLevel( new [] { "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()" } );
+                var m = GodObject.Windows.GetMainWindow();
+                if( showScanlineProgress )
+                    m.PushItemOfItems();
+                m.StartSyncTimer();
+                var tStart = m.SyncTimerElapsed();
+                
+                var result = true; // Unless it isn't
+                
                 minZ = float.MaxValue;
                 maxZ = float.MinValue;
                 averageWaterZ = float.MinValue;
@@ -304,12 +313,14 @@ namespace GodObject
                 if( volumes.NullOrEmpty() )
                 {
                     DebugLog.WriteError( "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()", "volumes is null or empty" );
-                    return false;
+                    result = false;
+                    goto localAbort;
                 }
                 if( !LoadLandHeightMap() )
                 {
                     DebugLog.WriteError( "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()", "Cannot load land heightmap" );
-                    return false;
+                    result = false;
+                    goto localAbort;
                 }
                 
                 double totalWaterZ = 0;
@@ -320,14 +331,7 @@ namespace GodObject
                 var wsMax = Vector2f.Max( volumes );
                 var minBounding = Engine.SpaceConversions.WorldspaceToHeightmap( wsMin, HeightMapOffset );
                 var maxBounding = Engine.SpaceConversions.WorldspaceToHeightmap( wsMax, HeightMapOffset );
-                
-                var m = GodObject.Windows.GetMainWindow();
-                var max = (int)0;
-                if( showScanlineProgress )
-                {
-                    m.PushItemOfItems();
-                    max = minBounding.Y - maxBounding.Y;
-                }
+                var max = minBounding.Y - maxBounding.Y;
                 
                 for( int hy = maxBounding.Y; hy <= minBounding.Y; hy++ )
                 {
@@ -359,13 +363,11 @@ namespace GodObject
                     }
                 }
                 
-                if( showScanlineProgress )
-                    m.PopItemOfItems();
-                
                 if( landPoints < 1 )    // No land points means nothing was found inside the volumes
                 {
                     DebugLog.WriteError( "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()", "No points on heightmap found in volume[s]" );
-                    return false;       // This should never happen unless the heightmap bounding or heightmap <-> worldspace conversions failed
+                    result = false;       // This should never happen unless the heightmap bounding or heightmap <-> worldspace conversions failed
+                    goto localAbort;
                 }
                 
                 averageZ = (float)( totalLandZ / (double)landPoints );
@@ -373,7 +375,13 @@ namespace GodObject
                     ? (float)( totalWaterZ / (double)waterPoints )
                     : float.MinValue;
                 
-                return true;
+                
+            localAbort:
+                var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
+                if( showScanlineProgress )
+                    m.PopItemOfItems();
+                DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
+                return result;
             }
             
             #endregion
@@ -683,7 +691,7 @@ namespace GodObject
         static void CreateEntryFor( Worldspace worldspace )
         {
             var entry = new PoolEntry( worldspace );
-            _Pool.Add( worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), entry );
+            _Pool.Add( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ), entry );
         }
         
         public static void DrainPool()
@@ -697,9 +705,9 @@ namespace GodObject
         
         public static PoolEntry GetPoolEntry( Worldspace worldspace )
         {
-            if( !_Pool.ContainsKey( worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+            if( !_Pool.ContainsKey( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) ) )
                 CreateEntryFor( worldspace );
-            return _Pool[ worldspace.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ];
+            return _Pool[ worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) ];
         }
         
         public static void DestroyWorldspaceTextures( bool destroySurfaces )

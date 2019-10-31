@@ -6,7 +6,9 @@
  */
 
 using System;
+using System.Linq;
 using XeLib;
+
 
 
 namespace Engine.Plugin.Forms
@@ -77,6 +79,11 @@ namespace Engine.Plugin.Forms
                 case TargetHandle.LastFullOptional:
                     h = Form.LastFullOptionalHandle;
                     break;
+                    
+                case TargetHandle.LastValid:
+                    h = Form.Handles.Last();
+                    break;
+                    
             }
             if( !h.IsValid() )
                 throw new ArgumentException( "target is not valid for field" );
@@ -147,8 +154,8 @@ namespace Engine.Plugin.Forms
                     "{0} :: AddElement :: Unable to AddElement \"{1}\" to 0x{2} - \"{3}\"",
                     this.GetType().ToString(),
                     elementPath,
-                    this.Form.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
-                    this.Form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    this.Form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
+                    this.Form.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ) );
                 return false;
             }
             elementHandle.Dispose();

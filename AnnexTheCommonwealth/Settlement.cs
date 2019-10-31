@@ -24,7 +24,7 @@ namespace AnnexTheCommonwealth
         
         public Settlement( Engine.Plugin.Forms.ObjectReference reference ) : base( reference )
         {
-            LocationName = string.Format( "0x{0} - No location", reference.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) );
+            LocationName = string.Format( "0x{0} - No location", reference.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) );
         }
         
         #endregion

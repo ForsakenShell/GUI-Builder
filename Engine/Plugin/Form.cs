@@ -72,7 +72,30 @@ namespace Engine.Plugin
             {
                 throwError = true;
                 errorString += string.Format( "\tError :: Cannot get Association for {0}\n", this.GetType() );
+            }
+            if( !ancestor.IsValid() )
+            {
+                throwError = true;
+                errorString += "\tError :: Ancestor must be valid\n";
+            }
+            else
+            {
+                if( ( ancestor as File ) == null )
+                {
+                    var aAssociation = Reflection.AssociationFrom( ancestor.Signature );
+                    var aCanHaveMe = aAssociation.HasChildOrGrandchildAssociationOf( Association, false );
+                    if( !aCanHaveMe )
+                    {
+                        throwError = true;
+                        errorString += "\tError :: Ancestor does not have an association for this Form type\n";
+                    }
                 }
+                else if( !Association.AllowRootCollection )
+                {
+                    throwError = true;
+                    errorString += "\tError :: Form type cannot be in a root (file) level container\n";
+                }
+            }
             if( ( string.IsNullOrEmpty( Signature ) )||( Signature.Length != 4 ) )
             {
                 throwError = true;
@@ -82,11 +105,6 @@ namespace Engine.Plugin
             {
                 throwError = true;
                 errorString += "\tError :: Collection cannot be null\n";
-            }
-            if( ancestor == null )
-            {
-                throwError = true;
-                errorString += "\tError :: Ancestor cannot be null\n";
             }
             if( !handle.IsValid() )
             {
@@ -121,7 +139,7 @@ namespace Engine.Plugin
                 }
                 catch {}
                 errorString= string.Format(
-                    "\n{0} :: cTOR()\n{1}\tHandle = 0x{2}\n\tPath = \"{8}\"\n\tHandle File = \"{3}\"\n\tForm Signature = \"{4}\"\n\tRecord Signature = \"{5}\"\n\tFormID = 0x{6}\n\tIsMaster = {7}",
+                    "\n{0} :: cTOR()\n{1}\tHandle = 0x{2}\n\tPath = \"{8}\"\n\tHandle File = \"{3}\"\n\tForm Signature = \"{4}\"\n\tRecord Signature = \"{5}\"\n\tFormID = 0x{6}\n\tIsMaster = {7}\n\tAncestor = {9}",
                     this.GetType().ToString(),
                     errorString,
                     handle.ToString(),
@@ -129,9 +147,10 @@ namespace Engine.Plugin
                     Signature, rSig,
                     rFID.ToString( "X8" ),
                     isMaster,
-                    rPath
+                    rPath,
+                    ancestor == null ? "[null]" : ancestor.ToString()
                    );
-                //DebugLog.Write( errorString );
+                DebugLog.WriteLine( errorString );
                 throw new ArgumentNullException( errorString );
             }
             _Collection = collection;
@@ -214,7 +233,7 @@ namespace Engine.Plugin
         
         public override int             GetHashCode()
         {
-            return GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).GetHashCode() ^ Signature.GetHashCode();
+            return GetFormID( Engine.Plugin.TargetHandle.Master ).GetHashCode() ^ Signature.GetHashCode();
         }
         
         public override string          ToString()
@@ -302,7 +321,7 @@ namespace Engine.Plugin
             }
         }
         
-        public uint                     LoadOrder               { get { return GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) >> 24; } }
+        public uint                     LoadOrder               { get { return GetFormID( Engine.Plugin.TargetHandle.Master ) >> 24; } }
         
         /*
         public uint                     FormID                  { get { return _FormID.GetValue( TargetHandle.Master ); } }
@@ -455,25 +474,7 @@ namespace Engine.Plugin
             else
                 _Handles.Insert( insertAt, newHandle );
             
-            // Find:
-            //    Working file handle index
-            //    Last non-partial handle index the working file handle requires
-            //    Last non-partial handle index that is in an optionally loaded file
-            for( int i = 0; i < _Handles.Count; i++ )
-            {
-                if( _Handles[ i ].Filename.InsensitiveInvariantMatch( GodObject.Plugin.Data.Files.Working.Filename ) )
-                    _WorkingFileHandleIndex = i;
-                if( !( (FormHandle)_Handles[ i ] ).IsPartialRecord )
-                {
-                    if( newHandle.Requires( _Handles[ i ].Filename ) )
-                    {
-                        _LastFullRequiredHandleIndex = i;
-                        _LastFullOptionalHandleIndex = i;   // Can be the same, but the inverse is not true
-                    }
-                    else
-                        _LastFullOptionalHandleIndex = i;
-                }
-            }
+            RecalcHandleIndexes();
             
             return true;
         }
@@ -483,7 +484,7 @@ namespace Engine.Plugin
         
         public ElementHandle            LastFullRequiredHandle      { get { return HandleByIndex( _LastFullRequiredHandleIndex ); } }
         public ElementHandle            LastFullOptionalHandle      { get { return HandleByIndex( _LastFullOptionalHandleIndex ); } }
-        public ElementHandle            LastHandleBeforeWorkingFile { get { return HandleByIndex( _WorkingFileHandleIndex - 1 ); } }
+        public ElementHandle            LastHandleBeforeWorkingFile { get { return HandleByIndex( _WorkingFileHandleIndex <= 0 ? 0 :_WorkingFileHandleIndex - 1 ); } }
         
         // Return a cloned list so the caller cannot directly manipulate it.  Adding/Removing handles should be done through the proper API calls.
         public List<ElementHandle>      Handles                     { get { return !GetHandles() ? null : _Handles.Clone(); } }
@@ -492,7 +493,11 @@ namespace Engine.Plugin
         
         ElementHandle                   CopyAsOverride( ElementHandle fromHandle )
         {
-            if( !fromHandle.IsValid() ) return null;
+            if( !fromHandle.IsValid() )
+            {
+                DebugLog.WriteLine( new [] { this.GetType().ToString(), "CopyAsOverride", "fromHandle is null!" } );
+                return null;
+            }
             if( IsInWorkingFile() ) return WorkingFileHandle;
             
             // XeLib is weird in that we copy the top level form which will trigger copying all ancestors.
@@ -528,21 +533,27 @@ namespace Engine.Plugin
             // Update the handles
             if( !AddNewHandle( resHandle ) )
             {
+                DebugLog.WriteLine( new [] { this.GetType().ToString(), "CopyAsOverride", "Unable to add new handle for override to Form!" } );
                 resHandle.Dispose();
                 return null;
             }
             
             // Now make sure my ancestors are updated
+            /* Shouldn't need to actually do this since the tree won't change when creating an override
             var a = Ancestor;
             while( ( a != null )&&( ( a as File ) == null ) )
             {
                 if( !a.IsInWorkingFile() )
                 {
-                    var h = workingFile.MasterHandle.GetRecord( GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false );
-                    if( !a.AddNewHandle( h ) ) return null;
+                    var h = workingFile.MasterHandle.GetRecord( GetFormID( Engine.Plugin.TargetHandle.Master ), false );
+                    if( !a.AddNewHandle( h ) )
+                    {
+                        DebugLog.WriteLine( new [] { this.GetType().ToString(), "CopyAsOverride", "Unable to add new handle for override to Form to ancestor...why are we doing this?" } );
+                        return null;
+                    }
                 }
                 a = a.Ancestor;
-                /*
+                // *
                 DebugLog.Write( string.Format(
                     "\n{0} :: CopyAsOverride() :: 0x{1} - \"{2}\" :: Ancestor.IsInWorkingFile() :: 0x{3} - \"{4}\"",
                     this.GetType().ToString(),
@@ -550,12 +561,12 @@ namespace Engine.Plugin
                     this.EditorID.ToString(),
                     Ancestor.FormID.ToString( "X8" ),
                     Ancestor.EditorID ) );
-                */
+                // * /
                 //var aiiwf = Ancestor.IsInWorkingFile( true );
                 //if( !aiiwf )
                 //    return false;
             }
-            
+            */
             // Now make sure any attached scripts are updated
             if( !_Scripts.NullOrEmpty() )
             {
@@ -605,7 +616,7 @@ namespace Engine.Plugin
                     DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Unable to get file for 0x{0} - \"{1}\"", _Forced_FormID.ToString( "X8" ), _Forced_Filename ) );
                     return false;
                 }
-                var fID = _Forced_FormID | m.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var fID = _Forced_FormID | m.GetFormID( Engine.Plugin.TargetHandle.Master );
                 hSource = m.MasterHandle.GetMasterRecord( fID, false );
                 if( !hSource.IsValid() )
                 {
@@ -624,24 +635,43 @@ namespace Engine.Plugin
             
             _Handles = new List<ElementHandle>();
             _Handles.Add( hSource );
-            _LastFullRequiredHandleIndex = 0;
             
             var hOverrides = hSource.GetOverrides();
             if( !hOverrides.NullOrEmpty() )
-            {
-                var c = hOverrides.Length;
-                for( int i = 0; i < c; i++ )
-                {
-                    var hOverride = hOverrides[ i ];
+                foreach( var hOverride in hOverrides )
                     _Handles.Add( hOverride );
-                    if( !hOverride.IsPartialRecord )
-                        _LastFullRequiredHandleIndex = i; //_Handles.IndexOf( hOverride );
-                    if( hOverride.Filename.InsensitiveInvariantMatch( GodObject.Plugin.Data.Files.Working.Filename ) )
-                        _WorkingFileHandleIndex = i; //_Handles.IndexOf( hOverride );
-                }
-            }
+            
+            RecalcHandleIndexes();
             
             return true;
+        }
+        
+        void                            RecalcHandleIndexes()
+        {
+            _LastFullRequiredHandleIndex = -1;
+            _LastFullOptionalHandleIndex = -1;
+            _WorkingFileHandleIndex      = -1;
+            var wLO = GodObject.Plugin.Data.Files.Working.LoadOrder;
+            
+            if( !_Handles.NullOrEmpty() )
+            {
+                var c = _Handles.Count();
+                for( int i = 0; i < c; i++ )
+                {
+                    var hOverride = _Handles[ i ] as FormHandle;
+                    var hLO = hOverride.LoadOrder;
+                    _Handles.Add( hOverride );
+                    if( hLO == wLO )
+                        _WorkingFileHandleIndex = i;
+                    if( !hOverride.IsPartialRecord )
+                    {
+                        if( hLO < wLO )
+                            _LastFullRequiredHandleIndex = i;
+                        if( hLO > wLO )
+                            _LastFullOptionalHandleIndex = i;
+                    }
+                }
+            }
         }
         
         ElementHandle                   HandleByIndex( int index )
@@ -761,9 +791,9 @@ namespace Engine.Plugin
                 var m = GodObject.Windows.GetMainWindow();
                 m.PushStatusMessage();
                 m.PushItemOfItems();
-                m.SetCurrentStatusMessage( string.Format( "Loading all references of 0x{0} - \"{1}\"...", GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 
-                DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "References", this.ToString() } );
+                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "References", this.ToString() } );
                 
                 List<Form> resultList = null;
                 
@@ -780,9 +810,9 @@ namespace Engine.Plugin
                     m.SetItemOfItems( i, max );
                     var refHandle = refs[ i ];
                     #region Debug dump
-                    var rFID = refHandle.FormID;
-                    var rSig = refHandle.Signature;
-                    DebugLog.WriteLine( "[ " + i + " ] = " + rSig + " 0x" + rFID.ToString( "X8" ) );
+                    //var rFID = refHandle.FormID;
+                    //var rSig = refHandle.Signature;
+                    //DebugLog.WriteLine( "[ " + i + " ] = " + rSig + " 0x" + rFID.ToString( "X8" ) );
                     #endregion
                     // Add the form to the return list
                     var rForm = GodObject.Plugin.Data.Root.Find( refHandle ) as Form;
@@ -790,7 +820,7 @@ namespace Engine.Plugin
                 }
                 
             localReturnResult:
-                DebugLog.CloseIndentLevel<Form>( "Forms", resultList );
+                //DebugLog.CloseIndentLevel<Form>( "Forms", resultList );
                 m.PopItemOfItems();
                 m.PopStatusMessage();
                 return resultList.NullOrEmpty()
@@ -862,7 +892,7 @@ namespace Engine.Plugin
             get
             {
                 var mo = new List<string>();
-                mo.Add( string.Format( "{0}: 0x{1} - \"{2}\"", Signature, GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                mo.Add( string.Format( "{0}: 0x{1} - \"{2}\"", Signature, GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 var moel = MouseOverExtra;
                 if( !moel.NullOrEmpty() )
                     foreach( var moe in moel )

@@ -78,8 +78,8 @@ namespace GUIBuilder.Windows.FormEditor
             
             if( SyncObject != null )
             {
-                tbFormID.Text = SyncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" );
-                tbEditorID.Text = SyncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                tbFormID.Text = SyncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" );
+                tbEditorID.Text = SyncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
                 SetFormFields();
             }
             

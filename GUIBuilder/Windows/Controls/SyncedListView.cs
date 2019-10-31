@@ -266,7 +266,7 @@ namespace GUIBuilder.Windows.Controls
                 if( _Parent._LoadOrderColumn ) SetRowData( row, SyncedColumnID.LoadOrder    , _SyncObject.LoadOrder.ToString( "X2" ) );
                 if( _Parent._FilenameColumn  ) SetRowData( row, SyncedColumnID.Filename     , _SyncObject.Filenames[ 0 ]             );
                 if( _Parent._TypeColumn      ) SetRowData( row, SyncedColumnID.SignatureType, _SyncObject.Signature                  );
-                if( _Parent._FormIDColumn    ) SetRowData( row, SyncedColumnID.FormID       , _SyncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) );
+                if( _Parent._FormIDColumn    ) SetRowData( row, SyncedColumnID.FormID       , _SyncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) );
                 if( _Parent._EditorIDColumn  ) SetRowData( row, SyncedColumnID.EditorID     , _SyncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 if( _Parent._ExtraInfoColumn ) SetRowData( row, SyncedColumnID.ExtraInfo    , _SyncObject.ExtraInfo                  );
                 //DebugLog.Write( string.Format(
@@ -317,7 +317,7 @@ namespace GUIBuilder.Windows.Controls
                 if( _Parent._LoadOrderColumn ) SetItemData( SyncedColumnID.LoadOrder    , _SyncObject.LoadOrder.ToString( "X2" ) );
                 if( _Parent._FilenameColumn  ) SetItemData( SyncedColumnID.Filename     , _SyncObject.Files[ 0 ].Filename        );
                 if( _Parent._TypeColumn      ) SetItemData( SyncedColumnID.SignatureType, _SyncObject.Signature                  );
-                if( _Parent._FormIDColumn    ) SetItemData( SyncedColumnID.FormID       , _SyncObject.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) );
+                if( _Parent._FormIDColumn    ) SetItemData( SyncedColumnID.FormID       , _SyncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) );
                 if( _Parent._EditorIDColumn  ) SetItemData( SyncedColumnID.EditorID     , _SyncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 if( _Parent._ExtraInfoColumn ) SetItemData( SyncedColumnID.ExtraInfo    , _SyncObject.ExtraInfo                  );
             }
@@ -748,7 +748,13 @@ namespace GUIBuilder.Windows.Controls
             if( this.InvokeRequired )
             {
                 //DebugLog.WriteLine( string.Format( "\n{0} :: RepopulateListViewThread() :: UI Thread Invoke\n", this.GetType().ToString() ) );
-                this.Invoke( (Action)delegate() { RepopulateListViewThread(); }, null );
+                //try{
+                    this.Invoke( (Action)delegate() { RepopulateListViewThread(); }, null );
+                //} catch( Exception e ){
+                //    var m = string.Format( "An exception occured attempting UI Thread Invoke\n{0}\n{1}", e.ToString(), e.StackTrace );
+                //    Console.WriteLine( string.Format( "{0} :: {1} :: {2}", this.GetType().ToString(), "RepopulateListViewThread()", m ) );
+                //    DebugLog.WriteError( this.GetType().ToString(), "RepopulateListViewThread()", m );
+                //}
                 return;
             }
             if( !_SyncItems.NullOrEmpty() )
@@ -840,9 +846,9 @@ namespace GUIBuilder.Windows.Controls
         {   return string.Compare( x.GetSyncObject().Signature, y.GetSyncObject().Signature, StringComparison.InvariantCultureIgnoreCase ); }
         
         static int SortFormIDAsc( SyncItem x, SyncItem y )
-        {   return x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) > y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ? 1 : x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) < y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ? -1 : 0; }
+        {   return x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) > y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) ? 1 : x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 0; }
         static int SortFormIDDes( SyncItem x, SyncItem y )
-        {   return x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) < y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ? 1 : x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) > y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ? -1 : 0; }
+        {   return x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) ? 1 : x.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) > y.GetSyncObject().GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 0; }
         
         static int SortEditorIDAsc( SyncItem x, SyncItem y )
         {   return string.Compare( x.GetSyncObject().GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), y.GetSyncObject().GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), StringComparison.InvariantCultureIgnoreCase ); }

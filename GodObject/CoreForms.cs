@@ -152,7 +152,7 @@ namespace GodObject
             if( !Engine.Plugin.Constant.ValidFormID( formID ) )
                 return null;
             foreach( var baseFlag in _SubDivisionEdgeFlags )
-                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == formID ) return baseFlag;
+                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return baseFlag;
             return null;
         }
         
@@ -161,7 +161,7 @@ namespace GodObject
             if( !Engine.Plugin.Constant.ValidFormID( formID ) )
                 return false;
             foreach( var baseFlag in _SubDivisionEdgeFlags )
-                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == formID ) return true;
+                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return true;
             return false;
         }
         
@@ -170,7 +170,7 @@ namespace GodObject
             if( !Engine.Plugin.Constant.ValidFormID( formID ) )
                 return false;
             foreach( var sefk in _SubDivisionEdgeFlagKeywords )
-                if( formID == sefk.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                if( formID == sefk.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                     return true;
             return false;
         }
@@ -180,7 +180,7 @@ namespace GodObject
             if( !Engine.Plugin.Constant.ValidFormID( formID ) )
                 return null;
             foreach( var sefk in _SubDivisionEdgeFlagKeywords )
-                if( formID == sefk.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                if( formID == sefk.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                     return sefk;
             return null;
         }

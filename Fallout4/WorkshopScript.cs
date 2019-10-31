@@ -50,7 +50,7 @@ namespace Fallout4
         
         public WorkshopScript( Engine.Plugin.Forms.ObjectReference reference ) : base( reference )
         {
-            LocationName = string.Format( "0x{0} - No location", reference.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ) );
+            LocationName = string.Format( "0x{0} - No location", reference.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) );
         }
         
         #endregion
@@ -62,7 +62,7 @@ namespace Fallout4
             get
             {
                 // TODO:  FIX ME FOR PROPER NAMESPACE PREFIXES AND STRING SCANNING, THIS CODE SUX!
-                var foo = Reference.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var foo = Reference.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
                 foo = foo.StripFrom( "WorkshopREF", StringComparison.InvariantCultureIgnoreCase );
                 foo = foo.StripFrom( "Workshop", StringComparison.InvariantCultureIgnoreCase );
                 foo = foo.StripFrom( "Reference", StringComparison.InvariantCultureIgnoreCase );
@@ -89,7 +89,7 @@ namespace Fallout4
                         var refr = form as Engine.Plugin.Forms.ObjectReference;
                         if( refr == null )
                             continue;
-                        var refrRef = refr.LinkedRefs.GetLinkedRef( wlbae.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        var refrRef = refr.LinkedRefs.GetLinkedRef( wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                         if( ( refrRef != null )&&( refrRef == Reference ) )
                         {
                             _Border = refr;
@@ -114,12 +114,12 @@ namespace Fallout4
                 // Unlink the current border
                 var current = BorderReference;
                 if( ( current != null )&&( current != value ) )
-                    current.LinkedRefs.Remove( this.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), Engine.Plugin.Constant.FormID_None );
+                    current.LinkedRefs.Remove( this.GetFormID( Engine.Plugin.TargetHandle.Master ), Engine.Plugin.Constant.FormID_None );
                 
                 // Link the new border
                 if( ( value != null )&&( value != _Border ) )
                 {
-                    var index = value.LinkedRefs.FindKeywordIndex( wlbae.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    var index = value.LinkedRefs.FindKeywordIndex( wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                     if( index >= 0 )
                     {   // Redirect the existing link to the new ref
                         value.LinkedRefs.Reference[ index ] = Reference;
@@ -175,7 +175,7 @@ namespace Fallout4
                         var refr = form as Engine.Plugin.Forms.ObjectReference;
                         if( refr == null )
                             continue;
-                        var refrRef = refr.LinkedRefs.GetLinkedRef( wlp.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        var refrRef = refr.LinkedRefs.GetLinkedRef( wlp.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                         if( ( refrRef != null )&&( refrRef == Reference ) )
                         {
                             list.Add( refr );
@@ -253,7 +253,7 @@ namespace Fallout4
                 if( refr == null )
                     continue;
                 
-                var lr = refr.LinkedRefs.GetLinkedRef( workshopLinkKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                var lr = refr.LinkedRefs.GetLinkedRef( workshopLinkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 if( ( lr == null )||( lr != Reference ) )
                     continue;
                 
@@ -306,7 +306,7 @@ namespace Fallout4
                 return null;
             
             var list = new List<Engine.Plugin.Forms.ObjectReference>();
-            var node = firstNode.LinkedRefs.GetLinkedRef( nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            var node = firstNode.LinkedRefs.GetLinkedRef( nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( node == null )
                 return null;
             
@@ -315,7 +315,7 @@ namespace Fallout4
             list.Add( node );
             while( true )
             {
-                node = node.LinkedRefs.GetLinkedRef( nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                node = node.LinkedRefs.GetLinkedRef( nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 if( node == null )
                     break;
                 list.Add( node );
@@ -350,7 +350,7 @@ namespace Fallout4
             string fileSuffix,
             bool createImportData )
         {
-            DebugLog.OpenIndentLevel( string.Format( "{0} :: CreateBorderNIFs() :: workshop 0x{1} - \"{2}\"", this.GetType().ToString(), this.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ), this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+            DebugLog.OpenIndentLevel( string.Format( "{0} :: CreateBorderNIFs() :: workshop 0x{1} - \"{2}\"", this.GetType().ToString(), this.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
             
             List<GUIBuilder.FormImport.ImportBase> result = null;
             
@@ -375,7 +375,7 @@ namespace Fallout4
             
             var keyword = _WorkshopLinkKeyword;
             var worldspace = Reference.Worldspace;
-            var workshopFID = this.GetFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var workshopFID = this.GetFormID( Engine.Plugin.TargetHandle.Master );
             var workshopName = this.NameFromEditorID;
             var border = BorderReference;
             if( ( createImportData )&&( border != null ) )
