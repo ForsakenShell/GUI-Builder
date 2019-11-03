@@ -280,7 +280,7 @@ public static class DebugLog
         if( logClosed ) return;
         if( !logInitialized ) Open();
         
-        _WriteLines( string.Format( "{0} = {1}", resultName, ( result == null ? "[null]" : result.ToString() ) ) );
+        _WriteLines( string.Format( "{0} = {1}", resultName, result.ToStringNullSafe() ) );
         _WriteLines( CloseIndentChar );
         
         logStream.Flush();

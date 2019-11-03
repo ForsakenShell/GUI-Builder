@@ -90,7 +90,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <SubDivisionBatchWindow.BorderEnablers>Border Enablers</SubDivisionBatchWindow.BorderEnablers>
     <SubDivisionBatchWindow.Functions>Functions</SubDivisionBatchWindow.Functions>
     <SubDivisionBatchWindow.Function.NormalizeBuildVolumes>Normalize Build Volumes</SubDivisionBatchWindow.Function.NormalizeBuildVolumes>
-    <SubDivisionBatchWindow.Function.OptimizeVolumes>Optimize Volumes</SubDivisionBatchWindow.Function.OptimizeVolumes>
+    <SubDivisionBatchWindow.Function.OptimizeSandboxVolumes>Optimize Sandbox Volumes</SubDivisionBatchWindow.Function.OptimizeSandboxVolumes>
     <SubDivisionBatchWindow.Function.CheckElements>Check For Missing Elements</SubDivisionBatchWindow.Function.CheckElements>
     <SubDivisionBatchWindow.Function.FinalizeElements>Finalize All Elements</SubDivisionBatchWindow.Function.FinalizeElements>
     <SubDivisionBatchWindow.BuildVolumes>Build Volumes</SubDivisionBatchWindow.BuildVolumes>
@@ -136,7 +136,8 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BatchImportWindow.Sorting>Sorting imports...</BatchImportWindow.Sorting>
     <BatchImportWindow.ImportingForm>Importing {0}: 0x{1} - "{2}"...</BatchImportWindow.ImportingForm>
     <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
-    <BatchImportWindow.Create>Creating import window...</BatchImportWindow.Create>
+    <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
+    <BatchImportWindow.UnableToUpdateReferencesFor>Unable to update references for "{0}"</BatchImportWindow.UnableToUpdateReferencesFor>
     <PluginSelectorWindow.Title>Select Plugin[s]</PluginSelectorWindow.Title>
     <PluginSelectorWindow.WorkingFile>Working File</PluginSelectorWindow.WorkingFile>
     <PluginSelectorWindow.OpenRenderWindow>Open Render Window On Load</PluginSelectorWindow.OpenRenderWindow>
@@ -169,10 +170,10 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <SubDivisionBatch.CheckingBorderEnablersFor>Checking border enablers for "{0}"...</SubDivisionBatch.CheckingBorderEnablersFor>
     <SubDivisionBatch.CalculatingSandboxes>Calculating sandbox volumes...</SubDivisionBatch.CalculatingSandboxes>
     <SubDivisionBatch.CheckingSandboxFor>Checking sandbox for "{0}"...</SubDivisionBatch.CheckingSandboxFor>
-    <SubDivisionBatch.CalculatingSandboxFor>Calculating sanbox for "{0}"...</SubDivisionBatch.CalculatingSandboxFor>
+    <SubDivisionBatch.CalculatingSandboxFor>Calculating sandbox for "{0}"...</SubDivisionBatch.CalculatingSandboxFor>
     <SubDivisionBatch.CheckingBuildVolumes>Checking build volumes...</SubDivisionBatch.CheckingBuildVolumes>
     <SubDivisionBatch.CheckingBuildVolumesFor>Checking build volumes for "{0}"...</SubDivisionBatch.CheckingBuildVolumesFor>
-    <SubDivisionBatch.OptimizingBuildVolumesFor>Optimizing build volumes for "{0}"...</SubDivisionBatch.OptimizingBuildVolumesFor>
+    <SubDivisionBatch.NormalizingBuildVolumesFor>Normalizing build volumes for "{0}"...</SubDivisionBatch.NormalizingBuildVolumesFor>
     <NIFBuilder.Preset.VanillaWorkshop>Vanilla Workshop</NIFBuilder.Preset.VanillaWorkshop>
     <NIFBuilder.Preset.VanillaWorkshopGS>Vanilla Workshop w/GS</NIFBuilder.Preset.VanillaWorkshopGS>
     <NIFBuilder.Preset.ATCTall>Tall</NIFBuilder.Preset.ATCTall>

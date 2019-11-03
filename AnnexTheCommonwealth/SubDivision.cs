@@ -111,7 +111,7 @@ namespace AnnexTheCommonwealth
             if( ( !_EdgeFlags.NullOrEmpty() )&&( !forceReset ) )
                 return true;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", "forceReset = " + forceReset.ToString() + "\n", "forceStopAt = " + ( forceStopAt == null ? "[null]" : forceStopAt.ToString() ) + "\n", this.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", "forceReset = " + forceReset.ToString() + "\n", "forceStopAt = " + forceStopAt.ToStringNullSafe() + "\n", this.ToString() } );
             var result = false;
             
             if( forceReset )
@@ -548,7 +548,7 @@ namespace AnnexTheCommonwealth
             
         }
         
-        public OptimalSandboxVolume GetOptimalSandboxVolume( float angleIncrement = 1.0f, bool skipZScan = false, float fSandboxCylinderBottom = -100.0f, float fSandboxCylinderTop = 1280.0f, float volumeMargin = 128.0f )
+        public OptimalSandboxVolume GetOptimalSandboxVolume( float angleIncrement = 1.0f, bool skipZScan = false, float fSandboxCylinderBottom = -100.0f, float fSandboxCylinderTop = 1280.0f, float volumeMargin = 128.0f, float sandboxSink = 128.0f )
         {
             var edgeFlags = EdgeFlags;
             if( edgeFlags.NullOrEmpty() )
@@ -590,7 +590,7 @@ namespace AnnexTheCommonwealth
             var halfHeight = fSandboxCylinderTop > Math.Abs( fSandboxCylinderBottom )
                 ? fSandboxCylinderTop
                 : Math.Abs( fSandboxCylinderBottom );
-            var volOffset = fSandboxCylinderBottom + 128.0f;
+            var volOffset = fSandboxCylinderBottom + sandboxSink;
             optVol.Height = halfHeight * 2.0f;
             
             // Rotate all the points around from 0-90 degrees looking for
@@ -603,16 +603,18 @@ namespace AnnexTheCommonwealth
                 var cSize = new Vector2f(
                     cSE.X - cNW.X,
                     cNW.Y - cSE.Y );
-                // TODO:  Need to fiddle with this a little, position calculation is slightly off
-                //var dOff = new Vector2f(
-                //    cNW.X + cSize.X * 0.5f,
-                //    cSE.Y + cSize.Y * 0.5f );
-                //var cOff = dOff.RotateAround( Vector2f.Zero, 270.0f + a );
-                //var cCentre = vCentre + cOff;
                 if( cSize.Area < optVol.Size2D.Area )
                 {
-                    optVol.Size2D = cSize;
+                    // TODO:  Need to fiddle with this a little, position calculation is slightly off
+                    //var dOff = new Vector2f(
+                    //    cNW.X + cSize.X * 0.5f,
+                    //    cSE.Y + cSize.Y * 0.5f );
+                    //var cOff = dOff.RotateAround( Vector2f.Zero, 270.0f + a );
+                    //var cCentre = vCentre + cOff;
                     //optVol.Position2D = cCentre;
+                    var delta = vSize - cSize;
+                    optVol.Position2D = vCentre - ( delta * 0.5f );
+                    optVol.Size2D = cSize;
                     optVol.ZRotation = a;
                 }
             }
@@ -646,34 +648,34 @@ namespace AnnexTheCommonwealth
             return optVol;
         }
         
-        public bool OptimizeBuildVolumes( ref List<GUIBuilder.FormImport.ImportBase> list, float groundSink = -1024.0f, float topAbovePeak = 5120.0f )
+        public bool NormalizeBuildVolumes( ref List<GUIBuilder.FormImport.ImportBase> list, float groundSink = -1024.0f, float topAbovePeak = 5120.0f )
         {
             var edgeFlags = EdgeFlags;
             if( edgeFlags.NullOrEmpty() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "OptimizeBuildVolumes()", "No edge flags for sub-division" );
+                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "No edge flags for sub-division" );
                 return false;
             }
             var volumes   = BuildVolumes;
             if( volumes.NullOrEmpty() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "OptimizeBuildVolumes()", "No build volumes for sub-division" );
+                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "No build volumes for sub-division" );
                 return false;
             }
             if( topAbovePeak <= 0.0f )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "OptimizeBuildVolumes()", "topAbovePeak must be greater than 0" );
+                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "topAbovePeak must be greater than 0" );
                 return false;
             }
             if( groundSink >= 0.0f )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "OptimizeBuildVolumes()", "groundSink must be less than 0" );
+                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "groundSink must be less than 0" );
                 return false;
             }
             var wsdp = Reference.Worldspace.PoolEntry;
             if( wsdp == null )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "OptimizeBuildVolumes()", "Worldspace data pool could not be resolved" );
+                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "Worldspace data pool could not be resolved" );
                 return false;
             }
             
@@ -688,7 +690,7 @@ namespace AnnexTheCommonwealth
             float minZ, maxZ, avgZ, avgWaterZ;
             if( !wsdp.ComputeZHeightsFromVolumes( volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "OptimizeBuildVolumes()", "Could not compute Z coords from worldspace heightmap" );
+                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "Could not compute Z coords from worldspace heightmap" );
                 return false;
             }
             
@@ -698,7 +700,7 @@ namespace AnnexTheCommonwealth
             var posZ = bottomZ + ( volH * 0.5f );
             
             DebugLog.WriteLine( string.Format(
-                "AnnexTheCommonwealth.SubDivision :: OptimizeBuildVolumes()\n\tComputeZHeightsFromVolumes()\n\t\tminZ = {0}\n\t\tmaxZ = {1}\n\t\tavgZ = {2}\n\t\tAvgWaterZ = {3}\n\t\tbottomZ = {4}\n\t\ttopZ = {5}\n\t\tvolH = {6}\n\t\tposZ = {7}",
+                "AnnexTheCommonwealth.SubDivision :: NormalizeBuildVolumes()\n{{ComputeZHeightsFromVolumes()\n\t\tminZ = {0}\n\t\tmaxZ = {1}\n\t\tavgZ = {2}\n\t\tAvgWaterZ = {3}\n\t\tbottomZ = {4}\n\t\ttopZ = {5}\n\t\tvolH = {6}\n\t\tposZ = {7}\n}}",
                 minZ, maxZ, avgZ, avgWaterZ,
                 bottomZ, topZ, volH, posZ ) );
             

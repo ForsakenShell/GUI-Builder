@@ -98,7 +98,7 @@ namespace Engine.Plugin
                 return "[null]";
             if( Disposed )
                 return "[disposed]";
-            var strH = ( _Handle == null ? "[null]" : _Handle.ToString() );
+            var strH = _Handle.ToStringNullSafe();
             var str = string.Format(
                 "[{0} :: typeof( File ) = {1}{2}]",
                 _Filename,

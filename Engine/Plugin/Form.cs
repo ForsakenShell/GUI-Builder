@@ -148,7 +148,7 @@ namespace Engine.Plugin
                     rFID.ToString( "X8" ),
                     isMaster,
                     rPath,
-                    ancestor == null ? "[null]" : ancestor.ToString()
+                    ancestor.ToStringNullSafe()
                    );
                 DebugLog.WriteLine( errorString );
                 throw new ArgumentNullException( errorString );
@@ -659,7 +659,7 @@ namespace Engine.Plugin
                 for( int i = 0; i < c; i++ )
                 {
                     var hOverride = _Handles[ i ] as FormHandle;
-                    var hLO = hOverride.LoadOrder;
+                    var hLO = hOverride.FileHandle.LoadOrder;
                     _Handles.Add( hOverride );
                     if( hLO == wLO )
                         _WorkingFileHandleIndex = i;

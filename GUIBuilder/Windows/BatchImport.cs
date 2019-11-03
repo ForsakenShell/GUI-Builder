@@ -74,6 +74,7 @@ namespace GUIBuilder.Windows
             */
             
             m.SetCurrentStatusMessage( "BatchImportWindow.Analyzing".Translate() );
+            DebugLog.WriteLine( "Loading imports into SyncListView" );
             lvImportForms.SyncObjects = ImportForms;
             //SortImportForms();
             //RepopulateImportListView( false );
@@ -158,6 +159,7 @@ namespace GUIBuilder.Windows
         
         void SortImportForms( List<FormImport.ImportBase> list, bool ascending )
         {
+            DebugLog.WriteLine( "SortImportForms()" );
             if( ascending )
                 list.Sort( PrioritySortImportAsc );
             else
@@ -181,6 +183,7 @@ namespace GUIBuilder.Windows
         
         void ImportSelectedListViewItems()
         {
+            DebugLog.OpenIndentLevel( "ImportSelectedListViewItems()" );
             pnMain.Enabled = false;
             
             var m = GodObject.Windows.GetMainWindow();
@@ -225,7 +228,7 @@ namespace GUIBuilder.Windows
                 AddImportMessage( msg );
                 
                 if( !GodObject.Plugin.BuildReferencesFor( mod, null ) )
-                    throw new Exception( string.Format( "Unable to BuildReferencesFor( \"{0}\" )", mod.Filename ) );
+                    AddImportMessage( string.Format( "BatchImportWindow.UnableToUpdateReferencesFor".Translate(), mod.Filename ) );
             }
             
             #endregion
@@ -235,6 +238,7 @@ namespace GUIBuilder.Windows
                 tStart.Ticks );
             m.PopStatusMessage();
             pnMain.Enabled = true;
+            DebugLog.CloseIndentLevel();
         }
         
         #endregion

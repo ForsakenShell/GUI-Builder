@@ -60,7 +60,7 @@ namespace GUIBuilder.Windows
                 DebugLog.WriteLine( "Plugin Loader finished" );
             }
             
-            WorkerThreadPool.StopAllWorkers( false );
+            WorkerThreadPool.StopAllWorkers( true, true );
             
             DisposeOfSyncTimer();
             GodObject.Windows.CloseAllChildWindows();

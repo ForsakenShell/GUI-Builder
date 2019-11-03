@@ -158,7 +158,7 @@ namespace GUIBuilder
             if( checkBorderEnablers )
                 GenerateMissingBorderEnablers( ref list, subdivisions, m );
             if( checkSandboxVolumes )
-                GenerateSandboxes( ref list, subdivisions, m, true );
+                GenerateSandboxes( ref list, subdivisions, m, true, true );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, true, ref allImportsMatchTarget );
@@ -189,8 +189,11 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
         
-        public static void GenerateSandboxes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool missingOnly )
+        public static void GenerateSandboxes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool createMissing, bool ignoreExisting )
         {
+            if( ( !createMissing )&&( ignoreExisting ) )
+                return; // So, uh...do nothing, der?
+            
             DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateSandboxes()" );
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatch.CalculatingSandboxes".Translate() );
@@ -209,8 +212,10 @@ namespace GUIBuilder
                     "Sandbox for:{0}{1}",
                     ImportBase.ExtraInfoFor( "\n\tSub-Division = {0}", subdivision, unresolveable: "unresolved" ),
                     ImportBase.ExtraInfoFor( "\n\tSandbox = {0}", sandbox, unresolveable: "unresolved" ) ) ); */
-                if( ( sandbox != null )&&( missingOnly ) )
-                {
+                if(
+                    ( ( sandbox != null )&&( ignoreExisting ) )||
+                    ( ( sandbox == null )&&( !createMissing ) )
+                ) {
                     m.PopStatusMessage();
                     continue;
                 }
@@ -228,6 +233,16 @@ namespace GUIBuilder
                     DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", subdivision.ToString() ) );
                 else
                 {
+                    DebugLog.WriteLine( string.Format(
+                        "Sandbox :: {0} :: Size = {1} -> {4} :: Position = {2} -> {5} :: Z Rotation = {3} -> {6}",
+                        subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        sandbox == null ? "[null]" : sandbox.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                        sandbox == null ? "[null]" : sandbox.Reference.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                        sandbox == null ? "[null]" : sandbox.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
+                        osv.Position.ToString(),
+                        osv.Size.ToString(),
+                        osv.Rotation.Z.ToString()
+                       ) );
                     var w = subdivision.Reference.Worldspace;
                     var c = w == null
                         ? subdivision.Reference.Cell
@@ -262,9 +277,9 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
         
-        public static void GenerateBuildVolumes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool missingOnly )
+        public static void NormalizeBuildVolumes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool missingOnly )
         {
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateBuildVolumes()" );
+            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes()" );
             
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingBuildVolumes".Translate() );
@@ -275,6 +290,8 @@ namespace GUIBuilder
             foreach( var subdivision in subdivisions )
             {
                 m.PushStatusMessage();
+                m.StartSyncTimer();
+                var tStart = m.SyncTimerElapsed();
                 msg = string.Format( "SubDivisionBatch.CheckingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 
@@ -286,25 +303,25 @@ namespace GUIBuilder
                 //if( ( volumes.NullOrEmpty() )&&( missingOnly ) )
                 if( volumes.NullOrEmpty() )
                 {
+                    msg = "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes() :: {0} :: " + subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    m.StopSyncTimer( msg, tStart.Ticks );
                     m.PopStatusMessage();
                     continue;
                 }
                 
-                msg = string.Format( "SubDivisionBatch.OptimizingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "SubDivisionBatch.NormalizingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
-                m.StartSyncTimer();
-                var tStart = m.SyncTimerElapsed();
                 
-                subdivision.OptimizeBuildVolumes(
+                subdivision.NormalizeBuildVolumes(
                     ref list,
                     -1024.0f, 5120.0f );
                 
-                msg = "GUIBuilder.SubDivisionBatch :: GenerateBuildVolumes() :: {0} :: " + subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                msg = "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes() :: {0} :: " + subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 m.StopSyncTimer( msg, tStart.Ticks );
                 m.PopStatusMessage();
             }
             
-            msg = "GUIBuilder.SubDivisionBatch :: GenerateBuildVolumes() :: Completed in {0}";
+            msg = "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes() :: Completed in {0}";
             m.StopSyncTimer( msg, fStart.Ticks );
             m.PopStatusMessage();
             DebugLog.CloseIndentLevel();

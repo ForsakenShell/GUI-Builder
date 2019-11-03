@@ -86,6 +86,14 @@ namespace GUIBuilder.FormImport
             if( stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( NIFFilePath ) )
                 tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
             
+            var lods = stat.DistantLOD.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var updateLODs = ( lods.NullOrEmpty() )||( lods.Length < 4 );
+            if( ( !lods.NullOrEmpty() )&&( lods.Length == 4 ) )
+                for( int i = 0; i < 4; i++ )
+                    updateLODs |= !lods[ i ].InsensitiveInvariantMatch( NIFFilePath );
+            if( updateLODs )
+                tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
+            
             return GenIXHandle.ConcatDisplayInfo( tmp );
         }
         
@@ -97,6 +105,7 @@ namespace GUIBuilder.FormImport
             tmp.Add( string.Format( "Min Bounds {0}", MinBounds.ToString() ) );
             tmp.Add( string.Format( "Max Bounds {0}", MaxBounds.ToString() ) );
             tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
+            tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
             
             return GenIXHandle.ConcatDisplayInfo( tmp );
         }
@@ -115,8 +124,12 @@ namespace GUIBuilder.FormImport
         {
             if( !Resolve( false ) ) return false;
             var stat = TargetStatic;
-            if( stat == null )
-                return false;
+            if( stat == null ) return false;
+            
+            var lods = stat.DistantLOD.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            if( ( lods.NullOrEmpty() )||( lods.Length < 4 ) ) return false;
+            for( int i = 0; i < 4; i++ )
+                if( !lods[ i ].InsensitiveInvariantMatch( NIFFilePath ) ) return false;
             
             return
                 ( TargetRecordFlagsMatch )&&

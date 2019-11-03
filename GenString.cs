@@ -138,4 +138,13 @@ public static class GenString
     
     #endregion
     
+    #region Null-safe object.ToString()
+    
+    public static string ToStringNullSafe<T>( this T o ) where T : class
+    {
+        return o == null ? "[null]" : o.ToString();
+    }
+    
+    #endregion
+    
 }

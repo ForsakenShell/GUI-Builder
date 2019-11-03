@@ -98,6 +98,9 @@ public static class WorkerThreadPool
             _OnFinish = null;
             _OnFinishParams = null;
             
+            _thread = null;
+            
+            WorkerThreadPool.INTERNAL_RemoveWorker( this );
             Disposed = true;
         }
         
@@ -117,7 +120,7 @@ public static class WorkerThreadPool
             if( ( !IsReady )||( IsRunning )||( _StopSignal ) )
                 return false;
             _thread.Start();
-            return _thread.IsAlive;
+            return IsRunning;
         }
         
         public void Stop( bool sync )
@@ -185,8 +188,6 @@ public static class WorkerThreadPool
             
             if( DebugLog.Initialized )
                 DebugLog.Close();
-            WorkerThreadPool.INTERNAL_RemoveWorker( this );
-            _thread = null;
         }
         
     }
@@ -221,23 +222,20 @@ public static class WorkerThreadPool
         return w;
     }
     
-    public static void StopAllWorkers( bool sync )
+    public static void StopAllWorkers( bool sync, bool disposeOfWorkers )
     {
         DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers()" );
         
-        // Stop all the workers but don't sync with them here
-        INTERNAL_StopActiveWorkers( false );
+        if( sync )
+            DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers() :: Syncing..." );
+        
+        INTERNAL_StopActiveWorkers( sync, disposeOfWorkers );
         
         if( sync )
-        {
-            DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers() :: Syncing..." );
-            
-            while( INTERNAL_AnyWorkerActive() )
-                Thread.Sleep( 0 );
-            
             DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers() :: ...Stopped" );
-        }
     }
+    
+    public static bool AnyActiveWorkers { get { return INTERNAL_AnyWorkerActive(); } }
     
     #endregion
     
@@ -254,19 +252,27 @@ public static class WorkerThreadPool
     {
         if( _workers == null )
             return false;
-        foreach( var w in _workers )
+        for( int i = _workers.Count - 1; i >= 0; i-- )
+        {
+            var w = _workers[ i ];
             if( w.IsRunning )
                 return true;
+        }
         return false;
     }
     
-    static void INTERNAL_StopActiveWorkers( bool sync )
+    static void INTERNAL_StopActiveWorkers( bool sync, bool disposeOfWorkers )
     {
         if( _workers == null )
             return;
-        foreach( var w in _workers )
+        for( int i = _workers.Count - 1; i >= 0; i-- )
+        {
+            var w = _workers[ i ];
             if( w.IsRunning )
                 w.Stop( sync );
+            if( disposeOfWorkers )
+                w.Dispose();
+        }
     }
     
     #endregion

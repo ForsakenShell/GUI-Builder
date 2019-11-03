@@ -134,7 +134,7 @@ namespace GUIBuilder.Windows
         
         void tvPluginsBeforeCheckOrSelect( object sender, TreeViewCancelEventArgs e )
         {
-            if( OverrideCheckedCheck ) return;
+            if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             if( e.Node.ForeColor == NodeDisabledColor ) e.Cancel = true;
         }
         
@@ -152,7 +152,7 @@ namespace GUIBuilder.Windows
         
         void tvPluginsAfterCheck( object sender, TreeViewEventArgs e )
         {
-            if( OverrideCheckedCheck ) return;
+            if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             OverrideCheckedCheck = true;
             
             var key = e.Node.Text;
@@ -193,8 +193,38 @@ namespace GUIBuilder.Windows
             }
             
             var workingSelected = 0;
+            if( lastSelectedWorking == null )
+            {
+                // No working file was selected, pick the last one to load but keep searching backwards until
+                // one selected requiring ATC is found and pick it instead
+                for( int i = tvPlugins.Nodes.Count - 1; i >= 0; i-- )
+                {
+                    var node = tvPlugins.Nodes[ i ];
+                    if( node.Checked )
+                    {
+                        // Pick it if nothing is selected yet
+                        if( lastSelectedWorking == null )
+                            lastSelectedWorking = node.Text;
+                        
+                        // Prefer an ATC dependant file
+                        var p = LoadOrder.Find( f => f.Filename.InsensitiveInvariantMatch( CutOffString( node.Text, NodeFilenameTail ) ) );
+                        if( !p.Masters.NullOrEmpty() )
+                        {
+                            foreach( var m in p.Masters )
+                            {
+                                if( m.InsensitiveInvariantMatch( GodObject.Master.AnnexTheCommonwealth.Filename ) )
+                                {
+                                    lastSelectedWorking = node.Text;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if( lastSelectedWorking != null )
             {
+                // Update the working file dropdown with the previously (or automagically) selected plugin
                 for( int i = 0; i < cbWorkingFile.Items.Count; i++ )
                 {
                     if( lastSelectedWorking.InsensitiveInvariantMatch( (string)cbWorkingFile.Items[ i ] ) )
@@ -212,7 +242,7 @@ namespace GUIBuilder.Windows
         
         void CbWorkingFileSelectedIndexChanged( object sender, EventArgs e )
         {
-            if( OverrideCheckedCheck ) return;
+            if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             btnLoad.Enabled = cbWorkingFile.SelectedIndex > 0;
         }
         

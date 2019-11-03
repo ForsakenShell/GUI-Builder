@@ -788,6 +788,7 @@ namespace GUIBuilder.Windows
         
         void ImportNIFs()
         {
+            DebugLog.Open();
             if( !_importData.NullOrEmpty() )
             {
                 bool tmp = false;
@@ -799,6 +800,7 @@ namespace GUIBuilder.Windows
                 if( !GUIBuilder.BorderBatch.ImportNIFs( _reImportFile, true ) )
                     GodObject.Windows.SetEnableState( true );
             }
+            DebugLog.Close();
         }
         
         #endregion

@@ -8,6 +8,8 @@
  * Time: 1:51 PM
  * 
  */
+//#define FAKE_LISTVIEW_FOR_FORM_EDITOR
+ 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -39,9 +41,12 @@ namespace GUIBuilder.Windows
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
+            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
+            #else
             lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
             UpdateSubDivisionList();
+            #endif
             
             onLoadComplete = true;
             SetEnableState( true );
@@ -70,8 +75,11 @@ namespace GUIBuilder.Windows
         
         void UpdateSubDivisionList()
         {
+            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
+            #else
             var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList();
             lvSubDivisions.SyncObjects = subdivisions;
+            #endif
         }
         
         void OnSubDivisionListChanged( object sender, EventArgs e )
@@ -100,7 +108,12 @@ namespace GUIBuilder.Windows
         
         void THREAD_CheckMissingElements()
         {
+            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
+            var subdivisions = (List<AnnexTheCommonwealth.SubDivision>)null;
+            #else
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
+            #endif
+            
             if( subdivisions.NullOrEmpty() )
             {
                 GodObject.Windows.SetEnableState( true );
@@ -123,15 +136,20 @@ namespace GUIBuilder.Windows
             GodObject.Windows.SetEnableState( true );
         }
         
-        void btnOptimizeClick( object sender, EventArgs e )
+        void btnOptimizeSandboxVolumesClick( object sender, EventArgs e )
         {
             GodObject.Windows.SetEnableState( false );
-            WorkerThreadPool.CreateWorker( THREAD_OptimizeVolumes, null ).Start();
+            WorkerThreadPool.CreateWorker( THREAD_OptimizeSandboxVolumes, null ).Start();
         }
         
-        void THREAD_OptimizeVolumes()
+        void THREAD_OptimizeSandboxVolumes()
         {
+            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
+            var subdivisions = (List<AnnexTheCommonwealth.SubDivision>)null;
+            #else
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
+            #endif
+            
             if( subdivisions.NullOrEmpty() )
             {
                 GodObject.Windows.SetEnableState( true );
@@ -145,16 +163,49 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            if( cbElementSandboxVolumes.Checked )
-                GUIBuilder.SubDivisionBatch.GenerateSandboxes( ref list, subdivisions, m, false );
-            
-            if( cbElementBuildVolumes.Checked )
-                GUIBuilder.SubDivisionBatch.GenerateBuildVolumes( ref list, subdivisions, m, false );
+            GUIBuilder.SubDivisionBatch.GenerateSandboxes( ref list, subdivisions, m, false, false );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
             
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatchWindow :: OptimizeVolumes() :: Completed in {0}", tStart.Ticks );
+            m.StopSyncTimer( "GUIBuilder.SubDivisionBatchWindow :: OptimizeSandboxVolumes() :: Completed in {0}", tStart.Ticks );
+            m.PopStatusMessage();
+            GodObject.Windows.SetEnableState( true );
+        }
+        
+        void btnNormalizeBuildVolumesClick(object sender, EventArgs e)
+        {
+            GodObject.Windows.SetEnableState( false );
+            WorkerThreadPool.CreateWorker( THREAD_NormalizeBuildVolumes, null ).Start();
+        }
+        
+        void THREAD_NormalizeBuildVolumes()
+        {
+            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
+            var subdivisions = (List<AnnexTheCommonwealth.SubDivision>)null;
+            #else
+            var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
+            #endif
+            
+            if( subdivisions.NullOrEmpty() )
+            {
+                GodObject.Windows.SetEnableState( true );
+                return;
+            }
+            
+            var m = GodObject.Windows.GetMainWindow();
+            m.PushStatusMessage();
+            m.StartSyncTimer();
+            var tStart = m.SyncTimerElapsed();
+            
+            List<GUIBuilder.FormImport.ImportBase> list = null;
+            
+            GUIBuilder.SubDivisionBatch.NormalizeBuildVolumes( ref list, subdivisions, m, false );
+            
+            bool allImportsMatchTarget = false;
+            FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
+            
+            m.StopSyncTimer( "GUIBuilder.SubDivisionBatchWindow :: NormalizeBuildVolumes() :: Completed in {0}", tStart.Ticks );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
         }

@@ -153,11 +153,17 @@ public static partial class NIFBuilder
                     var keys = string.IsNullOrEmpty( forcedNIFFile )
                         ? Mesh.MatchKeys( location, neighbour, group.BorderIndex, group.NIFIndex )
                         : Mesh.MatchKeys( group.Mesh.nifFile );
+                    
                     // Create an import for the Static Object
                     var orgStat = group.BestStaticFormFromOriginalsFor( originalForms, keys, true );
                     var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_None : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
                     var statEditorID = group.Mesh.nifFile;
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, group.MinBounds, group.MaxBounds ) );
+                    var minBounds = group.MinBounds; // Nodes are terrain following and their bounds will be
+                    var maxBounds = group.MaxBounds; // the elevation differences from the center (placement)
+                    minBounds.Z -= (int)groundSink;  // point, so add the appropriate offsets for the mesh
+                    maxBounds.Z += (int)( groundOffset + gradientHeight );
+                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, minBounds, maxBounds ) );
+                    
                     // Create an import for the Object Reference
                     var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
                     var cell = worldspace.Cells.GetByGrid( group.Cell );

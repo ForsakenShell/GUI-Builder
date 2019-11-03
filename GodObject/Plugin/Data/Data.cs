@@ -513,7 +513,7 @@ namespace GodObject
                         m.SetItemOfItems( index, max );
                         var iform = iforms[ index ];
                         var refr = iform as Engine.Plugin.Forms.ObjectReference;
-                        //DebugLog.WriteLine( string.Format( "[ {0} ] :: Load() :: {1}\n{{", index, ( refr == null ? "[null]" : refr.ToString() ) ) );
+                        //DebugLog.WriteLine( string.Format( "[ {0} ] :: Load() :: {1}\n{{", index, refr.ToStringNullSafe() ) );
                         if( refr != null )
                         {
                             var rFID = refr.GetFormID( Engine.Plugin.TargetHandle.Master );
@@ -692,13 +692,13 @@ namespace GodObject
                 
                 public List<TScript> FindAllInWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
                 {
-                    //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
+                    //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace.ToStringNullSafe() ) );
                     return worldspace == null
                         ? null
                         : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
                 
-                bool doOnce = false;
+                //bool doOnceInFindAllInWorldspace = false;
                 public List<TScript> FindAllInWorldspace( uint formid )
                 {
                     //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? 0x{1}", this.GetType().ToString(), formid.ToString( "X8" ) ) );
@@ -710,18 +710,18 @@ namespace GodObject
                     foreach( var kv in _ScriptForms )
                     {
                         /*
-                        if( !doOnce )
+                        if( !doOnceInFindAllInWorldspace )
                         {
                             var refr = kv.Value.Reference;
                             var cell = refr == null ? null : refr.Cell;
                             var wrld = cell == null ? null : cell.Worldspace;
-                            DebugLog.WriteLine( new [] { kv.Value.ToString(), refr == null ? "null" : refr.ToString(), cell == null ? "null" : cell.ToString(), wrld == null ? "null" : wrld.ToString() } );
+                            DebugLog.WriteLine( new [] { kv.Value.ToString(), refr.ToStringNullSafe(), cell.ToStringNullSafe(), wrld.ToStringNullSafe() } );
                         }
                         */
                         if( ( kv.Value.Reference.Worldspace != null )&&( kv.Value.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) == formid ) )
                             list.Add( kv.Value );
                     }
-                    doOnce = true;
+                    //doOnceInFindAllInWorldspace = true;
                     
                     return list.Count == 0
                         ? null

@@ -273,7 +273,7 @@ namespace Engine.Plugin
                 for( int i = 0; i < c; i++ )
                 {
                     var hOverride = _Handles[ i ];
-                    var hLO = hOverride.LoadOrder;
+                    var hLO = hOverride.FileHandle.LoadOrder;
                     if( hLO == wLO )
                         _WorkingFileHandleIndex = i;
                     if( hLO < wLO )

@@ -127,7 +127,7 @@ namespace GUIBuilder.FormImport
                 throw new NullReferenceException( "classType must be or derrived from \"Engine.Plugin.PapyrusScript\"" );
             var tType = targetScript == null ? null : targetScript.GetType();
             if( ( targetScript != null )&&( classType != tType ) )
-                throw new NullReferenceException( string.Format( "classType does not match targetScript!  Must be \"{0}\"", tType.ToString() ) );
+                throw new NullReferenceException( string.Format( "classType does not match targetScript!  Must be \"{0}\", targetScript is \"{1}\"", classType.ToString(), tType.ToString() ) );
             bool resolved = false;
             try
             {
@@ -244,7 +244,7 @@ namespace GUIBuilder.FormImport
             _ErrorMessage = null;
             _ErrorState = false;
         }
-        public void                     AddErrorMessage( FormImport.ErrorTypes type, string message )
+        public void                     AddErrorMessage( FormImport.ErrorTypes type, string message, Exception e = null )
         {
             var errorLine = string.Format( "{0} : {1} : {2}", Signature, type.ToString(), string.IsNullOrEmpty( message ) ? "Undefined" : message );
             if( _ErrorMessage == null )
@@ -253,8 +253,9 @@ namespace GUIBuilder.FormImport
                 _ErrorMessage += errorLine;
             if( _BatchWindow != null )
                 _BatchWindow.AddImportMessage( errorLine );
-            else
-                DebugLog.WriteLine( errorLine );
+            DebugLog.WriteLine( errorLine );
+            if( e != null )
+                DebugLog.WriteLine( new [] { e.ToString(), e.StackTrace } );
             _ErrorState = true;
         }
         
@@ -730,11 +731,14 @@ namespace GUIBuilder.FormImport
         
         public bool                     Apply( GUIBuilder.Windows.BatchImport importWindow )
         {
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "Apply()", this.GetType().ToString() } );
+            var result = false;
+            
             _BatchWindow = importWindow;
             if( _ErrorState )
             {
                 AddErrorMessage( ErrorTypes.Import, "Import in error state, cannot Apply()" );
-                return false;
+                goto localAbort;
             }
             if(
                 ( _FailOnApplyIfUnresolved )&
@@ -742,7 +746,7 @@ namespace GUIBuilder.FormImport
             )
             {
                 AddErrorMessage( ErrorTypes.Import, "Resolve() errors, cannot Apply()" );
-                return false;
+                goto localAbort;
             }
             
             if( TargetForm == null )
@@ -750,7 +754,7 @@ namespace GUIBuilder.FormImport
                 if( !CreateNewFormInWorkingFile() )
                 {
                     AddErrorMessage( ErrorTypes.Import, "Unable to create new form in working file" );
-                    return false;
+                    goto localAbort;
                 }
             }
             else if( !CopyToWorkingFile( TargetForm ) )
@@ -763,12 +767,18 @@ namespace GUIBuilder.FormImport
                         GodObject.Plugin.Data.Files.Working.Filename
                     )
                 );
-                return false;
+                goto localAbort;
             }
             
             SupressObjectDataChangedEvents();
             
-            var result = ApplyImport();
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ApplyImport()", this.GetType().ToString() } );
+            try{
+                result = ApplyImport();
+            } catch ( Exception e ){
+                AddErrorMessage( ErrorTypes.Import, "An unexpected exception has occured applying import!", e );
+            }
+            DebugLog.CloseIndentLevel( "result", result.ToString() );
             
             if( result )
             {
@@ -780,6 +790,8 @@ namespace GUIBuilder.FormImport
             
             ResumeObjectDataChangedEvents( true );
             
+        localAbort:
+            DebugLog.CloseIndentLevel( "result", result.ToString() );
             return result;
         }
         
@@ -856,7 +868,7 @@ namespace GUIBuilder.FormImport
         {
             if( importForms.NullOrEmpty() ) return false;
             
-            //DebugLog.Write( "\nGUIBuilder.ImportBase.ShowImportDialog() :: Start" );
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ShowImportDialog()" } );
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
@@ -875,7 +887,7 @@ namespace GUIBuilder.FormImport
             #endregion
             
             m.PopStatusMessage();
-            //DebugLog.Write( "GUIBuilder.ImportBase.ShowImportDialog() :: Complete" );
+            DebugLog.CloseIndentLevel();
             return true;
         }
         

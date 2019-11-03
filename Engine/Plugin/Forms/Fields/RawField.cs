@@ -86,7 +86,7 @@ namespace Engine.Plugin.Forms
                     
             }
             if( !h.IsValid() )
-                throw new ArgumentException( "target is not valid for field" );
+                throw new ArgumentException( string.Format( "Target did not yield a valid Handle for field :: Target = {0} :: Handle = {1}", target.ToString(), h.ToStringNullSafe() ) );
             return h;
         }
         

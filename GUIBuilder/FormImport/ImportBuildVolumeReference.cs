@@ -103,8 +103,8 @@ namespace GUIBuilder.FormImport
             DumpImport();
         }
         
-        public                          ImportBuildVolumeReference( AnnexTheCommonwealth.Volume originalScript, string newEditorID, Engine.Plugin.Forms.Activator baseActi, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, Vector3f rotation, Vector3f bounds, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, string layerEditorID )
-            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.Volume ), originalScript )
+        public                          ImportBuildVolumeReference( AnnexTheCommonwealth.BuildAreaVolume originalScript, string newEditorID, Engine.Plugin.Forms.Activator baseActi, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, Vector3f rotation, Vector3f bounds, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, string layerEditorID )
+            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.BuildAreaVolume ), originalScript )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
                 throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );

@@ -297,7 +297,7 @@ namespace GodObject
             
             public bool ComputeZHeightsFromVolumes( Vector2f[][] volumes, out float minZ, out float maxZ, out float averageZ, out float averageWaterZ, bool useWaterIfHigher = true, bool showScanlineProgress = false )
             {
-                DebugLog.OpenIndentLevel( new [] { "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()" } );
+                //DebugLog.OpenIndentLevel( new [] { "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()" } );
                 var m = GodObject.Windows.GetMainWindow();
                 if( showScanlineProgress )
                     m.PushItemOfItems();
@@ -380,7 +380,7 @@ namespace GodObject
                 var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
                 if( showScanlineProgress )
                     m.PopItemOfItems();
-                DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
+                //DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
                 return result;
             }
             

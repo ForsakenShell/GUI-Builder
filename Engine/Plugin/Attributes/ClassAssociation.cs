@@ -167,8 +167,8 @@ namespace Engine.Plugin.Attributes
                 : string.Format(
                     "{3}[Signature = \"{0}\" :: ClassType = {1} :: CollectionClassType = {2}]",
                     Signature,
-                    ( _ClassType == null ? "[null]" : _ClassType.ToString() ),
-                    ( CollectionClassType == null ? "[null]" : CollectionClassType.ToString() ),
+                    ( _ClassType.ToStringNullSafe() ),
+                    ( CollectionClassType.ToStringNullSafe() ),
                     ( PrettyName == null ? null : string.Format( "{0} = ", PrettyName ) )
                 );
         }
@@ -194,8 +194,8 @@ namespace Engine.Plugin.Attributes
                 "{0}\n\tSignature = \"{1}\"\n\tClass Type = \"{2}\"\n\tCollection Class Type = \"{3}\"\n\tAllow Root Collection = {4}\n\tHas Child Collections = {5}",
                 prefix,
                 association.Signature,
-                ( association.ClassType == null ? "null" : association.ClassType.ToString() ),
-                ( association.CollectionClassType == null ? "null" : association.CollectionClassType.ToString() ),
+                ( association.ClassType.ToStringNullSafe() ),
+                ( association.CollectionClassType.ToStringNullSafe() ),
                 association.AllowRootCollection,
                 association.HasChildCollections
             ) );
@@ -208,7 +208,7 @@ namespace Engine.Plugin.Attributes
                     DebugLog.WriteLine( string.Format(
                         "\t\tChild :: \"{0}\" - {1}",
                         associations.Signature,
-                        ( associations.ClassType == null ? "null" : associations.ClassType.ToString() )
+                        ( associations.ClassType.ToStringNullSafe() )
                     ) );
                 }
             }

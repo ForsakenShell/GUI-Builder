@@ -406,7 +406,7 @@ namespace Engine.Plugin
         
         IXHandle                        TryLoad( FormHandle record )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "TryLoad()", ( record == null ? "[null]" : record.ToString() ) } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "TryLoad()", record.ToStringNullSafe() } );
             
             IXHandle result = null;
             
@@ -502,7 +502,7 @@ namespace Engine.Plugin
         
         IXHandle                        TryLoad( string editorid, ElementHandle source )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "TryLoad()", editorid, ( source == null ? "[null]" : source.ToString() ) } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "TryLoad()", editorid, source.ToStringNullSafe() } );
             
             IXHandle result = null;
             
@@ -541,7 +541,7 @@ namespace Engine.Plugin
         
         public IXHandle                 FindEx( ClassAssociation targetAssociation, FormHandle handle = null, uint formid = 0, string editorid = null, bool tryLoad = true )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "FindEx()", ( targetAssociation == null ? "[null]" : targetAssociation.ToString() ), ( handle == null ? "[null]" : handle.ToString() ), "0x" + formid.ToString( "X8" ), editorid, tryLoad.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "FindEx()", targetAssociation.ToStringNullSafe(), handle.ToStringNullSafe(), "0x" + formid.ToString( "X8" ), editorid, tryLoad.ToString() } );
             
             IXHandle result = null;
             
@@ -642,7 +642,7 @@ namespace Engine.Plugin
         
         public IXHandle                 Find( XeLib.FormHandle handle, bool tryLoad = true )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Find()", ( handle == null ? "[null]" : handle.ToString() ), tryLoad.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Find()", handle.ToStringNullSafe(), tryLoad.ToString() } );
             IXHandle result = null;
             
             if( !handle.IsValid() )
@@ -866,7 +866,7 @@ namespace Engine.Plugin
                 if( records.NullOrEmpty() )
                 {
                     result = true;
-                    DebugLog.WriteWarning( this.GetType().ToString(), "LoadFromEx()", string.Format( "No records found with signature \"{0}\"\nsource = {1}\nhandle = {2}\n{3}", _Association.Signature, source.ToString(), handle.ToString(), System.Environment.StackTrace ) );
+                    //DebugLog.WriteWarning( this.GetType().ToString(), "LoadFromEx()", string.Format( "No records found with signature \"{0}\"\nsource = {1}\nhandle = {2}\n{3}", _Association.Signature, source.ToString(), handle.ToString(), System.Environment.StackTrace ) );
                     goto localReturnResult;
                 }
                 

@@ -111,8 +111,8 @@ namespace GodObject
                         {
                             DebugLog.WriteError( "GodObject.Plugin.Data.Root", "PrepCollection()", string.Format(
                                 "Unable to create Collection Type {0} for Class Type {1}",
-                                association.CollectionClassType == null ? "null" : association.CollectionClassType.ToString(),
-                                association.ClassType == null ? "null" : association.ClassType.ToString()
+                                association.CollectionClassType.ToStringNullSafe(),
+                                association.ClassType.ToStringNullSafe()
                             ) );
                             return null;
                         }
@@ -178,7 +178,7 @@ namespace GodObject
                 
                 public static IXHandle  FindEx( ClassAssociation classAssociation, FormHandle handle = null, uint formid = 0, string editorid = null, bool tryLoad = true )
                 {
-                    //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "FindEx()\n", "classAssociation = " + ( classAssociation == null ? "[null]" : classAssociation.ToString() ) + "\n", "handle = " + ( handle == null ? "[null]" : handle.ToString() ) + "\n", "formid = 0x" + formid.ToString( "X8" ) + "\n", "editorid = \"" + editorid + "\"\n", "tryLoad = " + tryLoad.ToString() } );
+                    //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "FindEx()\n", "classAssociation = " + classAssociation.ToStringNullSafe() + "\n", "handle = " + handle.ToStringNullSafe() + "\n", "formid = 0x" + formid.ToString( "X8" ) + "\n", "editorid = \"" + editorid + "\"\n", "tryLoad = " + tryLoad.ToString() } );
                     bool handleValid = handle.IsValid();
                     if( handleValid )
                     {
