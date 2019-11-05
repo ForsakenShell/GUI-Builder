@@ -77,7 +77,7 @@ namespace AnnexTheCommonwealth
                 var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
                 var reference = Reference;
                 
-                var sref = reference.LinkedRefs.GetLinkedRef( kfid );
+                var sref = reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
                 var result = sref != null
                     ? sref.GetScript<SubDivision>()
                     : null;
@@ -90,18 +90,18 @@ namespace AnnexTheCommonwealth
                 var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
                 _segments = null;
                 
-                var sIdx = Reference.LinkedRefs.FindKeywordIndex( kfid );
+                var sIdx = Reference.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
                 if( sIdx < 0 )
                 {
                     // Add new linked ref
-                    Reference.LinkedRefs.Add( value.GetFormID( Engine.Plugin.TargetHandle.Master ), kfid );
+                    Reference.LinkedRefs.Add( Engine.Plugin.TargetHandle.Working, value.GetFormID( Engine.Plugin.TargetHandle.Master ), kfid );
                 }
                 else
                 {
                     // Replace linked ref
-                    Reference.LinkedRefs.ReferenceID[ sIdx ] = value.GetFormID( Engine.Plugin.TargetHandle.Master );
+                    Reference.LinkedRefs.SetReferenceID( Engine.Plugin.TargetHandle.Working, sIdx, value.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
             }
         }
         
@@ -127,7 +127,7 @@ namespace AnnexTheCommonwealth
                 
                 subdivision.EdgeFlagKeyword = value;
                 _segments = null;
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
             }
         }
         
@@ -140,7 +140,7 @@ namespace AnnexTheCommonwealth
                 var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
                 var reference = Reference;
                 
-                var nref = reference.LinkedRefs.GetLinkedRef( kfid );
+                var nref = reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
                 var result = nref != null
                     ? nref.GetScript<SubDivision>()
                     : null;
@@ -153,18 +153,18 @@ namespace AnnexTheCommonwealth
                 var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
                 _segments = null;
                 
-                var nIdx = Reference.LinkedRefs.FindKeywordIndex( kfid );
+                var nIdx = Reference.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
                 if( nIdx < 0 )
                 {
                     // Add new linked ref
-                    Reference.LinkedRefs.Add( value.GetFormID( Engine.Plugin.TargetHandle.Master ), kfid );
+                    Reference.LinkedRefs.Add( Engine.Plugin.TargetHandle.Working, value.GetFormID( Engine.Plugin.TargetHandle.Master ), kfid );
                 }
                 else
                 {
                     // Replace linked ref
-                    Reference.LinkedRefs.ReferenceID[ nIdx ] = value.GetFormID( Engine.Plugin.TargetHandle.Master );
+                    Reference.LinkedRefs.SetReferenceID( Engine.Plugin.TargetHandle.Working, nIdx, value.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 }
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
             }
         }
         
@@ -311,7 +311,7 @@ namespace AnnexTheCommonwealth
         {
             _segments = null;
             if( sendchangedevent )
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
         }
         
         public void BuildSegmentsFromSubDivisionEdgeFlags( float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
@@ -382,7 +382,7 @@ namespace AnnexTheCommonwealth
                 // TODO: Nuke the old map UI data and write new values
             }
             
-            SendObjectDataChangedEvent();
+            SendObjectDataChangedEvent(this);
             
         localReturnResult:
             var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;

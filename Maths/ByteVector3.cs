@@ -230,7 +230,7 @@ namespace Maths
         
         #endregion
         
-        public new string ToString()
+        public override string ToString()
         {
             return string.Format( "{4}{0}{3}{1}{3}{2}{5}", X, Y, Z, delimiterSetElement, delimiterSetOpen, delimiterSetClose );
         }

@@ -35,6 +35,7 @@ namespace Engine.Plugin.Forms.Fields.Record
         {
             throw new System.NotImplementedException( "GUIBuilder does not currently support setting the FormID of existing forms!" );
             
+            /*
             var fh = HandleFromTarget( target ) as FormHandle;
             if( !fh.IsValid() )
                 throw new ArgumentException( "target is not valid for field" );
@@ -47,7 +48,8 @@ namespace Engine.Plugin.Forms.Fields.Record
                 if( Form.Collection != null )
                     Form.Collection.Add( Form );
                 
-                Form.SendObjectDataChangedEvent();
+                Form.SendObjectDataChangedEvent( null );
+            */
         }
         
         public override string          ToString( TargetHandle target, string format = null )

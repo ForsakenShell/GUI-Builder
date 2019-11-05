@@ -8,7 +8,7 @@
 using System;
 using sdColor = System.Drawing.Color;
 using XeLib;
-
+using Engine.Plugin.Extensions;
 
 namespace Engine.Plugin.Forms.Fields
 {

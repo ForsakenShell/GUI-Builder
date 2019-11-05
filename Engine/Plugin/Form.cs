@@ -751,14 +751,19 @@ namespace Engine.Plugin
         public void                     ResumeObjectDataChangedEvents( bool sendevent )
         {
             _SupressObjectDataChangedEvent = false;
-            if( sendevent ) SendObjectDataChangedEvent();
+            if( sendevent ) SendObjectDataChangedEvent( this );
         }
         
-        public void                     SendObjectDataChangedEvent()
+        public void                     SendObjectDataChangedEvent( object sender )
         {
             if( _SupressObjectDataChangedEvent ) return;
             EventHandler handler = ObjectDataChanged;
-            if( handler != null ) handler( this, null );
+            if( handler != null ) handler( sender, null );
+            foreach( var script in _Scripts )
+            {
+                if( sender != script )
+                    script.SendObjectDataChangedEvent( this );
+            }
         }
         
         public virtual bool             InitialCheckedOrSelectedState() { return false; }

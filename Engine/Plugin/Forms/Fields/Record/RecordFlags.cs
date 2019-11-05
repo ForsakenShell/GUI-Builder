@@ -268,7 +268,7 @@ namespace Engine.Plugin.Forms.Fields.Record
             var h = HandleFromTarget( target ) as XeLib.FormHandle;
             if( !CreateRootElement( true, false ) ) return;
             h.SetRecordFlag( flag, value );
-            Form.SendObjectDataChangedEvent();
+            Form.SendObjectDataChangedEvent( null );
         }
         
         #endregion

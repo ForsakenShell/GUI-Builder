@@ -32,36 +32,42 @@ namespace AnnexTheCommonwealth
             public int Anchoring;
         }
         
+        Engine.Plugin.TargetHandle _lastTarget;
         CornerData[] _corners;
         
-        public Vector2f Position2D
+        public Vector2f GetPosition2D( Engine.Plugin.TargetHandle target )
         {
-            get
-            {
-                var refPos = Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                return new Vector2f( refPos.X, refPos.Y );
-            }
+            var refPos = Reference.GetPosition( target );
+            return new Vector2f( refPos.X, refPos.Y );
         }
         
         #region Constructor
         
         public Volume( Engine.Plugin.Forms.ObjectReference reference ) : base( reference )
         {
-            CalculateCornerPositions();
+            ObjectDataChanged += OnSyncObjectDataChanged;
         }
         
         #endregion
         
-        public Vector3f Size
+        #region Custom Events
+        
+        // Clear any cached values to force the change to be properly reflected
+        void OnSyncObjectDataChanged( object sender, EventArgs e )
         {
-            get
-            {
-                var primitive = Reference.Primitive;
-                return primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-            }
+            _lastTarget = Engine.Plugin.TargetHandle.None;
+            _corners = null;
         }
         
-        public void CalculateCornerPositions( bool overrideAndClearAnchoring = false )
+        #endregion
+        
+        public Vector3f GetSize( Engine.Plugin.TargetHandle target )
+        {
+            var primitive = Reference.Primitive;
+            return primitive.GetBounds( target );
+        }
+        
+        public void CalculateCornerPositions( Engine.Plugin.TargetHandle target, bool overrideAndClearAnchoring = false )
         {
             // Restrict rotation to 0->360
             /*
@@ -71,12 +77,14 @@ namespace AnnexTheCommonwealth
             }
             rotation.Z %= 360f;
             */
-           
+            
+            _lastTarget = target;
+            
             // Half size and Vector2f for corner positions and rotation
-            var _size = Reference.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-            var _rotation = Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+            var _size = Reference.Primitive.GetBounds( target );
+            var _rotation = Reference.GetRotation( target );
             var hSize = _size * 0.5f;
-            var p2 = Position2D;
+            var p2 = GetPosition2D( target );
             var newCorners = new CornerData[ 4 ];
             
             // Define the rect corners counter-clockwise,
@@ -147,7 +155,7 @@ namespace AnnexTheCommonwealth
             var _size = _primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             
             // 2d centre position of volume
-            var p2 = Position2D;
+            var p2 = GetPosition2D( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             
             // Convert the new position into an unrotated position
             var urP = p.RotateAround( p2, _rotation.Z );
@@ -175,7 +183,7 @@ namespace AnnexTheCommonwealth
             Reference.SetPosition( Engine.Plugin.TargetHandle.Working, _position );
             
             // Recalculcate the positions of all the corners, overriding anchoring
-            CalculateCornerPositions( true );
+            CalculateCornerPositions( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, true );
             
             // Finally, anchor this corner as appropriate
             _corners[ corner ].Anchored = anchorCorner;
@@ -219,15 +227,14 @@ namespace AnnexTheCommonwealth
         /// Copy of the internal corner array position fields
         /// </summary>
         /// <returns>Array of Vector2f containing the worldspace transform positions of the corners of the volume.</returns>
-        public Vector2f[] Corners
+        public Vector2f[] GetCorners( Engine.Plugin.TargetHandle target )
         {
-            get
-            {   // "Fast" "no-calculations needed" clone
-                var clone = new Vector2f[ 4 ];
-                for( int index = 0; index < 4; index++ )
-                    clone[ index ] = new Vector2f( _corners[ index ].Position );
-                return clone;
-            }
+            if( target != _lastTarget )
+                CalculateCornerPositions( target, true );
+            var clone = new Vector2f[ 4 ];
+            for( int index = 0; index < 4; index++ )
+                clone[ index ] = new Vector2f( _corners[ index ].Position );
+            return clone;
         }
         
     }

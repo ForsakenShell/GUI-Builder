@@ -184,14 +184,14 @@ namespace SDL2ThinLayer
         
         void INTERNAL_SDLThread_InvokeQueue_Dispatcher()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_InvokeQueue_Dispatcher()" );
+            Console.WriteLine( "INTERNAL_SDLThread_InvokeQueue_Dispatcher()" );
             
             #if DEBUG
             if( !IsReady ) return;
             #endif
             
             
-            //Console.WriteLine( "INTERNAL_SDLThread_InvokeQueue_Dispatcher() :: Loop_Enter" );
+            Console.WriteLine( "INTERNAL_SDLThread_InvokeQueue_Dispatcher() :: Loop_Enter" );
             while( _invokeQueue.Count > 0 )
             {
                 var ueInfo = INTERNAL_SDLThread_InvokeQueue_FetchNext();
@@ -201,7 +201,7 @@ namespace SDL2ThinLayer
                     INTERNAL_SDLThread_InvokeQueue_HandleInvoke( ueInfo );
                 }
             }
-            //Console.WriteLine( "INTERNAL_SDLThread_InvokeQueue_Dispatcher() :: Loop_Exit" );
+            Console.WriteLine( "INTERNAL_SDLThread_InvokeQueue_Dispatcher() :: Loop_Exit" );
         }
         
         #endregion

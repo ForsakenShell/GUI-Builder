@@ -6,14 +6,11 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
-
+using Engine.Plugin.Extensions;
 using Maths;
-using Fallout4;
 using AnnexTheCommonwealth;
+
 
 namespace GUIBuilder.FormImport
 {
@@ -132,10 +129,10 @@ namespace GUIBuilder.FormImport
                 if( refrRef == null ) continue;
                 
                 var linked = refrRef.LinkedRefs;
-                var linkCount = linked.Count;
+                var linkCount = linked.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 if( linkCount < 1 ) continue;
                 for( int i = 0; i < linkCount; i++ )
-                    if( linked.KeywordFormID[ i ] == keywordFormID )
+                    if( linked.GetKeywordFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i ) == keywordFormID )
                         return refrRef;
             }
             
@@ -183,7 +180,7 @@ namespace GUIBuilder.FormImport
                 {
                     if( lr != null )
                         tmp.Add(
-                            GenIXHandle.ExtraInfoFor( lr, format: "Unlink sandbox from {0}" ) );
+                            lr.ExtraInfoFor(format: "Unlink sandbox from {0}"));
                     tmp.Add(
                         string.Format(
                             "Link {0} to sandbox using keyword {1}",
@@ -196,7 +193,7 @@ namespace GUIBuilder.FormImport
             if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -227,7 +224,7 @@ namespace GUIBuilder.FormImport
                         ftLinkKeyword.DisplayIDInfo()
                 ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )
@@ -376,8 +373,8 @@ namespace GUIBuilder.FormImport
                 {
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new ObjectReference instance of {0} in cell {1}",
-                        ftBaseActi.DisplayIDInfo( unresolveableSuffix: "unresolved" ),
-                        GenIXHandle.ExtraInfoFor( cell, unresolveable: "unresolved" ) ) );
+                        ftBaseActi.DisplayIDInfo(unresolveableSuffix: "unresolved"),
+                        cell.ExtraInfoFor(unresolveable: "unresolved")) );
                     return false;
                 }
                 refr.SetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftBaseActi.FormID );
@@ -400,9 +397,9 @@ namespace GUIBuilder.FormImport
             {
                 AddErrorMessage( ErrorTypes.Import, string.Format(
                     "An exception occured when trying to create a new ObjectReference instance of {0} in cell {1}\nInner Exception:\n{2}",
-                    ftBaseActi.DisplayIDInfo( unresolveableSuffix: "unresolved" ),
-                    GenIXHandle.ExtraInfoFor( cell, unresolveable: "unresolved" ),
-                    e.ToString() ) );
+                    ftBaseActi.DisplayIDInfo(unresolveableSuffix: "unresolved"),
+                    cell.ExtraInfoFor(unresolveable: "unresolved"),
+                    e.ToString()) );
             }
             return false;
         }
@@ -427,11 +424,11 @@ namespace GUIBuilder.FormImport
             {
                 if( orgParent != null )
                 {
-                    orgParent.LinkedRefs.Remove( refr.GetFormID( Engine.Plugin.TargetHandle.Master ) );
-                    orgParent.SendObjectDataChangedEvent();
+                    orgParent.LinkedRefs.Remove( Engine.Plugin.TargetHandle.Working, refr.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                    orgParent.SendObjectDataChangedEvent( this );
                 }
-                newParent.LinkedRefs.SetLinkedRef( refr.GetFormID( Engine.Plugin.TargetHandle.Master ), ftLinkKeyword.FormID );
-                newParent.SendObjectDataChangedEvent();
+                newParent.LinkedRefs.SetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, refr.GetFormID( Engine.Plugin.TargetHandle.Master ), ftLinkKeyword.FormID );
+                newParent.SendObjectDataChangedEvent( this );
             }
             
             if( ftLayer.IsResolved )

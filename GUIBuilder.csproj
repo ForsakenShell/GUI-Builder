@@ -63,14 +63,15 @@
     <Compile Include="AnnexTheCommonwealth\EdgeFlag.cs" />
     <Compile Include="AnnexTheCommonwealth\Settlement.cs" />
     <Compile Include="AnnexTheCommonwealth\SubDivision.cs" />
-    <Compile Include="CachedGetSetIXHandle.cs" />
     <Compile Include="CachedProperty.cs" />
-    <Compile Include="DebugLog.cs" />
+    <Compile Include="DebugLog\DebugLog.cs" />
     <Compile Include="DirectX\DDS_Header.cs" />
     <Compile Include="Engine\Plugin\Attributes\ClassAssociation.cs" />
     <Compile Include="Engine\Plugin\Attributes\FormAssociation.cs" />
     <Compile Include="Engine\Plugin\Attributes\ScriptAssociation.cs" />
     <Compile Include="Engine\Plugin\ConflictStatus.cs" />
+    <Compile Include="Engine\Plugin\Extensions\CachedGetSetIXHandle.cs" />
+    <Compile Include="Engine\Plugin\Extensions\GenIXHandle.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\CachedColorField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\CachedFloatField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\CachedIntField.cs" />
@@ -95,6 +96,12 @@
     <Compile Include="Engine\Plugin\Interface\ISyncedGUIList.cs" />
     <Compile Include="Engine\Plugin\Interface\ISyncedGUIObject.cs" />
     <Compile Include="Engine\Plugin\TargetHandle.cs" />
+    <Compile Include="Extensions\GenCollection.cs" />
+    <Compile Include="Extensions\GenFilePath.cs" />
+    <Compile Include="Extensions\GenReflection.cs" />
+    <Compile Include="Extensions\GenRenderTransform.cs" />
+    <Compile Include="Extensions\GenStream.cs" />
+    <Compile Include="Extensions\GenString.cs" />
     <Compile Include="GUIBuilder\Windows\PluginSelector.cs" />
     <Compile Include="GUIBuilder\Windows\PluginSelector.Designer.cs">
       <DependentUpon>PluginSelector.cs</DependentUpon>
@@ -103,12 +110,6 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Include="GodObject\Plugin\Data\Obsolete\BaseForm.cs" />
-    <Compile Include="GenCollection.cs" />
-    <Compile Include="GenFilePath.cs" />
-    <Compile Include="GenIXHandle.cs" />
-    <Compile Include="GenReflection.cs" />
-    <Compile Include="GenRenderTransform.cs" />
-    <Compile Include="GenStream.cs" />
     <Compile Include="GodObject\Plugin\Data\Root.cs" />
     <Compile Include="GodObject\Plugin\Data\Data.cs" />
     <Compile Include="GodObject\Plugin\Data\Files.cs" />
@@ -267,7 +268,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Include="GenString.cs" />
     <Compile Include="Translator.cs" />
     <Compile Include="WorkerThreadPool.cs" />
     <Compile Include="Maths\ByteVector3.cs" />
@@ -403,10 +403,13 @@
     <Folder Include="BorderBuilder\Lang" />
     <Folder Include="BorderBuilder\Lang\English %28UK%29" />
     <Folder Include="Engine\Plugin\Forms\Fields\Record" />
+    <Folder Include="Engine\Plugin\Extensions" />
     <Folder Include="GUIBuilder\Obsolete" />
     <Folder Include="GUIBuilder\Windows" />
     <Folder Include="GUIBuilder\Windows\Controls" />
     <Folder Include="GUIBuilder\Windows\RenderChild" />
+    <Folder Include="Extensions" />
+    <Folder Include="DebugLog" />
   </ItemGroup>
   <ItemGroup>
     <ContentWithTargetPath Include="XeLibSharp\XEditLib\Fallout4.Hardcoded.dat">

@@ -120,6 +120,9 @@ namespace GUIBuilder.Windows.RenderChild
         
         //VolumeEditor attachedEditor;
         
+        // Syncronizer
+        readonly object     _syncLock = new object();
+        
         SDLRenderer.void_RendererOnly WindowClosed;
         
         Vector2i            _textBoxPadding = new Vector2i( 2, 2 );
@@ -148,8 +151,11 @@ namespace GUIBuilder.Windows.RenderChild
         void CreateTransform( bool startSceneUpdate, SDLRenderer.InitParams initParams ) //Control target, Size size, SDLRenderer.void_RendererOnly windowClosed )
         {
             //DebugLog.Write( "GUIBuilder.RenderTransform.CreateTransform :: startSceneUpdate = " + startSceneUpdate + "\n" );
-            _sceneUpdate = 1; // Lock the transform while we create it
-            _sceneRender = 0;
+            lock( _syncLock )
+            {
+                _sceneUpdate = 1; // Lock the transform while we create it
+                _sceneRender = 0;
+            }
             sdlTarget = initParams.TargetControl;// target;
             //attachedEditor = null;
             WindowClosed = null;
@@ -157,7 +163,12 @@ namespace GUIBuilder.Windows.RenderChild
             rectTarget = initParams.WindowSize.ToSDLRect();
             RecreateSDLRenderer( true, initParams );
             if( !startSceneUpdate )
-                _sceneUpdate = 0; // Unlock the transform now that it's created
+            {
+                lock( _syncLock )
+                {
+                    _sceneUpdate = 0; // Unlock the transform now that it's created
+                }
+            }
         }
         
         #region Semi-Public API:  Destructor & IDispose
@@ -264,10 +275,18 @@ namespace GUIBuilder.Windows.RenderChild
             {
                 while( _sceneRender > 0 )
                     System.Threading.Thread.Sleep( 0 );
-                _sceneUpdate += 1;
+                lock( _syncLock )
+                {
+                    _sceneUpdate += 1;
+                }
             }
             else
-                _sceneUpdate -= 1;
+            {
+                lock( _syncLock )
+                {
+                    _sceneUpdate -= 1;
+                }
+            }
             if( trace > 0 )
                 DebugLog.WriteLine( "GUIBuilder.RenderTransform :: SyncSceneUpdate() :: start = " + start + " :: _sceneUpdate = " + _sceneUpdate + " :: _sceneRender = " + _sceneRender + "\n" + ( trace < 2 ? "" : Environment.StackTrace + "\n" ) );
         }
@@ -279,10 +298,18 @@ namespace GUIBuilder.Windows.RenderChild
             {
                 while( _sceneUpdate > 0 )
                     System.Threading.Thread.Sleep( 0 );
-                _sceneRender += 1;
+                lock( _syncLock )
+                {
+                    _sceneRender += 1;
+                }
             }
             else
-                _sceneRender -= 1;
+            {
+                lock( _syncLock )
+                {
+                    _sceneRender -= 1;
+                }
+            }
             if( trace > 0 )
                 DebugLog.WriteLine( "GUIBuilder.RenderTransform :: SyncRenderScene() :: start = " + start + " :: _sceneUpdate = " + _sceneUpdate + " :: _sceneRender = " + _sceneRender + "\n" + ( trace < 2 ? "" : Environment.StackTrace + "\n" ) );
         }
@@ -1484,7 +1511,7 @@ namespace GUIBuilder.Windows.RenderChild
                             }
                         }
                         
-                        DrawPolyWorldTransform( volume.Corners, useColor );
+                        DrawPolyWorldTransform( volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), useColor );
                     }
                 }
                 #if DEBUG
@@ -1569,7 +1596,10 @@ namespace GUIBuilder.Windows.RenderChild
                 
                 var c = Color.FromArgb( 255, 204, 76, 51 );
                 
-                DrawPolyWorldTransform( volume.Corners, c );
+                var corners = volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                //DebugLog.WriteArray( "DrawSandboxVolume() :: Corners", corners );
+                
+                DrawPolyWorldTransform( corners, c );
             }
             // disable once EmptyGeneralCatchClause
             catch {}
@@ -1618,13 +1648,13 @@ namespace GUIBuilder.Windows.RenderChild
                             var refr = flag.Reference;
                             var pos = refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                             var lrfs = refr.LinkedRefs;
-                            var count = lrfs.Count;
+                            var count = lrfs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                             for( int i = 0; i < count; i++ )
                             {
-                                var lkFID = lrfs.KeywordFormID[ i ];
+                                var lkFID = lrfs.GetKeywordFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                                 if( GodObject.CoreForms.IsSubDivisionEdgeFlagKeyword( lkFID ) )
                                 {
-                                    var lref = lrfs.Reference[ i ];
+                                    var lref = lrfs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                                     var lef = lref.GetScript<EdgeFlag>();
                                     if( ( lef != null )&&( lef.AssociatedWithSubDivision( s ) ) )
                                     {

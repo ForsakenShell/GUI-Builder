@@ -468,7 +468,7 @@ namespace SDL2ThinLayer
         
         void INTERNAL_SDLThread_Cleanup( SDLThreadState newState )
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_Cleanup()" );
+            Console.WriteLine( "INTERNAL_SDLThread_Cleanup()" );
             
             // Dispose of the renderer, window, etc
             INTERNAL_SDLThread_ReleaseWindowAndRenderer();
@@ -479,7 +479,7 @@ namespace SDL2ThinLayer
         
         void INTERNAL_SDLThread_ReleaseWindowAndRenderer()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_ReleaseWindowAndRenderer()" );
+            Console.WriteLine( "INTERNAL_SDLThread_ReleaseWindowAndRenderer()" );
             
             INTERNAL_SDLThread_ReleaseRenderer();
             INTERNAL_SDLThread_ReleaseWindow();
@@ -487,7 +487,7 @@ namespace SDL2ThinLayer
         
         void INTERNAL_SDLThread_ReleaseWindow()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_ReleaseWindow()" );
+            Console.WriteLine( "INTERNAL_SDLThread_ReleaseWindow()" );
             if( _sdlWindow != IntPtr.Zero )
                 SDL.SDL_DestroyWindow( _sdlWindow );
             _sdlWindow = IntPtr.Zero;
@@ -495,7 +495,7 @@ namespace SDL2ThinLayer
         
         void INTERNAL_SDLThread_ReleaseRenderer()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_ReleaseRenderer()" );
+            Console.WriteLine( "INTERNAL_SDLThread_ReleaseRenderer()" );
             if( _sdlRenderer != IntPtr.Zero )
                 SDL.SDL_DestroyRenderer( _sdlRenderer );
             _sdlRenderer = IntPtr.Zero;
@@ -503,7 +503,7 @@ namespace SDL2ThinLayer
         
         bool INTERNAL_SDLThread_ResetWindowAndRenderer()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_ResetWindowAndRenderer()" );
+            Console.WriteLine( "INTERNAL_SDLThread_ResetWindowAndRenderer()" );
             
             if( !INTERNAL_SDLThread_ResetWindow() )
                 return false;
@@ -516,7 +516,7 @@ namespace SDL2ThinLayer
         
         bool INTERNAL_SDLThread_ResetWindow()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_ResetWindow()" );
+            Console.WriteLine( "INTERNAL_SDLThread_ResetWindow()" );
             
             // Free the existing SDL_Window
             INTERNAL_SDLThread_ReleaseWindow();
@@ -527,7 +527,7 @@ namespace SDL2ThinLayer
         
         bool INTERNAL_SDLThread_ResetRenderer()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_ResetRenderer()" );
+            Console.WriteLine( "INTERNAL_SDLThread_ResetRenderer()" );
             
             // Get the old state values
             var obm = this.BlendMode;
@@ -556,7 +556,7 @@ namespace SDL2ThinLayer
         
         bool INTERNAL_SDLThread_InitWindow()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_InitWindow()" );
+            Console.WriteLine( "INTERNAL_SDLThread_InitWindow()" );
             
             // Create the SDL window
             _sdlWindow = SDL.SDL_CreateWindow(
@@ -642,7 +642,7 @@ namespace SDL2ThinLayer
         
         bool INTERNAL_SDLThread_InitRenderer()
         {
-            //Console.WriteLine( "INTERNAL_SDLThread_InitRenderer()" );
+            Console.WriteLine( "INTERNAL_SDLThread_InitRenderer()" );
             
             // Create the underlying renderer
             _sdlRenderer = SDL.SDL_CreateRenderer(

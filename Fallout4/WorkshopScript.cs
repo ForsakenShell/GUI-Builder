@@ -89,7 +89,7 @@ namespace Fallout4
                         var refr = form as Engine.Plugin.Forms.ObjectReference;
                         if( refr == null )
                             continue;
-                        var refrRef = refr.LinkedRefs.GetLinkedRef( wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                        var refrRef = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                         if( ( refrRef != null )&&( refrRef == Reference ) )
                         {
                             _Border = refr;
@@ -114,15 +114,15 @@ namespace Fallout4
                 // Unlink the current border
                 var current = BorderReference;
                 if( ( current != null )&&( current != value ) )
-                    current.LinkedRefs.Remove( this.GetFormID( Engine.Plugin.TargetHandle.Master ), Engine.Plugin.Constant.FormID_None );
+                    current.LinkedRefs.Remove( Engine.Plugin.TargetHandle.Working, this.GetFormID( Engine.Plugin.TargetHandle.Master ), Engine.Plugin.Constant.FormID_None );
                 
                 // Link the new border
                 if( ( value != null )&&( value != _Border ) )
                 {
-                    var index = value.LinkedRefs.FindKeywordIndex( wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                    var index = value.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                     if( index >= 0 )
                     {   // Redirect the existing link to the new ref
-                        value.LinkedRefs.Reference[ index ] = Reference;
+                        value.LinkedRefs.SetReference( Engine.Plugin.TargetHandle.Working, index, Reference );
                     }
                 }
                 
@@ -175,7 +175,7 @@ namespace Fallout4
                         var refr = form as Engine.Plugin.Forms.ObjectReference;
                         if( refr == null )
                             continue;
-                        var refrRef = refr.LinkedRefs.GetLinkedRef( wlp.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                        var refrRef = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, wlp.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                         if( ( refrRef != null )&&( refrRef == Reference ) )
                         {
                             list.Add( refr );
@@ -223,7 +223,7 @@ namespace Fallout4
             _BorderMarkerNodes = GetBorderNodes( firstNode, nodeKeyword );
             _nodes = BorderNode.GenerateBorderNodes( Reference.Worldspace, _BorderMarkerNodes, approximateNodeLength, slopeAllowance, forcedZ );
             
-            SendObjectDataChangedEvent();
+            SendObjectDataChangedEvent( this );
             /*
             DebugLog.Write( string.Format( "Fallout4.WorkshopScript.BuildBorders() :: Complete :: workshop 0x{0} \"{1}\" :: keyword 0x{2} \"{3}\"", this.FormID.ToString( "X8" ), this.EditorID, keyword.FormID.ToString( "X8" ), keyword.EditorID ) );
             DebugLog.Write( string.Format(
@@ -253,7 +253,7 @@ namespace Fallout4
                 if( refr == null )
                     continue;
                 
-                var lr = refr.LinkedRefs.GetLinkedRef( workshopLinkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, workshopLinkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 if( ( lr == null )||( lr != Reference ) )
                     continue;
                 
@@ -274,17 +274,17 @@ namespace Fallout4
             if( firstNode == null )
                 return null;
             
-            var count = firstNode.LinkedRefs.Count;
+            var count = firstNode.LinkedRefs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             if( count < 1 )
                 return null;
             
             for( int i = 0; i < count; i++ )
             {
-                var refr = firstNode.LinkedRefs.Reference[ i ];
+                var refr = firstNode.LinkedRefs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                 if( ( refr == null )||( refr == Reference ) )
                     continue;
                 
-                var kywd = firstNode.LinkedRefs.Keyword[ i ];
+                var kywd = firstNode.LinkedRefs.GetKeyword( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                 if( kywd == null )
                     continue;
                 
@@ -306,7 +306,7 @@ namespace Fallout4
                 return null;
             
             var list = new List<Engine.Plugin.Forms.ObjectReference>();
-            var node = firstNode.LinkedRefs.GetLinkedRef( nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var node = firstNode.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( node == null )
                 return null;
             
@@ -315,7 +315,7 @@ namespace Fallout4
             list.Add( node );
             while( true )
             {
-                node = node.LinkedRefs.GetLinkedRef( nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 if( node == null )
                     break;
                 list.Add( node );
@@ -438,7 +438,7 @@ namespace Fallout4
             _BorderMarkerNodes = null;
             _nodes = null;
             if( sendchangedevent )
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
         }
         
     }

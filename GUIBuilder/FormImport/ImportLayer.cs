@@ -6,14 +6,9 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
+using Engine.Plugin.Extensions;
 
-using Maths;
-using Fallout4;
-using AnnexTheCommonwealth;
 
 namespace GUIBuilder.FormImport
 {
@@ -63,7 +58,7 @@ namespace GUIBuilder.FormImport
             if( string.Compare( oldEDID, NewEditorID, StringComparison.InvariantCulture ) != 0 )
                 tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -72,7 +67,7 @@ namespace GUIBuilder.FormImport
             
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )

@@ -59,7 +59,7 @@ namespace Engine.Plugin.Forms.Fields.Static
             if( value.Length >= 4 )
                 WriteString( _LOD_3, value[ 3 ], false );
             
-            Form.SendObjectDataChangedEvent();
+            Form.SendObjectDataChangedEvent( null );
         }
         
         public override string          ToString( TargetHandle target, string format = null )

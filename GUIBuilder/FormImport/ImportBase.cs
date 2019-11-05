@@ -6,14 +6,10 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
 
-using Maths;
-using Fallout4;
-using AnnexTheCommonwealth;
+using Engine.Plugin.Extensions;
+
 
 namespace GUIBuilder.FormImport
 {
@@ -336,7 +332,7 @@ namespace GUIBuilder.FormImport
         
         #region Override Target[s]
         
-        protected bool                  CopyToWorkingFile<T>( T syncObject ) where T : Engine.Plugin.Interface.IXHandle
+        protected bool                  CopyToWorkingFile<T>( T syncObject ) where T : class, Engine.Plugin.Interface.IXHandle
         {
             if( syncObject == null ) return false;
             
@@ -350,16 +346,16 @@ namespace GUIBuilder.FormImport
                 errorMessage = string.Format(
                     "\n{0} :: CopyToWorkingFile<T>() :: Unable to copy override for {1}!",
                     this.GetType().ToString(),
-                    GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
-                    );
+                    syncObject.ExtraInfoFor( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
+                );
             }
             catch( Exception e )
             {
                 errorMessage = string.Format(
                     "\n{0} :: CopyToWorkingFile<T>() :: An exception occured when trying to copy override for {1}\nInner Exception:\n{2}",
-                        this.GetType().ToString(),
-                        GenIXHandle.ExtraInfoFor( syncObject, syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
-                        e.ToString() );
+                    this.GetType().ToString(),
+                    syncObject.ExtraInfoFor( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
+                    e.ToString());
             }
             
             DebugLog.WriteLine( errorMessage );
@@ -601,7 +597,7 @@ namespace GUIBuilder.FormImport
             get
             {
                 //DebugLog.Write( "ConflictStatus.get()" );
-                if( !GenIXHandle.Resolveable( _Target.Value, _Target.FormID, _Target.EditorID ) )
+                if(!_Target.Value.Resolveable(_Target.FormID, _Target.EditorID) )
                     return Engine.Plugin.ConflictStatus.NewForm;
                     //return Engine.Plugin.ConflictStatus.Invalid;
                 var targetForm = TargetForm;
@@ -663,16 +659,16 @@ namespace GUIBuilder.FormImport
             _SupressEvents = false;
             if( TargetForm != null )
                 TargetForm.ResumeObjectDataChangedEvents( sendevent );
-            if( sendevent ) SendObjectDataChangedEvent();
+            if( sendevent ) SendObjectDataChangedEvent( this );
         }
         
-        public void                     SendObjectDataChangedEvent()
+        public void                     SendObjectDataChangedEvent( object sender )
         {
             //DebugLog.Write( string.Format( "{0} :: SendObjectDataChangedEvent()", this.GetType().ToString() ) );
             if( _SupressEvents ) return;
             EventHandler handler = ObjectDataChanged;
             if( handler != null )
-                handler( this, null );
+                handler( sender, null );
         }
         
         public bool                     InitialCheckedOrSelectedState()

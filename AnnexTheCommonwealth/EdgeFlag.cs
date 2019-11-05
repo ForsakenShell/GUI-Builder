@@ -86,7 +86,7 @@ namespace AnnexTheCommonwealth
             get
             {
                 var lrs = Reference.LinkedRefs;
-                if( ( kywdSubDivision.Count == 0 )&&( lrs.Count == 0 ) )
+                if( ( kywdSubDivision.Count == 0 )&&( lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == 0 ) )
                     return null;
                 var moel = new List<string>();
                 
@@ -104,13 +104,13 @@ namespace AnnexTheCommonwealth
                     }
                 }
                 
-                if( lrs.Count > 0 )
+                if( lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) > 0 )
                 {
                     moel.Add( "Linked Flags:" );
-                    for( int i = 0; i < lrs.Count; i++ )
+                    for( int i = 0; i < lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ); i++ )
                     {
-                        var rID = lrs.ReferenceID[ i ];
-                        var k = lrs.Keyword[ i ];
+                        var rID = lrs.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
+                        var k = lrs.GetKeyword( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                         moel.Add(
                             string.Format(
                                 "\tEdgeFlag: 0x{0} :: Keyword: 0x{1} - \"{2}\"",

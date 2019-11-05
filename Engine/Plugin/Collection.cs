@@ -14,6 +14,7 @@ using XeLib.API;
 
 using Engine.Plugin.Interface;
 using Engine.Plugin.Attributes;
+using Engine.Plugin.Extensions;
 
 
 namespace Engine.Plugin

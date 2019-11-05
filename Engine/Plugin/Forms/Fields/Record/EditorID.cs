@@ -29,7 +29,7 @@ namespace Engine.Plugin.Forms.Fields.Record
             if( Form.Collection != null )
                 Form.Collection.Add( Form );
             
-            Form.SendObjectDataChangedEvent();
+            Form.SendObjectDataChangedEvent( null );
         }
         
     }

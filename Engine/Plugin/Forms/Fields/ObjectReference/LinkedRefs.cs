@@ -22,6 +22,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         static readonly string         _Reference = "Ref";
         static readonly string         _Keyword = "Keyword/Ref";
         
+        ElementHandle                  _LastHandle = null;
         List<ElementHandle>            _LinkedReferences = null;
         
         public LinkedRefs( Form form ) : base( form, "Linked References" ) {}
@@ -30,6 +31,8 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         void                            ClearCurrentLinkedRefHandles()
         {
+            _LastHandle = null;
+            
             if( _LinkedReferences.NullOrEmpty() )
                 return;
             
@@ -39,22 +42,24 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             _LinkedReferences = null;
         }
         
-        void                            GetLinkedRefsFromForm()
+        void                            GetLinkedRefsFromForm( TargetHandle target )
         {
-            if( _LinkedReferences != null )
-                return;
+            var h = HandleFromTarget( target );
+            if( _LastHandle == h ) return;
+            
+            ClearCurrentLinkedRefHandles();
             
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetLinkedRefsFromForm()", Form.ToString() } );
             
-            _LinkedReferences = new List<ElementHandle>();
+            _LastHandle = h;
             
-            if( !HasValue( TargetHandle.WorkingOrLastFullRequired ) )
+            if( !HasValue( target ) )
                 return;
                 //goto localReturnResult;
             
-            var bH = HandleFromTarget( TargetHandle.WorkingOrLastFullRequired );
+            _LinkedReferences = new List<ElementHandle>();
             
-            var handles = bH.GetElements<ElementHandle>( XPath, false, false );
+            var handles = h.GetElements<ElementHandle>( XPath, false, false );
             if( ( handles == null )||( handles.Length == 0 ) )
             {
                 var s = Messages.GetMessages();
@@ -76,7 +81,9 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             //DebugLog.CloseIndentLevel( _LinkedReferences.Count.ToString() );
         }
         
-        public int                      FindKeywordIndex( uint keywordFormID )
+        #endregion
+        
+        public int                      FindKeywordIndex( TargetHandle target, uint keywordFormID )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "FindKeywordIndex()", "keywordFormID = 0x" + keywordFormID.ToString( "X8" ), Form.ToString() } );
             int result = -1;
@@ -84,7 +91,8 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             if( ( keywordFormID == Engine.Plugin.Constant.FormID_None )||( keywordFormID == Engine.Plugin.Constant.FormID_Invalid ) )
                 goto localReturnResult;
             
-            GetLinkedRefsFromForm();
+            GetLinkedRefsFromForm( target );
+            
             if( _LinkedReferences.NullOrEmpty() )
                 goto localReturnResult;
             
@@ -95,13 +103,14 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             return result;
         }
         
-        public int                      FindReferenceIndex( uint refID )
+        public int                      FindReferenceIndex( TargetHandle target, uint refID )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "FindReferenceIndex()", "refID = 0x" + refID.ToString( "X8" ), Form.ToString() } );
             
             int result = -1;
             
-            GetLinkedRefsFromForm();
+            GetLinkedRefsFromForm( target );
+            
             if( _LinkedReferences.NullOrEmpty() )
                 goto localReturnResult;
             
@@ -112,23 +121,21 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             return result;
         }
         
-        #endregion
-        
-        public int                      Count
+        public int                      GetCount( TargetHandle target )
         {
-            get
-            {
-                GetLinkedRefsFromForm();
-                return _LinkedReferences == null
-                    ? 0
-                    : _LinkedReferences.Count;
-            }
+            GetLinkedRefsFromForm( target );
+            
+            return _LinkedReferences.NullOrEmpty()
+                ? 0
+                : _LinkedReferences.Count;
         }
         
-        public Forms.ObjectReference    GetLinkedRef( uint keywordFormID )
+        public Forms.ObjectReference    GetLinkedRef( TargetHandle target, uint keywordFormID )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetLinkedRef()", "keywordFormID = 0x" + keywordFormID.ToString( "X8" ), Form.ToString() } );
-            int index = FindKeywordIndex( keywordFormID );
+            GetLinkedRefsFromForm( target );
+            
+            int index = FindKeywordIndex( target, keywordFormID );
             var result = index < 0
                 ? null
                 : GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.ObjectReference>( _LinkedReferences[ index ].GetUIntValueEx( _Reference ) );
@@ -136,13 +143,15 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             return result;
         }
         
-        public void                     SetLinkedRef( uint refID, uint keywordFormID = Engine.Plugin.Constant.FormID_None )
+        public void                     SetLinkedRef( TargetHandle target, uint refID, uint keywordFormID = Engine.Plugin.Constant.FormID_None )
         {
             if( ( refID == Engine.Plugin.Constant.FormID_None )&&( keywordFormID == Engine.Plugin.Constant.FormID_None ) )
                 return;
             
-            var refIndex = refID == Engine.Plugin.Constant.FormID_None ? -1 : FindReferenceIndex( refID );
-            var keyIndex = keywordFormID == Engine.Plugin.Constant.FormID_None ? -1 : FindKeywordIndex( keywordFormID );
+            GetLinkedRefsFromForm( target );
+            
+            var refIndex = refID == Engine.Plugin.Constant.FormID_None ? -1 : FindReferenceIndex( target, refID );
+            var keyIndex = keywordFormID == Engine.Plugin.Constant.FormID_None ? -1 : FindKeywordIndex( target, keywordFormID );
             if( ( refIndex >= 0 )&&( refIndex == keyIndex ) )
                 return; // Linked ref with this refID using this keyword already exists
             
@@ -150,7 +159,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             {
                 if( refIndex < 0 )
                 {   // No linked ref for this refID, add a new one
-                    Add( refID, keywordFormID );
+                    Add( target, refID, keywordFormID );
                 }
                 else
                 {   // Update the existing linked refs keyword
@@ -167,29 +176,24 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             }
         }
         
-        public bool                     Add( uint refID, uint keywordFormID = Constant.FormID_None )
+        public bool                     Add( TargetHandle target, uint refID, uint keywordFormID = Constant.FormID_None )
         {
-            bool isInWorkingFile = Form.IsInWorkingFile(); // Check but don't copy (yet)
-            if( !isInWorkingFile )
-            {
-                if( !CreateRootElement( true, false ) ) // Copy override it now
-                    return false;
-                ClearCurrentLinkedRefHandles();
-                GetLinkedRefsFromForm();
-            }
+            if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: Add() :: Target must be TargetHandle.Working!" );
             
-            var index = FindReferenceIndex( refID );
-            if( index >= 0 ) // Already exists
-            {
-                if( !isInWorkingFile ) // Copied as override
-                    Form.SendObjectDataChangedEvent();
+            bool isInWorkingFile = Form.IsInWorkingFile(); // Check but don't copy (yet)
+            if( ( !isInWorkingFile )&&( !CreateRootElement( true, false ) ) ) // Copy override it now
                 return false;
-            }
+            
+            GetLinkedRefsFromForm( target );
+            
+            var index = FindReferenceIndex( target, refID );
+            if( index >= 0 ) // Already exists
+                return false;
             
             // New element in form
             index = AddEx( refID, keywordFormID );
             
-            Form.SendObjectDataChangedEvent();
+            Form.SendObjectDataChangedEvent( null );
             return index >= 0;
         }
         
@@ -217,28 +221,22 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             return index;
         }
         
-        public bool                     Remove( uint refID, uint keywordFormID = Constant.FormID_None )
+        public bool                     Remove( TargetHandle target, uint refID, uint keywordFormID = Constant.FormID_None )
         {
-            bool isInWorkingFile = Form.IsInWorkingFile(); // Check but don't copy (yet)
-            if( !isInWorkingFile )
-            {
-                if( !CreateRootElement( true, false ) ) // Copy override it now
-                    return false;
-                ClearCurrentLinkedRefHandles();
-                GetLinkedRefsFromForm();
-            }
+            if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: Remove() :: Target must be TargetHandle.Working!" );
             
-            var index = FindReferenceIndex( refID );
+            bool isInWorkingFile = Form.IsInWorkingFile(); // Check but don't copy (yet)
+            if( ( !isInWorkingFile )&&( !CreateRootElement( true, false ) ) ) // Copy override it now
+            
+            GetLinkedRefsFromForm( target );
+            
+            var index = FindReferenceIndex( target, refID );
             if( index < 0 ) // Already doesn't exist
-            {
-                if( !isInWorkingFile ) // Copied as override
-                    Form.SendObjectDataChangedEvent();
                 return false;
-            }
             
             var result = RemoveEx( index );
             
-            Form.SendObjectDataChangedEvent();
+            Form.SendObjectDataChangedEvent( null );
             return result;
         }
         
@@ -263,12 +261,12 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         #region ReferenceID
         
-        IndexedProperty<int, uint>     _ReferenceIDIndexer;
-        
-        uint                            GetReferenceID( int index )
+        public uint                     GetReferenceID( TargetHandle target, int index )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetReferenceID()", "index = " + index.ToString(), Form.ToString() } );
             uint result = Constant.FormID_Invalid;
+            
+            GetLinkedRefsFromForm( target );
             
             if( _LinkedReferences.NullOrEmpty() )
                 goto localReturnResult;
@@ -281,8 +279,10 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             //DebugLog.CloseIndentLevel( "0x" + result.ToString( "X8" ) );
             return result;
         }
-        void                            SetReferenceID( int index, uint value )
+        public void                     SetReferenceID( TargetHandle target, int index, uint value )
         {
+            if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: SetReferenceID() :: Target must be TargetHandle.Working!" );
+            GetLinkedRefsFromForm( target );
             if( _LinkedReferences.NullOrEmpty() )
                 return;
             if( ( index < 0 )||( index >= _LinkedReferences.Count ) )
@@ -294,12 +294,12 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         #region Object Reference
         
-        IndexedProperty<int, Forms.ObjectReference> _ReferenceIndexer;
-        
-        Forms.ObjectReference           GetReference( int index )
+        public Forms.ObjectReference    GetReference( TargetHandle target, int index )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetReference()", "index = " + index.ToString(), Form.ToString() } );
             Forms.ObjectReference result = null;
+            
+            GetLinkedRefsFromForm( target );
             
             if( _LinkedReferences.NullOrEmpty() )
                 goto localReturnResult;
@@ -312,9 +312,12 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             //DebugLog.CloseIndentLevel<Forms.ObjectReference>( result );
             return result;
         }
-        void                            SetReference( int index, Forms.ObjectReference value )
+        public void                     SetReference( TargetHandle target, int index, Forms.ObjectReference value )
         {
+            if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: SetReference() :: Target must be TargetHandle.Working!" );
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SetReference()", "index = " + index.ToString(), Form.ToString() } );
+            
+            GetLinkedRefsFromForm( target );
             
             if( _LinkedReferences.NullOrEmpty() )
                 return;
@@ -337,12 +340,12 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         #region Keyword FormID
         
-        IndexedProperty<int, uint>     _KeywordFormIDIndexer;
-        
-        uint                            GetKeywordFormID( int index )
+        public uint                     GetKeywordFormID( TargetHandle target, int index )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetKeywordFormID()", "index = " + index.ToString(), Form.ToString() } );
             uint result = Constant.FormID_Invalid;
+            
+            GetLinkedRefsFromForm( target );
             
             if( _LinkedReferences.NullOrEmpty() )
                 goto localReturnResult;
@@ -355,8 +358,10 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             //DebugLog.CloseIndentLevel( "0x" + result.ToString( "X8" ) );
             return result;
         }
-        void                            SetKeywordFormID( int index, uint value )
+        public void                     SetKeywordFormID( TargetHandle target, int index, uint value )
         {
+            if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: SetKeywordFormID() :: Target must be TargetHandle.Working!" );
+            GetLinkedRefsFromForm( target );
             if( _LinkedReferences.NullOrEmpty() )
                 return;
             if( ( index < 0 )||( index >= _LinkedReferences.Count ) )
@@ -368,12 +373,12 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         #region Keyword
         
-        IndexedProperty<int, Forms.Keyword> _KeywordIndexer;
-        
-        Forms.Keyword                   GetKeyword( int index )
+        public Forms.Keyword            GetKeyword( TargetHandle target, int index )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetKeyword()", "index = " + index.ToString(), Form.ToString() } );
             Forms.Keyword result = null;
+            
+            GetLinkedRefsFromForm( target );
             
             if( _LinkedReferences.NullOrEmpty() )
                 goto localReturnResult;
@@ -386,9 +391,12 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             //DebugLog.CloseIndentLevel<Forms.Keyword>( result );
             return result;
         }
-        void                            SetKeyword( int index, Forms.Keyword value )
+        public void                     SetKeyword( TargetHandle target, int index, Forms.Keyword value )
         {
+            if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: SetKeyword() :: Target must be TargetHandle.Working!" );
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SetKeyword()", "index = " + index.ToString(), Form.ToString() } );
+            
+            GetLinkedRefsFromForm( target );
             
             if( _LinkedReferences.NullOrEmpty() )
                 return;
@@ -408,56 +416,6 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         }
         
         #endregion
-        
-        #endregion
-        
-        #region Indexed Properties
-        
-        public IndexedProperty<int, uint> ReferenceID
-        {
-            get
-            {
-                GetLinkedRefsFromForm();
-                if( _ReferenceIDIndexer == null )
-                    _ReferenceIDIndexer = new IndexedProperty<int, uint>( GetReferenceID, SetReferenceID );
-                return _ReferenceIDIndexer;
-            }
-        }
-        
-        public IndexedProperty<int, Forms.ObjectReference> Reference
-        {
-            get
-            {
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Reference[]", Form.ToString() } );
-                GetLinkedRefsFromForm();
-                if( _ReferenceIndexer == null )
-                    _ReferenceIndexer = new IndexedProperty<int, Forms.ObjectReference>( GetReference, SetReference );
-                //DebugLog.CloseIndentLevel();
-                return _ReferenceIndexer;
-            }
-        }
-        
-        public IndexedProperty<int, uint> KeywordFormID
-        {
-            get
-            {
-                GetLinkedRefsFromForm();
-                if( _KeywordFormIDIndexer == null )
-                    _KeywordFormIDIndexer = new IndexedProperty<int, uint>( GetKeywordFormID, SetKeywordFormID );
-                return _KeywordFormIDIndexer;
-            }
-        }
-        
-        public IndexedProperty<int, Forms.Keyword> Keyword
-        {
-            get
-            {
-                GetLinkedRefsFromForm();
-                if( _KeywordIndexer == null )
-                    _KeywordIndexer = new IndexedProperty<int, Forms.Keyword>( GetKeyword, SetKeyword );
-                return _KeywordIndexer;
-            }
-        }
         
         #endregion
         

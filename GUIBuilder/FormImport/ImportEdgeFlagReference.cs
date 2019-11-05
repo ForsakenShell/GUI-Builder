@@ -6,14 +6,9 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
+using Engine.Plugin.Extensions;
 
-using Maths;
-using Fallout4;
-using AnnexTheCommonwealth;
 
 namespace GUIBuilder.FormImport
 {
@@ -58,9 +53,9 @@ namespace GUIBuilder.FormImport
                 tmp.Add( "Clear Location Reference" );
             
             if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
-                tmp.Add( string.Format( "Layer {0}", GenIXHandle.ExtraInfoFor( GodObject.CoreForms.ESM_ATC_LAYR_Controllers ) ) );
+                tmp.Add(string.Format("Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ExtraInfoFor()) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -69,13 +64,13 @@ namespace GUIBuilder.FormImport
             
             tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )
         {
             var flagBase = GodObject.CoreForms.SubDivisionEdgeFlag( TargetRef.GetName( target ) );
-            return GenIXHandle.ExtraInfoFor( flagBase, format: "Placed instance of {0}", unresolveable: "unresolved" );
+            return flagBase.ExtraInfoFor(format: "Placed instance of {0}", unresolveable: "unresolved");
         }
         
         public override int             InjectPriority { get { return 9000; } }

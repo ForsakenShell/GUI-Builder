@@ -10,12 +10,8 @@
  */
 using System;
 using System.IO;
-using System.Collections.Generic;
-//using System.Drawing;
-//using System.Windows.Forms;
-//using System.Runtime.InteropServices;
 using System.Linq;
-using System.Reflection;
+
 
 /// <summary>
 /// Description of GenString.

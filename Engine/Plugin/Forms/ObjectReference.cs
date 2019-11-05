@@ -154,9 +154,9 @@ namespace Engine.Plugin.Forms
             //DebugLog.Write( string.Format( "sendObjectDataChangedEvent = {0}\n", sendObjectDataChangedEvent ) );
             if( sendObjectDataChangedEvent )
             {
-                oldCell.SendObjectDataChangedEvent();
-                newCell.SendObjectDataChangedEvent();
-                this.SendObjectDataChangedEvent();
+                oldCell.SendObjectDataChangedEvent( null );
+                newCell.SendObjectDataChangedEvent( null );
+                this.SendObjectDataChangedEvent( null );
             }
         }
         
@@ -215,15 +215,15 @@ namespace Engine.Plugin.Forms
         
         #endregion
         
-        public bool LinksTo( uint referenceID )
+        public bool LinksTo( Engine.Plugin.TargetHandle target, uint referenceID )
         {
-            int count = _LinkedRefs.Count;
+            int count = _LinkedRefs.GetCount( target );
             if( count < 1 )
                 return false;
             
             for( int i = 0; i < count; i++ )
             {
-                var rID = _LinkedRefs.ReferenceID[ i ];
+                var rID = _LinkedRefs.GetReferenceID( target, i );
                 if( rID == referenceID )
                     return true;
             }
@@ -231,17 +231,17 @@ namespace Engine.Plugin.Forms
             return false;
         }
         
-        public ObjectReference NextInChain( uint keywordFormID )
+        public ObjectReference NextInChain( Engine.Plugin.TargetHandle target, uint keywordFormID )
         {
-            int count = _LinkedRefs.Count;
+            int count = _LinkedRefs.GetCount( target );
             if( count < 1 )
                 return null;
             
             for( int i = 0; i < count; i++ )
             {
-                var kFID = _LinkedRefs.KeywordFormID[ i ];
+                var kFID = _LinkedRefs.GetKeywordFormID( target, i );
                 if( kFID == keywordFormID )
-                    return _LinkedRefs.Reference[ i ];
+                    return _LinkedRefs.GetReference( target, i );
             }
             
             return null;
@@ -271,14 +271,14 @@ namespace Engine.Plugin.Forms
                 DebugLog.WriteLine( string.Format( "\tPosition: {0}", _Position.ToString( target ) ) );
             if( _Rotation.HasValue( target ) )
                 DebugLog.WriteLine( string.Format( "\tRotation: {0}", _Rotation.ToString( target ) ) );
-            var lrCount = _LinkedRefs.Count;
+            var lrCount = _LinkedRefs.GetCount( target );
             if( lrCount > 0 )
             {
                 DebugLog.WriteLine( "\tLinked Refs:" );
                 for( int i = 0; i < lrCount; i++ )
                 {
-                    var lrRefr = _LinkedRefs.Reference[ i ];
-                    var lrKywd = _LinkedRefs.Keyword[ i ];
+                    var lrRefr = _LinkedRefs.GetReference( target, i );
+                    var lrKywd = _LinkedRefs.GetKeyword( target, i );
                     DebugLog.WriteLine( string.Format(
                         lrKywd == null ? "\t\t{0}" : "\t\t{0}, {1}",
                         lrRefr.ToString(),

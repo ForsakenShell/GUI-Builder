@@ -58,6 +58,9 @@ namespace Engine.Plugin.Forms
             ElementHandle h = null;
             switch( target )
             {
+                case TargetHandle.None:
+                    break;
+                    
                 case TargetHandle.Master:
                     h = Form.MasterHandle;
                     break;
@@ -160,7 +163,7 @@ namespace Engine.Plugin.Forms
             }
             elementHandle.Dispose();
             
-            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent();
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
             
             return true;
         }
@@ -176,7 +179,7 @@ namespace Engine.Plugin.Forms
         {
             if( !CreateRootElement( true, false ) ) return;
             Form.WorkingFileHandle.SetFloatValueEx( BuildPath( path ), value );
-            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent();
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
         }
         
         protected int                   ReadInt( ElementHandle handle, string path, int defaultValue = 0 )
@@ -190,7 +193,7 @@ namespace Engine.Plugin.Forms
         {
             if( !CreateRootElement( true, false ) ) return;
             Form.WorkingFileHandle.SetIntValueEx( BuildPath( path ), value );
-            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent();
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
         }
         
         protected uint                  ReadUInt( ElementHandle handle, string path, uint defaultValue = 0 )
@@ -204,7 +207,7 @@ namespace Engine.Plugin.Forms
         {
             if( !CreateRootElement( true, false ) ) return;
             Form.WorkingFileHandle.SetUIntValueEx( BuildPath( path ), value );
-            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent();
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
         }
         
         protected string                ReadString( ElementHandle handle, string path, string defaultValue = null )
@@ -218,7 +221,7 @@ namespace Engine.Plugin.Forms
         {
             if( !CreateRootElement( true, false ) ) return;
             Form.WorkingFileHandle.SetValueEx( BuildPath( path ), value );
-            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent();
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
         }
         
         #endregion

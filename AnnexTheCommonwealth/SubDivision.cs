@@ -118,7 +118,7 @@ namespace AnnexTheCommonwealth
                 INTERNAL_ResetEdgeFlags();
             
             var lrs = Reference.LinkedRefs;
-            if( lrs.Count < 1 )     // No references is not an error per-say
+            if( lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) < 1 )     // No references is not an error per-say
             {
                 result = true;
                 goto localReturnResult;
@@ -128,15 +128,15 @@ namespace AnnexTheCommonwealth
             var flag = (EdgeFlag)null;
             uint fkFID = Engine.Plugin.Constant.FormID_None;
             
-            for( int i = 0; i < lrs.Count; i++ )
+            for( int i = 0; i < lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ); i++ )
             {
-                var lro = lrs.Reference[ i ];
+                var lro = lrs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                 if( ( lro != null )&&( GodObject.CoreForms.IsSubDivisionEdgeFlag( lro.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) ) )
                 {
                     flag = lro.GetScript<EdgeFlag>();
                     if( flag != null )
                     {
-                        fkFID = lrs.KeywordFormID[ i ];
+                        fkFID = lrs.GetKeywordFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                         break;
                     }
                 }
@@ -166,7 +166,7 @@ namespace AnnexTheCommonwealth
             INTERNAL_AddEdgeFlag( firstFlag, keyword );
             var prevFlag = flag;
             
-            var linkedRef = flag.Reference.LinkedRefs.GetLinkedRef( fkFID );
+            var linkedRef = flag.Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, fkFID );
             while( linkedRef != null )
             {
                 bool added = false;
@@ -200,7 +200,7 @@ namespace AnnexTheCommonwealth
                             break;
                         
                         prevFlag = flag;
-                        linkedRef = linkedRef.LinkedRefs.GetLinkedRef( fkFID );
+                        linkedRef = linkedRef.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, fkFID );
                     }
                 }
                 if( !added )
@@ -369,8 +369,8 @@ namespace AnnexTheCommonwealth
                         var refr = subRef as Engine.Plugin.Forms.ObjectReference;
                         if( ( refr != null )&&( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == volumeFID ) )
                         {
-                            var li = refr.LinkedRefs.FindKeywordIndex( keywordFID );
-                            if( ( li >= 0 )&&( refr.LinkedRefs.ReferenceID[ li ] == thisFID ) )
+                            var li = refr.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, keywordFID );
+                            if( ( li >= 0 )&&( refr.LinkedRefs.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, li ) == thisFID ) )
                             {
                                 var volume = refr.GetScript<AnnexTheCommonwealth.BuildAreaVolume>();
                                 if( volume != null )
@@ -415,7 +415,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                return Reference.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxEdge.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                return Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxEdge.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             }
         }
         
@@ -423,7 +423,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                var sandboxRef = Reference.LinkedRefs.GetLinkedRef( GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxVolume.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                var sandboxRef = Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxVolume.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 return sandboxRef == null
                     ? null
                     : sandboxRef.GetScript<AnnexTheCommonwealth.Volume>();
@@ -457,7 +457,7 @@ namespace AnnexTheCommonwealth
             var list = new List<Vector2f>();
             foreach( var volume in volumes )
             {
-                var corners = volume.Corners;
+                var corners = volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 foreach( var corner in corners )
                 {
                     list.Add( new Vector2f( corner ) );
@@ -468,87 +468,7 @@ namespace AnnexTheCommonwealth
             return list;
         }
         
-        public class OptimalSandboxVolume
-        {
-            #region Size
-            Vector3f _Size = Vector3f.Zero;
-            public Vector3f Size
-            {
-                get{ return _Size; }
-                set{ _Size = new Vector3f( value ); }
-            }
-            public Vector2f Size2D
-            {
-                get{ return new Vector2f( _Size ); }
-                set{ _Size = new Vector3f( value.X, value.Y, Height ); }
-            }
-            public float Height
-            {
-                get{ return _Size.Z; }
-                set{ _Size.Z = value; }
-            }
-            #endregion
-            
-            #region Position
-            Vector3f _Position = Vector3f.Zero;
-            public Vector3f Position
-            {
-                get{ return _Position; }
-                set{ _Position = new Vector3f( value ); }
-            }
-            public Vector2f Position2D
-            {
-                get{ return new Vector2f( _Position ); }
-                set{ _Position = new Vector3f( value.X, value.Y, Z ); }
-            }
-            public float Z
-            {
-                get{ return _Position.Z; }
-                set{ _Position.Z = value; }
-            }
-            #endregion
-            
-            #region Rotation
-            Vector3f _Rotation = Vector3f.Zero;
-            public Vector3f Rotation
-            {
-                get{ return _Rotation; }
-                set{ _Rotation = new Vector3f( value ); }
-            }
-            public float ZRotation
-            {
-                get{ return _Rotation.Z; }
-                set{ _Rotation.Z = value; }
-            }
-            #endregion
-            
-            public OptimalSandboxVolume( Vector2f size, Vector2f position, float rotation )
-            {
-                _Size = new Vector3f( size );
-                _Position = new Vector3f( position );
-                ZRotation = rotation;
-                //Dump( "cTor()" );
-            }
-            
-            public Vector2f[] Corners
-            {
-                get
-                {
-                    var p2D = Position2D;
-                    var hSize = _Size * 0.5f;
-                    return new Vector2f[]
-                    {
-                        Vector2f.RotateAround( new Vector2f( _Position.X - hSize.X, _Position.Y - hSize.Y ), p2D, - ZRotation ),
-                        Vector2f.RotateAround( new Vector2f( _Position.X + hSize.X, _Position.Y - hSize.Y ), p2D, - ZRotation ),
-                        Vector2f.RotateAround( new Vector2f( _Position.X + hSize.X, _Position.Y + hSize.Y ), p2D, - ZRotation ),
-                        Vector2f.RotateAround( new Vector2f( _Position.X - hSize.X, _Position.Y + hSize.Y ), p2D, - ZRotation )
-                    };
-                }
-            }
-            
-        }
-        
-        public OptimalSandboxVolume GetOptimalSandboxVolume( float angleIncrement = 1.0f, bool skipZScan = false, float fSandboxCylinderBottom = -100.0f, float fSandboxCylinderTop = 1280.0f, float volumeMargin = 128.0f, float sandboxSink = 128.0f )
+        public Maths.Geometry.ConvexHull.OptimalBoundingBox GetOptimalSandboxVolume( bool skipZScan = false, float fSandboxCylinderBottom = -100.0f, float fSandboxCylinderTop = 1280.0f, float volumeMargin = 128.0f, float sandboxSink = 128.0f )
         {
             var edgeFlags = EdgeFlags;
             if( edgeFlags.NullOrEmpty() )
@@ -567,57 +487,19 @@ namespace AnnexTheCommonwealth
                 return null;
             }
             
+            var volOffset = fSandboxCylinderBottom + sandboxSink;
+            var halfHeight = fSandboxCylinderTop > Math.Abs( fSandboxCylinderBottom )
+                ? fSandboxCylinderTop
+                : Math.Abs( fSandboxCylinderBottom );
+            
             // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
             var points = new List<Vector2f>();
             foreach( var flag in edgeFlags )
                 points.Add( new Vector2f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
             
-            var cNW = points.GetCornerNWFrom();
-            var cSE = points.GetCornerSEFrom();
-            
-            var vSize = new Vector2f(
-                cSE.X - cNW.X,
-                cNW.Y - cSE.Y );
-            var vCentre = new Vector2f(
-                cNW.X + vSize.X * 0.5f,
-                cSE.Y + vSize.Y * 0.5f );
-            
-            // Normalize points
-            for( int i = 0; i < points.Count; i++ )
-                points[ i ] -= vCentre;
-            
-            var optVol = new OptimalSandboxVolume( vSize, vCentre, 0.0f );
-            var halfHeight = fSandboxCylinderTop > Math.Abs( fSandboxCylinderBottom )
-                ? fSandboxCylinderTop
-                : Math.Abs( fSandboxCylinderBottom );
-            var volOffset = fSandboxCylinderBottom + sandboxSink;
+            var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
+            var optVol = Maths.Geometry.ConvexHull.MinBoundingBox( hull );
             optVol.Height = halfHeight * 2.0f;
-            
-            // Rotate all the points around from 0-90 degrees looking for
-            // the rotation that yields the optimal (smallest) sandbox size
-            for( float a = angleIncrement; a < 90.0f; a += angleIncrement )
-            {
-                var rotated = Vector2f.RotateAround( points, Vector2f.Zero, a );
-                cNW = rotated.GetCornerNWFrom();
-                cSE = rotated.GetCornerSEFrom();
-                var cSize = new Vector2f(
-                    cSE.X - cNW.X,
-                    cNW.Y - cSE.Y );
-                if( cSize.Area < optVol.Size2D.Area )
-                {
-                    // TODO:  Need to fiddle with this a little, position calculation is slightly off
-                    //var dOff = new Vector2f(
-                    //    cNW.X + cSize.X * 0.5f,
-                    //    cSE.Y + cSize.Y * 0.5f );
-                    //var cOff = dOff.RotateAround( Vector2f.Zero, 270.0f + a );
-                    //var cCentre = vCentre + cOff;
-                    //optVol.Position2D = cCentre;
-                    var delta = vSize - cSize;
-                    optVol.Position2D = vCentre - ( delta * 0.5f );
-                    optVol.Size2D = cSize;
-                    optVol.ZRotation = a;
-                }
-            }
             
             if( !skipZScan )
             {
@@ -682,7 +564,7 @@ namespace AnnexTheCommonwealth
             var vCount = volumes.Count;
             var volumeCorners = new Vector2f[ vCount ][];
             for( int i = 0; i < vCount; i++ )
-                volumeCorners[ i ] = volumes[ i ].Corners;
+                volumeCorners[ i ] = volumes[ i ].GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             
             var cNW = volumeCorners.GetCornerNWFrom();
             var cSE = volumeCorners.GetCornerSEFrom();
@@ -818,10 +700,10 @@ namespace AnnexTheCommonwealth
             var volume = SandboxVolume;
             if( ( enabler == null )||( volume == null ) )
             {
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
                 return;
             }
-            SendObjectDataChangedEvent();
+            SendObjectDataChangedEvent( this );
         }
         
         void AddNodeToSubCount( uint subFID, Dictionary<uint, List<uint>> subCount, uint flagFID )
@@ -997,14 +879,14 @@ namespace AnnexTheCommonwealth
             ClearSandboxBorderNodes( false );
             ClearBorderEnablerEdgeFlags( false );
             if( sendchangedevent )
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
         }
         
         public void ClearSandboxBorderNodes( bool sendchangedevent )
         {
             //_SandboxBorderNodes = null;
             if( sendchangedevent )
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
         }
         
         public void ClearBorderEnablerEdgeFlags( bool sendchangedevent )
@@ -1013,7 +895,7 @@ namespace AnnexTheCommonwealth
             foreach( var enabler in _BorderEnablers )
                 enabler.ClearSegmentsAndEdgeFlags( true );
             if( sendchangedevent )
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
         }
         
         public void BuildSegmentsFromEdgeFlags( float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
@@ -1037,7 +919,7 @@ namespace AnnexTheCommonwealth
                 enabler.BuildSegmentsFromSubDivisionEdgeFlags( approximateNodeLength, slopeAllowance, updateMapUIData );
             }
             
-            SendObjectDataChangedEvent();
+            SendObjectDataChangedEvent( this );
             
         localReturnResult:
             var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;

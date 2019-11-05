@@ -6,14 +6,10 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
-
+using Engine.Plugin.Extensions;
 using Maths;
-using Fallout4;
-using AnnexTheCommonwealth;
+
 
 namespace GUIBuilder.FormImport
 {
@@ -129,7 +125,7 @@ namespace GUIBuilder.FormImport
                 ( ftLinkRef.Resolveable() )&&
                 ( ftLinkKeyword.Resolveable() )
             )   {
-                var lr = refr.LinkedRefs.GetLinkedRef( ftLinkKeyword.FormID );
+                var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftLinkKeyword.FormID );
                 if( !ftLinkRef.Matches( lr, false ) )
                     tmp.Add(
                         string.Format(
@@ -142,7 +138,7 @@ namespace GUIBuilder.FormImport
             if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -174,7 +170,7 @@ namespace GUIBuilder.FormImport
                         ftLinkKeyword.DisplayIDInfo()
                 ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )
@@ -195,7 +191,7 @@ namespace GUIBuilder.FormImport
             if( ( !lwk )&&( !stEnableParent.Resolveable() ) ) return false;
             
             var lr = lwk
-                ? refr.LinkedRefs.GetLinkedRef( ftLinkKeyword.FormID )
+                ? refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftLinkKeyword.FormID )
                 : null;
             
             return
@@ -381,7 +377,7 @@ namespace GUIBuilder.FormImport
                 TargetEnableParent.AddPlacedNIFReference( refr );
             }
             if( ( ftLinkRef.IsResolved )&&( ftLinkKeyword.IsResolved ) )
-                refr.LinkedRefs.SetLinkedRef( ftLinkRef.FormID, ftLinkKeyword.FormID );
+                refr.LinkedRefs.SetLinkedRef( Engine.Plugin.TargetHandle.Working, ftLinkRef.FormID, ftLinkKeyword.FormID );
             
             // Remove unwanted elements automagically added by the CK/XeLib
             refr.LocationReference.DeleteRootElement( false, false );

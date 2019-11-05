@@ -13,6 +13,7 @@ namespace Engine.Plugin
     
     public enum TargetHandle
     {
+        None,
         Master,
         LastFullRequired,
         Working,

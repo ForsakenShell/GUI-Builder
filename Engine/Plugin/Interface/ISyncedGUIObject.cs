@@ -53,7 +53,7 @@ namespace Engine.Plugin.Interface
         
         void                            SupressObjectDataChangedEvents();
         void                            ResumeObjectDataChangedEvents( bool sendevent );
-        void                            SendObjectDataChangedEvent();
+        void                            SendObjectDataChangedEvent( object sender );
         
         bool                            InitialCheckedOrSelectedState();
         

@@ -68,7 +68,7 @@ namespace GUIBuilder.Windows
         
         void OnFormLoad( object sender, EventArgs e )
         {
-            //DebugLog.Write( "GUIBuilder.RenderWindow.OnFormLoad() :: Start" );
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "OnFormLoad()" } );
             
             //_SetEnableState( false );
             
@@ -116,12 +116,12 @@ namespace GUIBuilder.Windows
             WorkerThreadPool.CreateWorker( initParams, THREAD_RENDER_Init, null ).Start();
             
             onLoadComplete = true;
-            //DebugLog.Write( "GUIBuilder.RenderWindow.OnFormLoad() :: Complete" );
+            DebugLog.CloseIndentLevel();
         }
         
         void OnFormClosing( object sender, FormClosingEventArgs e )
         {
-            //DebugLog.Write( "GUIBuilder.RenderWindow.OnFormClosing() :: Start" );
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "OnFormClosing()" } );
             GodObject.Windows.SetRenderWindow( null, false );
             Shutdown();
             
@@ -134,7 +134,7 @@ namespace GUIBuilder.Windows
             twSettlements = null;
             twSubDivisions = null;
             
-            //DebugLog.Write( "GUIBuilder.RenderWindow.OnFormClosing() :: Complete" );
+            DebugLog.CloseIndentLevel();
         }
         
         void OnFormMove( object sender, EventArgs e )
@@ -166,14 +166,14 @@ namespace GUIBuilder.Windows
             _UpdatingRenderer = true;
             _ResetViewportOnUpdate = true;
             
-            //DebugLog.Write( "GUIBuilder.RenderWindow.THREAD_RENDER_Init() :: Start" );
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "THREAD_RENDER_Init()" } );
             
             if( CreateTransform( initParams ) )
                 UpdateRenderWindowThread(); // Call the thread function directly from this thread
             
             transform.SyncSceneUpdate( false );
             
-            //DebugLog.Write( "GUIBuilder.RenderWindow.THREAD_RENDER_Init() :: Complete" );
+            DebugLog.CloseIndentLevel();
         }
         
         #region Sync'd list monitoring

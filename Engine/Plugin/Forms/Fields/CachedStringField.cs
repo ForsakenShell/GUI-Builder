@@ -7,6 +7,7 @@
 
 using System;
 using XeLib;
+using Engine.Plugin.Extensions;
 
 
 namespace Engine.Plugin.Forms.Fields

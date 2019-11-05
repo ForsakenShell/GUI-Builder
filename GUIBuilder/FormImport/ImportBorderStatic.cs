@@ -6,14 +6,10 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Diagnostics;
-using System.Windows.Forms;
 using System.Linq;
-
+using Engine.Plugin.Extensions;
 using Maths;
-using Fallout4;
-using AnnexTheCommonwealth;
+
 
 namespace GUIBuilder.FormImport
 {
@@ -94,7 +90,7 @@ namespace GUIBuilder.FormImport
             if( updateLODs )
                 tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayNewFormInfo()
@@ -107,7 +103,7 @@ namespace GUIBuilder.FormImport
             tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
             tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
             
-            return GenIXHandle.ConcatDisplayInfo( tmp );
+            return tmp.ConcatDisplayInfo();
         }
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )

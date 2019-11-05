@@ -53,7 +53,7 @@ namespace GodObject
                         if( node != null )
                             XmlConfig.WriteNodeValue( node, XmlAlwaysSelect, _AlwaysSelect.ToString(), true );
                     }
-                    SendObjectDataChangedEvent();
+                    SendObjectDataChangedEvent( null );
                 }
             }
             
@@ -212,11 +212,11 @@ namespace GodObject
             public virtual void         SupressObjectDataChangedEvents() {}
             public virtual void         ResumeObjectDataChangedEvents( bool sendevent ) {}
             
-            public void                 SendObjectDataChangedEvent()
+            public void                 SendObjectDataChangedEvent( object sender )
             {
                 EventHandler handler = ObjectDataChanged;
-                if( handler != null )
-                    handler( this, null );
+                if( ( handler != null )&&( sender != this ) )
+                    handler( sender, null );
             }
             
             public bool                 ObjectChecked( bool checkedValue )

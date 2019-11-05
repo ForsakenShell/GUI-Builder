@@ -352,17 +352,17 @@ namespace Engine.Plugin
         {
             _SupressObjectDataChangedEvent = false;
             if( sendevent )
-                SendObjectDataChangedEvent();
+                SendObjectDataChangedEvent( this );
         }
         
-        public void                     SendObjectDataChangedEvent()
+        public void                     SendObjectDataChangedEvent( object sender )
         {
             if( _SupressObjectDataChangedEvent )
                 return;
             EventHandler handler = ObjectDataChanged;
-            if( handler != null )
-                handler( this, null );
-            Form.SendObjectDataChangedEvent();
+            if( handler != null ) handler( sender, null );
+            if( sender != Form )
+                Form.SendObjectDataChangedEvent( this );
         }
         
         public virtual bool             InitialCheckedOrSelectedState()
