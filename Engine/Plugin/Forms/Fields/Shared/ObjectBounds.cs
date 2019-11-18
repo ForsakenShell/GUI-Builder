@@ -10,6 +10,8 @@ using XeLib;
 
 using Maths;
 
+using Engine.Plugin.Extensions;
+
 
 namespace Engine.Plugin.Forms.Fields.Shared
 {
@@ -33,7 +35,7 @@ namespace Engine.Plugin.Forms.Fields.Shared
         
         public Vector3i                 GetMinValue( TargetHandle target )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( ( cached_Min_Handle != null )&&( cached_Min_Handle == h ) ) return _value_Min;
             _value_Min = !HasValue( h )
                 ? Vector3i.Zero
@@ -47,7 +49,7 @@ namespace Engine.Plugin.Forms.Fields.Shared
         
         public void                     SetMinValue( TargetHandle target, Vector3i value )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             cached_Min_Handle = h;
             _value_Min = value;
             WriteInt( _Min_X, value.X, false );
@@ -57,7 +59,7 @@ namespace Engine.Plugin.Forms.Fields.Shared
         
         public Vector3i                 GetMaxValue( TargetHandle target )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( ( cached_Max_Handle != null )&&( cached_Max_Handle == h ) ) return _value_Max;
             _value_Max = !HasValue( h )
                 ? Vector3i.Zero
@@ -71,7 +73,7 @@ namespace Engine.Plugin.Forms.Fields.Shared
         
         public void                     SetMaxValue( TargetHandle target, Vector3i value )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             cached_Max_Handle = h;
             _value_Max = value;
             WriteInt( _Max_X, value.X, false );

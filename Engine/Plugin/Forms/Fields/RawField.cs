@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using XeLib;
 
+using Engine.Plugin.Extensions;
 
 
 namespace Engine.Plugin.Forms
@@ -52,47 +53,6 @@ namespace Engine.Plugin.Forms
                 : string.Format( @"{0}\{1}", XPath, path );
         }
         
-        //protected ElementHandle         HandleFromTarget( TargetHandle target )
-        public ElementHandle            HandleFromTarget( TargetHandle target )
-        {
-            ElementHandle h = null;
-            switch( target )
-            {
-                case TargetHandle.None:
-                    break;
-                    
-                case TargetHandle.Master:
-                    h = Form.MasterHandle;
-                    break;
-                    
-                case TargetHandle.LastFullRequired:
-                    h = Form.LastFullRequiredHandle;
-                    break;
-                    
-                case TargetHandle.Working:
-                    h = Form.WorkingFileHandle;
-                    break;
-                    
-                case TargetHandle.WorkingOrLastFullRequired:
-                    h =   Form.WorkingFileHandle.IsValid()      ? Form.WorkingFileHandle
-                        : Form.LastFullRequiredHandle.IsValid() ? Form.LastFullRequiredHandle
-                        : null;
-                    break;
-                    
-                case TargetHandle.LastFullOptional:
-                    h = Form.LastFullOptionalHandle;
-                    break;
-                    
-                case TargetHandle.LastValid:
-                    h = Form.Handles.Last();
-                    break;
-                    
-            }
-            if( !h.IsValid() )
-                throw new ArgumentException( string.Format( "Target did not yield a valid Handle for field :: Target = {0} :: Handle = {1}", target.ToString(), h.ToStringNullSafe() ) );
-            return h;
-        }
-        
         /*
         static bool HasElement( ElementHandle handle, string path )
         {
@@ -110,7 +70,7 @@ namespace Engine.Plugin.Forms
         //protected virtual bool          HasValue( ElementHandle handle, string path = "" )
         public virtual bool             HasValue( TargetHandle target, string path = "" )
         {
-            return HasValue( HandleFromTarget( target ), path );
+            return HasValue( Form.HandleFromTarget( target ), path );
         }
         
         public virtual bool             HasValue( ElementHandle handle, string path = "" )
@@ -141,6 +101,7 @@ namespace Engine.Plugin.Forms
             {
                 if( !createOverride ) return false;
                 h = Form.CopyAsOverride();
+                if( !h.IsValid() ) return false;
             }
             var path = BuildPath( RootElement );
             if( h.HasElement( path ) ) return true;

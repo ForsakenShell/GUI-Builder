@@ -21,6 +21,7 @@ namespace GUIBuilder.Windows.FormEditor
         #region Form Xml
         
         const string XmlKeyPrefix = "FormEditorWindow_";
+        protected virtual string XmlKeySuffix { get { return "YOU_FORGOT_TO_SET_THIS_IN_THE_CHILD_FORM_EDITOR_WINDOW"; } }
         
         [Browsable( false )]
         public GodObject.XmlConfig.IXmlConfiguration XmlParent
@@ -28,7 +29,7 @@ namespace GUIBuilder.Windows.FormEditor
         
         [Browsable( false )]
         public string XmlKey
-        { get { return XmlKeyPrefix + this.Text; } }
+        { get { return XmlKeyPrefix + XmlKeySuffix; } }
         
         [Browsable( false )]
         public string        XmlPath                     { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }

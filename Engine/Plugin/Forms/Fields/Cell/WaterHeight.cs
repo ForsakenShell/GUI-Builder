@@ -8,6 +8,9 @@
 using System;
 using XeLib;
 
+using Engine.Plugin.Extensions;
+
+
 namespace Engine.Plugin.Forms.Fields.Cell
 {
     
@@ -19,7 +22,7 @@ namespace Engine.Plugin.Forms.Fields.Cell
         public override float           GetValue( TargetHandle target )
         {
             if( ( ( (Engine.Plugin.Forms.Cell)Form ).GetFlags( target ) & (uint)Flags.Flag.HasWater ) == 0 ) return Engine.Constant.DefaultWaterHeight;
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( !HasValue( h ) ) return Engine.Constant.DefaultWaterHeight;
             var value = base.GetValue( target );
             return value < Engine.Constant.DefaultWaterHeight

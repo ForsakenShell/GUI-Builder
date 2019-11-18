@@ -86,7 +86,7 @@ namespace XeLib.API
         
         #region Element Values
         
-        #region string Values
+        #region String Values
         
         public static string GetValueEx( uint uHandle, string path )
         {
@@ -99,6 +99,22 @@ namespace XeLib.API
         public static bool SetValueEx( uint uHandle, string path, string value )
         {
             return Functions.SetValue( uHandle, path, value );
+        }
+        
+        #endregion
+        
+        #region Bool Values
+        
+        public static bool GetBoolValueEx( uint uHandle, string path )
+        {
+            int resInt;
+            Functions.GetIntValue( uHandle, path, out resInt );
+            return resInt != 0;
+        }
+        
+        public static bool SetBoolValueEx( uint uHandle, string path, bool value )
+        {
+            return Functions.SetIntValue( uHandle, path, value ? 1 : 0 );
         }
         
         #endregion

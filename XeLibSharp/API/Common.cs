@@ -149,6 +149,7 @@ namespace XeLib.API
         
         */
         
+        /*
         public static bool HasScript( ElementHandle handle, string value )
         {
             return Elements.HasArrayItemEx( handle.XHandle, @"VMAD\Scripts", "scriptName", value );
@@ -191,6 +192,7 @@ namespace XeLib.API
         {
             Elements.RemoveArrayItemEx( handle.XHandle, "Properties", "propertyName", value );
         }
+        */
         
         /*
         public static bool HasCondition( Handle handle, string value)

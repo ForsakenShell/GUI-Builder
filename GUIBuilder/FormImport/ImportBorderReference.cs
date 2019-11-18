@@ -21,7 +21,8 @@ namespace GUIBuilder.FormImport
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.IsFullLOD |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.LODRespectsEnableState |
-            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn;
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn |
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.VisibleWhenDistant;
         
         FormTarget              ftBaseStat = null;
         FormTarget              ftWorldspace = null;

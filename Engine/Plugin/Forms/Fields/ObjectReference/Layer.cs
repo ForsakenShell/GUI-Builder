@@ -7,6 +7,8 @@
 
 using System;
 
+using Engine.Plugin.Extensions;
+
 
 namespace Engine.Plugin.Forms.Fields.ObjectReference
 {
@@ -33,7 +35,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public override string ToString( TargetHandle target, string format = null )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( !XeLib.HandleExtensions.IsValid( h ) )
                 return null;
             var lID = GetValue( target );

@@ -143,7 +143,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <PluginSelectorWindow.OpenRenderWindow>Open Render Window On Load</PluginSelectorWindow.OpenRenderWindow>
     <PluginSelectorWindow.Load>Load</PluginSelectorWindow.Load>
     <PluginSelectorWindow.Cancel>Cancel</PluginSelectorWindow.Cancel>
-    <PluginSelectorWindow.None>NONE</PluginSelectorWindow.None>
+    <DropdownSelectNone>NONE</DropdownSelectNone>
     <SyncedListView.Edit>Edit</SyncedListView.Edit>
     <SyncedListView.SelectAll>Select All</SyncedListView.SelectAll>
     <SyncedListView.SelectNone>Select None</SyncedListView.SelectNone>
@@ -158,6 +158,27 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <FormEditor.Cancel>Cancel</FormEditor.Cancel>
     <FormEditor.SubDivision.Title>Sub-Division</FormEditor.SubDivision.Title>
     <FormEditor.SubDivision.Location>Location</FormEditor.SubDivision.Location>
+    <Location.Name>Name</Location.Name>
+    <FormEditor.SubDivision.RequirementConditions>Requirement Conditions</FormEditor.SubDivision.RequirementConditions>
+    <FormEditor.SubDivision.RequirementsRelationships>Relationships</FormEditor.SubDivision.RequirementsRelationships>
+    <FormEditor.SubDivision.RequirementsQuests>Quests</FormEditor.SubDivision.RequirementsQuests>
+    <FormEditor.SubDivision.RequirementsRelationshipsAndQuests>Relationships &amp;&amp; Quests</FormEditor.SubDivision.RequirementsRelationshipsAndQuests>
+    <FormEditor.SubDivision.Tab.Locations>Locations</FormEditor.SubDivision.Tab.Locations>
+    <FormEditor.SubDivision.Tab.EncounterZones>Encounter Zones</FormEditor.SubDivision.Tab.EncounterZones>
+    <FormEditor.SubDivision.Tab.Quests>Quests</FormEditor.SubDivision.Tab.Quests>
+    <FormEditor.SubDivision.Tab.Relationships>Relationships</FormEditor.SubDivision.Tab.Relationships>
+    <FormEditor.SubDivision.Tab.References>References</FormEditor.SubDivision.Tab.References>
+    <FormEditor.SubDivision.Tab.Location.Hide>Hide sub-division until conditions met</FormEditor.SubDivision.Tab.Location.Hide>
+    <FormEditor.SubDivision.Tab.Location.MustClear>Must clear to annex</FormEditor.SubDivision.Tab.Location.MustClear>
+    <FormEditor.SubDivision.Tab.Location.NeverReset>Set "Never Resets" on Encounter Zone</FormEditor.SubDivision.Tab.Location.NeverReset>
+    <FormEditor.SubDivision.Tab.Location.Workshop>Set "Workshop" on Encounter Zone</FormEditor.SubDivision.Tab.Location.Workshop>
+    <FormEditor.SubDivision.Tab.Location.OverrideParent>Override Encounter Zone &amp;&amp; Location Parent</FormEditor.SubDivision.Tab.Location.OverrideParent>
+    <FormEditor.SubDivision.Requirements.AllRelationships>And - All relationship requirements must be met</FormEditor.SubDivision.Requirements.AllRelationships>
+    <FormEditor.SubDivision.Requirements.AnyRelationship>Or - Any relationship requirement must be met</FormEditor.SubDivision.Requirements.AnyRelationship>
+    <FormEditor.SubDivision.Requirements.AllQuests>And - All quest requirements must be met</FormEditor.SubDivision.Requirements.AllQuests>
+    <FormEditor.SubDivision.Requirements.AnyQuest>Or - Any quest requirement must be met</FormEditor.SubDivision.Requirements.AnyQuest>
+    <FormEditor.SubDivision.Requirements.RelationshipsAndQuests>And - Relationships and Quest requirements must be met</FormEditor.SubDivision.Requirements.RelationshipsAndQuests>
+    <FormEditor.SubDivision.Requirements.RelationshipsOrQuests>Or - Relationships or Quest requirements must be met</FormEditor.SubDivision.Requirements.RelationshipsOrQuests>
     <BorderBatch.ParsingImportFile>Parsing border import file...</BorderBatch.ParsingImportFile>
     <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for 0x{1} - "{2}"...</BorderBatch.CreateNIFsFor>
     <SubDivisionBatch.ClearingBordersFor>Clearing borders for "{0}"...</SubDivisionBatch.ClearingBordersFor>

@@ -58,17 +58,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\DebugLog.cs">
+    <Compile Include="..\..\DebugLog\DebugLog.cs">
       <Link>DebugLog.cs</Link>
     </Compile>
-    <Compile Include="..\..\GenCollection.cs">
+    <Compile Include="..\..\Extensions\GenCollection.cs">
       <Link>GenCollection.cs</Link>
     </Compile>
-    <Compile Include="..\..\GenFilePath.cs">
+    <Compile Include="..\..\Extensions\GenFilePath.cs">
       <Link>GenFilePath.cs</Link>
     </Compile>
-    <Compile Include="..\..\GenString.cs">
+    <Compile Include="..\..\Extensions\GenString.cs">
       <Link>GenString.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Translator.cs">
+      <Link>Translator.cs</Link>
     </Compile>
     <Compile Include="..\..\XeLibSharp\ScriptPropertyHandle.cs">
       <Link>ScriptPropertyHandle.cs</Link>

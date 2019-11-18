@@ -8,6 +8,8 @@
 using System;
 using XeLib;
 
+using Engine.Plugin.Extensions;
+
 
 namespace Engine.Plugin.Forms.Fields.Static
 {
@@ -28,7 +30,7 @@ namespace Engine.Plugin.Forms.Fields.Static
         
         public override string[]        GetValue( TargetHandle target )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( ( cached_Handle != null )&&( h == cached_Handle ) ) return _value;
             cached_Handle = h;
             _value = !HasValue( h )
@@ -46,7 +48,7 @@ namespace Engine.Plugin.Forms.Fields.Static
             if( ( value == null )||( value.Length < 1 ) )
                 return;
             
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             
             _value = value;
             cached_Handle = h;

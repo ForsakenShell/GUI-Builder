@@ -11,6 +11,10 @@ using System.Collections.Generic;
 using Maths;
 
 using Engine;
+using Engine.Plugin;
+using Engine.Plugin.Extensions;
+
+using XeLib;
 
 
 namespace AnnexTheCommonwealth
@@ -37,29 +41,6 @@ namespace AnnexTheCommonwealth
         List<BuildAreaVolume> _BuildVolumes = null;
         //public List<BorderNode> BorderNodes = null;
         
-        public string LocationName
-        {
-            get
-            {
-                // TODO:  Replace with myLocation!
-                //return NameFromEditorID;
-                var p = XeLib.API.Common.GetScriptProperty( WorkingFileHandle, "myLocation" );
-                return p.GetValue();
-            }
-        }
-        
-        public uint myLocation
-        {
-            get
-            {
-                return Engine.Plugin.Constant.FormID_None;
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-        
         #region Constructor
         
         public SubDivision( Engine.Plugin.Forms.ObjectReference reference ) : base( reference )
@@ -73,6 +54,8 @@ namespace AnnexTheCommonwealth
         }
         
         #endregion
+        
+        #region Linked Refs
         
         #region Internal Edge Flag Management
         
@@ -432,7 +415,149 @@ namespace AnnexTheCommonwealth
         
         #endregion
         
-        #region Public Properties
+        #endregion
+        
+        #region PapyrusScript Properties & Enumerations
+        
+        #region myLocation
+        
+        const string PS_myLocation = "myLocation";
+        
+        public uint GetMyLocation( TargetHandle target )
+        {
+            var result = Engine.Plugin.Constant.FormID_Invalid;
+            
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_myLocation );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetMyLocation() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_myLocation ) );
+                goto localAbort;
+            }
+            
+            result = ph.GetUIntValue();
+            
+        localAbort:
+            return result;
+        }
+        public void SetMyLocation( TargetHandle target, uint value )
+        {
+            if( target != TargetHandle.Working )
+                throw new Exception( string.Format( "AnnexTheCommonwealth.SubDivision :: SetMyLocation() :: Invalid target = {0}", target.ToString() ) );
+            if( !this.IsInWorkingFile() )
+                if( !this.CopyAsOverride().IsValid() )
+                    throw new Exception( "AnnexTheCommonwealth.SubDivision :: SetMyLocation() :: Unable to copy override to working file!" );
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_myLocation );
+            if( !ph.IsValid() )
+                //ph = this.
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: SetMyLocation() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_myLocation ) );
+                return;
+            }
+            ph.SetUIntValue( value );
+        }
+        
+        #endregion
+        
+        #region Relationships
+        
+        const string PS_RelationshipsAnyAll = "RelationshipsAnyAll";
+        
+        public int GetRelationshipsAnyAll( TargetHandle target )
+        {
+            var result = 0;
+            
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAnyAll );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetRelationshipsAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                goto localAbort;
+            }
+            
+            result = Math.Min( 0, Math.Max( 1, ph.GetIntValue() ) );
+            
+        localAbort:
+            return result;
+        }
+        public void SetRelationshipsAnyAll( TargetHandle target, int value )
+        {
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAnyAll );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: SetRelationshipsAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                return;
+            }
+            ph.SetIntValue( value );
+        }
+        
+        #endregion
+        
+        #region Quests
+        
+        const string PS_QuestsAnyAll = "QuestStagesAnyAll";
+        
+        public int GetQuestStagesAnyAll( TargetHandle target )
+        {
+            var result = 0;
+            
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_QuestsAnyAll );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetQuestStagesAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                goto localAbort;
+            }
+            
+            result = Math.Min( 0, Math.Max( 1, ph.GetIntValue() ) );
+            
+        localAbort:
+            return result;
+        }
+        public void SetQuestStagesAnyAll( TargetHandle target, int value )
+        {
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_QuestsAnyAll );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetQuestStagesAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                return;
+            }
+            ph.SetIntValue( value );
+        }
+        
+        #endregion
+        
+        #region Relationships & Quests
+        
+        const string PS_RelationshipsAndQuests = "RelationshipsAndQuests";
+        
+        public int GetRelationshipsAndQuests( TargetHandle target )
+        {
+            var result = 0;
+            
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAndQuests );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetRelationshipsAndQuests() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                goto localAbort;
+            }
+            
+            result = Math.Min( 0, Math.Max( 1, ph.GetIntValue() ) );
+            
+        localAbort:
+            return result;
+        }
+        public void SetRelationshipsAndQuests( TargetHandle target, int value )
+        {
+            var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAndQuests );
+            if( !ph.IsValid() )
+            {
+                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetRelationshipsAndQuests() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                return;
+            }
+            ph.SetIntValue( value );
+        }
+        
+        #endregion
+        
+        #endregion
         
         public string NameFromEditorID
         {
@@ -444,8 +569,6 @@ namespace AnnexTheCommonwealth
                 return foo.Substring( 3, si - 3 );
             }
         }
-        
-        #endregion
         
         #region Bounding box and cells of all build volume
         

@@ -28,19 +28,19 @@ namespace Engine.Plugin.Forms.Fields
         
         public override float           GetValue( TargetHandle target )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             return cache.GetValue( h );
         }
         
         public override void            SetValue( TargetHandle target, float value )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             cache.SetValue( h, value );
         }
         
         public override string          ToString( TargetHandle target, string format = null )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             var v = GetRawValue( h );
             return string.IsNullOrEmpty( format ) ? v.ToString() : string.Format( format, v );
         }

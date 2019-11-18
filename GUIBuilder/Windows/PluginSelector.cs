@@ -93,7 +93,7 @@ namespace GUIBuilder.Windows
             }
             
             cbWorkingFile.Items.Clear();
-            cbWorkingFile.Items.Add( string.Format( " [{0}] ", "PluginSelectorWindow.None".Translate() ) );
+            cbWorkingFile.Items.Add( string.Format( " [{0}] ", "DropdownSelectNone".Translate() ) );
             cbWorkingFile.SelectedIndex = 0;
             onLoadComplete = true;
         }

@@ -9,6 +9,9 @@ using System;
 using XeLib;
 using XeLib.API;
 
+using Engine.Plugin.Extensions;
+
+
 namespace Engine.Plugin.Forms.Fields.Record
 {
     
@@ -25,7 +28,7 @@ namespace Engine.Plugin.Forms.Fields.Record
         
         public override uint            GetValue( TargetHandle target )
         {
-            var fh = HandleFromTarget( target ) as FormHandle;
+            var fh = Form.HandleFromTarget( target ) as FormHandle;
             if( !fh.IsValid() )
                 throw new ArgumentException( "target is not valid for field" );
             return fh.FormID;

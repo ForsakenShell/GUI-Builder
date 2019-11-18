@@ -59,17 +59,19 @@ namespace GUIBuilder.Windows.FormEditor
             this.gbUIDs.Controls.Add(this.lblFormID);
             this.gbUIDs.Location = new System.Drawing.Point(3, 3);
             this.gbUIDs.Name = "gbUIDs";
-            this.gbUIDs.Size = new System.Drawing.Size(298, 73);
+            this.gbUIDs.Size = new System.Drawing.Size(296, 73);
             this.gbUIDs.TabIndex = 0;
             this.gbUIDs.TabStop = false;
-            this.gbUIDs.Tag = "FormEditor.UID.Title";
-            this.gbUIDs.Text = "Unique Identifiers";
+            this.gbUIDs.Tag = "FormEditor.UID.Title:";
+            this.gbUIDs.Text = "Unique Identifiers:";
             // 
             // tbEditorID
             // 
-            this.tbEditorID.Location = new System.Drawing.Point(71, 42);
+            this.tbEditorID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbEditorID.Location = new System.Drawing.Point(70, 42);
             this.tbEditorID.Name = "tbEditorID";
-            this.tbEditorID.Size = new System.Drawing.Size(214, 20);
+            this.tbEditorID.Size = new System.Drawing.Size(220, 20);
             this.tbEditorID.TabIndex = 7;
             // 
             // lblEditorID
@@ -83,11 +85,13 @@ namespace GUIBuilder.Windows.FormEditor
             // 
             // tbFormID
             // 
+            this.tbFormID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFormID.BackColor = System.Drawing.SystemColors.Control;
             this.tbFormID.Enabled = false;
-            this.tbFormID.Location = new System.Drawing.Point(71, 19);
+            this.tbFormID.Location = new System.Drawing.Point(70, 19);
             this.tbFormID.Name = "tbFormID";
-            this.tbFormID.Size = new System.Drawing.Size(214, 20);
+            this.tbFormID.Size = new System.Drawing.Size(220, 20);
             this.tbFormID.TabIndex = 5;
             // 
             // lblFormID
@@ -103,7 +107,7 @@ namespace GUIBuilder.Windows.FormEditor
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(226, 82);
+            this.btnCancel.Location = new System.Drawing.Point(224, 80);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 1;
@@ -116,7 +120,7 @@ namespace GUIBuilder.Windows.FormEditor
             // 
             this.btnApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnApply.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnApply.Location = new System.Drawing.Point(145, 82);
+            this.btnApply.Location = new System.Drawing.Point(143, 80);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(75, 23);
             this.btnApply.TabIndex = 2;
@@ -131,11 +135,11 @@ namespace GUIBuilder.Windows.FormEditor
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(304, 108);
+            this.ClientSize = new System.Drawing.Size(302, 106);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.gbUIDs);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(310, 130);

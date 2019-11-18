@@ -32,13 +32,13 @@ namespace Engine.Plugin.Forms.Fields
         
         public override sdColor         GetValue( TargetHandle target )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             return cache.GetValue( h );
         }
         
         public override void            SetValue( TargetHandle target, sdColor value )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( !h.IsValid() )
                 throw new ArgumentException( "target is not valid for field" );
             cache.SetValue( h, value );
@@ -46,7 +46,7 @@ namespace Engine.Plugin.Forms.Fields
         
         public override string          ToString( TargetHandle target, string format = null )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             var v = GetRawValue( h );
             return string.Format(
                 string.IsNullOrEmpty( format ) ? "({0},{1},{2})" : format,

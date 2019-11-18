@@ -58,5 +58,26 @@ namespace XeLib
             return result;
         }
         
+        public ScriptPropertyHandle AddProperty( ScriptPropertyHandle.PropertyTypes type, string propertyName )
+        {
+            var result = GetProperty( propertyName );
+            if( !result.IsValid() )
+            {
+                result = Elements.AddArrayItemEx<ScriptPropertyHandle>( XHandle, "Properties", "propertyName", propertyName );
+                if( result.IsValid() )
+                {
+                    ElementValues.SetIntValueEx( result.XHandle, "Type", (int)type );
+                    ElementValues.SetIntValueEx( result.XHandle, "Flags", 1 );
+                }
+            }
+            return result;
+        }
+        
+        public bool RemoveProperty( string propertyName )
+        {
+            var property = GetProperty( propertyName );
+            return !property.IsValid() || Elements.RemoveArrayItemEx( XHandle, "Properties", "propertyName", property.PropertyName );
+        }
+        
     }
 }

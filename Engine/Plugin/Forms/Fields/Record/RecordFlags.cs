@@ -8,6 +8,8 @@
 using System;
 using XeLib;
 
+using Engine.Plugin.Extensions;
+
 
 namespace Engine.Plugin.Forms.Fields.Record
 {
@@ -214,7 +216,7 @@ namespace Engine.Plugin.Forms.Fields.Record
         
         public override uint            GetValue( TargetHandle target )
         {
-            var h = HandleFromTarget( target ) as XeLib.FormHandle;
+            var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             if( ( cached_Handle != null )&&( h == cached_Handle ) ) return _value;
             cached_Handle = h;
             _value = ReadUInt( h, _Flags );
@@ -223,7 +225,7 @@ namespace Engine.Plugin.Forms.Fields.Record
         
         public override void            SetValue( TargetHandle target, uint value )
         {
-            var h = HandleFromTarget( target ) as XeLib.FormHandle;
+            var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             cached_Handle = h;
             _value = value;
             WriteUInt( _Flags, value, true );
@@ -231,7 +233,7 @@ namespace Engine.Plugin.Forms.Fields.Record
         
         public override string          ToString( TargetHandle target, string format = null )
         {
-            var h = HandleFromTarget( target ) as XeLib.FormHandle;
+            var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             if( !h.IsValid() ) throw new InvalidCastException();
             var setFlags = h.GetEnabledFlags( BuildPath( _Flags ) );
             string result = string.Format( "0x{0} - " + GetValue( target ).ToString( "X8" ) );
@@ -251,13 +253,13 @@ namespace Engine.Plugin.Forms.Fields.Record
         
         public string[]                 AllFlags( TargetHandle target )
         {
-            var h = HandleFromTarget( target ) as XeLib.FormHandle;
+            var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             return h.GetRecordFlags();
         }
         
         public bool                     GetFlag( TargetHandle target, string flag )
         {
-            var h = HandleFromTarget( target ) as XeLib.FormHandle;
+            var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             return h.GetRecordFlag( flag );
         }
         
@@ -265,7 +267,7 @@ namespace Engine.Plugin.Forms.Fields.Record
         {
             // TODO:  Make this code more generic instead of just targetting GUIBuilder's needs
             if( target != TargetHandle.Working ) throw new ArgumentException( "target is invalid for field!" );
-            var h = HandleFromTarget( target ) as XeLib.FormHandle;
+            var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             if( !CreateRootElement( true, false ) ) return;
             h.SetRecordFlag( flag, value );
             Form.SendObjectDataChangedEvent( null );

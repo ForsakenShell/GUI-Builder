@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using XeLib;
 using XeLib.API;
 
+using Engine.Plugin.Extensions;
+
 
 namespace Engine.Plugin.Forms.Fields.ObjectReference
 {
@@ -44,7 +46,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         void                            GetLinkedRefsFromForm( TargetHandle target )
         {
-            var h = HandleFromTarget( target );
+            var h = Form.HandleFromTarget( target );
             if( _LastHandle == h ) return;
             
             ClearCurrentLinkedRefHandles();

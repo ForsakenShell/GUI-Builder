@@ -552,7 +552,7 @@ namespace XeLib
         
         #region Element Values
         
-        #region string Values
+        #region String Values
         
         public virtual string GetValue()
         {
@@ -572,6 +572,30 @@ namespace XeLib
         public virtual bool SetValueEx( string path, string value )
         {
             return ElementValues.SetValueEx( this.XHandle, path, value );
+        }
+        
+        #endregion
+        
+        #region Bool Values
+        
+        public virtual bool GetBoolValue()
+        {
+            return ElementValues.GetBoolValueEx( this.XHandle, "" );
+        }
+        
+        public virtual bool GetBoolValueEx( string path )
+        {
+            return ElementValues.GetBoolValueEx( this.XHandle, path );
+        }
+        
+        public virtual bool SetBoolValue( bool value )
+        {
+            return ElementValues.SetBoolValueEx( this.XHandle, "", value );
+        }
+        
+        public virtual bool SetBoolValueEx( string path, bool value )
+        {
+            return ElementValues.SetBoolValueEx( this.XHandle, path, value );
         }
         
         #endregion
