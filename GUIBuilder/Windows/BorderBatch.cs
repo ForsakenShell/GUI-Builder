@@ -295,7 +295,7 @@ namespace GUIBuilder.Windows
         
         void UpdateWorkshopList( bool updateSampleDisplay )
         {
-            var workshops = GodObject.Plugin.Data.Workshops.ToList();
+            var workshops = GodObject.Plugin.Data.Workshops.ToList( false );
             if( workshops.NullOrEmpty() )
                 _sampleWorkshop = null;
             else
@@ -317,7 +317,7 @@ namespace GUIBuilder.Windows
         
         void UpdateSubDivisionList( bool updateSampleDisplay )
         {
-            var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList();
+            var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList( false );
             if( subdivisions.NullOrEmpty() )
                 _sampleSubDivision = null;
             else

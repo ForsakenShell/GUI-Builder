@@ -236,13 +236,16 @@ namespace Engine.Plugin.Forms.Fields.Record
             var h = Form.HandleFromTarget( target ) as XeLib.FormHandle;
             if( !h.IsValid() ) throw new InvalidCastException();
             var setFlags = h.GetEnabledFlags( BuildPath( _Flags ) );
-            string result = string.Format( "0x{0} - " + GetValue( target ).ToString( "X8" ) );
-            foreach( var f in setFlags )
+            string result = string.Format( "0x{0}", GetValue( target ).ToString( "X8" ) );
+            if( !setFlags.NullOrEmpty() )
             {
-                if( !string.IsNullOrEmpty( f ) )
-                    result += string.Format( "{0}, ", f );
+                result += " - ";
+                foreach( var f in setFlags )
+                {
+                    if( !string.IsNullOrEmpty( f ) )
+                        result += string.Format( "{0}, ", f );
+                }
             }
-            
             return result;
         }
         

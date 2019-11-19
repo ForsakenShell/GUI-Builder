@@ -77,7 +77,7 @@ namespace GUIBuilder.Windows
         {
             #if FAKE_LISTVIEW_FOR_FORM_EDITOR
             #else
-            var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList();
+            var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList( false );
             lvSubDivisions.SyncObjects = subdivisions;
             #endif
         }

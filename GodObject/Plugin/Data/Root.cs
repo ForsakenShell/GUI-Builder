@@ -140,9 +140,9 @@ namespace GodObject
                 
                 #region Enumerate Root Collections
                 
-                public static void      AddToMasterTable( IXHandle syncObject )
+                public static bool      AddToMasterTable( IXHandle syncObject )
                 {
-                    if( !syncObject.IsValid() ) return;
+                    if( !syncObject.IsValid() ) return false;
                     
                     if( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ValidFormID() )
                     {
@@ -159,6 +159,8 @@ namespace GodObject
                         var lEID = eid.ToLower();
                         _ByEditorID[ lEID ] = syncObject;
                     }
+                    
+                    return true;
                 }
                 
                 public static void      RemoveFromMasterTable( IXHandle syncObject )

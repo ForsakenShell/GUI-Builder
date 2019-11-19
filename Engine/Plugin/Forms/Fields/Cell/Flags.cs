@@ -27,7 +27,8 @@ namespace Engine.Plugin.Forms.Fields.Cell
             UseSkyLighting                  = 0x00000100,
             SunlightShadows                 = 0x00000800,
             DistantLODOnly                  = 0x00001000,
-            PlayerFollowersCantTravelHere   = 0x00002000
+            PlayerFollowersCantTravelHere   = 0x00002000,
+            PackInCell                      = 0x00000400    // Undocumented but seems to be
         }
         
         public Flags( Form form ) : base( form, "DATA" ) {}

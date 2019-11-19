@@ -27,7 +27,7 @@ namespace Engine.Plugin.Interface
         void                Add( TList item );
         bool                Remove( TList item );
         
-        List<TList>         ToList();
+        List<TList>         ToList( bool includePackInReferences );
         
         TList               Find( uint formid );
         TList               Find( string editorid );

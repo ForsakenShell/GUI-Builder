@@ -400,9 +400,21 @@ namespace Engine.Plugin
         
         #region Un/Loading
         
-        public virtual bool             Load()                  { return true; }
+        public virtual bool             Load()
+        {
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Load()", this.ToStringNullSafe() } );
+            //DebugDump( TargetHandle.Master );
+            //DebugLog.CloseIndentLevel();
+            return true;
+        }
         
-        public virtual bool             PostLoad()              { return true; }
+        public virtual bool             PostLoad()
+        {
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "PostLoad()", this.ToStringNullSafe() } );
+            //DebugDump( TargetHandle.Master );
+            //DebugLog.CloseIndentLevel();
+            return true;
+        }
         
         // For Dispose() see the Allocation/Deallocation region above
         
@@ -439,18 +451,20 @@ namespace Engine.Plugin
         
         public bool                     AddNewHandle( ElementHandle newHandle )
         {
+            //DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "AddNewHandle()", newHandle.ToStringNullSafe(), System.Environment.StackTrace } );
+            
+            bool result = false;
+            
             if( !newHandle.IsValid() )
             {
                 DebugLog.WriteLine( string.Format( "{0} :: AddNewHandle() :: newHandle is invalid!", this.GetType().ToString() ) );
-                return false;
+                goto localAbort;
             }
             if( ( newHandle as FormHandle ) == null )
             {
                 DebugLog.WriteLine( string.Format( "{0} :: AddNewHandle() :: newHandle is not a FormHandle!", this.GetType().ToString() ) );
-                return false;
+                goto localAbort;
             }
-            
-            var handles = _Handles ?? new List<ElementHandle>();
             
             var insertAt = HandleExtensions.ExistingHandleIndex( _Handles, newHandle );
             if( insertAt >= 0 )
@@ -460,13 +474,13 @@ namespace Engine.Plugin
                     _Handles[ insertAt ].Dispose();
                     _Handles[ insertAt ] = newHandle;
                 }
-                return true;
+                goto localAbort;
             }
             insertAt = HandleExtensions.InsertHandleIndex( _Handles, newHandle );
             if( insertAt < 0 )
             {
                 DebugLog.WriteWarning( this.GetType().ToString(), "AddNewHandle()", string.Format( "Unable to get load order insertion index for newHandle {0}", newHandle.ToString() ) );
-                return false;
+                goto localAbort;
             }
             
             if( insertAt == _Handles.Count )
@@ -475,8 +489,11 @@ namespace Engine.Plugin
                 _Handles.Insert( insertAt, newHandle );
             
             RecalcHandleIndexes();
+            result = true;
             
-            return true;
+        localAbort:
+            //DebugLog.CloseIndentLevel( "_Handles", _Handles );
+            return result;
         }
         
         public ElementHandle            MasterHandle                { get { return HandleByIndex( 0 ); } }
@@ -592,6 +609,9 @@ namespace Engine.Plugin
         bool                            GetHandles( FormHandle hSource = null )
         {
             if( !_Handles.NullOrEmpty() ) return true;
+            //DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "GetHandles()", hSource.ToStringNullSafe() } );
+            
+            bool result = false;
             
             if( hSource.IsValid() )
             {
@@ -603,25 +623,25 @@ namespace Engine.Plugin
                 if( !Engine.Plugin.Constant.ValidFormID( _Forced_FormID ) )
                 {
                     DebugLog.WriteError( this.GetType().ToString(), "GetHandles()", "FormID is invalid" );
-                    return false;
+                    goto localAbort;
                 }
                 if( !Engine.Plugin.Constant.ValidEditorID( _Forced_Filename ) )
                 {
                     DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Filename is invalid for 0x{0}", _Forced_FormID.ToString( "X8" ) ) );
-                    return false;
+                    goto localAbort;
                 }
                 var m = GodObject.Plugin.Data.Files.Find( _Forced_Filename );
                 if( ( m == null )||( m.LoadOrder == Constant.LO_Invalid ) )
                 {
                     DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Unable to get file for 0x{0} - \"{1}\"", _Forced_FormID.ToString( "X8" ), _Forced_Filename ) );
-                    return false;
+                    goto localAbort;
                 }
                 var fID = _Forced_FormID | m.GetFormID( Engine.Plugin.TargetHandle.Master );
                 hSource = m.MasterHandle.GetMasterRecord( fID, false );
                 if( !hSource.IsValid() )
                 {
                     DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Unable to GetMasterRecord for 0x{0} - \"{1}\"", _Forced_FormID.ToString( "X8" ), _Forced_Filename ) );
-                    return false;
+                    goto localAbort;
                 }
             }
             
@@ -630,7 +650,7 @@ namespace Engine.Plugin
             {
                 hSource.Dispose();
                 DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Record has invalid signature for 0x{0} :: Expected \"{1}\" got \"{2}\"", _Forced_FormID.ToString( "X8" ), Signature, rSig ) );
-                return false;
+                goto localAbort;
             }
             
             _Handles = new List<ElementHandle>();
@@ -639,11 +659,15 @@ namespace Engine.Plugin
             var hOverrides = hSource.GetOverrides();
             if( !hOverrides.NullOrEmpty() )
                 foreach( var hOverride in hOverrides )
-                    _Handles.Add( hOverride );
+                    if( ( !_Handles.Contains( hOverride ) )&&( !_Handles.Any( h => h.DuplicateOf( hOverride ) ) ) )
+                        _Handles.Add( hOverride );
             
             RecalcHandleIndexes();
+            result = true;
             
-            return true;
+        localAbort:
+            //DebugLog.CloseIndentLevel( "_Handles", _Handles );
+            return result;
         }
         
         void                            RecalcHandleIndexes()
@@ -660,7 +684,6 @@ namespace Engine.Plugin
                 {
                     var hOverride = _Handles[ i ] as FormHandle;
                     var hLO = hOverride.FileHandle.LoadOrder;
-                    _Handles.Add( hOverride );
                     if( hLO == wLO )
                         _WorkingFileHandleIndex = i;
                     if( !hOverride.IsPartialRecord )
@@ -759,11 +782,10 @@ namespace Engine.Plugin
             if( _SupressObjectDataChangedEvent ) return;
             EventHandler handler = ObjectDataChanged;
             if( handler != null ) handler( sender, null );
-            foreach( var script in _Scripts )
-            {
-                if( sender != script )
-                    script.SendObjectDataChangedEvent( this );
-            }
+            if( !_Scripts.NullOrEmpty() )
+                foreach( var script in _Scripts )
+                    if( sender != script )
+                        script.SendObjectDataChangedEvent( this );
         }
         
         public virtual bool             InitialCheckedOrSelectedState() { return false; }
@@ -870,14 +892,18 @@ namespace Engine.Plugin
             DebugLog.WriteLine( string.Format( "\t\tLastFullRequiredHandleIndex: {0}", _LastFullRequiredHandleIndex ) );
             DebugLog.WriteLine( string.Format( "\t\tLastFullOptionalHandleIndex: {0}", _LastFullOptionalHandleIndex ) );
             DebugLog.WriteLine( string.Format( "\t\tWorkingFileHandleIndex: {0}", _WorkingFileHandleIndex ) );
-            for( int i = 0; i < _Handles.Count; i++ )
-                DebugLog.WriteLine( string.Format( "\t\t[ {0} ] :: {1}", i, _Handles[ i ].ToString() ) );
+            if( !_Handles.NullOrEmpty() )
+                for( int i = 0; i < _Handles.Count; i++ )
+                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] :: {1}", i, _Handles[ i ].ToString() ) );
             DebugLog.WriteLine( string.Format( "\tFormID: {0}", _FormID.ToString( target ) ) );
             DebugLog.WriteLine( string.Format( "\tEditorID: \"{0}\"", _EditorID.ToString( target ) ) );
             var allFlags = RecordFlags.AllFlags( target );
-            DebugLog.WriteLine( string.Format( "\tFlags: ", RecordFlags.ToString( target ) ) );
-            foreach( var f in allFlags )
-                if( ( !string.IsNullOrEmpty( f ) )&&( !f.StartsWith( "unknown", StringComparison.InvariantCultureIgnoreCase ) ) ) DebugLog.WriteLine( string.Format( "\t\t{0} = {1}", f, RecordFlags.GetFlag( target, f ) ) );
+            if( !allFlags.NullOrEmpty() )
+            {
+                DebugLog.WriteLine( string.Format( "\tFlags: ", RecordFlags.ToString( target ) ) );
+                foreach( var f in allFlags )
+                    if( ( !string.IsNullOrEmpty( f ) )&&( !f.StartsWith( "unknown", StringComparison.InvariantCultureIgnoreCase ) ) ) DebugLog.WriteLine( string.Format( "\t\t{0} = {1}", f, RecordFlags.GetFlag( target, f ) ) );
+            }
             DebugDumpChild( target );
         }
         

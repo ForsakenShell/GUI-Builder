@@ -866,12 +866,7 @@ namespace GUIBuilder.FormImport
             
             DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ShowImportDialog()" } );
             
-            var m = GodObject.Windows.GetMainWindow();
-            m.PushStatusMessage();
-            
             #region Import window
-            
-            m.SetCurrentStatusMessage( "BatchImportWindow.Create".Translate() );
             
             var bbiw = new GUIBuilder.Windows.BatchImport();
             bbiw.EnableControlsOnClose = enableControlsOnClose;
@@ -882,7 +877,6 @@ namespace GUIBuilder.FormImport
             
             #endregion
             
-            m.PopStatusMessage();
             DebugLog.CloseIndentLevel();
             return true;
         }

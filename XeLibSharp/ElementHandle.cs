@@ -190,17 +190,19 @@ namespace XeLib
                 return "[null]";
             if( Disposed )
                 return "[disposed]";
-            var strExtra = ToStringExtra();
+            var strXHandle = this.XHandle.ToString( "X8" );
             var strType = this.GetType().ToString();
             var strFile = this.Filename;
-            var strXHandle = this.XHandle.ToString( "X8" );
+            var strLO = string.Format( "Load Order = 0x{0}", LoadOrder.ToString( "X2" ) );
+            var strExtra = ToStringExtra();
             var strCloned = ( CloneOf == null ? null : " :: Cloned Handle" );
             var str = string.Format(
-                "[XHandle = 0x{2} :: {3} :: \"{1}\"{0}{4}]",
-                ( strExtra == null ? null : string.Format( " :: {0}", strExtra ) ),
-                strFile,
+                "[XHandle = 0x{0} :: {1} :: \"{2}\" :: {3}{4}{5}]",
                 strXHandle,
                 strType,
+                strFile,
+                strLO,
+                ( strExtra == null ? null : string.Format( " :: {0}", strExtra ) ),
                 strCloned
             );
             return str;
@@ -383,7 +385,7 @@ namespace XeLib
         {
             get
             {
-                var lo = Setup.GetActivePlugins().IndexOf( Filename );
+                var lo = Setup.GetLoadOrder( false ).FindIndex( loi => loi.Filename.InsensitiveInvariantMatch( Filename ) );
                 return lo < 0 ? 0xFFFFFFFF : ( uint )lo;
             }
         }

@@ -645,11 +645,12 @@ namespace GodObject
                     return result;
                 }
                 
-                public List<TScript> ToList()
+                public List<TScript> ToList( bool includePackInReferences )
                 {
                     if( ( _ScriptForms == null )||( _ScriptForms.Count == 0 ) )
                         return null;
-                    return _ScriptForms.Values.ToList();
+                    return _ScriptForms.Values.Where( x => includePackInReferences || !x.Reference.Cell.GetIsPackInCell( Engine.Plugin.TargetHandle.Master ) ).ToList();
+                    //return _ScriptForms.Values.ToList();
                 }
                 
                 public TScript Find( uint formid )

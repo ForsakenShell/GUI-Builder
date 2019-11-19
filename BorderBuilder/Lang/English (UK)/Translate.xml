@@ -8,6 +8,7 @@
     <Conflict.None>No Conflict</Conflict.None>
     <Conflict.OverrideInAncestor>Override in Ancestor</Conflict.OverrideInAncestor>
     <Conflict.OverrideInWorkingFile>Override in Working File</Conflict.OverrideInWorkingFile>
+    <Conflict.OverrideInPostLoad>Override in Post Load File</Conflict.OverrideInPostLoad>
     <Conflict.OverrideRequired>Requires Override</Conflict.OverrideRequired>
     <MainWindow.Title>GUIBuilder</MainWindow.Title>
     <MainWindow.SavingFile>Saving "{0}"...</MainWindow.SavingFile>

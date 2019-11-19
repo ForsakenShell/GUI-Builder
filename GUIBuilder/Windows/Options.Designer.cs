@@ -29,6 +29,7 @@ namespace GUIBuilder.Windows
         private System.Windows.Forms.GroupBox gbLanguage;
         private System.Windows.Forms.ComboBox cbLanguage;
         private System.Windows.Forms.TextBox tbLanguageRestart;
+        private System.Windows.Forms.TextBox tbCSOverrideInPostLoad;
         
         /// <summary>
         /// Disposes resources used by the form.
@@ -53,25 +54,26 @@ namespace GUIBuilder.Windows
         {
             this.gbAlwaysSelectMasters = new System.Windows.Forms.GroupBox();
             this.lvAlwaysSelectMasters = new GUIBuilder.Windows.Controls.SyncedListView<GodObject.Master.File>();
-            this.gbConflictStatus = new System.Windows.Forms.GroupBox();
-            this.tbCSUneditable = new System.Windows.Forms.TextBox();
-            this.tbCSRequiresOverride = new System.Windows.Forms.TextBox();
-            this.tbCSNoConflict = new System.Windows.Forms.TextBox();
-            this.tbCSOverrideInWorkingFile = new System.Windows.Forms.TextBox();
-            this.tbCSOverrideInAncestor = new System.Windows.Forms.TextBox();
-            this.tbCSNewForm = new System.Windows.Forms.TextBox();
             this.tbCSInvalid = new System.Windows.Forms.TextBox();
-            this.gbSDLHints = new System.Windows.Forms.GroupBox();
-            this.tbSDLVideoRenderWarning = new System.Windows.Forms.TextBox();
-            this.cbSDLVideoDriver = new System.Windows.Forms.ComboBox();
-            this.lblSDLVideoDriver = new System.Windows.Forms.Label();
-            this.gbLanguage = new System.Windows.Forms.GroupBox();
-            this.tbLanguageRestart = new System.Windows.Forms.TextBox();
+            this.tbCSNewForm = new System.Windows.Forms.TextBox();
+            this.tbCSOverrideInAncestor = new System.Windows.Forms.TextBox();
+            this.tbCSOverrideInWorkingFile = new System.Windows.Forms.TextBox();
+            this.tbCSNoConflict = new System.Windows.Forms.TextBox();
+            this.tbCSRequiresOverride = new System.Windows.Forms.TextBox();
+            this.tbCSUneditable = new System.Windows.Forms.TextBox();
+            this.tbCSOverrideInPostLoad = new System.Windows.Forms.TextBox();
+            this.gbConflictStatus = new System.Windows.Forms.GroupBox();
             this.cbLanguage = new System.Windows.Forms.ComboBox();
+            this.tbLanguageRestart = new System.Windows.Forms.TextBox();
+            this.gbLanguage = new System.Windows.Forms.GroupBox();
+            this.lblSDLVideoDriver = new System.Windows.Forms.Label();
+            this.cbSDLVideoDriver = new System.Windows.Forms.ComboBox();
+            this.tbSDLVideoRenderWarning = new System.Windows.Forms.TextBox();
+            this.gbSDLHints = new System.Windows.Forms.GroupBox();
             this.gbAlwaysSelectMasters.SuspendLayout();
             this.gbConflictStatus.SuspendLayout();
-            this.gbSDLHints.SuspendLayout();
             this.gbLanguage.SuspendLayout();
+            this.gbSDLHints.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbAlwaysSelectMasters
@@ -112,90 +114,18 @@ namespace GUIBuilder.Windows
             this.lvAlwaysSelectMasters.TabIndex = 13;
             this.lvAlwaysSelectMasters.TypeColumn = true;
             // 
-            // gbConflictStatus
+            // tbCSInvalid
             // 
-            this.gbConflictStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbCSInvalid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbConflictStatus.Controls.Add(this.tbCSUneditable);
-            this.gbConflictStatus.Controls.Add(this.tbCSRequiresOverride);
-            this.gbConflictStatus.Controls.Add(this.tbCSNoConflict);
-            this.gbConflictStatus.Controls.Add(this.tbCSOverrideInWorkingFile);
-            this.gbConflictStatus.Controls.Add(this.tbCSOverrideInAncestor);
-            this.gbConflictStatus.Controls.Add(this.tbCSNewForm);
-            this.gbConflictStatus.Controls.Add(this.tbCSInvalid);
-            this.gbConflictStatus.Location = new System.Drawing.Point(3, 106);
-            this.gbConflictStatus.Name = "gbConflictStatus";
-            this.gbConflictStatus.Size = new System.Drawing.Size(309, 116);
-            this.gbConflictStatus.TabIndex = 1;
-            this.gbConflictStatus.TabStop = false;
-            this.gbConflictStatus.Tag = "OptionsWindow.ConflictStatus";
-            this.gbConflictStatus.Text = "Conflicts";
-            // 
-            // tbCSUneditable
-            // 
-            this.tbCSUneditable.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCSUneditable.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbCSUneditable.Location = new System.Drawing.Point(9, 32);
-            this.tbCSUneditable.Name = "tbCSUneditable";
-            this.tbCSUneditable.ReadOnly = true;
-            this.tbCSUneditable.Size = new System.Drawing.Size(292, 13);
-            this.tbCSUneditable.TabIndex = 1;
-            this.tbCSUneditable.Tag = "Conflict.Uneditable";
-            this.tbCSUneditable.Text = "Uneditable";
-            // 
-            // tbCSRequiresOverride
-            // 
-            this.tbCSRequiresOverride.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCSRequiresOverride.BackColor = System.Drawing.SystemColors.Control;
-            this.tbCSRequiresOverride.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbCSRequiresOverride.Location = new System.Drawing.Point(9, 97);
-            this.tbCSRequiresOverride.Name = "tbCSRequiresOverride";
-            this.tbCSRequiresOverride.ReadOnly = true;
-            this.tbCSRequiresOverride.Size = new System.Drawing.Size(292, 13);
-            this.tbCSRequiresOverride.TabIndex = 6;
-            this.tbCSRequiresOverride.Tag = "Conflict.OverrideRequired";
-            this.tbCSRequiresOverride.Text = "Requires Override";
-            // 
-            // tbCSNoConflict
-            // 
-            this.tbCSNoConflict.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCSNoConflict.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbCSNoConflict.Location = new System.Drawing.Point(9, 58);
-            this.tbCSNoConflict.Name = "tbCSNoConflict";
-            this.tbCSNoConflict.ReadOnly = true;
-            this.tbCSNoConflict.Size = new System.Drawing.Size(292, 13);
-            this.tbCSNoConflict.TabIndex = 3;
-            this.tbCSNoConflict.Tag = "Conflict.None";
-            this.tbCSNoConflict.Text = "No Conflict";
-            // 
-            // tbCSOverrideInWorkingFile
-            // 
-            this.tbCSOverrideInWorkingFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCSOverrideInWorkingFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbCSOverrideInWorkingFile.Location = new System.Drawing.Point(9, 84);
-            this.tbCSOverrideInWorkingFile.Name = "tbCSOverrideInWorkingFile";
-            this.tbCSOverrideInWorkingFile.ReadOnly = true;
-            this.tbCSOverrideInWorkingFile.Size = new System.Drawing.Size(292, 13);
-            this.tbCSOverrideInWorkingFile.TabIndex = 5;
-            this.tbCSOverrideInWorkingFile.Tag = "Conflict.OverrideInWorkingFile";
-            this.tbCSOverrideInWorkingFile.Text = "Override in Working File";
-            // 
-            // tbCSOverrideInAncestor
-            // 
-            this.tbCSOverrideInAncestor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCSOverrideInAncestor.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbCSOverrideInAncestor.Location = new System.Drawing.Point(9, 71);
-            this.tbCSOverrideInAncestor.Name = "tbCSOverrideInAncestor";
-            this.tbCSOverrideInAncestor.ReadOnly = true;
-            this.tbCSOverrideInAncestor.Size = new System.Drawing.Size(292, 13);
-            this.tbCSOverrideInAncestor.TabIndex = 4;
-            this.tbCSOverrideInAncestor.Tag = "Conflict.OverrideInAncestor";
-            this.tbCSOverrideInAncestor.Text = "Override in Ancestor";
+            this.tbCSInvalid.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSInvalid.Location = new System.Drawing.Point(9, 19);
+            this.tbCSInvalid.Name = "tbCSInvalid";
+            this.tbCSInvalid.ReadOnly = true;
+            this.tbCSInvalid.Size = new System.Drawing.Size(292, 13);
+            this.tbCSInvalid.TabIndex = 0;
+            this.tbCSInvalid.Tag = "Conflict.Error";
+            this.tbCSInvalid.Text = "Error State";
             // 
             // tbCSNewForm
             // 
@@ -210,83 +140,116 @@ namespace GUIBuilder.Windows
             this.tbCSNewForm.Tag = "Conflict.NewForm";
             this.tbCSNewForm.Text = "New Form";
             // 
-            // tbCSInvalid
+            // tbCSOverrideInAncestor
             // 
-            this.tbCSInvalid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbCSOverrideInAncestor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCSInvalid.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbCSInvalid.Location = new System.Drawing.Point(9, 19);
-            this.tbCSInvalid.Name = "tbCSInvalid";
-            this.tbCSInvalid.ReadOnly = true;
-            this.tbCSInvalid.Size = new System.Drawing.Size(292, 13);
-            this.tbCSInvalid.TabIndex = 0;
-            this.tbCSInvalid.Tag = "Conflict.Error";
-            this.tbCSInvalid.Text = "Error State";
+            this.tbCSOverrideInAncestor.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSOverrideInAncestor.Location = new System.Drawing.Point(9, 71);
+            this.tbCSOverrideInAncestor.Name = "tbCSOverrideInAncestor";
+            this.tbCSOverrideInAncestor.ReadOnly = true;
+            this.tbCSOverrideInAncestor.Size = new System.Drawing.Size(292, 13);
+            this.tbCSOverrideInAncestor.TabIndex = 4;
+            this.tbCSOverrideInAncestor.Tag = "Conflict.OverrideInAncestor";
+            this.tbCSOverrideInAncestor.Text = "Override in Ancestor";
             // 
-            // gbSDLHints
+            // tbCSOverrideInWorkingFile
             // 
-            this.gbSDLHints.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbCSOverrideInWorkingFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbSDLHints.Controls.Add(this.tbSDLVideoRenderWarning);
-            this.gbSDLHints.Controls.Add(this.cbSDLVideoDriver);
-            this.gbSDLHints.Controls.Add(this.lblSDLVideoDriver);
-            this.gbSDLHints.Location = new System.Drawing.Point(3, 324);
-            this.gbSDLHints.Name = "gbSDLHints";
-            this.gbSDLHints.Size = new System.Drawing.Size(309, 121);
-            this.gbSDLHints.TabIndex = 2;
-            this.gbSDLHints.TabStop = false;
-            this.gbSDLHints.Tag = "OptionsWindow.SDLHint";
-            this.gbSDLHints.Text = "SDL";
+            this.tbCSOverrideInWorkingFile.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSOverrideInWorkingFile.Location = new System.Drawing.Point(9, 84);
+            this.tbCSOverrideInWorkingFile.Name = "tbCSOverrideInWorkingFile";
+            this.tbCSOverrideInWorkingFile.ReadOnly = true;
+            this.tbCSOverrideInWorkingFile.Size = new System.Drawing.Size(292, 13);
+            this.tbCSOverrideInWorkingFile.TabIndex = 5;
+            this.tbCSOverrideInWorkingFile.Tag = "Conflict.OverrideInWorkingFile";
+            this.tbCSOverrideInWorkingFile.Text = "Override in Working File";
             // 
-            // tbSDLVideoRenderWarning
+            // tbCSNoConflict
             // 
-            this.tbSDLVideoRenderWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbCSNoConflict.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbSDLVideoRenderWarning.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbSDLVideoRenderWarning.Location = new System.Drawing.Point(9, 19);
-            this.tbSDLVideoRenderWarning.Multiline = true;
-            this.tbSDLVideoRenderWarning.Name = "tbSDLVideoRenderWarning";
-            this.tbSDLVideoRenderWarning.ReadOnly = true;
-            this.tbSDLVideoRenderWarning.Size = new System.Drawing.Size(292, 66);
-            this.tbSDLVideoRenderWarning.TabIndex = 3;
-            this.tbSDLVideoRenderWarning.TabStop = false;
-            this.tbSDLVideoRenderWarning.Tag = "";
-            this.tbSDLVideoRenderWarning.Text = "Your mother wears amry boots!";
+            this.tbCSNoConflict.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSNoConflict.Location = new System.Drawing.Point(9, 58);
+            this.tbCSNoConflict.Name = "tbCSNoConflict";
+            this.tbCSNoConflict.ReadOnly = true;
+            this.tbCSNoConflict.Size = new System.Drawing.Size(292, 13);
+            this.tbCSNoConflict.TabIndex = 3;
+            this.tbCSNoConflict.Tag = "Conflict.None";
+            this.tbCSNoConflict.Text = "No Conflict";
             // 
-            // cbSDLVideoDriver
+            // tbCSRequiresOverride
             // 
-            this.cbSDLVideoDriver.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbCSRequiresOverride.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbSDLVideoDriver.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbSDLVideoDriver.FormattingEnabled = true;
-            this.cbSDLVideoDriver.Location = new System.Drawing.Point(110, 91);
-            this.cbSDLVideoDriver.Name = "cbSDLVideoDriver";
-            this.cbSDLVideoDriver.Size = new System.Drawing.Size(193, 21);
-            this.cbSDLVideoDriver.TabIndex = 1;
-            this.cbSDLVideoDriver.SelectedIndexChanged += new System.EventHandler(this.cbSDLVideoDriverSelectedIndexChanged);
+            this.tbCSRequiresOverride.BackColor = System.Drawing.SystemColors.Control;
+            this.tbCSRequiresOverride.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSRequiresOverride.Location = new System.Drawing.Point(9, 110);
+            this.tbCSRequiresOverride.Name = "tbCSRequiresOverride";
+            this.tbCSRequiresOverride.ReadOnly = true;
+            this.tbCSRequiresOverride.Size = new System.Drawing.Size(292, 13);
+            this.tbCSRequiresOverride.TabIndex = 6;
+            this.tbCSRequiresOverride.Tag = "Conflict.OverrideRequired";
+            this.tbCSRequiresOverride.Text = "Requires Override";
             // 
-            // lblSDLVideoDriver
+            // tbCSUneditable
             // 
-            this.lblSDLVideoDriver.Location = new System.Drawing.Point(9, 94);
-            this.lblSDLVideoDriver.Name = "lblSDLVideoDriver";
-            this.lblSDLVideoDriver.Size = new System.Drawing.Size(100, 21);
-            this.lblSDLVideoDriver.TabIndex = 0;
-            this.lblSDLVideoDriver.Tag = "OptionsWindow.SDLHint.VideoDriver:";
-            this.lblSDLVideoDriver.Text = "Driver";
-            // 
-            // gbLanguage
-            // 
-            this.gbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbCSUneditable.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbLanguage.Controls.Add(this.tbLanguageRestart);
-            this.gbLanguage.Controls.Add(this.cbLanguage);
-            this.gbLanguage.Location = new System.Drawing.Point(3, 228);
-            this.gbLanguage.Name = "gbLanguage";
-            this.gbLanguage.Size = new System.Drawing.Size(309, 90);
-            this.gbLanguage.TabIndex = 3;
-            this.gbLanguage.TabStop = false;
-            this.gbLanguage.Tag = "OptionsWindow.Language";
-            this.gbLanguage.Text = "Lang it all anyway!";
+            this.tbCSUneditable.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSUneditable.Location = new System.Drawing.Point(9, 32);
+            this.tbCSUneditable.Name = "tbCSUneditable";
+            this.tbCSUneditable.ReadOnly = true;
+            this.tbCSUneditable.Size = new System.Drawing.Size(292, 13);
+            this.tbCSUneditable.TabIndex = 1;
+            this.tbCSUneditable.Tag = "Conflict.Uneditable";
+            this.tbCSUneditable.Text = "Uneditable";
+            // 
+            // tbCSOverrideInPostLoad
+            // 
+            this.tbCSOverrideInPostLoad.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCSOverrideInPostLoad.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbCSOverrideInPostLoad.Location = new System.Drawing.Point(9, 97);
+            this.tbCSOverrideInPostLoad.Name = "tbCSOverrideInPostLoad";
+            this.tbCSOverrideInPostLoad.ReadOnly = true;
+            this.tbCSOverrideInPostLoad.Size = new System.Drawing.Size(292, 13);
+            this.tbCSOverrideInPostLoad.TabIndex = 7;
+            this.tbCSOverrideInPostLoad.Tag = "Conflict.OverrideInPostLoad";
+            this.tbCSOverrideInPostLoad.Text = "Override in Post Load File";
+            // 
+            // gbConflictStatus
+            // 
+            this.gbConflictStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbConflictStatus.Controls.Add(this.tbCSOverrideInPostLoad);
+            this.gbConflictStatus.Controls.Add(this.tbCSUneditable);
+            this.gbConflictStatus.Controls.Add(this.tbCSRequiresOverride);
+            this.gbConflictStatus.Controls.Add(this.tbCSNoConflict);
+            this.gbConflictStatus.Controls.Add(this.tbCSOverrideInWorkingFile);
+            this.gbConflictStatus.Controls.Add(this.tbCSOverrideInAncestor);
+            this.gbConflictStatus.Controls.Add(this.tbCSNewForm);
+            this.gbConflictStatus.Controls.Add(this.tbCSInvalid);
+            this.gbConflictStatus.Location = new System.Drawing.Point(3, 106);
+            this.gbConflictStatus.Name = "gbConflictStatus";
+            this.gbConflictStatus.Size = new System.Drawing.Size(309, 129);
+            this.gbConflictStatus.TabIndex = 1;
+            this.gbConflictStatus.TabStop = false;
+            this.gbConflictStatus.Tag = "OptionsWindow.ConflictStatus";
+            this.gbConflictStatus.Text = "Conflicts";
+            // 
+            // cbLanguage
+            // 
+            this.cbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLanguage.FormattingEnabled = true;
+            this.cbLanguage.Location = new System.Drawing.Point(6, 63);
+            this.cbLanguage.Name = "cbLanguage";
+            this.cbLanguage.Size = new System.Drawing.Size(297, 21);
+            this.cbLanguage.TabIndex = 2;
+            this.cbLanguage.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSelectedIndexChanged);
             // 
             // tbLanguageRestart
             // 
@@ -303,23 +266,76 @@ namespace GUIBuilder.Windows
             this.tbLanguageRestart.Tag = "OptionsWindow.LanguageRestart";
             this.tbLanguageRestart.Text = "Your father smells of elderberries!";
             // 
-            // cbLanguage
+            // gbLanguage
             // 
-            this.cbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.gbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbLanguage.FormattingEnabled = true;
-            this.cbLanguage.Location = new System.Drawing.Point(6, 63);
-            this.cbLanguage.Name = "cbLanguage";
-            this.cbLanguage.Size = new System.Drawing.Size(297, 21);
-            this.cbLanguage.TabIndex = 2;
-            this.cbLanguage.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSelectedIndexChanged);
+            this.gbLanguage.Controls.Add(this.tbLanguageRestart);
+            this.gbLanguage.Controls.Add(this.cbLanguage);
+            this.gbLanguage.Location = new System.Drawing.Point(3, 241);
+            this.gbLanguage.Name = "gbLanguage";
+            this.gbLanguage.Size = new System.Drawing.Size(309, 90);
+            this.gbLanguage.TabIndex = 3;
+            this.gbLanguage.TabStop = false;
+            this.gbLanguage.Tag = "OptionsWindow.Language";
+            this.gbLanguage.Text = "Lang it all anyway!";
+            // 
+            // lblSDLVideoDriver
+            // 
+            this.lblSDLVideoDriver.Location = new System.Drawing.Point(9, 94);
+            this.lblSDLVideoDriver.Name = "lblSDLVideoDriver";
+            this.lblSDLVideoDriver.Size = new System.Drawing.Size(100, 21);
+            this.lblSDLVideoDriver.TabIndex = 0;
+            this.lblSDLVideoDriver.Tag = "OptionsWindow.SDLHint.VideoDriver:";
+            this.lblSDLVideoDriver.Text = "Driver";
+            // 
+            // cbSDLVideoDriver
+            // 
+            this.cbSDLVideoDriver.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbSDLVideoDriver.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbSDLVideoDriver.FormattingEnabled = true;
+            this.cbSDLVideoDriver.Location = new System.Drawing.Point(110, 91);
+            this.cbSDLVideoDriver.Name = "cbSDLVideoDriver";
+            this.cbSDLVideoDriver.Size = new System.Drawing.Size(193, 21);
+            this.cbSDLVideoDriver.TabIndex = 1;
+            this.cbSDLVideoDriver.SelectedIndexChanged += new System.EventHandler(this.cbSDLVideoDriverSelectedIndexChanged);
+            // 
+            // tbSDLVideoRenderWarning
+            // 
+            this.tbSDLVideoRenderWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbSDLVideoRenderWarning.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tbSDLVideoRenderWarning.Location = new System.Drawing.Point(9, 19);
+            this.tbSDLVideoRenderWarning.Multiline = true;
+            this.tbSDLVideoRenderWarning.Name = "tbSDLVideoRenderWarning";
+            this.tbSDLVideoRenderWarning.ReadOnly = true;
+            this.tbSDLVideoRenderWarning.Size = new System.Drawing.Size(292, 66);
+            this.tbSDLVideoRenderWarning.TabIndex = 3;
+            this.tbSDLVideoRenderWarning.TabStop = false;
+            this.tbSDLVideoRenderWarning.Tag = "";
+            this.tbSDLVideoRenderWarning.Text = "Your mother wears amry boots!";
+            // 
+            // gbSDLHints
+            // 
+            this.gbSDLHints.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbSDLHints.Controls.Add(this.tbSDLVideoRenderWarning);
+            this.gbSDLHints.Controls.Add(this.cbSDLVideoDriver);
+            this.gbSDLHints.Controls.Add(this.lblSDLVideoDriver);
+            this.gbSDLHints.Location = new System.Drawing.Point(3, 337);
+            this.gbSDLHints.Name = "gbSDLHints";
+            this.gbSDLHints.Size = new System.Drawing.Size(309, 121);
+            this.gbSDLHints.TabIndex = 2;
+            this.gbSDLHints.TabStop = false;
+            this.gbSDLHints.Tag = "OptionsWindow.SDLHint";
+            this.gbSDLHints.Text = "SDL";
             // 
             // Options
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(314, 448);
+            this.ClientSize = new System.Drawing.Size(314, 461);
             this.Controls.Add(this.gbLanguage);
             this.Controls.Add(this.gbSDLHints);
             this.Controls.Add(this.gbConflictStatus);
@@ -328,7 +344,7 @@ namespace GUIBuilder.Windows
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(600, 800);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(322, 472);
+            this.MinimumSize = new System.Drawing.Size(322, 485);
             this.Name = "Options";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "OptionsWindow.Title";
@@ -341,10 +357,10 @@ namespace GUIBuilder.Windows
             this.gbAlwaysSelectMasters.ResumeLayout(false);
             this.gbConflictStatus.ResumeLayout(false);
             this.gbConflictStatus.PerformLayout();
-            this.gbSDLHints.ResumeLayout(false);
-            this.gbSDLHints.PerformLayout();
             this.gbLanguage.ResumeLayout(false);
             this.gbLanguage.PerformLayout();
+            this.gbSDLHints.ResumeLayout(false);
+            this.gbSDLHints.PerformLayout();
             this.ResumeLayout(false);
 
         }

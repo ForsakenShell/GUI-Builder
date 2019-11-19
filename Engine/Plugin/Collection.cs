@@ -124,20 +124,24 @@ namespace Engine.Plugin
         
         public virtual bool             Add( IXHandle syncObject )
         {
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "AddFromRecord()", syncObject.ToStringNullSafe() } );
+            
+            bool result = false;
+            
             if( !this.IsValid() )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "Add()", "Collection !IsValid" );
-                return false;
+                goto localAbort;
             }
             if( syncObject == null )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "Add()", "syncObject is null" );
-                return false;
+                goto localAbort;
             }
             if( !_Association.ClassType.IsInstanceOfType( syncObject ) )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "Add()", string.Format( "Invalid Association.ClassType for \"{0}\"! :: Expected {1} :: Got {2}", syncObject.GetType().ToString(), syncObject.GetType().ToString(), _Association.ClassType.ToString() ) );
-                return false;
+                goto localAbort;
             }
             
             if( _AllForms == null )
@@ -157,10 +161,12 @@ namespace Engine.Plugin
                 _ByEditorID[ soEDID.ToLower() ] = syncObject;
             }
             
-            GodObject.Plugin.Data.Root.AddToMasterTable( syncObject );
+            result = GodObject.Plugin.Data.Root.AddToMasterTable( syncObject );
             
             //syncObject.Ancestor = _Ancestor; // Shouldn't need to do this now...?
-            return true;
+        localAbort:
+            //DebugLog.CloseIndentLevel();
+            return result;
         }
         
         public virtual void             Remove( IXHandle syncObject )
@@ -202,71 +208,79 @@ namespace Engine.Plugin
         
         public IXHandle                 AddFromRecord( IXHandle ancestor, ElementHandle handle )
         {
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "AddFromRecord()", ancestor.ToStringNullSafe(), handle.ToStringNullSafe() } );
+            
+            IXHandle result = null;
+            
             if( !this.IsValid() )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", "Collection !IsValid" );
-                return null;
+                goto localAbort;
             }
             
             if( !handle.IsValid() )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Invalid handle 0x{0}", handle.ToString() ) );
-                return null;
+                goto localAbort;
             }
             
             var rSig = handle.Signature;
             if( rSig != _Association.Signature )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Invalid record signature!  :: Expected \"{0}\" got \"{1}\"", _Association.Signature, rSig ) );
-                return null;
+                goto localAbort;
             }
             
             if( ( ancestor == null )&&( !_Association.AllowRootCollection ) )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Class does not allow root collections! :: {0}",  _Association.ClassType.ToString() ) );
-                return null;
+                goto localAbort;
             }
             
-            var syncObject = Activator.CreateInstance( _Association.ClassType, new Object[] { this, ancestor, handle } ) as IXHandle; //IDataSync;
-            if( syncObject == null )
+            result = Activator.CreateInstance( _Association.ClassType, new Object[] { this, ancestor, handle } ) as IXHandle; //IDataSync;
+            if( result == null )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Unable to create new {0}!", _Association.ClassType.ToString() ) );
-                return null;
+                goto localAbort;
             }
             
-            if( !syncObject.Load() )
+            if( !result.Load() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false!", syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
-                return null;
+                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false!", result.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), result.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
+                goto localAbort;
             }
             
-            var formid = syncObject.GetFormID( Engine.Plugin.TargetHandle.Master );
+            /* // Shouldn't need to do this now...?
+            var formid = result.GetFormID( Engine.Plugin.TargetHandle.Master );
             foreach( var file in GodObject.Plugin.Data.Files.Loaded )
             {
-                if( file.LoadOrder > syncObject.LoadOrder )
+                if( file.LoadOrder > result.LoadOrder )
                 {
                     var hOverride = file.WorkingFileHandle.GetRecord( formid, false );
                     if( hOverride.IsValid() )
                     {
-                        //syncObject.UpdateHandles( hOverride ); // Shouldn't need to do this now...?
-                        if( !syncObject.Load() )
+                        //syncObject.UpdateHandles( hOverride );
+                        if( !result.Load() )
                         {
-                            DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false for override handle!", syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
-                            return null;
+                            DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.Load() returned false for override handle!", result.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), result.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
+                            goto localAbort;
                         }
                     }
                 }
             }
+            */
             
-            if( !syncObject.PostLoad() )
+            if( !result.PostLoad() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.PostLoad() returned false!", syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
-                return null;
+                DebugLog.WriteError( this.GetType().ToString(), "AddFromRecord()", string.Format( "Form 0x{0} - \"{1}\" :: {2}.PostLoad() returned false!", result.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), result.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), _Association.ClassType.ToString() ) );
+                goto localAbort;
             }
             
-            Add( syncObject );
+            Add( result );
             
-            return syncObject;
+        localAbort:
+            //DebugLog.CloseIndentLevel( "result", result );
+            return result;
         }
         
         public TSync                    CreateNew<TSync>() where TSync : class, IXHandle
@@ -452,7 +466,7 @@ namespace Engine.Plugin
             }
             
        localReturnResult:
-            //DebugLog.CloseIndentLevel<IDataSync>( result );
+            //DebugLog.CloseIndentLevel<IXHandle>( "result", result );
             return result;
         }
         

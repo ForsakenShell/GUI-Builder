@@ -59,7 +59,12 @@ namespace Engine.Plugin.Forms
         public Worldspace( string filename, uint formID ) : base( filename, formID ) {}
         
         //public Worldspace( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Worldspace( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle ) {}
+        public Worldspace( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle )
+        {
+            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "cTor()", this.ToStringNullSafe() } );
+            //DebugDump( TargetHandle.Master );
+            //DebugLog.CloseIndentLevel();
+        }
         
         public override void CreateChildFields()
         {
@@ -143,6 +148,7 @@ namespace Engine.Plugin.Forms
         
         #region Debugging
         
+        public bool DebugDumpCells = false;
         public override void DebugDumpChild( TargetHandle target )
         {
             if( _FullName.HasValue( target ) )
@@ -155,11 +161,14 @@ namespace Engine.Plugin.Forms
                 DebugLog.WriteLine( string.Format( "\tMap Data: {0}", _MapData.ToString( target ) ) );
             if( _Bounds.HasValue( target ) )
                 DebugLog.WriteLine( string.Format( "\tBounds: {0}", _Bounds.ToString( target ) ) );
-            var cContainer = Cells;
-            DebugLog.WriteLine( string.Format( "\tCell count: {0}", cContainer.Count ) );
-            var cells = cContainer.ToList<Engine.Plugin.Forms.Cell>();
-            for( var i = 0; i < cells.Count; i++ )
-                cells[i].DebugDump( target );
+            if( DebugDumpCells )
+            {
+                var cContainer = Cells;
+                DebugLog.WriteLine( string.Format( "\tCell count: {0}", cContainer.Count ) );
+                var cells = cContainer.ToList<Engine.Plugin.Forms.Cell>();
+                for( var i = 0; i < cells.Count; i++ )
+                    cells[i].DebugDump( target );
+            }
         }
         
         #endregion

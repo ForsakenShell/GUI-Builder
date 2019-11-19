@@ -75,7 +75,7 @@ namespace XeLib.API
             for( int i = 0; i < unfiltered.Length; i++ )
             {
                 if( string.IsNullOrEmpty( unfiltered[ i ] ) ) continue;
-                if( ( !allowGhosts )&&( unfiltered[ i ].EndsWith( ".ghost", StringComparison.InvariantCulture ) ) ) continue;
+                if( ( !allowGhosts )&&( unfiltered[ i ].EndsWith( ".ghost", StringComparison.InvariantCultureIgnoreCase ) ) ) continue;
                 lo.Add( new LoadOrderItem( unfiltered[ i ], FileHandle.GetMastersOf( unfiltered[ i ] ) ) );
             }
             return lo;

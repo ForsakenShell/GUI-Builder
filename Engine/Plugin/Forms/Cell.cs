@@ -101,7 +101,19 @@ namespace Engine.Plugin.Forms
         
         public bool GetIsInterior( TargetHandle target )
         {
-            return ( GetFlags( target ) & (uint)Engine.Plugin.Forms.Fields.Cell.Flags.Flag.IsInteriorCell ) != 0;
+            var f = GetFlags( target );
+            return ( f & (uint)Engine.Plugin.Forms.Fields.Cell.Flags.Flag.IsInteriorCell ) != 0;
+        }
+        
+        public bool GetIsPackInCell( TargetHandle target )
+        {
+            var f = GetFlags( target );
+            //DebugLog.WriteLine( string.Format(
+            //    "0x{0} - \"{1}\" :: Cell Flags: 0x{2}",
+            //    GetFormID( target ).ToString( "X8" ),
+            //    GetEditorID( target ),
+            //    f.ToString( "X8" ) ) );
+            return ( f & (uint)Engine.Plugin.Forms.Fields.Cell.Flags.Flag.PackInCell ) != 0;
         }
         
         public Engine.Plugin.Collection ObjectReferences
@@ -132,11 +144,11 @@ namespace Engine.Plugin.Forms
                 ( !RecordFlags.GetPersistent( target ) )&&
                 ( _CellGrid.HasValue( target ) )
             )
-                DebugLog.WriteLine( string.Format( "\tGrid: \"{0}\"", _CellGrid.ToString( target ) ) );
+                DebugLog.WriteLine( string.Format( "\tGrid: {0}", _CellGrid.ToString( target ) ) );
             if( _Flags.HasValue( target ) )
-                DebugLog.WriteLine( string.Format( "\tFlags: \"{0}\"", _Flags.ToString( target ) ) );
+                DebugLog.WriteLine( string.Format( "\tFlags: {0}", _Flags.ToString( target ) ) );
             if( _WaterHeight.HasValue( target ) )
-                DebugLog.WriteLine( string.Format( "\tWater Height: \"{0}\"", _WaterHeight.ToString( target ) ) );
+                DebugLog.WriteLine( string.Format( "\tWater Height: {0}", _WaterHeight.ToString( target ) ) );
             var w = Worldspace;
             if( w != null )
                 DebugLog.WriteLine( string.Format( "\tWorldspace: {0}", w.ToString() ) );
