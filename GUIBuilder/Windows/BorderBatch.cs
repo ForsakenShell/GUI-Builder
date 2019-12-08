@@ -40,6 +40,8 @@ namespace GUIBuilder.Windows
         ToolTip tbNIFBuilderSubDivisionFilePathSampleToolTip;
         ToolTip tbNIFBuilderWorkshopFilePathSampleToolTip;
         
+        List<TabPage> hiddenPages = new List<TabPage>();
+        
         bool ReImportFileValid
         {
             get
@@ -71,32 +73,47 @@ namespace GUIBuilder.Windows
             
             tbTargetFolder.Text = GodObject.Paths.DefaultNIFBuilderOutput;
             
-            tbNIFBuilderSubDivisionFilePathSampleToolTip = new ToolTip();
-            tbNIFBuilderSubDivisionFilePathSampleToolTip.ShowAlways = true;
-            
-            tbNIFBuilderWorkshopFilePathSampleToolTip = new ToolTip();
-            tbNIFBuilderWorkshopFilePathSampleToolTip.ShowAlways = true;
-            
             tbNIFBuilderTargetFolderToolTip = new ToolTip();
             tbNIFBuilderTargetFolderToolTip.ShowAlways = true;
             tbNIFBuilderTargetFolderToolTip.SetToolTip( tbTargetFolder, tbTargetFolder.Text );
             
-            RepopulatePresetComboBoxes( cbWorkshopPresets   , NIFBuilder.Preset.WorkshopPresets   );
-            RepopulatePresetComboBoxes( cbSubDivisionPresets, NIFBuilder.Preset.SubDivisionPresets );
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            {
+                tbNIFBuilderSubDivisionFilePathSampleToolTip = new ToolTip();
+                tbNIFBuilderSubDivisionFilePathSampleToolTip.ShowAlways = true;
+                
+                RepopulatePresetComboBoxes( cbSubDivisionPresets, NIFBuilder.Preset.SubDivisionPresets );
+                
+                lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
+                GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
+                UpdateSubDivisionList( false );
+                
+                EnablePage( tpSubDivisions, true );
+            }
+            else
+                EnablePage( tpSubDivisions, false );
             
-            cbRestrictWorkshopBorderKeywords.Text = string.Format( "{0}\n{1}", "BorderBatchWindow.NodeDetection.Restrict".Translate(), GodObject.Plugin.Data.Files.Working.Filename );
-            
-            lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
-            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
-            UpdateSubDivisionList( false );
-            
-            //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
-            GodObject.Plugin.Data.Workshops.ObjectDataChanged += OnWorkshopListChanged;
-            UpdateWorkshopList( false );
-            
-            UpdateNIFFilePathSampleInternal();
+            if( GodObject.Master.Fallout4.Loaded )
+            {
+                tbNIFBuilderWorkshopFilePathSampleToolTip = new ToolTip();
+                tbNIFBuilderWorkshopFilePathSampleToolTip.ShowAlways = true;
+                
+                RepopulatePresetComboBoxes( cbWorkshopPresets   , NIFBuilder.Preset.WorkshopPresets   );
+                
+                cbRestrictWorkshopBorderKeywords.Text = string.Format( "{0}\n{1}", "BorderBatchWindow.NodeDetection.Restrict".Translate(), GodObject.Plugin.Data.Files.Working.Filename );
+                
+                //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
+                GodObject.Plugin.Data.Workshops.ObjectDataChanged += OnWorkshopListChanged;
+                UpdateWorkshopList( false );
+                
+                EnablePage( tpWorkshops, true );
+            }
+            else
+                EnablePage( tpWorkshops, false );
             
             onLoadComplete = true;
+            
+            UpdateNIFFilePathSampleInternal();
             SetEnableState( true );
         }
         
@@ -113,6 +130,7 @@ namespace GUIBuilder.Windows
                 return;
             GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
         }
+        
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
@@ -135,6 +153,22 @@ namespace GUIBuilder.Windows
             //pnNIFBuilder.Enabled = !cbNIFBuilderFullATCSet.Checked;
             
             pnWindow.Enabled = enabled;
+        }
+        
+        void EnablePage( TabPage page, bool enable )
+        {
+            if( enable )
+            {
+                if( !tcObjectSelect.TabPages.Contains( page ) )
+                    tcObjectSelect.TabPages.Add( page );
+                hiddenPages.Remove( page );
+            }
+            else
+            {
+                if( !hiddenPages.Contains( page ) )
+                    hiddenPages.Add( page );
+                tcObjectSelect.TabPages.Remove( page );
+            }
         }
         
         #endregion
@@ -399,28 +433,31 @@ namespace GUIBuilder.Windows
                 }
             }
             
-            var subDivisions = lvSubDivisions.GetSelectedSyncObjects();
-            if( !subDivisions.NullOrEmpty() )
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
             {
-                var sdPreset = SelectedSubDivisionPreset;
-                var nodeLength = ( sdPreset == null )
-                    ? float.Parse( tbSubDivisionNodeLength.Text )
-                    : sdPreset.NodeLength;
-                var slopeAllowance = ( sdPreset == null )
-                    ? float.Parse( tbSubDivisionSlopeAllowance.Text )
-                    : sdPreset.SlopeAllowance;
-                var createImportData = ( sdPreset == null )
-                    ? cbSubDivisionCreateImportData.Checked
-                    : sdPreset.CreateImportData;
-                if( GUIBuilder.SubDivisionBatch.CalculateSubDivisionEdgeFlagSegments(
-                    subDivisions,
-                    nodeLength,
-                    slopeAllowance,
-                    createImportData ) )
+                var subDivisions = lvSubDivisions.GetSelectedSyncObjects();
+                if( !subDivisions.NullOrEmpty() )
                 {
-                    _nodesBuilt = true;
-                    _reImportFile = null;
-                    _importData = null;
+                    var sdPreset = SelectedSubDivisionPreset;
+                    var nodeLength = ( sdPreset == null )
+                        ? float.Parse( tbSubDivisionNodeLength.Text )
+                        : sdPreset.NodeLength;
+                    var slopeAllowance = ( sdPreset == null )
+                        ? float.Parse( tbSubDivisionSlopeAllowance.Text )
+                        : sdPreset.SlopeAllowance;
+                    var createImportData = ( sdPreset == null )
+                        ? cbSubDivisionCreateImportData.Checked
+                        : sdPreset.CreateImportData;
+                    if( GUIBuilder.SubDivisionBatch.CalculateSubDivisionEdgeFlagSegments(
+                        subDivisions,
+                        nodeLength,
+                        slopeAllowance,
+                        createImportData ) )
+                    {
+                        _nodesBuilt = true;
+                        _reImportFile = null;
+                        _importData = null;
+                    }
                 }
             }
             
@@ -436,6 +473,9 @@ namespace GUIBuilder.Windows
         
         void UpdateNIFFilePathSampleInternal()
         {
+            if( !onLoadComplete )
+                return;
+            
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "UpdateNIFFilePathSampleInternal()" } );
             
             var target = tbTargetFolder.Text;
@@ -456,30 +496,33 @@ namespace GUIBuilder.Windows
             tbWorkshopSampleFilePath.Text = wsSample;
             tbNIFBuilderWorkshopFilePathSampleToolTip.SetToolTip( tbWorkshopSampleFilePath, wsSample );
             
-            var sdPreset = FullChildSelectedSubDivisionPreset;
-            var sdFilePrefix = tbSubDivisionFilePrefix.Text;
-            var sdName = _sampleSubDivision != null ? _sampleSubDivision.NameFromEditorID : "";
-            var sdNeighbourName = "Main";
-            var subBorders = _sampleSubDivision != null ? _sampleSubDivision.BorderEnablers : null;
-            if( !subBorders.NullOrEmpty() )
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
             {
-                var border = subBorders[ 0 ];
-                var neighbour = border == null ? null : border.Neighbour;
-                //if( ( border != null )&&( border.Neighbour != null ) )
-                if( neighbour != null )
-                    sdNeighbourName = neighbour.NameFromEditorID;
+                var sdPreset = FullChildSelectedSubDivisionPreset;
+                var sdFilePrefix = tbSubDivisionFilePrefix.Text;
+                var sdName = _sampleSubDivision != null ? _sampleSubDivision.NameFromEditorID : "";
+                var sdNeighbourName = "Main";
+                var subBorders = _sampleSubDivision != null ? _sampleSubDivision.BorderEnablers : null;
+                if( !subBorders.NullOrEmpty() )
+                {
+                    var border = subBorders[ 0 ];
+                    var neighbour = border == null ? null : border.Neighbour;
+                    //if( ( border != null )&&( border.Neighbour != null ) )
+                    if( neighbour != null )
+                        sdNeighbourName = neighbour.NameFromEditorID;
+                }
+                
+                var sdSample = NIFBuilder.Mesh.BuildFilePath(
+                    tbMeshDirectory.Text,
+                    ( sdPreset != null ? sdPreset.MeshSubDirectory : tbSubDivisionMeshSubDirectory.Text ),
+                    ( sdPreset != null ? sdPreset.FilePrefix : tbSubDivisionFilePrefix.Text ),
+                    sdName,
+                    ( sdPreset != null ? sdPreset.FileSuffix : tbSubDivisionFileSuffix.Text ), 1,
+                    sdNeighbourName, 1 );
+                
+                tbNIFBuilderSubDivisionSampleFilePath.Text = sdSample;
+                tbNIFBuilderSubDivisionFilePathSampleToolTip.SetToolTip( tbNIFBuilderSubDivisionSampleFilePath, sdSample );
             }
-            
-            var sdSample = NIFBuilder.Mesh.BuildFilePath(
-                tbMeshDirectory.Text,
-                ( sdPreset != null ? sdPreset.MeshSubDirectory : tbSubDivisionMeshSubDirectory.Text ),
-                ( sdPreset != null ? sdPreset.FilePrefix : tbSubDivisionFilePrefix.Text ),
-                sdName,
-                ( sdPreset != null ? sdPreset.FileSuffix : tbSubDivisionFileSuffix.Text ), 1,
-                sdNeighbourName, 1 );
-            
-            tbNIFBuilderSubDivisionSampleFilePath.Text = sdSample;
-            tbNIFBuilderSubDivisionFilePathSampleToolTip.SetToolTip( tbNIFBuilderSubDivisionSampleFilePath, sdSample );
             
             //DebugLog.CloseIndentLevel();
         }
@@ -548,50 +591,53 @@ namespace GUIBuilder.Windows
                 m.PopStatusMessage();
             }
             
-            var subDivisions = lvSubDivisions.GetSelectedSyncObjects();
-            if( !subDivisions.NullOrEmpty() )
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
             {
-                m.PushStatusMessage();
-                m.SetCurrentStatusMessage( "BorderBatchWindow.BuildingSubDivisionBorders".Translate() );
-                m.StartSyncTimer();
-                var tStart = m.SyncTimerElapsed();
-                
-                var sdPreset = SelectedSubDivisionPreset;
-                if( sdPreset == null )
+                var subDivisions = lvSubDivisions.GetSelectedSyncObjects();
+                if( !subDivisions.NullOrEmpty() )
                 {
-                    var createImportData = cbSubDivisionCreateImportData.Checked;
-                    var subList = GUIBuilder.BorderBatch.CreateNIFs(
-                        "Custom",
-                        subDivisions,
-                        float.Parse( tbSubDivisionGradientHeight.Text ),
-                        float.Parse( tbSubDivisionGroundOffset.Text ),
-                        float.Parse( tbSubDivisionGroundSink.Text ),
-                        targetPath, tbSubDivisionTargetSuffix.Text,
-                        meshSuffix, tbSubDivisionMeshSubDirectory.Text,
-                        tbSubDivisionFilePrefix.Text, tbSubDivisionFileSuffix.Text,
-                        cbSubDivisionCreateImportData.Checked );
-                    if( ( createImportData )&&( !subList.NullOrEmpty() ) )
+                    m.PushStatusMessage();
+                    m.SetCurrentStatusMessage( "BorderBatchWindow.BuildingSubDivisionBorders".Translate() );
+                    m.StartSyncTimer();
+                    var tStart = m.SyncTimerElapsed();
+                    
+                    var sdPreset = SelectedSubDivisionPreset;
+                    if( sdPreset == null )
                     {
-                        if( list == null )
-                            list = subList;
-                        else
-                            list.AddAll( subList );
+                        var createImportData = cbSubDivisionCreateImportData.Checked;
+                        var subList = GUIBuilder.BorderBatch.CreateNIFs(
+                            "Custom",
+                            subDivisions,
+                            float.Parse( tbSubDivisionGradientHeight.Text ),
+                            float.Parse( tbSubDivisionGroundOffset.Text ),
+                            float.Parse( tbSubDivisionGroundSink.Text ),
+                            targetPath, tbSubDivisionTargetSuffix.Text,
+                            meshSuffix, tbSubDivisionMeshSubDirectory.Text,
+                            tbSubDivisionFilePrefix.Text, tbSubDivisionFileSuffix.Text,
+                            cbSubDivisionCreateImportData.Checked );
+                        if( ( createImportData )&&( !subList.NullOrEmpty() ) )
+                        {
+                            if( list == null )
+                                list = subList;
+                            else
+                                list.AddAll( subList );
+                        }
                     }
-                }
-                else
-                {
-                    var subList = CreatePresetSubDivisionNIFs( subDivisions, sdPreset, targetPath, meshSuffix );
-                    if( ( sdPreset.CreateImportData )&&( !subList.NullOrEmpty() ) )
+                    else
                     {
-                        if( list == null )
-                            list = subList;
-                        else
-                            list.AddAll( subList );
+                        var subList = CreatePresetSubDivisionNIFs( subDivisions, sdPreset, targetPath, meshSuffix );
+                        if( ( sdPreset.CreateImportData )&&( !subList.NullOrEmpty() ) )
+                        {
+                            if( list == null )
+                                list = subList;
+                            else
+                                list.AddAll( subList );
+                        }
                     }
+                    
+                    m.StopSyncTimer( "GUIBuilder.BorderBatchWindow :: CreateNIFs() :: Sub-Division Borders :: Completed in {0}", tStart.Ticks );
+                    m.PopStatusMessage();
                 }
-                
-                m.StopSyncTimer( "GUIBuilder.BorderBatchWindow :: CreateNIFs() :: Sub-Division Borders :: Completed in {0}", tStart.Ticks );
-                m.PopStatusMessage();
             }
             
             _importData = list;
@@ -1005,7 +1051,7 @@ namespace GUIBuilder.Windows
         
         void cbWorkshopPresetsSelectedIndexChanged( object sender, EventArgs e )
         {
-            if( UpdatingPresetUI ) return;
+            if( UpdatingPresetUI )return;
             _SelectedWorkshopPreset = cbWorkshopPresets.SelectedIndex;
             UpdateWorkshopPresetUI( _SelectedWorkshopPreset );
         }
@@ -1019,13 +1065,13 @@ namespace GUIBuilder.Windows
         
         void uiWorkshopNIFBuilderChanged( object sender, EventArgs e )
         {
-            if( UpdatingPresetUI ) return;
+            if( ( !onLoadComplete )||( UpdatingPresetUI ) )return;
             UpdateWorkshopPresetUI( 0 );
         }
         
         void uiSubDivisionNIFBuilderChanged( object sender, EventArgs e )
         {
-            if( UpdatingPresetUI ) return;
+            if( ( !onLoadComplete )||( UpdatingPresetUI ) ) return;
             UpdateSubDivisionPresetUI( 0 );
         }
         

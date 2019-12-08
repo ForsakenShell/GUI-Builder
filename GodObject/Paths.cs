@@ -6,21 +6,7 @@
  */
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Diagnostics;
-using System.Threading;
-
-using Maths;
-
-using Engine;
-using GUIBuilder;
-
-using AnnexTheCommonwealth;
-
-using XeLib;
-using XeLib.API;
 
 namespace GodObject
 {
@@ -77,12 +63,18 @@ namespace GodObject
             {
                 if( string.IsNullOrEmpty( _borderBuilder ) )
                 {
-                    var readPath = Fallout4;
-                    if( string.IsNullOrEmpty( readPath ) )
-                        readPath = System.Environment.CurrentDirectory;
+                    // Try current path, then Fallout 4 path
+                    var readPath = System.Environment.CurrentDirectory + "\\";
                     var tryPath = readPath + GUIBuilder.Constant.BorderBuilderPath;
                     if( !tryPath.TryAssignPath( ref _borderBuilder ) )
-                        return null;
+                    {
+                        readPath = Fallout4;
+                        if( string.IsNullOrEmpty( readPath ) )
+                            return null;
+                        tryPath = readPath + GUIBuilder.Constant.BorderBuilderPath;
+                        if( !tryPath.TryAssignPath( ref _borderBuilder ) )
+                            return null;
+                    }
                 }
                 return _borderBuilder;
             }

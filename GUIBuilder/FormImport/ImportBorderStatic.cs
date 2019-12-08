@@ -128,7 +128,6 @@ namespace GUIBuilder.FormImport
                 if( !lods[ i ].InsensitiveInvariantMatch( NIFFilePath ) ) return false;
             
             return
-                ( TargetRecordFlagsMatch )&&
                 ( string.Compare( stat.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 )&&
                 ( stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( NIFFilePath ) )&&
                 ( stat.ObjectBounds.GetMinValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == MinBounds )&&
@@ -192,7 +191,6 @@ namespace GUIBuilder.FormImport
         {
             var stat = TargetStatic;
             
-            ApplyRecordFlagsToTarget();
             stat.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             stat.SetModel( Engine.Plugin.TargetHandle.Working, NIFFilePath );
             // Insure it's full LOD at all distances

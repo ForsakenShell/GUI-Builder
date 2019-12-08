@@ -8,8 +8,6 @@
  * Time: 1:51 PM
  * 
  */
-//#define FAKE_LISTVIEW_FOR_FORM_EDITOR
- 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -41,12 +39,9 @@ namespace GUIBuilder.Windows
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
-            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
-            #else
             lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
             UpdateSubDivisionList();
-            #endif
             
             onLoadComplete = true;
             SetEnableState( true );
@@ -75,11 +70,8 @@ namespace GUIBuilder.Windows
         
         void UpdateSubDivisionList()
         {
-            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
-            #else
             var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList( false );
             lvSubDivisions.SyncObjects = subdivisions;
-            #endif
         }
         
         void OnSubDivisionListChanged( object sender, EventArgs e )
@@ -108,11 +100,7 @@ namespace GUIBuilder.Windows
         
         void THREAD_CheckMissingElements()
         {
-            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
-            var subdivisions = (List<AnnexTheCommonwealth.SubDivision>)null;
-            #else
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
-            #endif
             
             if( subdivisions.NullOrEmpty() )
             {
@@ -144,11 +132,7 @@ namespace GUIBuilder.Windows
         
         void THREAD_OptimizeSandboxVolumes()
         {
-            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
-            var subdivisions = (List<AnnexTheCommonwealth.SubDivision>)null;
-            #else
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
-            #endif
             
             if( subdivisions.NullOrEmpty() )
             {
@@ -181,11 +165,7 @@ namespace GUIBuilder.Windows
         
         void THREAD_NormalizeBuildVolumes()
         {
-            #if FAKE_LISTVIEW_FOR_FORM_EDITOR
-            var subdivisions = (List<AnnexTheCommonwealth.SubDivision>)null;
-            #else
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
-            #endif
             
             if( subdivisions.NullOrEmpty() )
             {

@@ -82,7 +82,6 @@ namespace GUIBuilder.FormImport
             if( refr == null ) return false;
             
             return
-                ( TargetRecordFlagsMatch )&&
                 ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
                 ( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
@@ -91,7 +90,6 @@ namespace GUIBuilder.FormImport
         {
             var refr = TargetRef;
             
-            ApplyRecordFlagsToTarget();
             refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             // Remove unwanted elements automagically added by the CK/XeLib

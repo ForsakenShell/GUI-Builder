@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
+
 namespace GUIBuilder.Windows
 {
     
@@ -24,7 +25,8 @@ namespace GUIBuilder.Windows
         
         // Minimum sizes of the main window and render window/panel
         readonly Size SIZE_ZERO = new Size( 0, 0 );
-        readonly Size MIN_RENDER_SIZE = new Size( 640, 480 );
+        readonly Size MIN_RENDER_SIZE = new Size( 700, 42 );
+        readonly Size MAX_RENDER_SIZE = new Size( 65536, 42 );
         
         const string XmlNode = "MainWindow";
         const string XmlLocation = "Location";
@@ -38,6 +40,17 @@ namespace GUIBuilder.Windows
         public Main()
         {
             InitializeComponent();
+            // Calculate form size based on the current Windows theme
+            var fbs = Maths.GenSize.Multiply( SystemInformation.FrameBorderSize, 2 );
+            var cs = new Size(
+                0,
+                SystemInformation.CaptionHeight );
+            var rbt = new Size(
+                SystemInformation.HorizontalResizeBorderThickness,
+                SystemInformation.VerticalResizeBorderThickness );
+            var wfs = fbs + cs + rbt;
+            this.MinimumSize = MIN_RENDER_SIZE + wfs;
+            this.MaximumSize = MAX_RENDER_SIZE + wfs;
         }
         
         bool _already_shutdown = false;
@@ -91,10 +104,15 @@ namespace GUIBuilder.Windows
             var bbPath = GodObject.Paths.BorderBuilder;
             if( string.IsNullOrEmpty( bbPath ) )
             {
-                MessageBox.Show( string.Format( "Unable to find \"{0}\\{1}\"\n\nMake sure you have the GUIBuilder installed correctly.", Constant.BorderBuilderPath, Constant.GUIBuilderConfigFile ), "GUIBuilder Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                MessageBox.Show( string.Format( "Unable to find \"{0}\"\n\nMake sure you have the GUIBuilder installed correctly.", Constant.BorderBuilderPath ), "GUIBuilder Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
                 Application.Exit();
                 return;
             }
+            
+            var configFile = GodObject.Paths.GUIBuilderConfigFile;
+            //Console.WriteLine( configFile );
+            if( ( string.IsNullOrEmpty( configFile ) )||( !System.IO.File.Exists( configFile ) ) )
+                GodObject.Windows.GetOptionsWindow( true );
             
             /*
             var configFile = GodObject.GUIBuilderConfigFilePath;
@@ -116,10 +134,6 @@ namespace GUIBuilder.Windows
             ClearStatusBar();
             
             onLoadComplete = true;
-            
-            var configFile = GodObject.Paths.GUIBuilderConfigFile;
-            if( ( !string.IsNullOrEmpty( configFile ) )&&( !System.IO.File.Exists( configFile ) ) )
-                GodObject.Windows.GetOptionsWindow( true );
             
         }
         
@@ -169,7 +183,7 @@ namespace GUIBuilder.Windows
             if( GodObject.Plugin.IsLoaded )
             {
                 mbiToolsBorderBatch.Enabled = enabled;
-                mbiToolsSubDivisionBatch.Enabled = enabled;
+                mbiToolsSubDivisionBatch.Enabled = ( enabled )&&( GodObject.Master.AnnexTheCommonwealth.Loaded );
                 mbiToolsRendererWindow.Enabled = enabled;
             }
         }

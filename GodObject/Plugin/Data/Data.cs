@@ -428,8 +428,9 @@ namespace GodObject
                 where TScript : Engine.Plugin.PapyrusScript
             {
                 
-                Engine.Plugin.Form _ScriptForm = null;
-                Dictionary<uint,TScript> _ScriptForms = null;
+                bool                        _IsValid = false;
+                Engine.Plugin.Form          _ScriptForm = null;
+                Dictionary<uint,TScript>    _ScriptForms = null;
                 
                 #region Allocation
                 
@@ -438,6 +439,7 @@ namespace GodObject
                     if( baseform == null )
                         throw new ArgumentNullException( "baseform" );
                     _ScriptForm = baseform;
+                    _IsValid = _ScriptForm.IsValid();
                 }
                 
                 #endregion
@@ -461,8 +463,14 @@ namespace GodObject
                     if( Disposed )
                         return;
                     
-                    foreach( var kv in _ScriptForms )
-                        kv.Value.Dispose();
+                    if( _IsValid )
+                    {
+                        _IsValid = false;
+                        
+                        if( ( _ScriptForms != null )&&( _ScriptForms.Count > 0 ) )
+                            foreach( var kv in _ScriptForms )
+                                kv.Value.Dispose();
+                    }
                     
                     _ScriptForms = null;
                     _ScriptForm = null;
@@ -472,8 +480,13 @@ namespace GodObject
                 
                 #endregion
                 
+                public bool IsValid         { get { return _IsValid; } }
+                
                 public bool Load()
                 {
+                    if( !_IsValid )
+                        return false;
+                    
                     DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.ScriptedObjects", "Load()", _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.Master ), _ScriptForm.ToString() } );
                     
                     var m = GodObject.Windows.GetMainWindow();
@@ -549,6 +562,9 @@ namespace GodObject
                 
                 public bool PostLoad()
                 {
+                    if( !_IsValid )
+                        return false;
+                    
                     DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "PostLoad()", _ScriptForm.ToString() } );
                     
                     var result = true;
@@ -596,10 +612,15 @@ namespace GodObject
                 bool _SupressObjectDataChangedEvent = false;
                 public void SupressObjectDataChangedEvents()
                 {
+                    if( !_IsValid )
+                        return;
                     _SupressObjectDataChangedEvent = true;
                 }
                 public void ResumeObjectDataChangedEvents( bool sendevent )
                 {
+                    if( !_IsValid )
+                        return;
+                    
                     _SupressObjectDataChangedEvent = false;
                     if( sendevent )
                         SendObjectDataChangedEvent();
@@ -607,6 +628,9 @@ namespace GodObject
                 
                 public void SendObjectDataChangedEvent()
                 {
+                    if( !_IsValid )
+                        return;
+                    
                     if( _SupressObjectDataChangedEvent )
                         return;
                     EventHandler handler = ObjectDataChanged;
@@ -622,6 +646,9 @@ namespace GodObject
                 {
                     get
                     {
+                        if( !_IsValid )
+                            return 0;
+                        
                         return _ScriptForms == null
                             ? 0
                             : _ScriptForms.Count;
@@ -630,6 +657,9 @@ namespace GodObject
                 
                 public void Add( TScript item )
                 {
+                    if( !_IsValid )
+                        return;
+                    
                     if( _ScriptForms == null )
                         _ScriptForms = new Dictionary<uint,TScript>();
                     _ScriptForms[ item.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = item;
@@ -638,7 +668,7 @@ namespace GodObject
                 
                 public bool Remove( TScript item )
                 {
-                    if( _ScriptForms != null ) return false;
+                    if( ( !_IsValid )||( _ScriptForms != null ) ) return false;
                     var result =_ScriptForms.Remove( item.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                     if( result )
                         SendObjectDataChangedEvent();
@@ -647,7 +677,7 @@ namespace GodObject
                 
                 public List<TScript> ToList( bool includePackInReferences )
                 {
-                    if( ( _ScriptForms == null )||( _ScriptForms.Count == 0 ) )
+                    if( ( !_IsValid )||( _ScriptForms == null )||( _ScriptForms.Count == 0 ) )
                         return null;
                     return _ScriptForms.Values.Where( x => includePackInReferences || !x.Reference.Cell.GetIsPackInCell( Engine.Plugin.TargetHandle.Master ) ).ToList();
                     //return _ScriptForms.Values.ToList();
@@ -655,7 +685,7 @@ namespace GodObject
                 
                 public TScript Find( uint formid )
                 {
-                    if( ( _ScriptForms == null )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
+                    if( ( !_IsValid )||( _ScriptForms == null )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
                         return null;
                     
                     TScript s = null;
@@ -666,7 +696,7 @@ namespace GodObject
                 
                 public TScript Find( string editorid )
                 {
-                    if( ( _ScriptForms == null )||( string.IsNullOrEmpty( editorid ) ) )
+                    if( ( !_IsValid )||( _ScriptForms == null )||( string.IsNullOrEmpty( editorid ) ) )
                         return null;
                     
                     foreach( var kv in _ScriptForms )
@@ -678,6 +708,8 @@ namespace GodObject
                 
                 public List<TScript> FindAllInWorldspace( string editorid )
                 {
+                    if( !_IsValid )
+                        return null;
                     //var cWorldspaces = GodObject.Plugin.Data.Root.GetContainer<Engine.Plugin.Forms.Worldspace>( true, false );
                     //if( cWorldspaces == null )
                     //{
@@ -693,6 +725,8 @@ namespace GodObject
                 
                 public List<TScript> FindAllInWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
                 {
+                    if( !_IsValid )
+                        return null;
                     //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace.ToStringNullSafe() ) );
                     return worldspace == null
                         ? null
@@ -703,7 +737,7 @@ namespace GodObject
                 public List<TScript> FindAllInWorldspace( uint formid )
                 {
                     //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? 0x{1}", this.GetType().ToString(), formid.ToString( "X8" ) ) );
-                    if( ( _ScriptForms == null )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
+                    if( ( !_IsValid )||( _ScriptForms == null )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
                         return null;
                     
                     var list = new List<TScript>();

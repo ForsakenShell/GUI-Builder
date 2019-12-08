@@ -1773,7 +1773,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawSubDivisions()
         {
-            if( _subdivisions.NullOrEmpty() )
+            if( ( !GodObject.Master.AnnexTheCommonwealth.Loaded )||( _subdivisions.NullOrEmpty() ) )
                 return;
             
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawSubDivisions()" } );
@@ -1799,7 +1799,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawSettlements()
         {
-            if( _settlements.NullOrEmpty() )
+            if( ( !GodObject.Master.AnnexTheCommonwealth.Loaded )||( _settlements.NullOrEmpty() ) )
                 return;
             
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawSettlements()" } );

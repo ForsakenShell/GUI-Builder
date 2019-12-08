@@ -88,7 +88,6 @@ namespace GUIBuilder.FormImport
                 return false;
             
             return
-                ( TargetRecordFlagsMatch )&&
                 ( string.Compare( layer.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 );
         }
         
@@ -141,7 +140,6 @@ namespace GUIBuilder.FormImport
         {
             var layer = TargetLayer;
             
-            ApplyRecordFlagsToTarget();
             layer.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             
             return true;

@@ -155,6 +155,7 @@ namespace GUIBuilder.Windows
             if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             OverrideCheckedCheck = true;
             
+            try{
             var key = e.Node.Text;
             var state = e.Node.Checked;
             UpdateChildCheckState( key, state );
@@ -184,7 +185,7 @@ namespace GUIBuilder.Windows
             
             var lastSelectedWorking = cbWorkingFile.SelectedIndex < 1 ? null : (string)cbWorkingFile.Items[ cbWorkingFile.SelectedIndex ];
             cbWorkingFile.Items.Clear();
-            cbWorkingFile.Items.Add( " [NONE] " );
+            cbWorkingFile.Items.Add( string.Format( " [{0}] ", "DropdownSelectNone".Translate() ) );
             foreach( TreeNode node in tvPlugins.Nodes )
             {
                 var f = CutOffString( node.Text, NodeFilenameTail );
@@ -238,6 +239,11 @@ namespace GUIBuilder.Windows
             btnLoad.Enabled = workingSelected > 0;
             
             OverrideCheckedCheck = false;
+            }
+            catch( Exception ex )
+            {
+                Console.WriteLine( string.Format( "An exception has occured...no REALLY!\n{0}\n{1}\n{2}\n{3}", e.Action.ToString(), e.Node.ToStringNullSafe(), ex.ToString(), ex.StackTrace ) );
+            }
         }
         
         void CbWorkingFileSelectedIndexChanged( object sender, EventArgs e )

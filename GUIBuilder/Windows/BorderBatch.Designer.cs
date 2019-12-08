@@ -104,9 +104,9 @@ namespace GUIBuilder.Windows
         {
             this.pnWindow = new System.Windows.Forms.Panel();
             this.gbTargetFolder = new System.Windows.Forms.GroupBox();
+            this.tbMeshDirectory = new System.Windows.Forms.TextBox();
             this.tbTargetFolder = new System.Windows.Forms.TextBox();
             this.lblMeshDirectory = new System.Windows.Forms.Label();
-            this.tbMeshDirectory = new System.Windows.Forms.TextBox();
             this.tcObjectSelect = new System.Windows.Forms.TabControl();
             this.tpSubDivisions = new System.Windows.Forms.TabPage();
             this.gbSubDivisionNodeAndNIFGeneration = new System.Windows.Forms.GroupBox();
@@ -190,7 +190,7 @@ namespace GUIBuilder.Windows
             this.pnWindow.Controls.Add(this.gbBorderFunctions);
             this.pnWindow.Location = new System.Drawing.Point(0, 0);
             this.pnWindow.Name = "pnWindow";
-            this.pnWindow.Size = new System.Drawing.Size(672, 505);
+            this.pnWindow.Size = new System.Drawing.Size(672, 506);
             this.pnWindow.TabIndex = 0;
             // 
             // gbTargetFolder
@@ -205,6 +205,14 @@ namespace GUIBuilder.Windows
             this.gbTargetFolder.TabStop = false;
             this.gbTargetFolder.Tag = "BorderBatchWindow.TargetDirectory";
             this.gbTargetFolder.Text = "Target Folder";
+            // 
+            // tbMeshDirectory
+            // 
+            this.tbMeshDirectory.Location = new System.Drawing.Point(60, 42);
+            this.tbMeshDirectory.Name = "tbMeshDirectory";
+            this.tbMeshDirectory.Size = new System.Drawing.Size(264, 20);
+            this.tbMeshDirectory.TabIndex = 9;
+            this.tbMeshDirectory.TextChanged += new System.EventHandler(this.uiUpdateWorkshopNIFFilePathSample);
             // 
             // tbTargetFolder
             // 
@@ -223,14 +231,6 @@ namespace GUIBuilder.Windows
             this.lblMeshDirectory.TabIndex = 8;
             this.lblMeshDirectory.Text = "Meshes\\";
             // 
-            // tbMeshDirectory
-            // 
-            this.tbMeshDirectory.Location = new System.Drawing.Point(60, 42);
-            this.tbMeshDirectory.Name = "tbMeshDirectory";
-            this.tbMeshDirectory.Size = new System.Drawing.Size(264, 20);
-            this.tbMeshDirectory.TabIndex = 9;
-            this.tbMeshDirectory.TextChanged += new System.EventHandler(this.uiUpdateWorkshopNIFFilePathSample);
-            // 
             // tcObjectSelect
             // 
             this.tcObjectSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -241,7 +241,7 @@ namespace GUIBuilder.Windows
             this.tcObjectSelect.Location = new System.Drawing.Point(0, 80);
             this.tcObjectSelect.Name = "tcObjectSelect";
             this.tcObjectSelect.SelectedIndex = 0;
-            this.tcObjectSelect.Size = new System.Drawing.Size(672, 425);
+            this.tcObjectSelect.Size = new System.Drawing.Size(672, 426);
             this.tcObjectSelect.TabIndex = 0;
             this.tcObjectSelect.SelectedIndexChanged += new System.EventHandler(this.tcObjectSelectSelectedIndexChanged);
             // 
@@ -252,7 +252,7 @@ namespace GUIBuilder.Windows
             this.tpSubDivisions.Location = new System.Drawing.Point(4, 22);
             this.tpSubDivisions.Name = "tpSubDivisions";
             this.tpSubDivisions.Padding = new System.Windows.Forms.Padding(3);
-            this.tpSubDivisions.Size = new System.Drawing.Size(664, 399);
+            this.tpSubDivisions.Size = new System.Drawing.Size(664, 400);
             this.tpSubDivisions.TabIndex = 1;
             this.tpSubDivisions.Tag = "BorderBatchWindow.Tab.SubDivisions";
             this.tpSubDivisions.Text = "Sub-Divisions";
@@ -506,7 +506,7 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions.Location = new System.Drawing.Point(336, 0);
             this.lvSubDivisions.MultiSelect = true;
             this.lvSubDivisions.Name = "lvSubDivisions";
-            this.lvSubDivisions.Size = new System.Drawing.Size(328, 399);
+            this.lvSubDivisions.Size = new System.Drawing.Size(328, 400);
             this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
             this.lvSubDivisions.SyncedEditorFormType = null;
             this.lvSubDivisions.SyncObjects = null;
@@ -905,7 +905,7 @@ namespace GUIBuilder.Windows
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(672, 506);
+            this.ClientSize = new System.Drawing.Size(672, 507);
             this.Controls.Add(this.pnWindow);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;

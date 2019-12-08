@@ -167,7 +167,6 @@ namespace GUIBuilder.FormImport
             var naySub = targetRef.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             var result = 
-                ( TargetRecordFlagsMatch )&&
                 ( string.Compare( targetRef.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 )&&
                 ( ftWorldspace.Matches( targetRef.Worldspace, true ) )&&
                 ( ftCell.Matches( targetRef.Cell, false ) )&&
@@ -300,7 +299,6 @@ namespace GUIBuilder.FormImport
             }
             var refr = enabler.Reference;
             
-            ApplyRecordFlagsToTarget();
             refr.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
             refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );

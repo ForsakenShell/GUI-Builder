@@ -22,6 +22,7 @@ namespace XeLib
         
         const string            RecordFlags_Path        = @"Record Header\Record Flags";
         const uint              PartialRecord_Value     = 0x00004000;
+        const uint              Persistent_Value        = 0x00000400;
         
         public uint RecordFlags
         {
@@ -58,6 +59,18 @@ namespace XeLib
             get
             {
                 return ( RecordFlags & PartialRecord_Value ) != 0;
+            }
+        }
+        
+        public bool IsPersistentRecord
+        {
+            get
+            {
+                return ( RecordFlags & Persistent_Value ) != 0;
+            }
+            set
+            {
+                RecordFlags = ( RecordFlags & ~Persistent_Value ) | ( value ? Persistent_Value : 0 );
             }
         }
         

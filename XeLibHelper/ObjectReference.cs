@@ -170,11 +170,10 @@ namespace XeLibHelper
             }
             
             // Appropriate persistence flag for new record
-            const string PERSISTENT = "Persistent";
-            var dPersistent = destination.GetRecordFlag( PERSISTENT );
-            DebugLog.WriteLine( "Persistence: " + dPersistent );
+            var dPersistent = destination.IsPersistentRecord;
+            DebugLog.WriteLine( "Persistent: " + dPersistent );
             DebugLog.WriteLine( "Current Flags: " + result.RecordFlags.ToString( "X8" ) );
-            result.SetRecordFlag( PERSISTENT, dPersistent );
+            result.IsPersistentRecord = dPersistent;
             DebugLog.WriteLine( "New Flags: " + result.RecordFlags.ToString( "X8" ) );
             
             if( result != source )

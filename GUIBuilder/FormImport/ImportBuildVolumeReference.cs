@@ -243,7 +243,6 @@ namespace GUIBuilder.FormImport
             var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftLinkKeyword.FormID );
             
             return
-                ( TargetRecordFlagsMatch )&&
                 ( string.Compare( refr.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 )&&
                 ( ftBaseActi.Matches( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )&&
                 ( ftWorldspace.Matches( refr.Worldspace, false ) )&&
@@ -402,7 +401,6 @@ namespace GUIBuilder.FormImport
         {
             var refr = TargetRef;
             
-            ApplyRecordFlagsToTarget();
             refr.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseActi.FormID );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );

@@ -88,4 +88,14 @@ namespace Maths
     
     #endregion
     
+    public static class GenSize
+    {
+        
+        public static System.Drawing.Size Multiply ( System.Drawing.Size s, int scale )
+        {
+            return new System.Drawing.Size( s.Width * scale, s.Height * scale );
+        }
+    
+    }
+    
 }

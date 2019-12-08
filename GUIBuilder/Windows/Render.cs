@@ -84,18 +84,27 @@ namespace GUIBuilder.Windows
             
             twWorldspaces = new Windows.RenderChild.WorldspaceTool();
             twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops );
-            twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
-            twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
-            
             AddOwnedForm( twWorldspaces );
             AddOwnedForm( twWorkshops );
-            AddOwnedForm( twSettlements );
-            AddOwnedForm( twSubDivisions );
-            
             twWorldspaces.Show();
             twWorkshops.Show();
-            twSettlements.Show();
-            twSubDivisions.Show();
+            
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            {
+                twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
+                twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
+                AddOwnedForm( twSettlements );
+                AddOwnedForm( twSubDivisions );
+                twSettlements.Show();
+                twSubDivisions.Show();
+                tsRenderSettlements.Visible = true;
+                tsRenderSubDivisions.Visible = true;
+            }
+            else
+            {
+                tsRenderSettlements.Visible = false;
+                tsRenderSubDivisions.Visible = false;
+            }
             
             var cWorldspaces = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Worldspace>( true, true );
             if( cWorldspaces != null )
@@ -182,8 +191,11 @@ namespace GUIBuilder.Windows
         {
             DebugLog.WriteLine( string.Format( "{0} :: UpdateSettlementObjectChildWindowContentsForWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
             twWorkshops.Worldspace = worldspace;
-            twSettlements.Worldspace = worldspace;
-            twSubDivisions.Worldspace = worldspace;
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            {
+                twSettlements.Worldspace = worldspace;
+                twSubDivisions.Worldspace = worldspace;
+            }
         }
         
         #endregion
@@ -204,8 +216,11 @@ namespace GUIBuilder.Windows
             pnWindow.Enabled = enabled;
             twWorldspaces.SetEnableState( enabled );
             twWorkshops.SetEnableState( enabled );
-            twSettlements.SetEnableState( enabled );
-            twSubDivisions.SetEnableState( enabled );
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            {
+                twSettlements.SetEnableState( enabled );
+                twSubDivisions.SetEnableState( enabled );
+            }
         }
         
         public void SetToolStripEnableState( bool enabled )
@@ -817,8 +832,8 @@ namespace GUIBuilder.Windows
             var poolEntry               = !renderWorldspace ? null : selectedWorldspace.PoolEntry;
             //var selectedImportMod       = (ImportMod)null;//SelectedImportMod();
             var selectedWorkshops       = !renderWorldspace ? null : renderSelectedOnly ? twWorkshops.SelectedSyncObjects : twWorkshops.SyncObjects;
-            var selectedSettlements     = !renderWorldspace ? null : renderSelectedOnly ? twSettlements.SelectedSyncObjects : twSettlements.SyncObjects;
-            var selectedSubdivisions    = !renderWorldspace ? null : renderSelectedOnly ? twSubDivisions.SelectedSyncObjects : twSubDivisions.SyncObjects;
+            var selectedSettlements     = ( ( !renderWorldspace )||( !GodObject.Master.AnnexTheCommonwealth.Loaded ) ) ? null : renderSelectedOnly ? twSettlements.SelectedSyncObjects : twSettlements.SyncObjects;
+            var selectedSubdivisions    = ( ( !renderWorldspace )||( !GodObject.Master.AnnexTheCommonwealth.Loaded ) ) ? null : renderSelectedOnly ? twSubDivisions.SelectedSyncObjects : twSubDivisions.SyncObjects;
             var unassociatedEdgeFlags   = !renderWorldspace ? null : GodObject.Plugin.Data.EdgeFlags.ByAssociation( GodObject.Plugin.Data.EdgeFlags.FindAllInWorldspace( selectedWorldspace ), GodObject.Plugin.Data.EdgeFlags.Association.Unassociated );
             
             // Get cell range from [whole] map/selected volumes
@@ -877,8 +892,11 @@ namespace GUIBuilder.Windows
             //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Update scene objects", this.GetType().ToString(), _ResetViewportOnUpdate ) );
             transform.Worldspace    = selectedWorldspace;
             transform.Workshops     = selectedWorkshops;
-            transform.Settlements   = selectedSettlements;
-            transform.SubDivisions  = selectedSubdivisions;
+            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            {
+                transform.Settlements   = selectedSettlements;
+                transform.SubDivisions  = selectedSubdivisions;
+            }
             transform.UnassociatedEdgeFlags = unassociatedEdgeFlags;
             
             //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: transform :: UpdateScene()", this.GetType().ToString(), _ResetViewportOnUpdate ) );

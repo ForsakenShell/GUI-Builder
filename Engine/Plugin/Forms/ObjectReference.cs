@@ -104,60 +104,98 @@ namespace Engine.Plugin.Forms
             }
         }
         
+        bool UpdateContainerCellHandle( Cell cell )
+        {
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "UpdateContainerCellHandle()" } );
+            
+            var result = false;
+            
+            // Technically the same as cell.IsInWorkingFile() but this is more clear as to our intent
+            if( cell.HandleFor( GodObject.Plugin.Data.Files.Working ).IsValid() )
+            {
+                result = true;
+                goto localAbort;
+            }
+            
+            var cmH = cell.MasterHandle as FormHandle;
+            var coHs = cmH.GetOverrides();
+            if( !coHs.NullOrEmpty() )
+            {
+                foreach( var coH in coHs )
+                {
+                    if( coH.Filename.InsensitiveInvariantMatch( GodObject.Plugin.Data.Files.Working.Filename ) )
+                    {
+                        DebugLog.WriteLine( new [] { "AddNewHandle()", cell.ToStringNullSafe(), coH.ToStringNullSafe() } );
+                        cell.AddNewHandle( coH );
+                        result = true;
+                    }
+                }
+            }
+            if( !result )
+                result = cell.CopyAsOverride().IsValid();
+            
+        localAbort:
+            DebugLog.CloseIndentLevel();
+            return result;
+        }
+        
         public void CheckForBackgroundCellChange( bool sendObjectDataChangedEvent )
         {
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "CheckForBackgroundCellChange()", this.ToStringNullSafe() } );
+            
             // Changing position and some record flags will trigger XeLib to update the cell container,
             // We need to match those changes in GUIBuilder too
-            if( !IsInWorkingFile() ) return;
+            if( !IsInWorkingFile() ) goto localAbort;
             
             var oH = WorkingFileHandle as XeLib.FormHandle;
-            if( !oH.IsValid() ) return;
+            if( !oH.IsValid() ) goto localAbort;
             
-            var newCell = ( oH.RecordFlags & (uint)Forms.Fields.Record.Flags.Common.Persistent ) != 0
+            var newCell = oH.IsPersistentRecord
                 ? Worldspace.Cells.Persistent
                 : Worldspace.Cells.GetByGrid( GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).WorldspaceToCellGrid() );
             var fileCellFormID = oH.GetCellFormID();
             var fileCell = Worldspace.Cells.Find( fileCellFormID ) as Engine.Plugin.Forms.Cell;
             var oldCell = Cell;
-            if( ( newCell == oldCell )&&( fileCell == oldCell ) ) return;
+            if( ( newCell == oldCell )&&( fileCell == oldCell ) ) goto localAbort;
             
-            // Changed containers
-            //DebugLog.Write( string.Format( "\n{0} :: CheckForBackgroundCellChange()\n\tthis     = {1}\n\tnewCell  = {2}\n\toldCell  = {3}\n\tfileCell = {4}\n", this.GetType().ToString(), this.ToString(), newCell.ToString(), oldCell.ToString(), fileCell.ToString() ) );
-            
-            //DebugLog.Write( "newCell.InInWorkingFile( true )..." );
-            if( !newCell.IsInWorkingFile() )
-                throw new Exception( "Unable to copy destination cell as override to move object reference to!" );
-            
-            if( newCell != fileCell )
+            if( !UpdateContainerCellHandle( newCell ) )
             {
-                //DebugLog.Write( "this.CopyMoveToCell( moveRefrToCell: true )..." );
-                try
-                {
-                    var ncOH = newCell.WorkingFileHandle as XeLib.FormHandle;
-                    var newHandle = oH.CopyMoveToCell( ncOH, true );
-                    if( !newHandle.IsValid() )
-                        throw new Exception( "Unable to move object reference to new cell!" );
-                    //DebugLog.Write( "this.UpdateHandle()..." );
-                    this.AddNewHandle( newHandle );
-                }
-                catch( Exception e )
-                {
-                    DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", e.ToString() );
-                }
+                DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", "Unable to copy new CELL to working file!" );
+                goto localAbort;
             }
             
-            //DebugLog.Write( "oldCell.RemoveForm()..." );
+            /*
+            try
+            {
+                //var ncOH = newCell.WorkingFileHandle as XeLib.FormHandle;
+                //oH.SetCell( ncOH );
+                //var newHandle = oH.CopyMoveToCell( ncOH, true );
+                //if( !newHandle.IsValid() )
+                //    DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", "Unable to move object reference to new cell!" );
+                //else
+                //    this.AddNewHandle( newHandle );
+            }
+            catch( Exception e )
+            {
+                DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", e.ToString() );
+            }
+            */
+            
+            DebugLog.WriteLine( new [] { "Cell.ObjectReferences.Remove()", oldCell.ToStringNullSafe() } );
             oldCell.ObjectReferences.Remove( this );
-            //DebugLog.Write( "newCell.AddForm()..." );
+            DebugLog.WriteLine( new [] { "Cell.ObjectReferences.Add()", newCell.ToStringNullSafe() } );
             newCell.ObjectReferences.Add( this );
             
-            //DebugLog.Write( string.Format( "sendObjectDataChangedEvent = {0}\n", sendObjectDataChangedEvent ) );
+            DebugLog.WriteLine( string.Format( "sendObjectDataChangedEvent = {0}", sendObjectDataChangedEvent ) );
             if( sendObjectDataChangedEvent )
             {
                 oldCell.SendObjectDataChangedEvent( null );
                 newCell.SendObjectDataChangedEvent( null );
                 this.SendObjectDataChangedEvent( null );
             }
+            
+        localAbort:
+            DebugLog.CloseIndentLevel();
         }
         
         public Vector3f GetPosition( TargetHandle target )

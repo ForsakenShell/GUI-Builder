@@ -371,22 +371,24 @@ namespace GUIBuilder.FormImport
         
         #region Target Record Flags
         
-        protected uint                  RecordFlags                 { get { return _RecordFlags; } }
-        
-        protected bool                  TargetRecordFlagsMatch
+        bool                            TargetRecordFlagsMatch
         {
             get
             {
-                //return ( TargetForm != null )&&( TargetForm.RecordFlags.Value == RecordFlags );
-                return ( TargetForm != null )&&( TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == RecordFlags );
+                return ( TargetForm != null )&&( TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == _RecordFlags );
+                //if( TargetForm == null ) return false;
+                //var rf = TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                //DebugLog.WriteLine( new string[] { this.GetType().ToString(), TargetForm.ExtraInfoFor(), string.Format( "Record Flags = 0x{0} ?= 0x{1}", rf.ToString( "X8" ), _RecordFlags.ToString( "X8" ) ) } );
+                //return rf == _RecordFlags;
             }
         }
         
-        public void                     ApplyRecordFlagsToTarget()
+        bool                            ApplyRecordFlagsToTarget()
         {
             var targetForm = TargetForm;
-            if( targetForm == null ) return;
+            if( targetForm == null ) return false;
             targetForm.RecordFlags.SetValue( Engine.Plugin.TargetHandle.Working, _RecordFlags );
+            return TargetRecordFlagsMatch;
         }
         
         #endregion
@@ -614,7 +616,7 @@ namespace GUIBuilder.FormImport
                 */
                 //var isInWorkingFile = targetForm.IsInWorkingFile();
                 return
-                    !ImportDataMatchesTarget() //  !ImportFormMatchesResolvedForm()
+                     !TargetRecordFlagsMatch || !ImportDataMatchesTarget()
                         ? Engine.Plugin.ConflictStatus.RequiresOverride
                         : Engine.Plugin.ConflictStatus.NoConflict;
             }
@@ -693,7 +695,7 @@ namespace GUIBuilder.FormImport
         {
             var targetForm = TargetForm;
             
-            if( ( targetForm != null )&&( ImportDataMatchesTarget() ) )
+            if( ( targetForm != null )&&( TargetRecordFlagsMatch )&&( ImportDataMatchesTarget() ) )
                 return "No changes";
             
             var prefix = ( targetForm == null )
@@ -701,14 +703,17 @@ namespace GUIBuilder.FormImport
                 : "Update Form: ";
             
             var tmp = new List<string>();
+            if( !TargetRecordFlagsMatch )
+            {
+                if( _RecordFlags == 0 )
+                    tmp.Add( "Clear Record Flags" );
+                else
+                    tmp.Add( string.Format( "Record Flags 0x{0}", _RecordFlags.ToString( "X8" ) ) );
+            }
+            
             tmp.Add( ( targetForm == null )
                     ? GetDisplayNewFormInfo()
                     : GetDisplayUpdateFormInfo() );
-            
-            if( _RecordFlags == 0 )
-                tmp.Add( "Clear Record Flags" );
-            else if( !TargetRecordFlagsMatch )
-                tmp.Add( string.Format( "Record Flags 0x{0}", RecordFlags.ToString( "X8" ) ) );
             
             var tmp2 = GenIXHandle.ConcatDisplayInfo( tmp );
             return prefix + tmp2;
@@ -727,7 +732,7 @@ namespace GUIBuilder.FormImport
         
         public bool                     Apply( GUIBuilder.Windows.BatchImport importWindow )
         {
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "Apply()", this.GetType().ToString() } );
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "Apply()", this.GetType().ToString(), Target.DisplayIDInfo() } );
             var result = false;
             
             _BatchWindow = importWindow;
@@ -768,14 +773,20 @@ namespace GUIBuilder.FormImport
             
             SupressObjectDataChangedEvents();
             
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ApplyImport()", this.GetType().ToString() } );
-            try{
+            try
+            {
+                DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ApplyImport()", this.GetType().ToString() } );
                 result = ApplyImport();
-            } catch ( Exception e ){
+                DebugLog.CloseIndentLevel();
+                
+                DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ApplyRecordFlagsToTarget()", this.GetType().ToString() } );
+                result &= ApplyRecordFlagsToTarget();
+                DebugLog.CloseIndentLevel();
+            }
+            catch( Exception e )
+            {
                 AddErrorMessage( ErrorTypes.Import, "An unexpected exception has occured applying import!", e );
             }
-            DebugLog.CloseIndentLevel( "result", result.ToString() );
-            
             if( result )
             {
                 var refr = TargetForm as Engine.Plugin.Forms.ObjectReference;

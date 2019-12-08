@@ -216,7 +216,7 @@ namespace GodObject
             foreach( var form in CoreForms.Forms )
             {
                 //DebugLog.Write( string.Format( "\n{0} :: 0x{1} :: {2}", form.Signature, form._Forced_FormID.ToString( "X8" ), form._Forced_Filename ) );
-                if( Data.Files.IsLoaded( form.MasterHandle.Filename ) )
+                if( ( !string.IsNullOrEmpty( form.ForcedFilename ) )&&( Data.Files.IsLoaded( form.ForcedFilename ) ) )
                 {
                     var handle = form.MasterHandle;
                     if( !handle.IsValid() )
@@ -254,8 +254,8 @@ namespace GodObject
                 
                 DebugLog.OpenIndentLevel( "Selected Plugins" );
                 DebugLog.WriteList( "Filenames", _loadPlugins );
-                DebugLog.CloseIndentLevel();
                 DebugLog.WriteLine( new [] { "Working file", _workingFile } );
+                DebugLog.CloseIndentLevel();
                 
                 if( _thread.StopSignal )
                     throw new Exception( "SignalStop" );

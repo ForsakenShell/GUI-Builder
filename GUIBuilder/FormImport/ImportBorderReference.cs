@@ -18,7 +18,6 @@ namespace GUIBuilder.FormImport
     {
         const string            IMPORT_SIGNATURE = "BorderRef";
         const uint              TARGET_RECORD_FLAGS =
-            (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.IsFullLOD |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.LODRespectsEnableState |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn |
@@ -196,7 +195,6 @@ namespace GUIBuilder.FormImport
                 : null;
             
             return
-                ( TargetRecordFlagsMatch )&&
                 ( ftBaseStat.Matches( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )&&
                 ( ftWorldspace.Matches( refr.Worldspace, false ) )&&
                 ( ftCell.Matches( refr.Cell, false ) )&&
@@ -366,7 +364,6 @@ namespace GUIBuilder.FormImport
         {
             var refr = TargetRef;
             
-            ApplyRecordFlagsToTarget();
             refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.FormID );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
             if( ftLayer.IsResolved )

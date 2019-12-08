@@ -309,6 +309,8 @@ namespace Engine.Plugin
             }
         }
         
+        public string                   ForcedFilename          { get { return _Forced_Filename; } }
+        
         public string[]                 Filenames
         {
             get
