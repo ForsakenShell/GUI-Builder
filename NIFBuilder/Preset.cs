@@ -78,6 +78,22 @@ public static partial class NIFBuilder
         public static List<Preset>      WorkshopPresets     = new List<Preset>{ Workshop.VanillaGroundSink, Workshop.Vanilla };
         public static List<Preset>      SubDivisionPresets  = new List<Preset>{ SubDivision.FullSet, SubDivision.Tall, SubDivision.Medium, SubDivision.Vanilla, SubDivision.None };
         
+        public override string          ToString()
+        {
+            return string.Format(
+                "[ Name = \"{0}\" :: NodeLength = {1} :: SlopeAllowance = {2} :: GradientHeight = {3} :: GroundOffset = {4} :: GroundSink = {5} :: TargetSuffix = \"{6}\" :: MeshSubDirectory = \"{7}\" :: FilePrefix = \"{8}\" :: FileSuffix = \"{9}\" :: CreateImportData = {10} ]",
+                Name,
+                NodeLength,
+                SlopeAllowance,
+                GradientHeight,
+                GroundOffset,
+                GroundSink,
+                TargetSuffix,
+                MeshSubDirectory,
+                FilePrefix,
+                FileSuffix,
+                CreateImportData );
+        }
     }
     
 }

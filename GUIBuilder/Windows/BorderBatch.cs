@@ -764,6 +764,7 @@ namespace GUIBuilder.Windows
             if( UpdatingPresetUI ) return;
             UpdatingPresetUI = true;
             cbWorkshopPresets.SelectedIndex = 0;
+            _SelectedWorkshopPreset = -1;
             UpdateNIFFilePathSampleInternal();
             UpdatingPresetUI = false;
         }
@@ -773,6 +774,7 @@ namespace GUIBuilder.Windows
             if( UpdatingPresetUI ) return;
             UpdatingPresetUI = true;
             cbSubDivisionPresets.SelectedIndex = 0;
+            _SelectedSubDivisionPreset = -1;
             UpdateNIFFilePathSampleInternal();
             UpdatingPresetUI = false;
         }

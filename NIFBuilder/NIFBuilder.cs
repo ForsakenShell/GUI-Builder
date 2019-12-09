@@ -57,14 +57,12 @@ public static partial class NIFBuilder
             uint[] outsideColours,
             List<Engine.Plugin.Form> originalForms )
     {
-        /*
         DebugLog.OpenIndentLevel( new string [] { "NIFBuilder", "CreateNIFs()",
             Mesh.BuildTargetPath( targetPath, targetSuffix ),
             gradientHeight.ToString(), groundOffset.ToString(), groundSink.ToString(),
             location, neighbour,
             createImportData.ToString()
             } );
-        */
         
         List<GUIBuilder.FormImport.ImportBase> list = null;
         
@@ -90,14 +88,14 @@ public static partial class NIFBuilder
         // If enablerKeyword is null then the enabler is linked to the border reference as it's enable parent (XESP field of the reference), ie: sub-division borders
         // otherwise, the border reference is linked to the enable parent as a standard linked reference using the keyword, ie: workshop borders
         
-        //BorderNodeGroup.DumpGroupNodes( allNodes, "Pre-clone nodes:" );
+        BorderNodeGroup.DumpGroupNodes( allNodes, "Pre-clone nodes:" );
         
         // Clone the list and the nodes so we don't corrupt the original data
         var clonedNodeList = new List<BorderNode>();
         foreach( var node in allNodes )
             clonedNodeList.Add( node.Clone() );
         
-        //BorderNodeGroup.DumpGroupNodes( clonedNodeList, "Post-clone nodes:" );
+        BorderNodeGroup.DumpGroupNodes( clonedNodeList, "Post-clone nodes:" );
         
         List<BorderNodeGroup> nodeGroups = null;
         if( !splitMeshes )
@@ -136,14 +134,14 @@ public static partial class NIFBuilder
         
         if( nodeGroups.NullOrEmpty() )
         {
-            //DebugLog.WriteLine( "No Node Groups!" );
+            DebugLog.WriteLine( "No Node Groups!" );
             goto localAbort;
         }
         
         for( int i = 0; i < nodeGroups.Count; i++ )
         {
             var group = nodeGroups[ i ];
-            //BorderNodeGroup.DumpGroupNodes( group.Nodes, "Group[ " + i + " ] Nodes:" );
+            BorderNodeGroup.DumpGroupNodes( group.Nodes, "Group[ " + i + " ] Nodes:" );
             
             if( group.BuildMesh( gradientHeight, groundOffset, groundSink, insideColours, outsideColours ) )
             {
@@ -173,7 +171,7 @@ public static partial class NIFBuilder
         }
         
     localAbort:
-        //DebugLog.CloseIndentLevel( "Imports", list );
+        DebugLog.CloseIndentLevel( "Imports", list );
         return list;
     }
     

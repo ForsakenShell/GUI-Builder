@@ -144,6 +144,19 @@ public static class GenString
         return o == null ? "[null]" : o.ToString();
     }
     
+    public static string ToStringNullSafe<T>( this List<T> l ) where T : class
+    {
+        if( l.NullOrEmpty() )
+            return "[null]";
+        var r = "{ ";
+        for( int i = 0; i < l.Count; i++ )
+        {
+            r += l[ i ].ToStringNullSafe();
+            r += ( i < l.Count - 1 ) ? ", " : " }";
+        }
+        return r;
+    }
+    
     #endregion
     
 }

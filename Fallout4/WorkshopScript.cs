@@ -204,20 +204,25 @@ namespace Fallout4
                 goto localReturnResult;
             var firstNode = GetFirstBorderNode( keyword );
             if( firstNode == null )
+            {
+                DebugLog.WriteLine( "GetFirstBorderNode() returned null!" );
                 goto localReturnResult;
+            }
             var nodeKeyword = GetBorderNodeKeyword( firstNode );
             if( nodeKeyword == null )
+            {
+                DebugLog.WriteLine( "GetBorderNodeKeyword() returned null!" );
                 goto localReturnResult;
+            }
             
             /*
-            DebugLog.Write( string.Format(
+            DebugLog.WriteLine( string.Format(
                 "Fallout4.WorkshopScript.BuildBorders() :: Start :: workshop 0x{0} \"{1}\" :: workshop link keyword 0x{2} \"{3}\" :: node link keyword 0x{4} \"{5}\" :: first node 0x{6} \"{7}\"",
                 this.FormID.ToString( "X8" ), this.EditorID,
                 keyword.FormID.ToString( "X8" ), keyword.EditorID,
                 nodeKeyword.FormID.ToString( "X8" ), nodeKeyword.EditorID,
                 firstNode.FormID.ToString( "X8" ), firstNode.EditorID ) );
             */
-            
             _WorkshopLinkKeyword = keyword;
             _MarkerNodeLinkKeyword = nodeKeyword;
             _BorderMarkerNodes = GetBorderNodes( firstNode, nodeKeyword );
@@ -225,8 +230,8 @@ namespace Fallout4
             
             SendObjectDataChangedEvent( this );
             /*
-            DebugLog.Write( string.Format( "Fallout4.WorkshopScript.BuildBorders() :: Complete :: workshop 0x{0} \"{1}\" :: keyword 0x{2} \"{3}\"", this.FormID.ToString( "X8" ), this.EditorID, keyword.FormID.ToString( "X8" ), keyword.EditorID ) );
-            DebugLog.Write( string.Format(
+            DebugLog.WriteLine( string.Format( "Fallout4.WorkshopScript.BuildBorders() :: Complete :: workshop 0x{0} \"{1}\" :: keyword 0x{2} \"{3}\"", this.FormID.ToString( "X8" ), this.EditorID, keyword.FormID.ToString( "X8" ), keyword.EditorID ) );
+            DebugLog.WriteLine( string.Format(
                 "Fallout4.WorkshopScript.BuildBorders() :: Complete :: workshop 0x{0} \"{1}\" :: workshop link keyword 0x{2} \"{3}\" :: node link keyword 0x{4} \"{5}\" :: first node 0x{6} \"{7}\" :: node count = {8}",
                 this.FormID.ToString( "X8" ), this.EditorID,
                 keyword.FormID.ToString( "X8" ), keyword.EditorID,
@@ -245,7 +250,10 @@ namespace Fallout4
             
             var forms = Form.References;
             if( forms.NullOrEmpty() )
+            {
+                DebugLog.WriteLine( new string[] { "Workshop has no other forms referencing it" } );
                 return null;
+            }
             
             foreach( var form in forms )
             {
@@ -257,12 +265,12 @@ namespace Fallout4
                 if( ( lr == null )||( lr != Reference ) )
                     continue;
                 
-                /*
-                DebugLog.Write( string.Format(
-                    "Fallout4.WorkshopScript.GetFirstBorderNode() :: 0x{0} \"{1}\"",
-                    refr.FormID.ToString( "X8" ),
-                    refr.EditorID ) );
-                */
+                // *
+                DebugLog.WriteLine( new string[] {
+                    this.GetType().ToString(),
+                    "GetFirstBorderNode()",
+                    refr.ToStringNullSafe() } );
+                // * /
                 
                 return refr;
             }
@@ -294,6 +302,13 @@ namespace Fallout4
                     kywd.FormID.ToString( "X8" ),
                     kywd.EditorID ) );
                 */
+                // *
+                DebugLog.WriteLine( new string[] {
+                    this.GetType().ToString(),
+                    "GetBorderNodeKeyword()",
+                    kywd.ToStringNullSafe() } );
+                // * /
+                
                 
                 return kywd;
             }
@@ -302,13 +317,18 @@ namespace Fallout4
         
         List<Engine.Plugin.Forms.ObjectReference> GetBorderNodes( Engine.Plugin.Forms.ObjectReference firstNode, Engine.Plugin.Forms.Keyword nodeKeyword )
         {
-            if( ( nodeKeyword == null )||( firstNode == null )||( Form == null ) )
-                return null;
+            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "GetBorderNodes()", "workshop = " + this.ToStringNullSafe(), "keyword = " + nodeKeyword.ToStringNullSafe(), "firstNode = " + firstNode.ToStringNullSafe() } );
             
-            var list = new List<Engine.Plugin.Forms.ObjectReference>();
+            var list = (List<Engine.Plugin.Forms.ObjectReference>)null;
+            
+            if( ( nodeKeyword == null )||( firstNode == null )||( Form == null ) )
+                goto localAbort;
+            
             var node = firstNode.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( node == null )
-                return null;
+                goto localAbort;
+            
+            list = new List<Engine.Plugin.Forms.ObjectReference>();
             
             var closedLoop = false;
             list.Add( firstNode );
@@ -335,6 +355,8 @@ namespace Fallout4
                 list.Count ) );
             */
             
+       localAbort:
+            DebugLog.CloseIndentLevel( "nodes", list );
             return list;
         }
         
@@ -353,6 +375,8 @@ namespace Fallout4
             DebugLog.OpenIndentLevel( string.Format( "{0} :: CreateBorderNIFs() :: workshop 0x{1} - \"{2}\"", this.GetType().ToString(), this.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
             
             List<GUIBuilder.FormImport.ImportBase> result = null;
+            
+            DebugLog.WriteList( "_nodes", _nodes );
             
             if( _nodes.NullOrEmpty() )
                 goto localReturnResult;

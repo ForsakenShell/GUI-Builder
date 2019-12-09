@@ -56,13 +56,13 @@ namespace GUIBuilder
             float slopeAllowance,
             bool updateMapUIData )
         {
+            DebugLog.OpenIndentLevel( new string[] { "GUIBuilder.SubDivisionBatch", "CalculateWorkshopEdgeFlagSegments()", "keyword = " + keyword.ToStringNullSafe(), "workshops = " + workshops.ToStringNullSafe() } );
+            
             if(
                 ( workshops.NullOrEmpty() )||
                 ( keyword == null )
             )
                 return false;
-            
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: CalculateWorkshopEdgeFlagSegments()" );
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();

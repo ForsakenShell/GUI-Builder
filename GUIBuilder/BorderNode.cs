@@ -596,31 +596,31 @@ namespace GUIBuilder
         
         static List<BorderNode> GenerateBorderNodes( GodObject.WorldspaceDataPool.PoolEntry wpEntry, IList<Vector3f> refPoints, float nodeLength, float slopeAllowance )
         {
-            //DebugLog.OpenIndentLevel( "GUIBuilder.BorderNode :: GenerateBorderNodes()" );
+            DebugLog.OpenIndentLevel( "GUIBuilder.BorderNode :: GenerateBorderNodes()" );
             List<BorderNode> nodes = null;
             
             if( refPoints.NullOrEmpty() )
             {
-                //DebugLog.WriteLine( "refPoints is NULL or EMPTY!" );
+                DebugLog.WriteLine( "refPoints is NULL or EMPTY!" );
                 goto localAbort;
             }
             
             if( wpEntry == null )
             {
-                //DebugLog.WriteLine( "wpEntry is NULL!" );
+                DebugLog.WriteLine( "wpEntry is NULL!" );
                 goto localAbort;
             }
             
             if( !wpEntry.LoadHeightMapData() )
             {
-                //DebugLog.WriteLine( "LoadHeightMapData() returned false" );
+                DebugLog.WriteLine( "LoadHeightMapData() returned false" );
                 goto localAbort;
             }
             
             nodeLength     = nodeLength     < BorderNode.MIN_NODE_LENGTH     ? BorderNode.MIN_NODE_LENGTH     : nodeLength;
             slopeAllowance = slopeAllowance < BorderNode.MIN_SLOPE_ALLOWANCE ? BorderNode.MIN_SLOPE_ALLOWANCE : slopeAllowance;
             
-            //DumpReferencePoints( refPoints, string.Format( "nodeLength = {0} :: slopeAllowance = {1}", nodeLength, slopeAllowance ) );
+            DumpReferencePoints( refPoints, string.Format( "nodeLength = {0} :: slopeAllowance = {1}", nodeLength, slopeAllowance ) );
             
             var lowestFloor = float.MaxValue;
             var rCount = refPoints.Count - 1;
@@ -734,7 +734,7 @@ namespace GUIBuilder
                 var refNode = new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.MidPoint );
                 nodes.Add( refNode );
             }
-            //BorderNodeGroup.DumpGroupNodes( nodes, "Generated nodes from linked refs" );
+            BorderNodeGroup.DumpGroupNodes( nodes, "Generated nodes from linked refs" );
             
             // Check if the first and last refs are the same for a complete loop
             var nCount = nodes.Count;
@@ -755,7 +755,7 @@ namespace GUIBuilder
                 node.Floor = lowestFloor;
             
         localAbort:
-            //DebugLog.CloseIndentLevel( "nodes", nodes );
+            DebugLog.CloseIndentLevel( "nodes", nodes );
             return nodes;
         }
         
