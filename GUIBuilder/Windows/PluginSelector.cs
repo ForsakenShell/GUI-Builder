@@ -207,16 +207,19 @@ namespace GUIBuilder.Windows
                         if( lastSelectedWorking == null )
                             lastSelectedWorking = node.Text;
                         
-                        // Prefer an ATC dependant file
-                        var p = LoadOrder.Find( f => f.Filename.InsensitiveInvariantMatch( CutOffString( node.Text, NodeFilenameTail ) ) );
-                        if( !p.Masters.NullOrEmpty() )
+                        if( GodObject.Master.AnnexTheCommonwealth.Loaded )
                         {
-                            foreach( var m in p.Masters )
+                            // Prefer an ATC dependant file
+                            var p = LoadOrder.Find( f => f.Filename.InsensitiveInvariantMatch( CutOffString( node.Text, NodeFilenameTail ) ) );
+                            if( !p.Masters.NullOrEmpty() )
                             {
-                                if( m.InsensitiveInvariantMatch( GodObject.Master.AnnexTheCommonwealth.Filename ) )
+                                foreach( var m in p.Masters ) // Gourmetrix (discord) reported an null reference error on this line, wtf?
                                 {
-                                    lastSelectedWorking = node.Text;
-                                    break;
+                                    if( m.InsensitiveInvariantMatch( GodObject.Master.AnnexTheCommonwealth.Filename ) )
+                                    {
+                                        lastSelectedWorking = node.Text;
+                                        break;
+                                    }
                                 }
                             }
                         }

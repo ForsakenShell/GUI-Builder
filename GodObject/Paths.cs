@@ -14,6 +14,11 @@ namespace GodObject
     public static class Paths
     {
         
+        static readonly string          XmlNode_Options     = "Options";
+        static readonly string          XmlNode_Paths       = "Paths";
+        static readonly string          XmlLanguageKey      = "Language";
+        static readonly string          XmlOutputKey        = "Output";
+        
         #region Fallout 4 Paths
         
         static string _fallout4 = null;
@@ -89,14 +94,13 @@ namespace GodObject
             }
         }
         
-        static readonly string XmlLanguageKey = "Language";
         static string _Language = string.Empty;
         public static string Language
         {
             get
             {
                 if( string.IsNullOrEmpty( _Language ) )
-                    _Language = XmlConfig.ReadStringValue( "Options", XmlLanguageKey, GUIBuilder.Constant.DefaultLanguage );
+                    _Language = XmlConfig.ReadStringValue( XmlNode_Options, XmlLanguageKey, GUIBuilder.Constant.DefaultLanguage );
                 return _Language;
             }
             set
@@ -109,7 +113,7 @@ namespace GodObject
                     ( !string.Format( "{0}{1}/{2}/{3}", bbPath, GUIBuilder.Constant.LanguageSubPath, value, GUIBuilder.Constant.LanguageFile ).FileExists() )
                 )   value = GUIBuilder.Constant.DefaultLanguage;
                 _Language = value;
-                XmlConfig.WriteStringValue( "Options", XmlLanguageKey, value );
+                XmlConfig.WriteStringValue( XmlNode_Options, XmlLanguageKey, value );
             }
         }
         
@@ -178,25 +182,30 @@ namespace GodObject
             }
         }
         
-        static string _defaultNIFBuilderOutput = null;
-        public static string DefaultNIFBuilderOutput
+        static string _NIFBuilderOutput = null;
+        public static string NIFBuilderOutput
         {
             get
             {
-                if( string.IsNullOrEmpty( _defaultNIFBuilderOutput ) )
+                if( string.IsNullOrEmpty( _NIFBuilderOutput ) )
                 {
+                    _NIFBuilderOutput = GodObject.XmlConfig.ReadStringValue( XmlNode_Paths, XmlOutputKey );
+                    if( !string.IsNullOrEmpty( _NIFBuilderOutput ) )
+                        return _NIFBuilderOutput;
                     var bbPath = BorderBuilder;
                     if( string.IsNullOrEmpty( bbPath ) )
                         return null;
                     var tryPath = bbPath + GUIBuilder.Constant.DefaultNIFBuilderOutputPath;
-                    if( !tryPath.TryAssignPath( ref _defaultNIFBuilderOutput ) )
+                    if( !tryPath.TryAssignPath( ref _NIFBuilderOutput ) )
                         return null;
+                    GodObject.XmlConfig.WriteStringValue( XmlNode_Paths, XmlOutputKey, _NIFBuilderOutput, true );
                 }
-                return _defaultNIFBuilderOutput;
+                return _NIFBuilderOutput;
             }
             set
             {
-                _defaultNIFBuilderOutput = value;
+                _NIFBuilderOutput = value;
+                GodObject.XmlConfig.WriteStringValue( XmlNode_Paths, XmlOutputKey, _NIFBuilderOutput, true );
             }
         }
         

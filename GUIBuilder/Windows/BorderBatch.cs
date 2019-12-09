@@ -71,7 +71,7 @@ namespace GUIBuilder.Windows
             this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
             this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
             
-            tbTargetFolder.Text = GodObject.Paths.DefaultNIFBuilderOutput;
+            tbTargetFolder.Text = GodObject.Paths.NIFBuilderOutput;
             
             tbNIFBuilderTargetFolderToolTip = new ToolTip();
             tbNIFBuilderTargetFolderToolTip.ShowAlways = true;
@@ -105,6 +105,8 @@ namespace GUIBuilder.Windows
                 //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
                 GodObject.Plugin.Data.Workshops.ObjectDataChanged += OnWorkshopListChanged;
                 UpdateWorkshopList( false );
+                
+                RepopulateWorkshopNodeDetectionForms();
                 
                 EnablePage( tpWorkshops, true );
             }
@@ -725,7 +727,14 @@ namespace GUIBuilder.Windows
         void btnBuildNIFsClick( object sender, EventArgs e )
         {
             if( string.IsNullOrEmpty( tbTargetFolder.Text ) )
-                return;
+            {
+                tbNIFBuilderTargetFolderMouseClick( null, null );
+                if( string.IsNullOrEmpty( tbTargetFolder.Text ) )
+                {
+                    DebugLog.WriteLine( new string[] { "GUIBuilder.Windows.BorderBatch", "btnBuildNIFsClick()", "No target folder selected!" } );
+                    return;
+                }
+            }
             WorkerThreadPool.CreateWorker( CreateNIFs, null ).Start();
         }
         
@@ -733,14 +742,14 @@ namespace GUIBuilder.Windows
         {
             
             var fbd = new FolderBrowserDialog();
-            fbd.SelectedPath = GodObject.Paths.DefaultNIFBuilderOutput;
+            fbd.SelectedPath = GodObject.Paths.NIFBuilderOutput;
             
-            if( fbd.ShowDialog() != DialogResult.OK )
+            if( fbd.ShowDialog() == DialogResult.OK )
             {
                 var path = fbd.SelectedPath;
                 if( !string.IsNullOrEmpty( path ) )
                 {
-                    GodObject.Paths.DefaultNIFBuilderOutput = path;
+                    GodObject.Paths.NIFBuilderOutput = path;
                     tbTargetFolder.Text = path;
                     tbNIFBuilderTargetFolderToolTip.SetToolTip( tbTargetFolder, path );
                 }
@@ -793,7 +802,7 @@ namespace GUIBuilder.Windows
                 var dlg = new OpenFileDialog();
                 dlg.Title = "BorderBatchWindow.ImportNIFsTitle".Translate();
                 dlg.Filter = string.Format( "{0}|NIFBuilder_BorderNIFs_*.txt|{1}|*.*", "BorderBatchWindow.ImportExportFilter".Translate(), "BorderBatchWindow.ImportAllFilter".Translate() );
-                dlg.InitialDirectory = GodObject.Paths.DefaultNIFBuilderOutput;
+                dlg.InitialDirectory = GodObject.Paths.NIFBuilderOutput;
                 dlg.FileName = _reImportFile;
                 dlg.RestoreDirectory = true;
                 dlg.DereferenceLinks = true;
