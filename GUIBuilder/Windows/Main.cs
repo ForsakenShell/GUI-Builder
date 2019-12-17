@@ -6,6 +6,7 @@
  */
 
 // Uncomment this line to use the native Windows dialog to load a single (the working) plugin instead of the multi-plugin loader
+// This also effects the workspace file selector
 //#define USE_SINGLE_LOADER
 
 using System;
@@ -20,7 +21,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of Main.
     /// </summary>
-    public partial class Main : Form
+    public partial class Main : Form, GodObject.XmlConfig.IXmlConfiguration
     {
         
         // Minimum sizes of the main window and render window/panel
@@ -28,9 +29,9 @@ namespace GUIBuilder.Windows
         readonly Size MIN_RENDER_SIZE = new Size( 700, 42 );
         readonly Size MAX_RENDER_SIZE = new Size( 65536, 42 );
         
-        const string XmlNode = "MainWindow";
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "MainWindow"; } }
+        
         bool onLoadComplete = false;
         
         const string TIME_FORMAT = @"mm\:ss";
@@ -110,8 +111,7 @@ namespace GUIBuilder.Windows
             }
             
             var configFile = GodObject.Paths.GUIBuilderConfigFile;
-            //Console.WriteLine( configFile );
-            if( ( string.IsNullOrEmpty( configFile ) )||( !System.IO.File.Exists( configFile ) ) )
+            if( ( string.IsNullOrEmpty( configFile ) )||( !System.IO.File.Exists( configFile ) )||( GodObject.XmlConfig.WasReset ) )
                 GodObject.Windows.GetOptionsWindow( true );
             
             /*
@@ -126,8 +126,8 @@ namespace GUIBuilder.Windows
             
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             GodObject.Windows.SetMainWindow( this, false );
             
@@ -155,13 +155,14 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
+        
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlNode, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         #endregion
@@ -182,9 +183,25 @@ namespace GUIBuilder.Windows
             mbMain.Enabled = enabled;
             if( GodObject.Plugin.IsLoaded )
             {
+                mbiFileCreateWorkspace.Enabled = ( enabled )&&( GodObject.Plugin.Workspace == null );
+                mbiFileLoadWorkspace.Enabled = false;
+                mbiFileLoadPlugin.Enabled = false;
+                mbiFileSavePlugin.Enabled = enabled;
+                mbiFileCloseFiles.Enabled = enabled;
                 mbiToolsBorderBatch.Enabled = enabled;
                 mbiToolsSubDivisionBatch.Enabled = ( enabled )&&( GodObject.Master.AnnexTheCommonwealth.Loaded );
                 mbiToolsRendererWindow.Enabled = enabled;
+            }
+            else
+            {
+                mbiFileCreateWorkspace.Enabled = false;
+                mbiFileLoadWorkspace.Enabled = enabled;
+                mbiFileLoadPlugin.Enabled = enabled;
+                mbiFileSavePlugin.Enabled = false;
+                mbiFileCloseFiles.Enabled = false;
+                mbiToolsBorderBatch.Enabled = false;
+                mbiToolsSubDivisionBatch.Enabled = false;
+                mbiToolsRendererWindow.Enabled = false;
             }
         }
         
@@ -399,11 +416,9 @@ namespace GUIBuilder.Windows
         
         #endregion
         
-        #region Load ESM/ESP
-        
-        void OnMenuCloseFileClick( object sender, EventArgs e )
+        void mbiFileCloseFilesClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "OnMenuCloseFileClick()" } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileCloseFilesClick()" } );
             GodObject.Windows.SetEnableState( false );
             
             if( ( GodObject.Plugin.IsLoading )||( !GodObject.Plugin.IsLoaded ) )
@@ -417,9 +432,11 @@ namespace GUIBuilder.Windows
             GodObject.Windows.SetEnableState( true );
         }
         
-        void OnMenuFileSaveClick( object sender, EventArgs e )
+        #region Save/Load Plugin
+        
+        void mbiFileSavePluginClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "OnMenuFileSaveClick()" } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileSavePluginClick()" } );
             GodObject.Windows.SetEnableState( false );
             
             if( !GodObject.Plugin.IsLoaded )
@@ -440,7 +457,7 @@ namespace GUIBuilder.Windows
             if( !result )
             {
                 saveMsg = string.Format( "Unable to save \"{0}\"\n{1}", wfn, saveMsg );
-                DebugLog.WriteError( this.GetType().ToString(), "OnMenuFileSaveClick()", saveMsg );
+                DebugLog.WriteError( this.GetType().ToString(), "mbiFileSavePluginClick()", saveMsg );
                 MessageBox.Show( saveMsg, "Error Saving", MessageBoxButtons.OK, MessageBoxIcon.Error );
             }
             else if( !string.IsNullOrEmpty( saveMsg ) )
@@ -455,9 +472,9 @@ namespace GUIBuilder.Windows
             DebugLog.CloseIndentLevel();
         }
         
-        void OnMenuLoadESMESPClick( object sender, EventArgs e )
+        void mbiFileLoadPluginClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "OnMenuLoadESMESPClick()" } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileLoadPluginClick()" } );
             GodObject.Windows.SetEnableState( false );
             var reEnableGUI = true;
             
@@ -500,7 +517,7 @@ namespace GUIBuilder.Windows
                     if( master.AlwaysSelect )
                         sp.Add( master.Filename );
                 if( !sp.Contains( wf ) )
-                	sp.Add( wf );
+                    sp.Add( wf );
                 
 #else
                 var wf = dlg.WorkingFile;
@@ -576,6 +593,82 @@ namespace GUIBuilder.Windows
         }
         
         #endregion
+        
+        void mbiFileLoadWorkspaceClick( object sender, EventArgs e )
+        {
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileLoadWorkspaceClick()" } );
+
+            GodObject.Windows.SetEnableState( false );
+            var reEnableGUI = true;
+            
+            if( ( GodObject.Plugin.IsLoading )||( GodObject.Plugin.IsLoaded ) )
+                goto localReturnResult;
+            
+            GodObject.Windows.CloseAllChildWindows();
+            
+#if USE_SINGLE_LOADER
+            var dlg = new OpenFileDialog();
+            dlg.Title = "Select GUIBuilder Workspace to load";
+            dlg.Filter = "eXtensible Markup Language|*.xml|All Files|*.*";
+            dlg.InitialDirectory = GodObject.Paths.Fallout4Data;
+            dlg.RestoreDirectory = true;
+            dlg.DereferenceLinks = true;
+            dlg.CheckFileExists = true;
+            dlg.CheckPathExists = true;
+            dlg.Multiselect = false;
+            
+#else
+            var dlg = new WorkspaceSelector();
+            
+#endif
+            
+#if USE_SINGLE_LOADER
+            if( ( dlg.ShowDialog() == DialogResult.OK )&&( !string.IsNullOrEmpty( dlg.FileName ) ) )
+#else
+            if( ( dlg.ShowDialog() == DialogResult.OK )&&( !string.IsNullOrEmpty( dlg.SelectedWorkspace ) ) )
+#endif
+            {
+                ClearStatusBar();
+                
+#if USE_SINGLE_LOADER
+                string path;
+                var sws = GenFilePath.FilenameFromPathname( dlg.FileName, out path );
+#else
+                var sws = dlg.SelectedWorkspace;
+#endif
+                
+                // If the plugin loader returns true, the loader thread will re-enable the GUI
+                reEnableGUI &= !GodObject.Plugin.Load( sws );
+            }
+            
+        localReturnResult:
+            if( reEnableGUI )
+                GodObject.Windows.SetEnableState( true );
+            DebugLog.CloseIndentLevel();
+        }
+        
+        void mbiFileCreateWorkspaceClick( object sender, EventArgs e )
+        {
+            if( ( !GodObject.Plugin.IsLoaded )||( GodObject.Plugin.IsLoading ) )
+            {
+                MessageBox.Show(
+                    "WorkspaceCreateWait.Body".Translate(),
+                    "WorkspaceCreateWait.Title".Translate(),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation );
+                return;
+            }
+            if( GodObject.Plugin.Workspace != null )
+            {
+                MessageBox.Show(
+                    "WorkspaceCreateAlreadyLoaded.Body".Translate(),
+                    "WorkspaceCreateAlreadyLoaded.Title".Translate(),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation );
+                return;
+            }
+            mbiFileCreateWorkspace.Enabled = !GodObject.Plugin.CreateWorkspace();
+        }
         
     }
 }

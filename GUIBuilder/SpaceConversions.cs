@@ -55,6 +55,11 @@ namespace GUIBuilder
             return new SDL.SDL_Rect( 0, 0, size.Width, size.Height );
         }
         
+        public static SDL.SDL_Point ToSDLPoint( this Size size )
+        {
+            return new SDL.SDL_Point( size.Width, size.Height );
+        }
+        
         public static Vector2i ToVector2i( this Size size )
         {
             return new Vector2i( size.Width, size.Height );

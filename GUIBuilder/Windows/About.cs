@@ -13,12 +13,12 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of About.
     /// </summary>
-    public partial class About : Form
+    public partial class About : Form, GodObject.XmlConfig.IXmlConfiguration
     {
         
-        const string XmlNode = "AboutWindow";
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "AboutWindow"; } }
+        
         bool onLoadComplete = false;
         
         public About()
@@ -42,8 +42,8 @@ namespace GUIBuilder.Windows
         {
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             lblVersion.Text = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             
@@ -54,14 +54,14 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlNode, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
         }
         
         void OnFormClosed( object sender, FormClosedEventArgs e )

@@ -9,6 +9,9 @@
 *.dds
 *.DDS
 
+# VS garbage
+.vs/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

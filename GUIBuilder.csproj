@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Exe</OutputType>
     <AssemblyName>GUIBuilder</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <NoStdLib>False</NoStdLib>
@@ -22,6 +22,21 @@
     <RunCodeAnalysis>False</RunCodeAnalysis>
     <ApplicationIcon>Images\GuiBuilder.ico</ApplicationIcon>
     <NoWarn>0162;0429</NoWarn>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -49,9 +64,22 @@
     <DefineConstants>TRACE;</DefineConstants>
     <BaseIntermediateOutputPath>..\obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -99,15 +127,25 @@
     <Compile Include="Engine\Plugin\PapyrusScripts\RawProperty.cs" />
     <Compile Include="Engine\Plugin\TargetHandle.cs" />
     <Compile Include="Extensions\GenCollection.cs" />
+    <Compile Include="Extensions\GenConversion.cs" />
     <Compile Include="Extensions\GenFilePath.cs" />
     <Compile Include="Extensions\GenReflection.cs" />
     <Compile Include="Extensions\GenRenderTransform.cs" />
     <Compile Include="Extensions\GenStream.cs" />
     <Compile Include="Extensions\GenString.cs" />
-    <Compile Include="GUIBuilder\Windows\PluginSelector.cs" />
+    <Compile Include="GUIBuilder\Windows\PluginSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GUIBuilder\Windows\PluginSelector.Designer.cs">
       <DependentUpon>PluginSelector.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUIBuilder\Windows\WorkspaceSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\WorkspaceSelector.Designer.cs">
+      <DependentUpon>WorkspaceSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="XmlBase.cs" />
     <None Include="BorderBuilder\Lang\English %28UK%29\Translate.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
@@ -260,6 +298,7 @@
     <Compile Include="GUIBuilder\Windows\SubDivisionBatch.Designer.cs">
       <DependentUpon>SubDivisionBatch.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUIBuilder\Workspace.cs" />
     <Compile Include="IndexedProperty.cs" />
     <Compile Include="Maths\HalfVector2f.cs" />
     <Compile Include="Maths\Vector3i.cs" />
@@ -269,6 +308,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Translator.cs" />
     <Compile Include="WorkerThreadPool.cs" />
@@ -395,24 +435,20 @@
     <EmbeddedResource Include="GUIBuilder\Windows\SubDivisionBatch.resx">
       <DependentUpon>SubDivisionBatch.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\WorkspaceSelector.resx">
+      <DependentUpon>WorkspaceSelector.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="BorderBuilder" />
-    <Folder Include="BorderBuilder\Lang" />
-    <Folder Include="BorderBuilder\Lang\English %28UK%29" />
-    <Folder Include="Engine\Plugin\Forms\Fields\Record" />
-    <Folder Include="Engine\Plugin\Extensions" />
-    <Folder Include="Engine\Plugin\PapyrusScripts" />
-    <Folder Include="GUIBuilder\Obsolete" />
-    <Folder Include="GUIBuilder\Windows" />
-    <Folder Include="GUIBuilder\Windows\Controls" />
-    <Folder Include="GUIBuilder\Windows\RenderChild" />
-    <Folder Include="Extensions" />
-    <Folder Include="DebugLog" />
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
     <ContentWithTargetPath Include="XeLibSharp\XEditLib\Fallout4.Hardcoded.dat">

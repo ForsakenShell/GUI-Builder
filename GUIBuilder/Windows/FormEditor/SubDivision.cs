@@ -19,7 +19,7 @@ namespace GUIBuilder.Windows.FormEditor
         
         bool onLoadComplete = false;
         
-        protected override string XmlKeySuffix { get { return "SubDivision"; } }
+        protected override string XmlFormNodeName { get { return "SubDivision"; } }
         
         List<Engine.Plugin.Forms.Location> _Locations;
         

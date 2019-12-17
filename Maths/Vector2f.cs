@@ -495,5 +495,26 @@ namespace Maths
         
         #endregion
         
+        /// <summary>
+        /// Calculate a primitive volume 2d corners using an object references position, rotation (Z only) and object bounds.
+        /// </summary>
+        /// <param name="p">position</param>
+        /// <param name="r">roation</param>
+        /// <param name="b">object bounds</param>
+        /// <returns></returns>
+        public static Vector2f[] CalculateCornerPositions( Vector3f p, Vector3f r, Vector3f b )
+        {
+            var h = b * 0.5f;
+            var p2 = new Vector2f( p.X, p.Y );
+            // Define the rect corners counter-clockwise,
+            // rotated in the inverse from screenspace to worldspace
+            return new Vector2f[]{
+                Vector2f.RotateAround( new Vector2f( p.X - h.X, p.Y - h.Y ), p2, - r.Z ),
+                Vector2f.RotateAround( new Vector2f( p.X + h.X, p.Y - h.Y ), p2, - r.Z ),
+                Vector2f.RotateAround( new Vector2f( p.X + h.X, p.Y + h.Y ), p2, - r.Z ),
+                Vector2f.RotateAround( new Vector2f( p.X - h.X, p.Y + h.Y ), p2, - r.Z )
+            };
+        }
+        
     }
 }

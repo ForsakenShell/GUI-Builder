@@ -16,6 +16,7 @@ using GUIBuilder;
 using Maths;
 
 using Engine;
+using Engine.Plugin;
 
 using XeLib;
 using XeLib.API;
@@ -27,7 +28,7 @@ namespace Fallout4
     /// <summary>
     /// Description of Workshop.
     /// </summary>
-    [Engine.Plugin.Attributes.ScriptAssociation( /*typeof( WorkshopScript ),*/ "WorkshopScript" )]
+    [Engine.Plugin.Attributes.ScriptAssociation( "WorkshopScript" )]
     public class WorkshopScript : Engine.Plugin.PapyrusScript
     {
         
@@ -52,11 +53,23 @@ namespace Fallout4
         {
             LocationName = string.Format( "0x{0} - No location", reference.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) );
         }
-        
+
         #endregion
-        
+
         #region Public Properties
         
+        public override ConflictStatus ConflictStatus
+        {
+            get
+            {
+                var bgKYWD = GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator );
+                return
+                    ( bgKYWD != null )&&( GetFirstBorderNode( bgKYWD ) != null )
+                    ? ConflictStatus.RequiresOverride
+                    : base.ConflictStatus;
+            }
+        }
+
         public string NameFromEditorID
         {
             get
@@ -154,7 +167,15 @@ namespace Fallout4
             }
         }
         
-        List<Engine.Plugin.Forms.ObjectReference> BuildVolumes
+        public Engine.Plugin.Forms.ObjectReference SandboxVolume
+        {
+            get
+            {
+                return Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.WorkshopLinkSandbox.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            }
+        }
+        
+        public List<Engine.Plugin.Forms.ObjectReference> BuildVolumes
         {
             get
             {
@@ -205,13 +226,13 @@ namespace Fallout4
             var firstNode = GetFirstBorderNode( keyword );
             if( firstNode == null )
             {
-                DebugLog.WriteLine( "GetFirstBorderNode() returned null!" );
+                DebugLog.WriteLine( "GetFirstBorderNode() returned null! :: BorderGeneratorKeyword = " + keyword.ToStringNullSafe() );
                 goto localReturnResult;
             }
             var nodeKeyword = GetBorderNodeKeyword( firstNode );
             if( nodeKeyword == null )
             {
-                DebugLog.WriteLine( "GetBorderNodeKeyword() returned null!" );
+                DebugLog.WriteLine( "GetBorderNodeKeyword() returned null! :: BorderGeneratorKeyword = " + keyword.ToStringNullSafe() );
                 goto localReturnResult;
             }
             
@@ -243,9 +264,9 @@ namespace Fallout4
            DebugLog.CloseIndentLevel();
         }
         
-        Engine.Plugin.Forms.ObjectReference GetFirstBorderNode( Engine.Plugin.Forms.Keyword workshopLinkKeyword )
+        Engine.Plugin.Forms.ObjectReference GetFirstBorderNode( Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword )
         {
-            if( workshopLinkKeyword == null )
+            if( workshopBorderGeneratorKeyword == null )
                 return null;
             
             var forms = Form.References;
@@ -261,7 +282,7 @@ namespace Fallout4
                 if( refr == null )
                     continue;
                 
-                var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, workshopLinkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, workshopBorderGeneratorKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 if( ( lr == null )||( lr != Reference ) )
                     continue;
                 

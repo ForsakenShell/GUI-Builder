@@ -54,36 +54,17 @@ namespace GUIBuilder.Windows.Controls
         where TSync : class, Engine.Plugin.Interface.ISyncedGUIObject
     {
         
-        // disable StaticFieldInGenericType
-        static readonly string XmlSortColumn = "SortBy";
-        static readonly string XmlSortDirection = "SortDirection";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return GodObject.XmlConfig.GetXmlParent( this ); } }
+        public string XmlNodeName { get{ return this.Name; } }
         
-        static System.Drawing.Font fontBold = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-        static System.Drawing.Font fontNormal = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+        // disable StaticFieldInGenericType
+        static readonly string XmlKey_SortColumn = "SortBy";
+        static readonly string XmlKey_SortDirection = "SortDirection";
+        
+        static System.Drawing.Font fontBold   = new System.Drawing.Font( "Microsoft Sans Serif", 8.25f, System.Drawing.FontStyle.Bold   , System.Drawing.GraphicsUnit.Point, 0 );
+        static System.Drawing.Font fontNormal = new System.Drawing.Font( "Microsoft Sans Serif", 8.25f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0 );
         
         bool onLoadComplete = false;
-        
-        [Browsable( false )]
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent
-        {
-            get
-            {
-                var p = Parent;
-                while( p != null )
-                {
-                    var xp = p as GodObject.XmlConfig.IXmlConfiguration;
-                    if( xp != null ) return xp;
-                    p = p.Parent;
-                }
-                return null;
-            }
-        }
-        
-        [Browsable( false )]
-        public string XmlKey { get { return this.Name; } }
-        
-        [Browsable( false )]
-        public string XmlPath { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
         
         struct Column : GodObject.XmlConfig.IXmlConfiguration
         {
@@ -100,14 +81,14 @@ namespace GUIBuilder.Windows.Controls
             
             public GodObject.XmlConfig.IXmlConfiguration XmlParent { get { return Parent; } }
             
-            public string XmlKey { get { return this.Name; } }
+            string _XmlNodeName;
+            public string XmlNodeName { get { return _XmlNodeName; } }
             
-            public string XmlPath { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
-            
-            public Column( SyncedListView<TSync> parent, SyncedColumnID id, string name, int defaultWidth, bool forceDefaultWidth, bool show )
+            public Column( SyncedListView<TSync> parent, SyncedColumnID id, string xmlNodeName, string name, int defaultWidth, bool forceDefaultWidth, bool show )
             {
                 Parent = parent;
                 ID = id;
+                _XmlNodeName = xmlNodeName;
                 Name = name;
                 DefaultWidth = defaultWidth;
                 ForceDefaultWidth = forceDefaultWidth;
@@ -117,7 +98,7 @@ namespace GUIBuilder.Windows.Controls
                 if( show )
                 {
                     if( !ForceDefaultWidth )
-                        DefaultWidth = GodObject.XmlConfig.ReadInt( XmlPath, XmlWidth, defaultWidth );
+                        DefaultWidth = GodObject.XmlConfig.ReadValue<int>( this, XmlWidth, defaultWidth );
                     Header = new System.Windows.Forms.ColumnHeader();
                     Header.Text = string.IsNullOrEmpty( Name ) ? "" : Name.Translate();
                     Header.Width = DefaultWidth;
@@ -385,15 +366,15 @@ namespace GUIBuilder.Windows.Controls
         
         void SyncedListViewLoad( object sender, EventArgs e )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: SyncedListViewLoad() :: Name = {1}", this.GetType().ToString(), this.Name ) );
+            //DebugLog.Write( string.Format( "\n{0} :: SyncedListViewLayout() :: Name = {1}", this.GetType().ToString(), this.Name ) );
             this.Translate( true );
             
             RecreateColumns();
             Sorter = null;
             if( AllowOverrideColumnSorting )
             {
-                _SortByColumn = (SyncedSortByColumns)GodObject.XmlConfig.ReadInt( XmlPath, XmlSortColumn, (int)_SortByColumn );
-                _SortDirection = (SyncedSortDirections)GodObject.XmlConfig.ReadInt( XmlPath, XmlSortColumn, (int)_SortDirection );
+                _SortByColumn = (SyncedSortByColumns)GodObject.XmlConfig.ReadValue<int>( this, XmlKey_SortColumn, (int)_SortByColumn );
+                _SortDirection = (SyncedSortDirections)GodObject.XmlConfig.ReadValue<int>( this, XmlKey_SortColumn, (int)_SortDirection );
             }
             onLoadComplete = true;
         }
@@ -407,13 +388,13 @@ namespace GUIBuilder.Windows.Controls
             lvSyncObjects.Columns.Clear();
             ColumnCount = 0;
             Columns = new Column[]{
-                new Column( this, SyncedColumnID.Checkbox     , ""                        ,  24, true , _CheckboxColumn  ),
-                new Column( this, SyncedColumnID.LoadOrder    , "SyncedListView.LoadOrder",  28, true , _LoadOrderColumn ),
-                new Column( this, SyncedColumnID.Filename     , "SyncedListView.Filename" , 160, false, _FilenameColumn  ),
-                new Column( this, SyncedColumnID.SignatureType, "SyncedListView.Type"     ,  60, false, _TypeColumn      ),
-                new Column( this, SyncedColumnID.FormID       , "Form.FormID"             ,  80, true , _FormIDColumn    ),
-                new Column( this, SyncedColumnID.EditorID     , "Form.EditorID"           , 256, false, _EditorIDColumn  ),
-                new Column( this, SyncedColumnID.ExtraInfo    , "SyncedListView.ExtraInfo", 512, false, _ExtraInfoColumn )
+                new Column( this, SyncedColumnID.Checkbox     , "Check"    , ""                        ,  24, true , _CheckboxColumn  ),
+                new Column( this, SyncedColumnID.LoadOrder    , "LoadOrder", "SyncedListView.LoadOrder",  28, true , _LoadOrderColumn ),
+                new Column( this, SyncedColumnID.Filename     , "Filename" , "SyncedListView.Filename" , 160, false, _FilenameColumn  ),
+                new Column( this, SyncedColumnID.SignatureType, "Signature", "SyncedListView.Type"     ,  60, false, _TypeColumn      ),
+                new Column( this, SyncedColumnID.FormID       , "FormID"   , "Form.FormID"             ,  80, true , _FormIDColumn    ),
+                new Column( this, SyncedColumnID.EditorID     , "EditorID" , "Form.EditorID"           , 256, false, _EditorIDColumn  ),
+                new Column( this, SyncedColumnID.ExtraInfo    , "ExtraInfo", "SyncedListView.ExtraInfo", 512, false, _ExtraInfoColumn )
             };
             RegisterListViewForEvents( true );
             lvSyncObjects.Enabled = true;
@@ -439,7 +420,7 @@ namespace GUIBuilder.Windows.Controls
                     if( column.ForceDefaultWidth )
                         column.Header.Width = column.DefaultWidth;
                     else if( onLoadComplete )
-                        GodObject.XmlConfig.WriteInt( column.XmlPath, Column.XmlWidth, column.Header.Width, true );
+                        GodObject.XmlConfig.WriteValue<int>( column, Column.XmlWidth, column.Header.Width, true );
                 }
             }
         }
@@ -475,7 +456,7 @@ namespace GUIBuilder.Windows.Controls
             set
             {
                 _SortByColumn = value;
-                GodObject.XmlConfig.WriteInt( XmlPath, XmlSortColumn, (int)_SortByColumn, true );
+                GodObject.XmlConfig.WriteValue<int>( this, XmlKey_SortColumn, (int)_SortByColumn, true );
                 Sorter = null;
                 RepopulateListView();
             }
@@ -487,7 +468,7 @@ namespace GUIBuilder.Windows.Controls
             set
             {
                 _SortDirection = value;
-                GodObject.XmlConfig.WriteInt( XmlPath, XmlSortDirection, (int)_SortDirection, true );
+                GodObject.XmlConfig.WriteValue<int>( this, XmlKey_SortDirection, (int)_SortDirection, true );
                 Sorter = null;
                 RepopulateListView();
             }
@@ -1102,9 +1083,9 @@ namespace GUIBuilder.Windows.Controls
             if( lastColumn == _SortByColumn )
                 _SortDirection = _SortDirection == SyncedSortDirections.Ascending ? SyncedSortDirections.Descending : SyncedSortDirections.Ascending;
             if( lastColumn != _SortByColumn )
-                GodObject.XmlConfig.WriteInt( XmlPath, XmlSortColumn, (int)_SortByColumn, true );
+                GodObject.XmlConfig.WriteValue<int>( this, XmlKey_SortColumn, (int)_SortByColumn, true );
             if( lastDirection != _SortDirection )
-                GodObject.XmlConfig.WriteInt( XmlPath, XmlSortDirection, (int)_SortDirection, true );
+                GodObject.XmlConfig.WriteValue<int>( this, XmlKey_SortDirection, (int)_SortDirection, true );
             Sorter = null;
             RepopulateListView();
         }

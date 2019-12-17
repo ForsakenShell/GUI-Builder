@@ -632,6 +632,8 @@ namespace Engine.Plugin
                     DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Filename is invalid for 0x{0}", _Forced_FormID.ToString( "X8" ) ) );
                     goto localAbort;
                 }
+                if( !GodObject.Plugin.Data.Files.IsLoaded( _Forced_Filename ) )
+                    return false;   // Not an error, user didn't select this core dependancy
                 var m = GodObject.Plugin.Data.Files.Find( _Forced_Filename );
                 if( ( m == null )||( m.LoadOrder == Constant.LO_Invalid ) )
                 {

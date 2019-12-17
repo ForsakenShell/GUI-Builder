@@ -25,6 +25,10 @@ namespace GodObject
         
         public static Engine.Plugin.Forms.Keyword WorkshopLinkedBuildAreaEdge               = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x001A0DD8 );
         public static Engine.Plugin.Forms.Keyword WorkshopLinkedPrimitive                   = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x000B91E6 );
+        public static Engine.Plugin.Forms.Keyword WorkshopLinkSandbox                       = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x0022B5A7 );
+        public static Engine.Plugin.Forms.Keyword WorkshopLinkSpawn                         = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x0002A198 );
+        public static Engine.Plugin.Forms.Keyword WorkshopLinkCenter                        = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x00038C0B );
+        public static Engine.Plugin.Forms.Keyword WorkshopLinkAttackMarker                  = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x000A7693 );
         
         public static Engine.Plugin.Forms.Layer WorkshopBorderArt                           = new Engine.Plugin.Forms.Layer      ( Master.Filename.Fallout4      , 0x001B2CD4 );
         
@@ -80,6 +84,10 @@ namespace GodObject
             
             WorkshopLinkedBuildAreaEdge,
             WorkshopLinkedPrimitive,
+            WorkshopLinkSandbox,
+            WorkshopLinkSpawn,
+            WorkshopLinkCenter,
+            WorkshopLinkAttackMarker,
             
             WorkshopBorderArt,
             

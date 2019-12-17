@@ -17,12 +17,12 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of BorderBatchImportWindow.
     /// </summary>
-    public partial class BatchImport : Form
+    public partial class BatchImport : Form, GodObject.XmlConfig.IXmlConfiguration
     {
         
-        const string XmlNode = "BatchImportWindow";
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "BatchImportWindow"; } }
+        
         bool onLoadComplete = false;
         
         public bool AllImportsMatchTarget = false;
@@ -56,8 +56,8 @@ namespace GUIBuilder.Windows
             // At this point we just need to sort the data and populate the form
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
@@ -100,13 +100,13 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlNode, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
         }
         
         void btnCloseClick( object sender, EventArgs e )

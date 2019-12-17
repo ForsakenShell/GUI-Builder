@@ -165,7 +165,7 @@ namespace SDL2ThinLayer
         /// <summary>
         /// Convert a string to an SDL_Point
         /// </summary>
-        public static bool TryParseSDLPoint( string fromString, out SDL.SDL_Point result )
+        public static bool TryParseSDLPoint( this string fromString, out SDL.SDL_Point result )
         {
             result = new SDL.SDL_Point( 0, 0 );
             

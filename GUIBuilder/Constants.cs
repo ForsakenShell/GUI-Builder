@@ -17,6 +17,7 @@ namespace GUIBuilder
         public const string BorderBuilderPath = "BorderBuilder";
         public const string BorderConfigPath = "BorderConfigs";
         public const string WorldspacePath = "Worldspaces";
+        public const string WorkspacePath = "Workspaces";
         public const string ImportModPath = "Mods";
         public const string RenderTransformImagePath = "RenderTransform";
         public const string DefaultNIFBuilderOutputPath = "Output";

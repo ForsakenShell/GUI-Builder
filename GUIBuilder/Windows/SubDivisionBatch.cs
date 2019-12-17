@@ -19,12 +19,12 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of SubDivisionBatch.
     /// </summary>
-    public partial class SubDivisionBatch : Form
+    public partial class SubDivisionBatch : Form, GodObject.XmlConfig.IXmlConfiguration
     {
         
-        const string XmlNode = "SubDivisionBatchWindow";
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "SubDivisionBatchWindow"; } }
+        
         bool onLoadComplete = false;
         
         public SubDivisionBatch()
@@ -36,8 +36,8 @@ namespace GUIBuilder.Windows
         {
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
@@ -57,13 +57,13 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlNode, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
         }
         
         #region Sync'd list monitoring

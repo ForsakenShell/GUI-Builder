@@ -15,306 +15,241 @@ namespace GodObject
     public static class XmlConfig
     {
         
+        const int                           CurrentConfigVersion                    = 1;
+        const string                        XmlKey_ConfigVersion                    = "ConfigVersion";
+        
+        // XmlNodes for the program wide options, not the options window
+        public const string                 XmlNode_Options                         = "Options";
+        public const string                 XmlNode_AlwaysSelectMasters             = "AlwaysSelectMasters";
+        
+        // XmlKeys for System.Windows.Forms.Control
+        public const string                 XmlKey_Location                         = "Location";
+        public const string                 XmlKey_Size                             = "Size";
+        public const string                 XmlKey_ZipLogs                          = "ZipLogs";
+        
         public interface IXmlConfiguration
         {
-            IXmlConfiguration   XmlParent                   { get; }
-            string              XmlKey                      { get; }
             
-            /* Since C# isn't capable of multiple class inheritance, this is a handy
-             * copy-pasta help function for classes implementing this interface
-            public string        XmlPath                     { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
-            */
+            [System.ComponentModel.Browsable( false )]
+            IXmlConfiguration               XmlParent                               { get; }
+            
+            [System.ComponentModel.Browsable( false )]
+            string                          XmlNodeName                             { get; }
         }
         
         #region Internal
         
-        public static readonly string Root = "GUIBuilder";
-        
-        static XmlDocument _Document;
-        static XmlNode _RootNode;
-        
-        static XmlNode RootNode
+        class ConfigInterface : XmlBase
         {
-            get
+            
+            public override bool            XmlForceCreateFile                      { get{ return false; } }
+            
+            public override bool            XmlFileMustExist                        { get{ return false; } }
+            
+            public override string          RootNodeName                            { get{ return "GUIBuilder"; } }
+            
+            public override string          Pathname                                { get{ return GodObject.Paths.GUIBuilderConfigFile; } }
+            
+            public override void            OnLoad()
             {
-                if( _Document == null )
-                {
-                    _Document = new XmlDocument();
-                    if( _Document == null )
-                        return null;
-                    
-                    var configFile = GodObject.Paths.GUIBuilderConfigFile;
-                    if( ( !string.IsNullOrEmpty( configFile ) )&&( System.IO.File.Exists( configFile ) ) )
-                    {
-                        _Document.Load( configFile );
-                        _RootNode = _Document.SelectSingleNode( Root );
-                    }
-                    else
-                    {
-                        _RootNode = _Document.CreateElement( Root );
-                        _Document.AppendChild( _RootNode );
-                    }
-                }
-                return _RootNode;
+                // Reset the config info if the config version is less than 1
+                var configVer = ReadValue<int>( XmlKey_ConfigVersion, 0 );
+                if( configVer < 1 )
+                    Reset( true, true );
+            }
+            
+            public override void            OnInit()
+            {
+                WriteValue<int>( XmlKey_ConfigVersion, CurrentConfigVersion );
             }
         }
         
+        static ConfigInterface              _ConfigInterface                        = new ConfigInterface();
+        
         #endregion
+        
+        public static bool WasReset { get { return _ConfigInterface.WasReset; } }
         
         #region Nodes
         
-        public static bool Commit()
+        public static XmlNodeList GetNodes( string[] nodes )
         {
-            var xdoc = _Document;
-            if( xdoc == null )
-                return false;
-            var configFile = GodObject.Paths.BorderBuilder + GUIBuilder.Constant.GUIBuilderConfigFile;
-            if( string.IsNullOrEmpty( configFile ) )
-                return false;
-            
-            XmlWriterSettings xsettings = new XmlWriterSettings();
-            if( xsettings == null )
-                return false;
-            xsettings.Indent = true;
-            
-            XmlWriter xwrite = XmlWriter.Create( configFile, xsettings );
-            if( xwrite == null )
-                return false;
-            
-            xdoc.WriteTo( xwrite );
-            xwrite.Close();
-            
-            return true;
+            return _ConfigInterface.GetNodes( XmlPathTo( nodes ) );
+        }
+        
+        public static XmlNodeList GetNodes( string[] nodes, string node )
+        {
+            return _ConfigInterface.GetNodes( XmlPathTo( nodes, node ) );
         }
         
         public static XmlNodeList GetNodes( string xpath )
         {
-            var rnode = RootNode;
-            return rnode == null ? null : rnode.SelectNodes( xpath );
-            
+            return _ConfigInterface.GetNodes( xpath );
+        }
+        
+        public static XmlNode GetNode( string[] nodes )
+        {
+            return _ConfigInterface.GetNode( XmlPathTo( nodes ) );
+        }
+        
+        public static XmlNode GetNode( string[] nodes, string node )
+        {
+            return _ConfigInterface.GetNode( XmlPathTo( nodes, node ) );
         }
         
         public static XmlNode GetNode( string xpath )
         {
-            var rnode = RootNode;
-            return rnode == null ? null : rnode.SelectSingleNode( xpath );
-            
+            return _ConfigInterface.GetNode( xpath );
+        }
+        
+        public static XmlNode MakeXPath( string[] nodes )
+        {
+            return _ConfigInterface.MakeXPath( XmlPathTo( nodes ) );
+        }
+        
+        public static XmlNode MakeXPath( string[] nodes, string node )
+        {
+            return _ConfigInterface.MakeXPath( XmlPathTo( nodes, node ) );
+        }
+        
+        public static XmlNode MakeXPath( string xpath )
+        {
+            return _ConfigInterface.MakeXPath( xpath );
+        }
+        
+        public static XmlNode AppendNode( XmlNode pnode, string xpath )
+        {
+            return _ConfigInterface.AppendNode( pnode, xpath );
         }
         
         #endregion
         
         #region Values
         
-        public static string ReadNodeValue( XmlNode node, string key, string defaultValue = null )
+        public static string                ReadNode( IXmlConfiguration config, string key )
         {
-            if( node == null )
-                return defaultValue;
-            var knode = node.SelectSingleNode( key );
-            return knode == null ? defaultValue : knode.InnerText;
+            return _ConfigInterface.ReadNode( XmlPathTo( config ), key );
         }
         
-        public static bool WriteNodeValue( XmlNode node, string key, string value, bool commit = false )
+        public static string                ReadNode( XmlNode pnode, string xpath, string key )
         {
-            if( node == null )
-                return false;
-            
-            var knode = node.SelectSingleNode( key );
-            if( knode == null )
-            {
-                knode = MakeXPath( node, key );
-                if( knode == null )
-                    return false;
-            }
-            /*
-            DebugLog.Write(
-                string.Format(
-                    "\nWriteNodeValue()\n\tkey = \"{0}\"\n\tvalue = \"{1}\"\n\tcommit = {2}",
-                    key, value, commit ) );
-            */
-            knode.InnerText = value;
-            
-            if( !commit ) return true;
-            return Commit();
+            return _ConfigInterface.ReadNode( pnode, xpath, key );
         }
         
-        public static string ReadStringValue( string xpath, string key, string defaultValue = null )
+        public static bool                  WriteNode( XmlNode pnode, string xpath, string key, string value, bool commit = false )
         {
-            /*
-            DebugLog.Write(
-                string.Format(
-                    "\nReadStringValue()\n\tXPath = \"{0}\"\n\tkey = \"{1}\"\n\tdefaultValue = \"{2}\"",
-                    xpath, key, defaultValue ) );
-            */
-            var dnode = GetNode( xpath );
-            if( dnode == null )
-                return defaultValue;
-            return ReadNodeValue( dnode, key, defaultValue );
+            return _ConfigInterface.WriteNode( pnode, xpath, key, value, commit );
         }
         
-        public static bool WriteStringValue( string xpath, string key, string value, bool commit = false )
+        public static T                     ReadValue<T>( XmlNode pnode, string xpath, string key, T defaultValue = default(T) )
         {
-            /*
-            DebugLog.Write(
-                string.Format(
-                    "\nWriteStringValue()\n\tXPath = \"{0}\"\n\tkey = \"{1}\"\n\tvalue = \"{2}\"\n\tcommit = {3}",
-                    xpath, key, value, commit ) );
-            */
-            var dnode = GetNode( xpath );
-            if( dnode == null )
-            {
-                dnode = MakeXPath( xpath );
-                if( dnode == null )
-                    return false;
-            }
-            return WriteNodeValue( dnode, key, value, commit );
+            return _ConfigInterface.ReadValue<T>( pnode, xpath, key, defaultValue );
+        }
+        public static T                     ReadValue<T>( XmlNode pnode, string key, T defaultValue = default(T) )
+        {
+            return ReadValue<T>( pnode, null, key, defaultValue );
+        }
+        public static T                     ReadValue<T>( string xpath, string key, T defaultValue = default(T) )
+        {
+            return ReadValue<T>( null, xpath, key, defaultValue );
+        }
+        public static T                     ReadValue<T>( string key, T defaultValue = default(T) )
+        {
+            return ReadValue<T>( null, null, key, defaultValue );
+        }
+        public static T                     ReadValue<T>( IXmlConfiguration config, string key, T defaultValue = default(T) )
+        {
+            return ReadValue<T>( null, XmlPathTo( config ), key, defaultValue );
         }
         
-        public static bool WriteInt( string xpath, string key, int value, bool commit = false )
+        public static bool                  WriteValue<T>( XmlNode pnode, string xpath, string key, T value, bool commit = false )
         {
-            var svalue = value.ToString();
-            //DebugLog.Write( xpath + "/" + key + " = " + svalue );
-            return WriteStringValue( xpath, key, svalue, commit );
+            return _ConfigInterface.WriteValue<T>( pnode, xpath, key, value, commit );
+        }
+        public static bool                  WriteValue<T>( XmlNode pnode, string key, T value, bool commit = false )
+        {
+            return WriteValue<T>( pnode, null, key, value, commit );
+        }
+        public static bool                  WriteValue<T>( string xpath, string key, T value, bool commit = false )
+        {
+            return WriteValue<T>( null, xpath, key, value, commit );
+        }
+        public static bool                  WriteValue<T>( string key, T value, bool commit = false )
+        {
+            return WriteValue<T>( null, null, key, value, commit );
+        }
+        public static bool                  WriteValue<T>( IXmlConfiguration config, string key, T value, bool commit = false )
+        {
+            return WriteValue<T>( null, XmlPathTo( config ), key, value, commit );
         }
         
-        public static int ReadInt( string xpath, string key, int defaultValue )
+        public static System.Drawing.Point  ReadLocation<T>( T config ) where T : System.Windows.Forms.Control, IXmlConfiguration
         {
-            var svalue = ReadStringValue( xpath, key );
-            if( string.IsNullOrEmpty( svalue ) )
-                return defaultValue;
-            
-            //DebugLog.Write( xpath + "/" + key + " = " + svalue + " ? " + defaultValue );
-            int rvalue;
-            return !int.TryParse( svalue, out rvalue )
-                ? defaultValue
-                : rvalue;
+            return ReadValue<System.Drawing.Point>( null, XmlPathTo( config ), XmlKey_Location, config.Location );
+        }
+        public static System.Drawing.Size   ReadSize<T>( T config ) where T : System.Windows.Forms.Control, IXmlConfiguration
+        {
+            return ReadValue<System.Drawing.Size>( null, XmlPathTo( config ), XmlKey_Size, config.Size );
         }
         
-        public static bool WriteFloat( string xpath, string key, float value, bool commit = false )
+        public static bool                  WriteLocation<T>( T config, bool commit = true ) where T : System.Windows.Forms.Control, IXmlConfiguration
         {
-            var svalue = value.ToString();
-            return WriteStringValue( xpath, key, svalue, commit );
+            return WriteValue<System.Drawing.Point>( null, XmlPathTo( config ), XmlKey_Location, config.Location, commit );
         }
-        
-        public static float ReadFloat( string xpath, string key, float defaultValue )
+        public static bool                  WriteSize<T>( T config, bool commit = true ) where T : System.Windows.Forms.Control, IXmlConfiguration
         {
-            var svalue = ReadStringValue( xpath, key );
-            if( string.IsNullOrEmpty( svalue ) )
-                return defaultValue;
-            
-            float rvalue;
-            return !float.TryParse( svalue, out rvalue )
-                ? defaultValue
-                : rvalue;
-        }
-        
-        public static bool WriteSDLPoint( string xpath, string key, SDL2.SDL.SDL_Point value, bool commit = false )
-        {
-            var svalue = SDL2ThinLayer.Extensions.ToString( value );
-            return WriteStringValue( xpath, key, svalue, commit );
-        }
-        
-        public static SDL2.SDL.SDL_Point ReadSDLPoint( string xpath, string key, SDL2.SDL.SDL_Point defaultValue )
-        {
-            var svalue = ReadStringValue( xpath, key );
-            if( string.IsNullOrEmpty( svalue ) )
-                return defaultValue;
-            
-            SDL2.SDL.SDL_Point spoint;
-            return SDL2ThinLayer.Extensions.TryParseSDLPoint( svalue, out spoint )
-                ? spoint
-                : defaultValue;
-        }
-        
-        public static bool WritePoint( string xpath, string key, System.Drawing.Point value, bool commit = false )
-        {
-            var spoint = SDL2ThinLayer.Extensions.ToSDLPoint( value );
-            var svalue = SDL2ThinLayer.Extensions.ToString( spoint );
-            return WriteStringValue( xpath, key, svalue, commit );
-        }
-        
-        public static System.Drawing.Point ReadPoint( string xpath, string key, System.Drawing.Point defaultValue )
-        {
-            var svalue = ReadStringValue( xpath, key );
-            if( string.IsNullOrEmpty( svalue ) )
-                return defaultValue;
-            
-            SDL2.SDL.SDL_Point spoint;
-            return SDL2ThinLayer.Extensions.TryParseSDLPoint( svalue, out spoint )
-                ? SDL2ThinLayer.Extensions.ToPoint( spoint )
-                : defaultValue;
-        }
-        
-        public static bool WriteSize( string xpath, string key, System.Drawing.Size value, bool commit = false )
-        {
-            var spoint = new SDL2.SDL.SDL_Point( value.Width, value.Height );
-            var svalue = SDL2ThinLayer.Extensions.ToString( spoint );
-            return WriteStringValue( xpath, key, svalue, commit );
-        }
-        
-        public static System.Drawing.Size ReadSize( string xpath, string key, System.Drawing.Size defaultValue )
-        {
-            var svalue = ReadStringValue( xpath, key );
-            if( string.IsNullOrEmpty( svalue ) )
-                return defaultValue;
-            
-            SDL2.SDL.SDL_Point spoint;
-            return SDL2ThinLayer.Extensions.TryParseSDLPoint( svalue, out spoint )
-                ? new System.Drawing.Size( spoint.x, spoint.y )
-                : defaultValue;
+            return WriteValue<System.Drawing.Size>( null, XmlPathTo( config ), XmlKey_Size, config.Size, commit );
         }
         
         #endregion
         
         #region Paths
         
-        public static string XmlPathTo( IXmlConfiguration config )
+        static string                       XmlPathTo( string[] nodes )
+        {
+            if( nodes.NullOrEmpty() ) return null;
+            var xpath = nodes[ 0 ];
+            for( int i = 1; i < nodes.Length; i++ )
+                xpath += "/" + nodes[ i ];
+            return xpath;
+        }
+        
+        static string                       XmlPathTo( string[] nodes, string node )
+        {
+            if( nodes.NullOrEmpty() ) return null;
+            var xpath = nodes[ 0 ];
+            for( int i = 1; i < nodes.Length; i++ )
+                xpath += "/" + nodes[ i ];
+            if( !string.IsNullOrEmpty( node ) )
+                xpath += "/" + node;
+            return xpath;
+        }
+        
+        static string                       XmlPathTo( IXmlConfiguration config )
         {
             if( config == null ) return null;
-            var xmlKey = config.XmlKey.ReplaceInvalidFilenameChars();
-            if( string.IsNullOrEmpty( xmlKey ) ) return null;
-            //DebugLog.Write( string.Format( "\nXmlPathTo :: xmlKey = \"{0}\" :: Parent ? {1}", xmlKey, ( config.XmlParent == null ? "false" : "true" ) ) );
-            if( config.XmlParent == null ) return xmlKey;
-            var pXPath = XmlPathTo( config.XmlParent );
-            //var s = ""; //"\n" + System.Environment.StackTrace;
-            //DebugLog.Write( string.Format( "\nXmlPathTo :: xmlKey = \"{0}\" :: pXPath = \"{1}\"{2}", xmlKey, pXPath, s ) );
-            return string.IsNullOrEmpty( pXPath )
-                ? xmlKey
-                : string.Format( "{0}/{1}", pXPath, xmlKey );
-        }
-        
-        public static XmlNode AppendNode( XmlNode parent, string key )
-        {
-            if( ( parent == null )||( string.IsNullOrEmpty( key ) ) )
-               return null;
-            return parent.AppendChild( _Document.CreateElement( key ) );
-        }
-        
-        public static XmlNode MakeXPath( string xpath )
-        {
-            return MakeXPath( _RootNode, xpath );
-        }
-        
-        public static XmlNode MakeXPath( XmlNode parent, string xpath )
-        {
-            if( _Document == null )
-                return null;
-            // grab the next node name in the xpath; or return parent if empty
-            string[] partsOfXPath = xpath.Trim('/').Split('/');
-            string nextNodeInXPath = partsOfXPath.First();
-            if( string.IsNullOrEmpty( nextNodeInXPath ) )
-                return parent;
-            
-            // get or create the node from the name
-            XmlNode node = parent.SelectSingleNode( nextNodeInXPath );
-            if( node == null )
-                node = AppendNode( parent, nextNodeInXPath );
-            
-            // rejoin the remainder of the array as an xpath expression and recurse
-            string rest = string.Join( "/", partsOfXPath.Skip( 1 ).ToArray() );
-            return MakeXPath( node, rest );
+            var xpath = config.XmlNodeName;
+            if( string.IsNullOrEmpty( xpath ) ) return null;
+            var pxpath = XmlPathTo( config.XmlParent );
+            return string.IsNullOrEmpty( pxpath )
+                ? xpath
+                : string.Format( "{0}/{1}", pxpath, xpath );
         }
         
         #endregion
+        
+        public static IXmlConfiguration     GetXmlParent( System.Windows.Forms.Control control )
+        {
+            var p = control.Parent;
+            while( p != null )
+            {
+                var x = p as GodObject.XmlConfig.IXmlConfiguration;
+                if( x != null )
+                    return x;
+                p = p.Parent;
+            }
+            return null;
+        }
         
     }
 }

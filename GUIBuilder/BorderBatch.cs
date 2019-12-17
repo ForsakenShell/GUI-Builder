@@ -24,9 +24,14 @@ namespace GUIBuilder
     /// </summary>
     public static class BorderBatch
     {
-        
+
+        public const string     WSDS_KYWD_BorderGenerator   = "WorkshopBorderGenerator";
+        public const string     WSDS_KYWD_BorderLink        = "WorkshopBorderLink";
+        public const string     WSDS_STAT_TerrainFollowing  = "TerrainFollowing";
+        public const string     WSDS_STAT_ForcedZ           = "ForcedZ";
+
         #region Import NIFs
-        
+
         public static bool ImportNIFs( string guiBuilderImportFile, bool enableControlsOnClose )
         {
             if( string.IsNullOrEmpty( guiBuilderImportFile ) )

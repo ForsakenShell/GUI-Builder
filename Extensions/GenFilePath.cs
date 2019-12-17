@@ -55,18 +55,30 @@ public static class GenFilePath
         return File.Exists( FixPathSlashes( file, false ) );
     }
     
-    public static bool TryAssignPath( this string path, ref string target )
+    public static bool TryAssignPath( this string path, ref string target, bool forceCreate = false )
     {
         var working = FixPathSlashes( path, true );
-        if( !Directory.Exists( working ) ) return false;
+        if( !Directory.Exists( working ) )
+        {
+            if( !forceCreate ) return false;
+            if( !path.CreatePath() ) return false;
+        }
         target = working;
         return true;
     }
     
-    public static bool TryAssignFile( this string file, ref string target )
+    public static bool TryAssignFile( this string file, ref string target, bool forceCreatePath = false )
     {
         var working = FixPathSlashes( file, false );
         //DebugLog.Write( string.Format( "{0} -> {1}", newFile, working ) );
+        if( forceCreatePath )
+        {
+            string path;
+            FilenameFromPathname( file, out path );
+            if( ( !string.IsNullOrEmpty( path ) )&&( !Directory.Exists( path ) ) )
+                if( !CreatePath( path ) )
+                    return false;
+        }
         if( !File.Exists( working ) ) return false;
         target = working;
         return true;
@@ -87,6 +99,12 @@ public static class GenFilePath
         if( string.IsNullOrEmpty( pathname ) )return;
         if( !File.Exists( pathname ) )return;
         File.Delete( pathname );
+    }
+    
+    public static string FilenameFromPathname( string pathname, string datapath = null, bool allowGhosts = false )
+    {
+        string path = null;
+        return FilenameFromPathname( pathname, out path, datapath, allowGhosts );
     }
     
     public static string FilenameFromPathname( string pathname, out string path, string datapath = null, bool allowGhosts = false )

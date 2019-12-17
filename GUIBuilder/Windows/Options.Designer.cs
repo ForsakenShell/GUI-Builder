@@ -30,6 +30,7 @@ namespace GUIBuilder.Windows
         private System.Windows.Forms.ComboBox cbLanguage;
         private System.Windows.Forms.TextBox tbLanguageRestart;
         private System.Windows.Forms.TextBox tbCSOverrideInPostLoad;
+        private System.Windows.Forms.CheckBox cbZipLogFiles;
         
         /// <summary>
         /// Disposes resources used by the form.
@@ -70,6 +71,7 @@ namespace GUIBuilder.Windows
             this.cbSDLVideoDriver = new System.Windows.Forms.ComboBox();
             this.tbSDLVideoRenderWarning = new System.Windows.Forms.TextBox();
             this.gbSDLHints = new System.Windows.Forms.GroupBox();
+            this.cbZipLogFiles = new System.Windows.Forms.CheckBox();
             this.gbAlwaysSelectMasters.SuspendLayout();
             this.gbConflictStatus.SuspendLayout();
             this.gbLanguage.SuspendLayout();
@@ -84,7 +86,7 @@ namespace GUIBuilder.Windows
             this.gbAlwaysSelectMasters.Controls.Add(this.lvAlwaysSelectMasters);
             this.gbAlwaysSelectMasters.Location = new System.Drawing.Point(3, 3);
             this.gbAlwaysSelectMasters.Name = "gbAlwaysSelectMasters";
-            this.gbAlwaysSelectMasters.Size = new System.Drawing.Size(309, 97);
+            this.gbAlwaysSelectMasters.Size = new System.Drawing.Size(309, 95);
             this.gbAlwaysSelectMasters.TabIndex = 0;
             this.gbAlwaysSelectMasters.TabStop = false;
             this.gbAlwaysSelectMasters.Tag = "OptionsWindow.Masters";
@@ -106,7 +108,7 @@ namespace GUIBuilder.Windows
             this.lvAlwaysSelectMasters.Location = new System.Drawing.Point(6, 19);
             this.lvAlwaysSelectMasters.MultiSelect = false;
             this.lvAlwaysSelectMasters.Name = "lvAlwaysSelectMasters";
-            this.lvAlwaysSelectMasters.Size = new System.Drawing.Size(297, 72);
+            this.lvAlwaysSelectMasters.Size = new System.Drawing.Size(297, 70);
             this.lvAlwaysSelectMasters.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.LoadOrder;
             this.lvAlwaysSelectMasters.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvAlwaysSelectMasters.SyncedEditorFormType = null;
@@ -231,7 +233,7 @@ namespace GUIBuilder.Windows
             this.gbConflictStatus.Controls.Add(this.tbCSOverrideInAncestor);
             this.gbConflictStatus.Controls.Add(this.tbCSNewForm);
             this.gbConflictStatus.Controls.Add(this.tbCSInvalid);
-            this.gbConflictStatus.Location = new System.Drawing.Point(3, 106);
+            this.gbConflictStatus.Location = new System.Drawing.Point(3, 104);
             this.gbConflictStatus.Name = "gbConflictStatus";
             this.gbConflictStatus.Size = new System.Drawing.Size(309, 129);
             this.gbConflictStatus.TabIndex = 1;
@@ -272,7 +274,7 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbLanguage.Controls.Add(this.tbLanguageRestart);
             this.gbLanguage.Controls.Add(this.cbLanguage);
-            this.gbLanguage.Location = new System.Drawing.Point(3, 241);
+            this.gbLanguage.Location = new System.Drawing.Point(3, 239);
             this.gbLanguage.Name = "gbLanguage";
             this.gbLanguage.Size = new System.Drawing.Size(309, 90);
             this.gbLanguage.TabIndex = 3;
@@ -323,7 +325,7 @@ namespace GUIBuilder.Windows
             this.gbSDLHints.Controls.Add(this.tbSDLVideoRenderWarning);
             this.gbSDLHints.Controls.Add(this.cbSDLVideoDriver);
             this.gbSDLHints.Controls.Add(this.lblSDLVideoDriver);
-            this.gbSDLHints.Location = new System.Drawing.Point(3, 337);
+            this.gbSDLHints.Location = new System.Drawing.Point(3, 335);
             this.gbSDLHints.Name = "gbSDLHints";
             this.gbSDLHints.Size = new System.Drawing.Size(309, 121);
             this.gbSDLHints.TabIndex = 2;
@@ -331,11 +333,27 @@ namespace GUIBuilder.Windows
             this.gbSDLHints.Tag = "OptionsWindow.SDLHint";
             this.gbSDLHints.Text = "SDL";
             // 
+            // cbZipLogFiles
+            // 
+            this.cbZipLogFiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbZipLogFiles.Checked = true;
+            this.cbZipLogFiles.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbZipLogFiles.Location = new System.Drawing.Point(3, 462);
+            this.cbZipLogFiles.Name = "cbZipLogFiles";
+            this.cbZipLogFiles.Size = new System.Drawing.Size(309, 24);
+            this.cbZipLogFiles.TabIndex = 4;
+            this.cbZipLogFiles.Tag = "OptionsWindow.ZipLogFiles";
+            this.cbZipLogFiles.Text = "Zippity-do-da";
+            this.cbZipLogFiles.UseVisualStyleBackColor = true;
+            this.cbZipLogFiles.CheckedChanged += new System.EventHandler(this.cbZipLogFilesCheckedChanged);
+            // 
             // Options
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(314, 461);
+            this.ClientSize = new System.Drawing.Size(314, 488);
+            this.Controls.Add(this.cbZipLogFiles);
             this.Controls.Add(this.gbLanguage);
             this.Controls.Add(this.gbSDLHints);
             this.Controls.Add(this.gbConflictStatus);
@@ -344,7 +362,7 @@ namespace GUIBuilder.Windows
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(600, 800);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(322, 485);
+            this.MinimumSize = new System.Drawing.Size(322, 512);
             this.Name = "Options";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "OptionsWindow.Title";

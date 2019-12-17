@@ -39,8 +39,8 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.TabPage tpWorkshops;
         GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript> lvWorkshops;
         System.Windows.Forms.TabPage tpSubDivisions;
-        System.Windows.Forms.ComboBox cbWorkshopBorderKeyword;
-        System.Windows.Forms.Label lblWorkshopBorderKeyword;
+        System.Windows.Forms.ComboBox cbWorkshopKeywordBorderGenerator;
+        System.Windows.Forms.Label lblWorkshopMarkerLink;
         System.Windows.Forms.CheckBox cbRestrictWorkshopBorderKeywords;
         System.Windows.Forms.Label lbSubDivisionSlopeAllowance;
         System.Windows.Forms.TextBox tbSubDivisionSlopeAllowance;
@@ -76,10 +76,16 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.Label lblWorkshopFileSuffix;
         System.Windows.Forms.TextBox tbWorkshopTargetSuffix;
         System.Windows.Forms.Label lblWorkshopTargetSuffix;
-        System.Windows.Forms.ComboBox cbWorkshopForcedZStatic;
+        System.Windows.Forms.ComboBox cbWorkshopBorderMarkerForcedZ;
         System.Windows.Forms.Label lblWorkshopForcedZStatic;
         System.Windows.Forms.GroupBox gbWorkshopNodeDetection;
         System.Windows.Forms.CheckBox cbWorkshopCreateImportData;
+        private System.Windows.Forms.Label lbWorkshopBorderGenerator;
+        private System.Windows.Forms.ComboBox cbWorkshopKeywordBorderLink;
+        private System.Windows.Forms.ComboBox cbWorkshopBorderMarkerTerrainFollowing;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.GroupBox gbWorkshopNodeDetectionKeywords;
+        private System.Windows.Forms.GroupBox gbWorkshopNodeDetectionStaticMarkers;
         
         /// <summary>
         /// Disposes resources used by the form.
@@ -135,11 +141,17 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.tpWorkshops = new System.Windows.Forms.TabPage();
             this.gbWorkshopNodeDetection = new System.Windows.Forms.GroupBox();
-            this.cbRestrictWorkshopBorderKeywords = new System.Windows.Forms.CheckBox();
-            this.cbWorkshopForcedZStatic = new System.Windows.Forms.ComboBox();
-            this.lblWorkshopBorderKeyword = new System.Windows.Forms.Label();
-            this.cbWorkshopBorderKeyword = new System.Windows.Forms.ComboBox();
+            this.gbWorkshopNodeDetectionStaticMarkers = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.lblWorkshopForcedZStatic = new System.Windows.Forms.Label();
+            this.cbWorkshopBorderMarkerTerrainFollowing = new System.Windows.Forms.ComboBox();
+            this.cbWorkshopBorderMarkerForcedZ = new System.Windows.Forms.ComboBox();
+            this.gbWorkshopNodeDetectionKeywords = new System.Windows.Forms.GroupBox();
+            this.lbWorkshopBorderGenerator = new System.Windows.Forms.Label();
+            this.cbWorkshopKeywordBorderGenerator = new System.Windows.Forms.ComboBox();
+            this.lblWorkshopMarkerLink = new System.Windows.Forms.Label();
+            this.cbWorkshopKeywordBorderLink = new System.Windows.Forms.ComboBox();
+            this.cbRestrictWorkshopBorderKeywords = new System.Windows.Forms.CheckBox();
             this.gbWorkshopNodeAndNIFGeneration = new System.Windows.Forms.GroupBox();
             this.cbWorkshopCreateImportData = new System.Windows.Forms.CheckBox();
             this.tbWorkshopGroundSink = new System.Windows.Forms.TextBox();
@@ -176,6 +188,8 @@ namespace GUIBuilder.Windows
             this.gbSubDivisionNodeAndNIFGeneration.SuspendLayout();
             this.tpWorkshops.SuspendLayout();
             this.gbWorkshopNodeDetection.SuspendLayout();
+            this.gbWorkshopNodeDetectionStaticMarkers.SuspendLayout();
+            this.gbWorkshopNodeDetectionKeywords.SuspendLayout();
             this.gbWorkshopNodeAndNIFGeneration.SuspendLayout();
             this.gbBorderFunctions.SuspendLayout();
             this.SuspendLayout();
@@ -190,7 +204,7 @@ namespace GUIBuilder.Windows
             this.pnWindow.Controls.Add(this.gbBorderFunctions);
             this.pnWindow.Location = new System.Drawing.Point(0, 0);
             this.pnWindow.Name = "pnWindow";
-            this.pnWindow.Size = new System.Drawing.Size(672, 506);
+            this.pnWindow.Size = new System.Drawing.Size(672, 640);
             this.pnWindow.TabIndex = 0;
             // 
             // gbTargetFolder
@@ -241,7 +255,7 @@ namespace GUIBuilder.Windows
             this.tcObjectSelect.Location = new System.Drawing.Point(0, 80);
             this.tcObjectSelect.Name = "tcObjectSelect";
             this.tcObjectSelect.SelectedIndex = 0;
-            this.tcObjectSelect.Size = new System.Drawing.Size(672, 426);
+            this.tcObjectSelect.Size = new System.Drawing.Size(672, 560);
             this.tcObjectSelect.TabIndex = 0;
             this.tcObjectSelect.SelectedIndexChanged += new System.EventHandler(this.tcObjectSelectSelectedIndexChanged);
             // 
@@ -252,7 +266,7 @@ namespace GUIBuilder.Windows
             this.tpSubDivisions.Location = new System.Drawing.Point(4, 22);
             this.tpSubDivisions.Name = "tpSubDivisions";
             this.tpSubDivisions.Padding = new System.Windows.Forms.Padding(3);
-            this.tpSubDivisions.Size = new System.Drawing.Size(664, 400);
+            this.tpSubDivisions.Size = new System.Drawing.Size(664, 534);
             this.tpSubDivisions.TabIndex = 1;
             this.tpSubDivisions.Tag = "BorderBatchWindow.Tab.SubDivisions";
             this.tpSubDivisions.Text = "Sub-Divisions";
@@ -506,8 +520,9 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions.Location = new System.Drawing.Point(336, 0);
             this.lvSubDivisions.MultiSelect = true;
             this.lvSubDivisions.Name = "lvSubDivisions";
-            this.lvSubDivisions.Size = new System.Drawing.Size(328, 400);
+            this.lvSubDivisions.Size = new System.Drawing.Size(328, 534);
             this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
+            this.lvSubDivisions.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvSubDivisions.SyncedEditorFormType = null;
             this.lvSubDivisions.SyncObjects = null;
             this.lvSubDivisions.TabIndex = 10;
@@ -521,7 +536,7 @@ namespace GUIBuilder.Windows
             this.tpWorkshops.Location = new System.Drawing.Point(4, 22);
             this.tpWorkshops.Name = "tpWorkshops";
             this.tpWorkshops.Padding = new System.Windows.Forms.Padding(3);
-            this.tpWorkshops.Size = new System.Drawing.Size(664, 399);
+            this.tpWorkshops.Size = new System.Drawing.Size(664, 534);
             this.tpWorkshops.TabIndex = 0;
             this.tpWorkshops.Tag = "BorderBatchWindow.Tab.Workshops";
             this.tpWorkshops.Text = "Workshops";
@@ -529,18 +544,116 @@ namespace GUIBuilder.Windows
             // 
             // gbWorkshopNodeDetection
             // 
+            this.gbWorkshopNodeDetection.Controls.Add(this.gbWorkshopNodeDetectionStaticMarkers);
+            this.gbWorkshopNodeDetection.Controls.Add(this.gbWorkshopNodeDetectionKeywords);
             this.gbWorkshopNodeDetection.Controls.Add(this.cbRestrictWorkshopBorderKeywords);
-            this.gbWorkshopNodeDetection.Controls.Add(this.cbWorkshopForcedZStatic);
-            this.gbWorkshopNodeDetection.Controls.Add(this.lblWorkshopBorderKeyword);
-            this.gbWorkshopNodeDetection.Controls.Add(this.cbWorkshopBorderKeyword);
-            this.gbWorkshopNodeDetection.Controls.Add(this.lblWorkshopForcedZStatic);
             this.gbWorkshopNodeDetection.Location = new System.Drawing.Point(0, 257);
             this.gbWorkshopNodeDetection.Name = "gbWorkshopNodeDetection";
-            this.gbWorkshopNodeDetection.Size = new System.Drawing.Size(330, 142);
+            this.gbWorkshopNodeDetection.Size = new System.Drawing.Size(330, 278);
             this.gbWorkshopNodeDetection.TabIndex = 17;
             this.gbWorkshopNodeDetection.TabStop = false;
             this.gbWorkshopNodeDetection.Tag = "BorderBatchWindow.NodeDetection";
             this.gbWorkshopNodeDetection.Text = "Node Detection";
+            // 
+            // gbWorkshopNodeDetectionStaticMarkers
+            // 
+            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.label1);
+            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.lblWorkshopForcedZStatic);
+            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.cbWorkshopBorderMarkerTerrainFollowing);
+            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.cbWorkshopBorderMarkerForcedZ);
+            this.gbWorkshopNodeDetectionStaticMarkers.Location = new System.Drawing.Point(6, 167);
+            this.gbWorkshopNodeDetectionStaticMarkers.Name = "gbWorkshopNodeDetectionStaticMarkers";
+            this.gbWorkshopNodeDetectionStaticMarkers.Size = new System.Drawing.Size(318, 106);
+            this.gbWorkshopNodeDetectionStaticMarkers.TabIndex = 22;
+            this.gbWorkshopNodeDetectionStaticMarkers.TabStop = false;
+            this.gbWorkshopNodeDetectionStaticMarkers.Tag = "BorderBatchWindow.NodeDetection.StaticMarkers:";
+            this.gbWorkshopNodeDetectionStaticMarkers.Text = "StaticMarkers:";
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(6, 16);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(306, 17);
+            this.label1.TabIndex = 19;
+            this.label1.Tag = "BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing:";
+            this.label1.Text = "BorderMarkerTerrainFollowing:";
+            // 
+            // lblWorkshopForcedZStatic
+            // 
+            this.lblWorkshopForcedZStatic.Location = new System.Drawing.Point(6, 60);
+            this.lblWorkshopForcedZStatic.Name = "lblWorkshopForcedZStatic";
+            this.lblWorkshopForcedZStatic.Size = new System.Drawing.Size(306, 17);
+            this.lblWorkshopForcedZStatic.TabIndex = 15;
+            this.lblWorkshopForcedZStatic.Tag = "BorderBatchWindow.NodeDetection.BorderMarkerForcedZ:";
+            this.lblWorkshopForcedZStatic.Text = "BorderMarkerForcedZ:";
+            // 
+            // cbWorkshopBorderMarkerTerrainFollowing
+            // 
+            this.cbWorkshopBorderMarkerTerrainFollowing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbWorkshopBorderMarkerTerrainFollowing.Location = new System.Drawing.Point(6, 36);
+            this.cbWorkshopBorderMarkerTerrainFollowing.Name = "cbWorkshopBorderMarkerTerrainFollowing";
+            this.cbWorkshopBorderMarkerTerrainFollowing.Size = new System.Drawing.Size(306, 21);
+            this.cbWorkshopBorderMarkerTerrainFollowing.TabIndex = 20;
+            this.cbWorkshopBorderMarkerTerrainFollowing.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged);
+            // 
+            // cbWorkshopBorderMarkerForcedZ
+            // 
+            this.cbWorkshopBorderMarkerForcedZ.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbWorkshopBorderMarkerForcedZ.Location = new System.Drawing.Point(6, 80);
+            this.cbWorkshopBorderMarkerForcedZ.Name = "cbWorkshopBorderMarkerForcedZ";
+            this.cbWorkshopBorderMarkerForcedZ.Size = new System.Drawing.Size(306, 21);
+            this.cbWorkshopBorderMarkerForcedZ.TabIndex = 16;
+            this.cbWorkshopBorderMarkerForcedZ.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopBorderMarkerForcedZSelectedIndexChanged);
+            // 
+            // gbWorkshopNodeDetectionKeywords
+            // 
+            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.lbWorkshopBorderGenerator);
+            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.cbWorkshopKeywordBorderGenerator);
+            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.lblWorkshopMarkerLink);
+            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.cbWorkshopKeywordBorderLink);
+            this.gbWorkshopNodeDetectionKeywords.Location = new System.Drawing.Point(6, 55);
+            this.gbWorkshopNodeDetectionKeywords.Name = "gbWorkshopNodeDetectionKeywords";
+            this.gbWorkshopNodeDetectionKeywords.Size = new System.Drawing.Size(318, 106);
+            this.gbWorkshopNodeDetectionKeywords.TabIndex = 21;
+            this.gbWorkshopNodeDetectionKeywords.TabStop = false;
+            this.gbWorkshopNodeDetectionKeywords.Tag = "BorderBatchWindow.NodeDetection.Keywords:";
+            this.gbWorkshopNodeDetectionKeywords.Text = "Keywords:";
+            // 
+            // lbWorkshopBorderGenerator
+            // 
+            this.lbWorkshopBorderGenerator.Location = new System.Drawing.Point(6, 16);
+            this.lbWorkshopBorderGenerator.Name = "lbWorkshopBorderGenerator";
+            this.lbWorkshopBorderGenerator.Size = new System.Drawing.Size(306, 17);
+            this.lbWorkshopBorderGenerator.TabIndex = 17;
+            this.lbWorkshopBorderGenerator.Tag = "BorderBatchWindow.NodeDetection.WorkshopBorderGenerator:";
+            this.lbWorkshopBorderGenerator.Text = "WorkshopBorderGenerator:";
+            // 
+            // cbWorkshopKeywordBorderGenerator
+            // 
+            this.cbWorkshopKeywordBorderGenerator.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbWorkshopKeywordBorderGenerator.Location = new System.Drawing.Point(6, 36);
+            this.cbWorkshopKeywordBorderGenerator.Name = "cbWorkshopKeywordBorderGenerator";
+            this.cbWorkshopKeywordBorderGenerator.Size = new System.Drawing.Size(306, 21);
+            this.cbWorkshopKeywordBorderGenerator.TabIndex = 13;
+            this.cbWorkshopKeywordBorderGenerator.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopKeywordBorderGeneratorSelectedIndexChanged);
+            // 
+            // lblWorkshopMarkerLink
+            // 
+            this.lblWorkshopMarkerLink.Location = new System.Drawing.Point(6, 60);
+            this.lblWorkshopMarkerLink.Name = "lblWorkshopMarkerLink";
+            this.lblWorkshopMarkerLink.Size = new System.Drawing.Size(306, 17);
+            this.lblWorkshopMarkerLink.TabIndex = 12;
+            this.lblWorkshopMarkerLink.Tag = "BorderBatchWindow.NodeDetection.WorkshopMarkerLink:";
+            this.lblWorkshopMarkerLink.Text = "WorkshopMarkerLink:";
+            // 
+            // cbWorkshopKeywordBorderLink
+            // 
+            this.cbWorkshopKeywordBorderLink.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbWorkshopKeywordBorderLink.Location = new System.Drawing.Point(6, 80);
+            this.cbWorkshopKeywordBorderLink.Name = "cbWorkshopKeywordBorderLink";
+            this.cbWorkshopKeywordBorderLink.Size = new System.Drawing.Size(306, 21);
+            this.cbWorkshopKeywordBorderLink.TabIndex = 18;
+            this.cbWorkshopKeywordBorderLink.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopKeywordBorderLinkSelectedIndexChanged);
             // 
             // cbRestrictWorkshopBorderKeywords
             // 
@@ -553,40 +666,6 @@ namespace GUIBuilder.Windows
             this.cbRestrictWorkshopBorderKeywords.Text = "Restrict to:\r\n{0}";
             this.cbRestrictWorkshopBorderKeywords.UseVisualStyleBackColor = true;
             this.cbRestrictWorkshopBorderKeywords.CheckStateChanged += new System.EventHandler(this.cbRestrictWorkshopBorderKeywordsChanged);
-            // 
-            // cbWorkshopForcedZStatic
-            // 
-            this.cbWorkshopForcedZStatic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWorkshopForcedZStatic.Location = new System.Drawing.Point(5, 116);
-            this.cbWorkshopForcedZStatic.Name = "cbWorkshopForcedZStatic";
-            this.cbWorkshopForcedZStatic.Size = new System.Drawing.Size(319, 21);
-            this.cbWorkshopForcedZStatic.TabIndex = 16;
-            // 
-            // lblWorkshopBorderKeyword
-            // 
-            this.lblWorkshopBorderKeyword.Location = new System.Drawing.Point(6, 52);
-            this.lblWorkshopBorderKeyword.Name = "lblWorkshopBorderKeyword";
-            this.lblWorkshopBorderKeyword.Size = new System.Drawing.Size(198, 17);
-            this.lblWorkshopBorderKeyword.TabIndex = 12;
-            this.lblWorkshopBorderKeyword.Tag = "BorderBatchWindow.NodeDetection.WorkshopKeyword:";
-            this.lblWorkshopBorderKeyword.Text = "Workshop Link Keyword:";
-            // 
-            // cbWorkshopBorderKeyword
-            // 
-            this.cbWorkshopBorderKeyword.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWorkshopBorderKeyword.Location = new System.Drawing.Point(5, 72);
-            this.cbWorkshopBorderKeyword.Name = "cbWorkshopBorderKeyword";
-            this.cbWorkshopBorderKeyword.Size = new System.Drawing.Size(319, 21);
-            this.cbWorkshopBorderKeyword.TabIndex = 13;
-            // 
-            // lblWorkshopForcedZStatic
-            // 
-            this.lblWorkshopForcedZStatic.Location = new System.Drawing.Point(6, 96);
-            this.lblWorkshopForcedZStatic.Name = "lblWorkshopForcedZStatic";
-            this.lblWorkshopForcedZStatic.Size = new System.Drawing.Size(198, 17);
-            this.lblWorkshopForcedZStatic.TabIndex = 15;
-            this.lblWorkshopForcedZStatic.Tag = "BorderBatchWindow.NodeDetection.ForcedZStatic:";
-            this.lblWorkshopForcedZStatic.Text = "Forced Z Static Object:";
             // 
             // gbWorkshopNodeAndNIFGeneration
             // 
@@ -836,8 +915,9 @@ namespace GUIBuilder.Windows
             this.lvWorkshops.Location = new System.Drawing.Point(336, 0);
             this.lvWorkshops.MultiSelect = true;
             this.lvWorkshops.Name = "lvWorkshops";
-            this.lvWorkshops.Size = new System.Drawing.Size(328, 399);
+            this.lvWorkshops.Size = new System.Drawing.Size(328, 534);
             this.lvWorkshops.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
+            this.lvWorkshops.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvWorkshops.SyncedEditorFormType = null;
             this.lvWorkshops.SyncObjects = null;
             this.lvWorkshops.TabIndex = 11;
@@ -905,12 +985,12 @@ namespace GUIBuilder.Windows
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(672, 507);
+            this.ClientSize = new System.Drawing.Size(672, 641);
             this.Controls.Add(this.pnWindow);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(680, 530);
+            this.MinimumSize = new System.Drawing.Size(680, 665);
             this.Name = "BorderBatch";
             this.ShowInTaskbar = false;
             this.Tag = "BorderBatchWindow.Title";
@@ -928,6 +1008,8 @@ namespace GUIBuilder.Windows
             this.gbSubDivisionNodeAndNIFGeneration.PerformLayout();
             this.tpWorkshops.ResumeLayout(false);
             this.gbWorkshopNodeDetection.ResumeLayout(false);
+            this.gbWorkshopNodeDetectionStaticMarkers.ResumeLayout(false);
+            this.gbWorkshopNodeDetectionKeywords.ResumeLayout(false);
             this.gbWorkshopNodeAndNIFGeneration.ResumeLayout(false);
             this.gbWorkshopNodeAndNIFGeneration.PerformLayout();
             this.gbBorderFunctions.ResumeLayout(false);

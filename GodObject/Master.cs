@@ -16,10 +16,11 @@ namespace GodObject
     
     public static class Master
     {
-        const string                    XmlNode                     = "AlwaysSelectMasters";
-        const string                    XmlMaster                   = "Master";
-        const string                    XmlFilename                 = "Filename";
-        const string                    XmlAlwaysSelect             = "AlwaysSelect";
+        const string                    XmlNode_Master              = "Master";
+        const string                    XmlKey_Filename             = "Filename";
+        const string                    XmlKey_AlwaysSelect         = "AlwaysSelect";
+        
+        static string[]                 XmlPath_AlwaysLoadMasters   = new string[] { XmlConfig.XmlNode_Options, XmlConfig.XmlNode_AlwaysSelectMasters };
         
         public static class Filename
         {
@@ -51,7 +52,7 @@ namespace GodObject
                         _AlwaysSelect = value;
                         var node = GetXmlNode( true );
                         if( node != null )
-                            XmlConfig.WriteNodeValue( node, XmlAlwaysSelect, _AlwaysSelect.ToString(), true );
+                            XmlConfig.WriteValue<bool>( node, XmlKey_AlwaysSelect, _AlwaysSelect, true );
                     }
                     SendObjectDataChangedEvent( null );
                 }
@@ -70,30 +71,30 @@ namespace GodObject
             
             public XmlNode              GetXmlNode( bool createNode = false )
             {
-                var masters = XmlConfig.GetNodes( XmlNode + '/' + XmlMaster  );
+                var masters = XmlConfig.GetNodes( XmlPath_AlwaysLoadMasters, XmlNode_Master );
                 if( masters != null )
                 {
                     foreach( XmlNode master in masters )
                     {
-                        var name = XmlConfig.ReadNodeValue( master, XmlFilename, null );
+                        var name = XmlConfig.ReadValue<string>( master, XmlKey_Filename, null );
                         if( ( name != null )&&( Name.InsensitiveInvariantMatch( name ) ) )
                            return master;
                     }
                 }
                 if( !createNode )
                     return null;
-                var almnode = XmlConfig.GetNode( XmlNode );
+                var almnode = XmlConfig.GetNode( XmlPath_AlwaysLoadMasters );
                 if( almnode == null )
                 {
-                    almnode = XmlConfig.MakeXPath( XmlNode );
+                    almnode = XmlConfig.MakeXPath( XmlPath_AlwaysLoadMasters );
                     if( almnode == null )
                         return null;
                 }
                 
-                var node = XmlConfig.AppendNode( almnode, XmlMaster );
+                var node = XmlConfig.AppendNode( almnode, XmlNode_Master );
                 if( node == null )
                     return null;
-                XmlConfig.WriteNodeValue( node, XmlFilename, Name );
+                XmlConfig.WriteValue<string>( node, XmlKey_Filename, Name );
                 return node;
             }
             
@@ -118,7 +119,7 @@ namespace GodObject
                 }
             }
             
-            public string[] Filenames
+            public string[]             Filenames
             {
                 get
                 {
@@ -270,15 +271,15 @@ namespace GodObject
                 bool alwaysSelect = Filename.Fallout4.InsensitiveInvariantMatch( loi.Filename ) || Filename.AnnexTheCommonwealth.InsensitiveInvariantMatch( loi.Filename );
                 files.Add( new File( loi.Filename, userDeleteable, userToggleable, alwaysSelect ) );
             }
-            var masters = XmlConfig.GetNodes( XmlNode + '/' + XmlMaster );
+            var masters = XmlConfig.GetNodes( XmlPath_AlwaysLoadMasters );
             if( masters != null )
             {
                 foreach( XmlNode node in masters )
                 {
-                    var name = XmlConfig.ReadNodeValue( node, XmlFilename, null );
+                    var name = XmlConfig.ReadValue<string>( node, XmlKey_Filename, null );
                     if( name != null )
                     {
-                        var alwaysSelect = XmlConfig.ReadNodeValue( node, XmlAlwaysSelect, "false" ).InsensitiveInvariantMatch( "true" );
+                        var alwaysSelect = XmlConfig.ReadValue<bool>( node, XmlKey_AlwaysSelect, false );
                         var index = FindEx( files, name );
                         //DebugLog.Write( name + " " + alwaysLoad.ToString() );
                         if( index < 0 )

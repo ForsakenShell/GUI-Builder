@@ -21,18 +21,15 @@ namespace GUIBuilder.Windows.FormEditor
         #region Form Xml
         
         const string XmlKeyPrefix = "FormEditorWindow_";
-        protected virtual string XmlKeySuffix { get { return "YOU_FORGOT_TO_SET_THIS_IN_THE_CHILD_FORM_EDITOR_WINDOW"; } }
+        protected virtual string XmlFormNodeName { get { throw new NotImplementedException(); } }
         
         [Browsable( false )]
         public GodObject.XmlConfig.IXmlConfiguration XmlParent
         { get { return null; } }
         
         [Browsable( false )]
-        public string XmlKey
-        { get { return XmlKeyPrefix + XmlKeySuffix; } }
-        
-        [Browsable( false )]
-        public string        XmlPath                     { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
+        public string XmlNodeName
+        { get { return XmlKeyPrefix + XmlFormNodeName; } }
         
         #endregion
         
@@ -58,8 +55,6 @@ namespace GUIBuilder.Windows.FormEditor
         
         #region Common SyncObjectGUIElement Form Controls and Events
         
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
         Size _ExpandedSize;
         bool _AllowResizing = false;
         bool _ShrinkOnDeactivate = false;
@@ -71,9 +66,9 @@ namespace GUIBuilder.Windows.FormEditor
         {
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
             if( _AllowResizing )
-                this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );
+                this.Size = GodObject.XmlConfig.ReadSize( this );
             _ExpandedSize = this.Size;
             MoveButtons();
             
@@ -120,14 +115,14 @@ namespace GUIBuilder.Windows.FormEditor
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlPath, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlPath, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
             _ExpandedSize = this.Size;
             MoveButtons();
         }

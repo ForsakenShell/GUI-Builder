@@ -45,6 +45,8 @@ namespace GodObject
         
         #region Internal variables
         
+        public static GUIBuilder.Workspace Workspace = null;
+        
         static List<string> _loadPlugins = null;
         static string _workingFile = null;
         static bool _openRenderWindowOnLoad = false;
@@ -94,6 +96,45 @@ namespace GodObject
             {
                 return _isLoaded;
             }
+        }
+        
+        #endregion
+        
+        #region Load/Create Workspace
+        
+        public static bool Load( string workspace )
+        {
+            var result = false;
+            Workspace = new Workspace( workspace );
+            if( Workspace != null )
+            {
+                result = Load(
+                    Workspace.WorkingFile,
+                    Workspace.PluginNames,
+                    Workspace.OpenRenderWindowOnLoad );
+            }
+            return result;
+        }
+        
+        public static bool CreateWorkspace()
+        {
+            if( string.IsNullOrEmpty( _workingFile ) )
+            {
+                DebugLog.WriteError( "GUIBuilder.GodObject.Plugin", "CreateWorkspace()", "No working file!" );
+                return false;
+            }
+            Workspace = new Workspace( _workingFile );
+            if( Workspace == null )
+            {
+                DebugLog.WriteError( "GUIBuilder.GodObject.Plugin", "CreateWorkspace()", "Could not create Workspace!" );
+                return false;
+            }
+            Workspace.PluginNames = _loadPlugins;
+            Workspace.WorkingFile = _workingFile;
+            Workspace.OpenRenderWindowOnLoad = _openRenderWindowOnLoad;
+            Workspace.Commit();
+            
+            return true;
         }
         
         #endregion
@@ -197,7 +238,13 @@ namespace GodObject
                 
             }
             
+            if( Workspace != null )
+                Workspace.Commit();
+
+            Workspace = null;
+            _workingFile = null;
             _isLoading = isLoading;
+
             DebugLog.CloseIndentLevel();
         }
         
@@ -375,7 +422,7 @@ namespace GodObject
             m.StopSyncTimer( "GodObject.Plugin :: PluginLoader() :: Thread finished in {0}", tStart.Ticks );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
-            _workingFile = string.Empty;
+            //_workingFile = string.Empty;
             _isLoading = false;
         }
         

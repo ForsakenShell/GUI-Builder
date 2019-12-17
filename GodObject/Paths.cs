@@ -7,6 +7,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+
 
 namespace GodObject
 {
@@ -14,10 +16,10 @@ namespace GodObject
     public static class Paths
     {
         
-        static readonly string          XmlNode_Options     = "Options";
+        //static readonly string          XmlNode_Options     = "Options";
         static readonly string          XmlNode_Paths       = "Paths";
-        static readonly string          XmlLanguageKey      = "Language";
-        static readonly string          XmlOutputKey        = "Output";
+        static readonly string          XmlKey_Language      = "Language";
+        static readonly string          XmlKey_Output        = "Output";
         
         #region Fallout 4 Paths
         
@@ -100,7 +102,7 @@ namespace GodObject
             get
             {
                 if( string.IsNullOrEmpty( _Language ) )
-                    _Language = XmlConfig.ReadStringValue( XmlNode_Options, XmlLanguageKey, GUIBuilder.Constant.DefaultLanguage );
+                    _Language = XmlConfig.ReadValue<string>( XmlConfig.XmlNode_Options, XmlKey_Language, GUIBuilder.Constant.DefaultLanguage );
                 return _Language;
             }
             set
@@ -113,7 +115,7 @@ namespace GodObject
                     ( !string.Format( "{0}{1}/{2}/{3}", bbPath, GUIBuilder.Constant.LanguageSubPath, value, GUIBuilder.Constant.LanguageFile ).FileExists() )
                 )   value = GUIBuilder.Constant.DefaultLanguage;
                 _Language = value;
-                XmlConfig.WriteStringValue( XmlNode_Options, XmlLanguageKey, value );
+                XmlConfig.WriteValue<string>( XmlConfig.XmlNode_Options, XmlKey_Language, value );
             }
         }
         
@@ -189,7 +191,7 @@ namespace GodObject
             {
                 if( string.IsNullOrEmpty( _NIFBuilderOutput ) )
                 {
-                    _NIFBuilderOutput = GodObject.XmlConfig.ReadStringValue( XmlNode_Paths, XmlOutputKey );
+                    _NIFBuilderOutput = GodObject.XmlConfig.ReadValue<string>( XmlNode_Paths, XmlKey_Output );
                     if( !string.IsNullOrEmpty( _NIFBuilderOutput ) )
                         return _NIFBuilderOutput;
                     var bbPath = BorderBuilder;
@@ -198,14 +200,14 @@ namespace GodObject
                     var tryPath = bbPath + GUIBuilder.Constant.DefaultNIFBuilderOutputPath;
                     if( !tryPath.TryAssignPath( ref _NIFBuilderOutput ) )
                         return null;
-                    GodObject.XmlConfig.WriteStringValue( XmlNode_Paths, XmlOutputKey, _NIFBuilderOutput, true );
+                    GodObject.XmlConfig.WriteValue<string>( XmlNode_Paths, XmlKey_Output, _NIFBuilderOutput, true );
                 }
                 return _NIFBuilderOutput;
             }
             set
             {
                 _NIFBuilderOutput = value;
-                GodObject.XmlConfig.WriteStringValue( XmlNode_Paths, XmlOutputKey, _NIFBuilderOutput, true );
+                GodObject.XmlConfig.WriteValue<string>( XmlNode_Paths, XmlKey_Output, _NIFBuilderOutput, true );
             }
         }
         
@@ -244,6 +246,49 @@ namespace GodObject
                     _worldspace = Directory.GetDirectories( readPath );
                 }
                 return _worldspace;
+            }
+        }
+        
+        static string _workspace = null;
+        public static string Workspace
+        {
+            get
+            {
+                if( _workspace == null )
+                {
+                    var bbPath = BorderBuilder;
+                    if( string.IsNullOrEmpty( bbPath ) )
+                        return null;
+                    var tryPath = bbPath + GUIBuilder.Constant.WorkspacePath;
+                    if( !tryPath.TryAssignPath( ref _workspace, true ) )
+                        return null;
+                    //Console.WriteLine( string.Format( "Workspaces: \"{0}\"", _workspace ) );
+                }
+                return _workspace;
+            }
+        }
+        
+        public static string[] Workspaces
+        {
+            get
+            {
+                var wsPath = Workspace;
+                if( string.IsNullOrEmpty( wsPath ) )
+                    return null;
+                var wsFiles = Directory.GetFiles( wsPath, "*.xml" );
+                //if( !wsFiles.NullOrEmpty() )
+                //    foreach( var wsFile in wsFiles )
+                //        Console.WriteLine( string.Format( "Workspace File: \"{0}\"", wsFile ) );
+                var result = wsFiles.Select( x =>
+                                            {
+                                                var y = GenFilePath.FilenameFromPathname( x );
+                                                var dot = y.LastIndexOf( '.' );
+                                                return y.Substring( 0, dot );
+                                            } ).ToArray();
+                //if( !result.NullOrEmpty() )
+                //    foreach( var wsName in result )
+                //        Console.WriteLine( string.Format( "Workspace Name: \"{0}\"", wsName ) );
+                return result;
             }
         }
         

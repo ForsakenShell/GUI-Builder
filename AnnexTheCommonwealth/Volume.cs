@@ -80,32 +80,26 @@ namespace AnnexTheCommonwealth
             
             _lastTarget = target;
             
-            // Half size and Vector2f for corner positions and rotation
-            var _size = Reference.Primitive.GetBounds( target );
-            var _rotation = Reference.GetRotation( target );
-            var hSize = _size * 0.5f;
-            var p2 = GetPosition2D( target );
-            var newCorners = new CornerData[ 4 ];
-            
-            // Define the rect corners counter-clockwise,
-            // rotated in the inverse from screenspace to worldspace
-            newCorners[ 0 ].Position = Vector2f.RotateAround( new Vector2f( p2.X - hSize.X, p2.Y - hSize.Y ), p2, -_rotation.Z );
-            newCorners[ 1 ].Position = Vector2f.RotateAround( new Vector2f( p2.X + hSize.X, p2.Y - hSize.Y ), p2, -_rotation.Z );
-            newCorners[ 2 ].Position = Vector2f.RotateAround( new Vector2f( p2.X + hSize.X, p2.Y + hSize.Y ), p2, -_rotation.Z );
-            newCorners[ 3 ].Position = Vector2f.RotateAround( new Vector2f( p2.X - hSize.X, p2.Y + hSize.Y ), p2, -_rotation.Z );
+            var newCorners = Vector2fExtensions.CalculateCornerPositions(
+                Reference.GetPosition( target ),
+                Reference.GetRotation( target ),
+                Reference.Primitive.GetBounds( target ) );
             
             var firstSet = _corners.NullOrEmpty();
             overrideAndClearAnchoring = overrideAndClearAnchoring && !firstSet;
             
             if( ( overrideAndClearAnchoring )||( firstSet ) )
             {
-                _corners = newCorners;
+                var corners = new CornerData[ 4 ];
+                for( int i = 0; i < 4; i++ )
+                    corners[ i ].Position = newCorners[ i ];
+                _corners = corners;
             }
             else
             {
                 for( int i = 0; i < 4; i++ )
                     if( !_corners[ i ].Anchored )
-                        _corners[ i ].Position = newCorners[ i ].Position;
+                        _corners[ i ].Position = newCorners[ i ];
             }
         }
         

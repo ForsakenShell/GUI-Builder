@@ -176,7 +176,8 @@ namespace GodObject
         
         #region Render Window
         
-        static readonly string XmlSDLVideoDriver = "SDLVideoDriver";
+        const string                    XmlKey_SDLVideoDriver                   = "SDLVideoDriver";
+        
         static public readonly string SDLVideoDriverDefault = "Default";
         static public readonly string SDLVideoDriverSoftware = "Software";
         static public readonly int SDLVideoDriverDefaultIndex = 0;
@@ -194,12 +195,12 @@ namespace GodObject
         {
             get
             {
-                return GodObject.XmlConfig.ReadStringValue( "Options", XmlSDLVideoDriver, SDLVideoDriverDefault );
+                return GodObject.XmlConfig.ReadValue<string>( XmlConfig.XmlNode_Options, XmlKey_SDLVideoDriver, SDLVideoDriverDefault );
             }
             set
             {
                 int i = GetDriverIndexFromName( value );
-                GodObject.XmlConfig.WriteStringValue( "Options", XmlSDLVideoDriver, SDLVideoDrivers[ i ], true );
+                GodObject.XmlConfig.WriteValue<string>( XmlConfig.XmlNode_Options, XmlKey_SDLVideoDriver, SDLVideoDrivers[ i ], true );
             }
         }
         static public int SDLVideoDriverIndex
@@ -210,10 +211,11 @@ namespace GodObject
             }
             set
             {
-                int i = ( value < 0 )||( value > SDLVideoDrivers.Length )
+                SDLVideoDriver = SDLVideoDrivers[
+                    ( value < 0 )||( value > SDLVideoDrivers.Length )
                     ? SDLVideoDriverDefaultIndex
-                    : value;
-                GodObject.XmlConfig.WriteStringValue( "Options", XmlSDLVideoDriver, SDLVideoDrivers[ i ], true );
+                    : value
+                ];
             }
         }
         

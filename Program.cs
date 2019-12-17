@@ -11,6 +11,7 @@
 using System;
 using System.Windows.Forms;
 
+
 /// <summary>
 /// Class with program entry point.
 /// </summary>
@@ -26,8 +27,17 @@ internal sealed class Program
         DebugLog.Open();
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault( false );
-        Application.Run( new GUIBuilder.Windows.Main() );
+        try
+        {
+            Application.Run( new GUIBuilder.Windows.Main() );
+        }
+        catch( Exception e )
+        {
+            DebugLog.WriteError( "Program", "Main()", string.Format( "An unhandled exception occured\n{0}", e.ToStringNullSafe() ) );
+        }
         DebugLog.Close();
+        if( GodObject.XmlConfig.ReadValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_ZipLogs, true ) )
+            DebugLog.ZipLogs( true );
     }
     
 }

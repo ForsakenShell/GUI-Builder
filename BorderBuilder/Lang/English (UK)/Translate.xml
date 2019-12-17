@@ -14,9 +14,11 @@
     <MainWindow.SavingFile>Saving "{0}"...</MainWindow.SavingFile>
     <MainWindow.FileSaved>"{0}" saved.</MainWindow.FileSaved>
     <MainWindow.FileMenu>File</MainWindow.FileMenu>
-    <MainWindow.FileMenu.Load>Load ESM/ESP</MainWindow.FileMenu.Load>
-    <MainWindow.FileMenu.Save>Save</MainWindow.FileMenu.Save>
-    <MainWindow.FileMenu.Close>Close Files</MainWindow.FileMenu.Close>
+    <MainWindow.FileMenu.LoadWorkspace>Load Workspace</MainWindow.FileMenu.LoadWorkspace>
+    <MainWindow.FileMenu.CreateWorkspace>Create Workspace</MainWindow.FileMenu.CreateWorkspace>
+    <MainWindow.FileMenu.LoadPlugin>Load Plugin</MainWindow.FileMenu.LoadPlugin>
+    <MainWindow.FileMenu.SavePlugin>Save Plugin</MainWindow.FileMenu.SavePlugin>
+    <MainWindow.FileMenu.CloseAllFiles>Close All Files</MainWindow.FileMenu.CloseAllFiles>
     <MainWindow.FileMenu.Exit>Exit</MainWindow.FileMenu.Exit>
     <MainWindow.ToolMenu>Tools</MainWindow.ToolMenu>
     <MainWindow.ToolMenu.SubDivisions>Sub-Division Batch</MainWindow.ToolMenu.SubDivisions>
@@ -32,6 +34,7 @@
     <OptionsWindow.SDLHint>SDL Hints</OptionsWindow.SDLHint>
     <OptionsWindow.SDLHint.Warning>GUIBuilder will create very large textures that are "non-power-of-two" depending on the worldspace.  The Commonwealth (for example) is 6145x6145, if your hardware cannot support this you should override the below setting with "{0}".</OptionsWindow.SDLHint.Warning>
     <OptionsWindow.SDLHint.VideoDriver>Video Driver</OptionsWindow.SDLHint.VideoDriver>
+    <OptionsWindow.ZipLogFiles>Zip log files on exit</OptionsWindow.ZipLogFiles>
     <AboutWindow.Title>About GUIBuilder</AboutWindow.Title>
     <AboutWindow.ComicTitle>GUIBuilder</AboutWindow.ComicTitle>
     <AboutWindow.Author>by 1000101</AboutWindow.Author>
@@ -119,8 +122,12 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.NodesAndNIFs.CreateImports>Create Import Data</BorderBatchWindow.NodesAndNIFs.CreateImports>
     <BorderBatchWindow.NodeDetection>Node Detection</BorderBatchWindow.NodeDetection>
     <BorderBatchWindow.NodeDetection.Restrict>Restrict to</BorderBatchWindow.NodeDetection.Restrict>
-    <BorderBatchWindow.NodeDetection.WorkshopKeyword>Workshop Link Keyword</BorderBatchWindow.NodeDetection.WorkshopKeyword>
-    <BorderBatchWindow.NodeDetection.ForcedZStatic>Forced Z Static Object</BorderBatchWindow.NodeDetection.ForcedZStatic>
+    <BorderBatchWindow.NodeDetection.Keywords>Keywords</BorderBatchWindow.NodeDetection.Keywords>
+    <BorderBatchWindow.NodeDetection.StaticMarkers>Static Markers</BorderBatchWindow.NodeDetection.StaticMarkers>
+    <BorderBatchWindow.NodeDetection.WorkshopBorderGenerator>Workshop Border Generator</BorderBatchWindow.NodeDetection.WorkshopBorderGenerator>
+    <BorderBatchWindow.NodeDetection.WorkshopMarkerLink>Workshop Marker Link</BorderBatchWindow.NodeDetection.WorkshopMarkerLink>
+    <BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing>Terrain Following</BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing>
+    <BorderBatchWindow.NodeDetection.BorderMarkerForcedZ>Forced Z</BorderBatchWindow.NodeDetection.BorderMarkerForcedZ>
     <BorderBatchWindow.SearchingForKeyword>Searching for default keyword...</BorderBatchWindow.SearchingForKeyword>
     <BorderBatchWindow.SearchingForForcedZStatic>Searching for default static object...</BorderBatchWindow.SearchingForForcedZStatic>
     <BorderBatchWindow.BuildingWorkshopBorders>Building workhop borders...</BorderBatchWindow.BuildingWorkshopBorders>
@@ -128,7 +135,6 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.ImportNIFsTitle>Select NIFBuilder export file to import</BorderBatchWindow.ImportNIFsTitle>
     <BorderBatchWindow.ImportExportFilter>NIFBuilder Export File</BorderBatchWindow.ImportExportFilter>
     <BorderBatchWindow.ImportAllFilter>All Files</BorderBatchWindow.ImportAllFilter>
-    <BorderBatchWindow.PresetCustom>Custom</BorderBatchWindow.PresetCustom>
     <BatchImportWindow.Title>Batch Import</BatchImportWindow.Title>
     <BatchImportWindow.Import>Import</BatchImportWindow.Import>
     <BatchImportWindow.Close>Close</BatchImportWindow.Close>
@@ -139,11 +145,14 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
     <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
     <BatchImportWindow.UnableToUpdateReferencesFor>Unable to update references for "{0}"</BatchImportWindow.UnableToUpdateReferencesFor>
+    <WorkspaceSelectorWindow.Title>Select Workspace</WorkspaceSelectorWindow.Title>
+    <WorkspaceSelector.PluginsNode>Plugins</WorkspaceSelector.PluginsNode>
+    <WorkspaceSelector.WorkingFileNode>Working File</WorkspaceSelector.WorkingFileNode>
     <PluginSelectorWindow.Title>Select Plugin[s]</PluginSelectorWindow.Title>
     <PluginSelectorWindow.WorkingFile>Working File</PluginSelectorWindow.WorkingFile>
     <PluginSelectorWindow.OpenRenderWindow>Open Render Window On Load</PluginSelectorWindow.OpenRenderWindow>
-    <PluginSelectorWindow.Load>Load</PluginSelectorWindow.Load>
-    <PluginSelectorWindow.Cancel>Cancel</PluginSelectorWindow.Cancel>
+    <SelectorWindow.Load>Load</SelectorWindow.Load>
+    <SelectorWindow.Cancel>Cancel</SelectorWindow.Cancel>
     <DropdownSelectNone>NONE</DropdownSelectNone>
     <SyncedListView.Edit>Edit</SyncedListView.Edit>
     <SyncedListView.SelectAll>Select All</SyncedListView.SelectAll>
@@ -196,6 +205,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <SubDivisionBatch.CheckingBuildVolumes>Checking build volumes...</SubDivisionBatch.CheckingBuildVolumes>
     <SubDivisionBatch.CheckingBuildVolumesFor>Checking build volumes for "{0}"...</SubDivisionBatch.CheckingBuildVolumesFor>
     <SubDivisionBatch.NormalizingBuildVolumesFor>Normalizing build volumes for "{0}"...</SubDivisionBatch.NormalizingBuildVolumesFor>
+    <NIFBuilder.Preset.Custom>Custom</NIFBuilder.Preset.Custom>
     <NIFBuilder.Preset.VanillaWorkshop>Vanilla Workshop</NIFBuilder.Preset.VanillaWorkshop>
     <NIFBuilder.Preset.VanillaWorkshopGS>Vanilla Workshop w/GS</NIFBuilder.Preset.VanillaWorkshopGS>
     <NIFBuilder.Preset.ATCTall>Tall</NIFBuilder.Preset.ATCTall>
@@ -220,4 +230,8 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <Plugin.PostLoadReferenceOfSig>Post load of {0} Forms...</Plugin.PostLoadReferenceOfSig>
     <Plugin.LoadingSigFormsFromAncestor>Loading {0} forms from {1}...</Plugin.LoadingSigFormsFromAncestor>
     <Cells.LoadingRange>Loading Cells from {0} {1} in {2}...</Cells.LoadingRange>
+    <WorkspaceCreateWait.Body>Please wait until the plugin loader has finished before trying to create a workspace.</WorkspaceCreateWait.Body>
+    <WorkspaceCreateWait.Title>Hold yer horses, eh?</WorkspaceCreateWait.Title>
+    <WorkspaceCreateAlreadyLoaded.Body>There is already a workspace created for the working file.</WorkspaceCreateAlreadyLoaded.Body>
+    <WorkspaceCreateAlreadyLoaded.Title>Been there, done that.</WorkspaceCreateAlreadyLoaded.Title>
 </GUIBuilder>

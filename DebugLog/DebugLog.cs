@@ -10,6 +10,7 @@
  */
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -30,22 +31,55 @@ public static class DebugLog
     
     static string instanceTime = null;
     
-    static string logPath = null;
+    static string _logPath = null;
     
     [ThreadStatic]
     static string _logFile = null;
     
     [ThreadStatic]
-    static FileStream logStream = null;
+    static FileStream _logStream = null;
     
     [ThreadStatic]
-    static int logIndent = 0;
+    static int _logIndent = 0;
     
     [ThreadStatic]
-    static bool logInitialized = false;
+    static bool _logInitialized = false;
     
     [ThreadStatic]
-    static bool logClosed = false;
+    static bool _logClosed = false;
+    
+    public static void ZipLogs( bool deleteFiles )
+    {
+        if( string.IsNullOrEmpty( _logPath ) ) return; // No logs created, nothing to zip
+        //Console.WriteLine( _logPath );
+        
+        var zipFile = string.Format( "{0}.zip", _logPath );
+        //Console.WriteLine( zipFile );
+        
+        var logFiles = Directory.GetFiles( _logPath, "*.log" );
+        
+        if( logFiles.Length == 0 ) return; // No logs creates, nothing to zip
+        
+        using( var zipToOpen = new FileStream( zipFile, FileMode.Create ) )
+        {
+            using( var archive = new ZipArchive( zipToOpen, ZipArchiveMode.Update ) )
+            {
+                for( int i = 0; i < logFiles.Length; i++ )
+                {
+                    var logZipFilename = GenFilePath.FilenameFromPathname( logFiles[ i ] );
+                    //Console.WriteLine( string.Format( "{0} -> {1}", logFiles[ i ], logZipFilename ) );
+                    archive.CreateEntryFromFile( logFiles[ i ], logZipFilename, CompressionLevel.Optimal );
+                    if( deleteFiles )
+                        File.Delete( logFiles[ i ] );
+                }
+            }
+        }
+        if( deleteFiles )
+        {
+            Directory.Delete( _logPath );
+            _logPath = null;
+        }
+    }
     
     public static string ThreadID
     {
@@ -60,9 +94,13 @@ public static class DebugLog
         get
         {
             var name = Thread.CurrentThread.Name;
-            return string.IsNullOrEmpty( name )
-                ? "Thread_" + ThreadID
-                : name;
+            return string.Format(
+                "Thread_{0}{1}",
+                ThreadID,
+                string.IsNullOrEmpty( name )
+                    ? null
+                    : string.Format( "_{0}", name )
+            );
         }
     }
     
@@ -76,12 +114,12 @@ public static class DebugLog
                 if( string.IsNullOrEmpty( instanceTime ) )
                 {
                     instanceTime = rightNow;
-                    logPath = string.Format( "{0}\\{1}", LogRootPath, instanceTime );
+                    _logPath = string.Format( "{0}\\{1}", LogRootPath, instanceTime );
                     LogRootPath.DeleteFile();   // Force removal of the old global log file
-                    logPath.CreatePath();
+                    _logPath.CreatePath();
                 }
                 var name = ThreadName;
-                _logFile = string.Format( "{0}\\{1}_{2}.log", logPath, rightNow, name );
+                _logFile = string.Format( "{0}\\{1}_{2}.log", _logPath, name, rightNow );
             }
             return _logFile;
         }
@@ -91,29 +129,29 @@ public static class DebugLog
     {
         get
         {
-            return logInitialized;
+            return _logInitialized;
         }
     }
     
     public static void Close()
     {
-        if( ( logInitialized )&&( !logClosed ) )
+        if( ( _logInitialized )&&( !_logClosed ) )
         {
             _WriteLines( string.Format( "{2}{1}Log closed at {0}", DateTime.Now.ToString(), FormatNewLineChar, CloseIndentChar ) );
-            logStream.Flush();
-            logStream.Close();
-            logClosed = true;
-            logInitialized = false;
-            logStream = null;
+            _logStream.Flush();
+            _logStream.Close();
+            _logClosed = true;
+            _logInitialized = false;
+            _logStream = null;
         }
     }
     
     public static string Open()
     {
-        if( ( !logClosed )&&( !logInitialized ) )
+        if( ( !_logClosed )&&( !_logInitialized ) )
         {
-            logStream = File.Open( Filename, FileMode.Create, FileAccess.Write, FileShare.Read );
-            logInitialized = true;
+            _logStream = File.Open( Filename, FileMode.Create, FileAccess.Write, FileShare.Read );
+            _logInitialized = true;
             _WriteLines( string.Format(
                 "GUIBuilder {0} log for thread \"{1}\" with ID {2} opened at {3}{4}{5}",
                 Assembly.GetExecutingAssembly().GetName().Version.ToString(),
@@ -122,92 +160,92 @@ public static class DebugLog
                 DateTime.Now.ToString(),
                 FormatNewLineChar, OpenIndentChar
             ) );
-            logStream.Flush();
+            _logStream.Flush();
         }
         return Filename;
     }
     
     public static void WriteLine( string message )
     {
-        if( logClosed ) return;
+        if( _logClosed ) return;
         if( string.IsNullOrEmpty( message ) ) return;
-        if( !logInitialized ) Open();
+        if( !_logInitialized ) Open();
         
         _WriteLines( message );
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void WriteLine( string[] values )
     {
-        if( logClosed ) return;
+        if( _logClosed ) return;
         if( values.NullOrEmpty() ) return;
-        if( !logInitialized ) Open();
+        if( !_logInitialized ) Open();
         
         var result = _FormatLine( values );
         _WriteLines( result );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void WriteError( string namespaceClassName, string functionName, string message )
     {
-        if( logClosed ) return;
+        if( _logClosed ) return;
         if( string.IsNullOrEmpty( namespaceClassName) ) return;
         if( string.IsNullOrEmpty( functionName ) ) return;
         if( string.IsNullOrEmpty( message ) ) return;
-        if( !logInitialized ) Open();
+        if( !_logInitialized ) Open();
         
         _WriteAlertMessage( "ERROR", "======", namespaceClassName, functionName, message, true );
     }
     
     public static void WriteWarning( string namespaceClassName, string functionName, string message )
     {
-        if( logClosed ) return;
+        if( _logClosed ) return;
         if( string.IsNullOrEmpty( message ) ) return;
-        if( !logInitialized ) Open();
+        if( !_logInitialized ) Open();
         
         _WriteAlertMessage( "Warning", "------", namespaceClassName, functionName, message, false );
     }
     
     public static void OpenIndentLevel( string[] values )
     {
-        if( logClosed ) return;
+        if( _logClosed ) return;
         if( values.NullOrEmpty() ) return;
-        if( !logInitialized ) Open();
+        if( !_logInitialized ) Open();
         
         var result = _FormatLine( values );
         _WriteLines( result );
         _WriteLines( OpenIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void OpenIndentLevel( string message )
     {
-        if( logClosed ) return;
+        if( _logClosed ) return;
         if( string.IsNullOrEmpty( message ) ) return;
-        if( !logInitialized ) Open();
+        if( !_logInitialized ) Open();
         
         _WriteLines( message );
         _WriteLines( OpenIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void OpenIndentLevel()
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         _WriteLines( OpenIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void WriteList<TList>( string listName, IList<TList> list )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         if( list.NullOrEmpty() )
             _WriteLines( string.Format( "{0} = [null]", listName ) );
@@ -220,13 +258,13 @@ public static class DebugLog
             _WriteLines( CloseIndentChar );
         }
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void WriteArray<TArray>( string arrayName, TArray[] array )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         if( array.NullOrEmpty() )
             _WriteLines( string.Format( "{0} = [null]", arrayName ) );
@@ -239,85 +277,85 @@ public static class DebugLog
             _WriteLines( CloseIndentChar );
         }
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel<TList>( string listName, List<TList> list )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         WriteList( listName, list );
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel<TArray>( string arrayName, TArray[] array )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         WriteArray( arrayName, array );
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel( string resultName, string result )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         _WriteLines( string.Format( "{0} = {1}", resultName, result ) );
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel<TResult>( string resultName, TResult result ) where TResult : class
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         _WriteLines( string.Format( "{0} = {1}", resultName, result.ToStringNullSafe() ) );
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel( long elapsed, string resultName, string result )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         var tmp = new TimeSpan( elapsed );
         _WriteLines( string.Format( "Completed in {0}{3}{1} = {2}", tmp.ToString(), resultName, result, FormatNewLineChar ) );
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel( long elapsed )
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         var tmp = new TimeSpan( elapsed );
         _WriteLines( string.Format( "Completed in {0}{1}", tmp.ToString(), FormatNewLineChar ) );
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     public static void CloseIndentLevel()
     {
-        if( logClosed ) return;
-        if( !logInitialized ) Open();
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
         
         _WriteLines( CloseIndentChar );
         
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     static string _FormatLine( string[] values )
@@ -351,7 +389,7 @@ public static class DebugLog
                 functionName,
                 message,
                 stack ) );
-        logStream.Flush();
+        _logStream.Flush();
     }
     
     static void _WriteLines( string messageLines )
@@ -369,20 +407,20 @@ public static class DebugLog
                         ( ( line.Length == 1 )&&( line.StartsWith( CloseIndentChar ) ) )||
                         ( ( line.Length >  1 )&&( line.EndsWith  ( CloseIndentChar ) ) )
                     ){
-                        logIndent--;
-                        if( logIndent < 0 )
-                            logIndent = 0;
+                        _logIndent--;
+                        if( _logIndent < 0 )
+                            _logIndent = 0;
                     }
                     
                     string writeLine = "";
-                    for( int i = 0; i < logIndent; i++ )
+                    for( int i = 0; i < _logIndent; i++ )
                         writeLine += FormatTabChar;
                     writeLine += line;
                     writeLine += FormatNewLineChar;
                     byte[] bytes = Encoding.ASCII.GetBytes( writeLine );
                     if( !bytes.NullOrEmpty() )
                     {
-                        logStream.Write( bytes, 0, bytes.Length );
+                        _logStream.Write( bytes, 0, bytes.Length );
                         //Console.Write( writeLine );
                     }
                     
@@ -390,7 +428,7 @@ public static class DebugLog
                         ( ( line.Length == 1 )&&( line.StartsWith( OpenIndentChar ) ) )||
                         ( ( line.Length >  1 )&&( line.EndsWith  ( OpenIndentChar ) ) )
                     ){
-                        logIndent++;
+                        _logIndent++;
                     }
                 }
             }

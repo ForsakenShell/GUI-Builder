@@ -18,8 +18,11 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of PluginSelector.
     /// </summary>
-    public partial class PluginSelector : Form
+    public partial class PluginSelector : Form, GodObject.XmlConfig.IXmlConfiguration
     {
+        
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "PluginSelector"; } }
         
         const string NodeFormat = "{1} [{0}]";
         const int NodeFilenameTail = 5;
@@ -32,9 +35,6 @@ namespace GUIBuilder.Windows
         public string WorkingFile = null;
         public bool OpenRenderWindowOnLoad { get { return cbOpenRenderWindowOnLoad.Checked; } }
         
-        const string XmlNode = "PluginSelector";
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
         bool onLoadComplete = false;
         
         public PluginSelector()
@@ -54,8 +54,8 @@ namespace GUIBuilder.Windows
         {
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             tvPlugins.Nodes.Clear();
             
@@ -102,14 +102,14 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlNode, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
         }
         
         void btnLoadClick( object sender, EventArgs e )

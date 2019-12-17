@@ -4,9 +4,12 @@
  * Insert description here.
  *
  */
+using System.Windows.Forms;
+
+
 namespace GUIBuilder.Windows.Controls
 {
-    partial class SyncedListView<TSync>
+    public partial class SyncedListView<TSync> : UserControl, GodObject.XmlConfig.IXmlConfiguration
         where TSync : class, Engine.Plugin.Interface.ISyncedGUIObject
     {
         /// <summary>

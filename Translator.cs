@@ -22,35 +22,24 @@ public static class Translator
     
     #region Internal
     
-    private static readonly string Root = "GUIBuilder";
-    private static readonly string MissingTranslation = "Missing translation";
-    private static readonly string ToolTipPrefix = "ToolTip:";
-    
-    static Dictionary<string,string> _Translations = null;
-    
-    static XmlDocument _Document;
-    static XmlNode _RootNode;
-    
-    static XmlNode RootNode
+    class TranslationInterface : XmlBase
     {
-        get
-        {
-            if( _Document == null )
-            {
-                _Document = new XmlDocument();
-                if( _Document == null )
-                    return null;
-                
-                var translateFile = GodObject.Paths.GUIBuilderLanguageFile;
-                if( ( string.IsNullOrEmpty( translateFile ) )||( !System.IO.File.Exists( translateFile ) ) )
-                    return null;
-                
-                _Document.Load( translateFile );
-                _RootNode = _Document.SelectSingleNode( Root );
-            }
-            return _RootNode;
-        }
+        
+        public override bool            XmlForceCreateFile                      { get{ return false; } }
+        
+        public override bool            XmlFileMustExist                        { get{ return true; } }
+        
+        public override string          RootNodeName                            { get{ return "GUIBuilder"; } }
+        
+        public override string          Pathname                                { get{ return GodObject.Paths.GUIBuilderLanguageFile; } }
+        
     }
+    
+    static readonly string              MissingTranslation                      = "Missing translation";
+    static readonly string              ToolTipPrefix                           = "ToolTip:";
+    
+    static TranslationInterface         _TranslationInterface                   = new TranslationInterface();
+    static Dictionary<string,string>    _Translations                           = new Dictionary<string, string>();
     
     #endregion
     
@@ -61,9 +50,6 @@ public static class Translator
     /// <returns></returns>
     public static string Translate( this string key )
     {
-        if( RootNode == null ) return MissingTranslation;
-        if( _Translations == null )
-            _Translations = new Dictionary<string, string>();
         bool colonSuffix = false;
         string wKey = (string)key.Clone();
         string result = null;
@@ -77,7 +63,7 @@ public static class Translator
             if( colonSuffix ) result += ":";
             return result;
         }
-        var knode = RootNode.SelectSingleNode( wKey );
+        var knode = _TranslationInterface.GetNode( wKey );
         if( knode == null )
         {
             DebugLog.WriteLine( string.Format( "{0} :: \"{1}\"", MissingTranslation, key ) );

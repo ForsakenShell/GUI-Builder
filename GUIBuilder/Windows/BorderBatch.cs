@@ -18,12 +18,12 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of BorderBatch.
     /// </summary>
-    public partial class BorderBatch : Form
+    public partial class BorderBatch : Form, GodObject.XmlConfig.IXmlConfiguration
     {
         
-        const string            XmlNode         = "BorderBatchWindow";
-        const string            XmlLocation     = "Location";
-        const string            XmlSize         = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "BorderBatchWindow"; } }
+        
         bool                    onLoadComplete  = false;
         
         bool _nodesBuilt = false;
@@ -34,7 +34,7 @@ namespace GUIBuilder.Windows
         SubDivision _sampleSubDivision = null;
         
         List<Engine.Plugin.Forms.Keyword> _WorkshopBorderKeywordPool = null;
-        List<Engine.Plugin.Forms.Static>  _WorkshopBorderForcedZMarkerPool = null;
+        List<Engine.Plugin.Forms.Static>  _WorkshopBorderStaticPool = null;
         
         ToolTip tbNIFBuilderTargetFolderToolTip;
         ToolTip tbNIFBuilderSubDivisionFilePathSampleToolTip;
@@ -68,8 +68,8 @@ namespace GUIBuilder.Windows
         {
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlNode, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlNode, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             tbTargetFolder.Text = GodObject.Paths.NIFBuilderOutput;
             
@@ -130,14 +130,14 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlNode, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlNode, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
         }
         
         public void SetEnableState( bool enabled )
@@ -171,6 +171,60 @@ namespace GUIBuilder.Windows
                     hiddenPages.Add( page );
                 tcObjectSelect.TabPages.Remove( page );
             }
+        }
+        
+        #endregion
+        
+        #region Store Workshop Node Detection Forms To Workspace
+        
+        bool SaveWorkshopNodeDetectionFormToWorkspace<TForm>( ComboBox control, string detectionSuffix, List<TForm> list ) where TForm : Engine.Plugin.Form
+        {
+            if( control == null ) return false;
+            if( string.IsNullOrEmpty( detectionSuffix ) ) return false;
+            if( list.NullOrEmpty() ) return false;
+            
+            var i = control.SelectedIndex - 1;
+            if( i < 0 ) return false;
+            if( i >= list.Count ) return false;
+            
+            var form = list[ i ];
+            if( form == null ) return false;
+            
+            var ws = GodObject.Plugin.Workspace;
+            return ( ws != null )&&
+                ws.SetFormIdentifier( detectionSuffix, form.MasterHandle.Filename, form.GetFormID( Engine.Plugin.TargetHandle.Master ), true );
+        }
+        
+        void cbWorkshopKeywordBorderGeneratorSelectedIndexChanged( object sender, EventArgs e )
+        {
+            SaveWorkshopNodeDetectionFormToWorkspace(
+                cbWorkshopKeywordBorderGenerator,
+                GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator,
+                _WorkshopBorderKeywordPool );
+        }
+        
+        void cbWorkshopKeywordBorderLinkSelectedIndexChanged( object sender, EventArgs e )
+        {
+            SaveWorkshopNodeDetectionFormToWorkspace(
+                cbWorkshopKeywordBorderLink,
+                GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink,
+                _WorkshopBorderKeywordPool );
+        }
+        
+        void cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged( object sender, EventArgs e )
+        {
+            SaveWorkshopNodeDetectionFormToWorkspace(
+                cbWorkshopBorderMarkerTerrainFollowing,
+                GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing,
+                _WorkshopBorderStaticPool );
+        }
+        
+        void cbWorkshopBorderMarkerForcedZSelectedIndexChanged( object sender, EventArgs e )
+        {
+            SaveWorkshopNodeDetectionFormToWorkspace(
+                cbWorkshopBorderMarkerForcedZ,
+                GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ,
+                _WorkshopBorderStaticPool );
         }
         
         #endregion
@@ -215,11 +269,14 @@ namespace GUIBuilder.Windows
             control.Items.Add( text );
         }
         
-        void FindAndSetWorkshopNodeDetectionFormControlDefault<TForm>( ComboBox control, List<TForm> forms, string suffix ) where TForm : Engine.Plugin.Form
+        TForm FindAndSetWorkshopNodeDetectionFormControlDefault<TForm>( ComboBox control, List<TForm> forms, string suffix ) where TForm : Engine.Plugin.Form
         {
-            if( control == null ) return;
-            if( forms.NullOrEmpty() ) return;
-            if( string.IsNullOrEmpty( suffix ) ) return;
+            TForm result = null;
+            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "FindAndSetWorkshopNodeDetectionFormControlDefault<TForm>()", suffix } );
+            
+            if( control == null ) goto localAbort;
+            if( forms.NullOrEmpty() ) goto localAbort;
+            if( string.IsNullOrEmpty( suffix ) ) goto localAbort;
             
             var lSuffix = suffix.ToLower();
             var sIndex = 0; // Default "None"
@@ -235,12 +292,17 @@ namespace GUIBuilder.Windows
                     var lcase = fEDID.ToLower();
                     if( lcase.EndsWith( lSuffix ) )
                     {
+                        result = form;
                         sIndex = 1 + i; // Skip "None"
                         break;
                     }
                 }
             }
             SetWorkshopNodeDetectionFormControlDefault( control, sIndex );
+            
+        localAbort:
+            DebugLog.CloseIndentLevel( "result", result );
+            return result;
         }
         
         void SetWorkshopNodeDetectionFormControlDefault( ComboBox control, int index )
@@ -263,6 +325,8 @@ namespace GUIBuilder.Windows
             list = null;
             if( control == null ) return;
             
+            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "RepopulateWorkshopNodeDetectionControl<TForm>()", detectionSuffix } );
+            
             var m = GodObject.Windows.GetMainWindow();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( message );
@@ -271,23 +335,35 @@ namespace GUIBuilder.Windows
             
             ResetWorkshopNodeDetectionFormControl( control );
             
-            var cForms = GodObject.Plugin.Data.Root.GetCollection<TForm>( true, true );
-            if( cForms != null )
+            // Check if there is a workspace that defines the control form
+            var wsForm = GodObject.Plugin.Workspace?.GetIdentifierForm<TForm>( detectionSuffix );
+            if( wsForm != null )
             {
-                
-                list = cForms.ToList<TForm>( filter );
-                if( !list.NullOrEmpty() )
+                list = new List<TForm>() { wsForm };
+                AddWorkshopNodeDetectionFormControlItem( control, string.Format( "0x{0} - \"{1}\"", wsForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), wsForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+            }
+            else
+            {
+                var cForms = GodObject.Plugin.Data.Root.GetCollection<TForm>( true, true );
+                if( cForms != null )
                 {
-                    list.Sort( (x, y)=>( x.GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 1 ) );
                     
-                    var c = list.Count();
-                    foreach( var form in list )
-                        AddWorkshopNodeDetectionFormControlItem( control, string.Format( "0x{0} - \"{1}\"", form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                    
-                    // Try to find the "default" form
-                    FindAndSetWorkshopNodeDetectionFormControlDefault( control, list, detectionSuffix );
+                    list = cForms.ToList<TForm>( filter );
+                    if( !list.NullOrEmpty() )
+                    {
+                        list.Sort( (x, y)=>( x.GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 1 ) );
+                        
+                        var c = list.Count();
+                        foreach( var form in list )
+                            AddWorkshopNodeDetectionFormControlItem( control, string.Format( "0x{0} - \"{1}\"", form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    }
                 }
             }
+            
+            // Try to find the "default" form
+            FindAndSetWorkshopNodeDetectionFormControlDefault( control, list, "_" + detectionSuffix );
+            
+            DebugLog.CloseIndentLevel();
             
             m.StopSyncTimer( message, tStart.Ticks );
             m.PopStatusMessage();
@@ -296,6 +372,7 @@ namespace GUIBuilder.Windows
         void Thread_RepopulateWorkshopNodeDetectionForms()
         {
             SetEnableState( false );
+            DebugLog.Open();
             
             var restricted = cbRestrictWorkshopBorderKeywords.Checked;
             var filter = restricted ? (int)GodObject.Plugin.Data.Files.Working.LoadOrder : -1;
@@ -304,9 +381,16 @@ namespace GUIBuilder.Windows
             
             RepopulateWorkshopNodeDetectionControl<Engine.Plugin.Forms.Keyword>(
                 "BorderBatchWindow.SearchingForKeyword".Translate(),
-                cbWorkshopBorderKeyword,
+                cbWorkshopKeywordBorderGenerator,
                 filter,
-                "_WorkshopBorderGenerator",
+                GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator,
+                out _WorkshopBorderKeywordPool );
+            
+            RepopulateWorkshopNodeDetectionControl<Engine.Plugin.Forms.Keyword>(
+                "BorderBatchWindow.SearchingForKeyword".Translate(),
+                cbWorkshopKeywordBorderLink,
+                filter,
+                GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink,
                 out _WorkshopBorderKeywordPool );
             
             #endregion
@@ -315,13 +399,21 @@ namespace GUIBuilder.Windows
             
             RepopulateWorkshopNodeDetectionControl<Engine.Plugin.Forms.Static>(
                 "BorderBatchWindow.SearchingForForcedZStatic".Translate(),
-                cbWorkshopForcedZStatic,
+                cbWorkshopBorderMarkerTerrainFollowing,
                 filter,
-                "_ForcedZ",
-                out _WorkshopBorderForcedZMarkerPool );
+                GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing,
+                out _WorkshopBorderStaticPool );
+            
+            RepopulateWorkshopNodeDetectionControl<Engine.Plugin.Forms.Static>(
+                "BorderBatchWindow.SearchingForForcedZStatic".Translate(),
+                cbWorkshopBorderMarkerForcedZ,
+                filter,
+                GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ,
+                out _WorkshopBorderStaticPool );
             
             #endregion
             
+            DebugLog.Close();
             SetEnableState( true );
         }
         
@@ -344,6 +436,7 @@ namespace GUIBuilder.Windows
             lvWorkshops.SyncObjects = workshops;
             if( updateSampleDisplay )
                 UpdateNIFFilePathSampleInternal();
+            
         }
         
         void OnWorkshopListChanged( object sender, EventArgs e )
@@ -398,7 +491,7 @@ namespace GUIBuilder.Windows
         
         #endregion
         
-        #region Calculate sub-division edge flag segments
+        #region Calculate edge flag segments
         
         void THREAD_CalculateBorderNodesFromEdgeFlags()
         {
@@ -407,12 +500,12 @@ namespace GUIBuilder.Windows
             var workshops = lvWorkshops.GetSelectedSyncObjects();
             if( !workshops.NullOrEmpty() )
             {
-                var kwSelected = cbWorkshopBorderKeyword.SelectedIndex - 1;
+                var kwSelected = cbWorkshopKeywordBorderGenerator.SelectedIndex - 1;
                 if( kwSelected >= 0 )
                 {
                     var keyword = _WorkshopBorderKeywordPool[ kwSelected ];
-                    var fzSelected = cbWorkshopForcedZStatic.SelectedIndex - 1;
-                    var forcedZ = fzSelected >= 0 ? _WorkshopBorderForcedZMarkerPool[ fzSelected ] : null;
+                    var fzSelected = cbWorkshopBorderMarkerForcedZ.SelectedIndex - 1;
+                    var forcedZ = fzSelected >= 0 ? _WorkshopBorderStaticPool[ fzSelected ] : null;
                     var wsPreset = SelectedWorkshopPreset;
                     var nodeLength = ( wsPreset == null )
                         ? float.Parse( tbWorkshopNodeLength.Text )
@@ -869,7 +962,7 @@ namespace GUIBuilder.Windows
         static void RepopulatePresetComboBoxes( ComboBox cb, List<NIFBuilder.Preset> presets )
         {
             cb.Items.Clear();
-            cb.Items.Add( "BorderBatchWindow.PresetCustom".Translate() );
+            cb.Items.Add( "NIFBuilder.Preset.Custom".Translate() );
             var count = presets == null ? 0 : presets.Count;
             if( count > 0 )
             {
@@ -1102,7 +1195,7 @@ namespace GUIBuilder.Windows
                     break;
                     
                 case 1:
-                    if( ( _WorkshopBorderKeywordPool.NullOrEmpty() )||( _WorkshopBorderForcedZMarkerPool.NullOrEmpty() ) )
+                    if( ( _WorkshopBorderKeywordPool.NullOrEmpty() )||( _WorkshopBorderStaticPool.NullOrEmpty() ) )
                         RepopulateWorkshopNodeDetectionForms();
                     if( lvWorkshops.Visible )
                         lvWorkshops.RepopulateListView();

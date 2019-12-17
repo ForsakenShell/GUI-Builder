@@ -82,7 +82,7 @@ namespace GUIBuilder.Windows
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 3;
-            this.btnLoad.Tag = "PluginSelectorWindow.Load";
+            this.btnLoad.Tag = "SelectorWindow.Load";
             this.btnLoad.Text = "Load";
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoadClick);
@@ -95,7 +95,7 @@ namespace GUIBuilder.Windows
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 4;
-            this.btnCancel.Tag = "PluginSelectorWindow.Cancel";
+            this.btnCancel.Tag = "SelectorWindow.Cancel";
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancelClick);
@@ -127,10 +127,8 @@ namespace GUIBuilder.Windows
             // 
             // PluginSelector
             // 
-            this.AcceptButton = this.btnLoad;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(272, 414);
             this.Controls.Add(this.gbWorkingFile);
             this.Controls.Add(this.btnCancel);
