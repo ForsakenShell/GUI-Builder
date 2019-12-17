@@ -1,0 +1,196 @@
+How to create a custom terrain following workshop border for your custom
+settlement.
+
+
+This document will be expanded on later, for now it's a quick'n'dirty run-down
+on what you need to do and how to use GUIBuilder to do it.  This is done in a
+pair of simple point lists, the first for what you need to do with the CK and
+the second for how to create the NIF itself with GUIBuilder.
+
+
+In the Creation Kit:
+
+    a)  Create two new keywords in your settlement mod.  I recommend one with
+        the EditorID suffix "_WorkshopBorderGenerator" (no quotes, duh) and the
+        second with the suffix "_WorkshopBorderLink"; although neither of them
+        need an EditorID at all you'll thank me later.
+    b)  [Optional, as required] Create two new static object markers with the
+        EditorID suffixes of "_TerrainFollowing" and "_ForcedZ" (again, no
+        quotes and again, you'll thank me later).
+        Pro-tip:    Copy two different colour vanilla "flag" markers to use as
+                    your markers so you can easily differentiate them.
+    c)  Place markers at the outside corners and intersections of your build
+        volumes and link them in a clockwise order with the
+        "_WorkshopBorderLink" keyword you created in the first step (a).
+        NOTE:       It is important that your markers are in clockwise order,
+                    it is this order that correctly assigns the "inside"
+                    (green) and "outside" (red) textures of the border.
+        Pro-tip:    Create a new layer for your border nodes and set it as the
+                    active layer, freeze all other layers to avoid accidental
+                    selection of references on those layers.  It may also be
+                    helpful to turn off the visibility of the layers other than
+                    the default layer and your custom layer.
+        Pro-tip:    Switching the render window between perspective and
+                    orthographic view ("0" (zero) in the render window) and
+                    top-down ("T" in the render window) can help you can get
+                    your markers as close to the corners/intersections/edges of
+                    the build volumes as possible so they are the most
+                    accurate.
+        Pro-tip:    Use the "G" key in the render window to toggle local and
+                    global axial movement.
+        Pro-tip:    Set the rotation of your markers to the same rotation as
+                    the build volume they sit on and then rotate them by 90
+                    degrees so the "flag" points in the clockwise direction of
+                    the link.
+        Pro-tip:    Use the duplicate function ("control-D" in the render
+                    window) for the next marker in the sequence and select
+                    local translation ("G" in the render window) so you can
+                    then use the axial move key ("Z"/"X"/"C" for Z/X/Y) to move
+                    the new marker into position, this is especially useful if
+                    you need to place "_ForcedZ" markers so that the border
+                    stays straight between actual corners of the border.
+        Pro-tip:    Place the all your markers, including the "_ForcedZ" on the
+                    top of your build volumes so they are easier to find and
+                    move; "_ForcedZ" markers need to be at the Z position you
+                    want to force on the border for that section however,
+                    placing and linking them on the top to start with is easier.
+                    Once you have them all placed and linked, use the "F" key in
+                    the render window with your "_ForcedZ" markers selected to
+                    them "fall" to the ground (or whatever static they may be
+                    over) then use the axial movement keys to fine-tune their
+                    positions.
+        NOTE:       It takes at least two "_ForcedZ" markers linked in sequence
+                    in a "start-stop" manner; "_ForcedZ" segments use the Z
+                    position of the markers starting at the first marker
+                    encountered to the last "_ForcedZ" marker in the sequence.
+                    Ideally your first and last "_ForcedZ" markers will be on
+                    the actual ground so that the terrain following will create
+                    as smooth a transition as possible, but this isn't strictly
+                    necessary.
+    d)  Link one of your border markers to the workshop with the
+        "_WorkshopBorderGenerator" keyword.  Link to the workshop this way
+        allows mods can replace existing borders without touching the workshop
+        the border is for (ie, vanilla workshops).
+    e)  Save and exit
+
+
+In GUIBuilder:
+
+    a)  Load your settlement mod and make sure it's the "working file".
+        Pro-tip:    Once your mod is loaded, use the "Create Workspace"
+                    function for the future, this will record and use the same
+                    settings everytime you want to work on your mod in
+                    GUIBuilder.  This way instead of loading your plugin
+                    directly you can load the workspace instead.
+    b)  Open "Tools" > "Border Batch"
+    c)  Select your workshop[s] in the list of workshops.
+    d)  Select a target output folder, by default GUIBuilder tries to use
+        "BorderBuilder\Output" but any folder can be used.  If you don't select
+        an output folder, GUIBuilder will prompt you for one when you generate
+        the NIF file[s].
+    e)  Select the preset you want to use or create your own, "/GS" means "with
+        ground sink".  See the main notes section at the bottom of this
+        document for a full explaination of all the parameters.
+    f)  Make sure your keywords and static markers that you created in steps
+        (a) and (b) in the CK are selected in the "Node Detection" area.
+        Really you only need to have the "_WorkshopBorderGenerator" selected
+        but it will help to insure your mod is "correct" if you gave all the
+        forms appropriate EditorIDs and GUIBuilder detects them.  If you only
+        created the one required keyword it's ok, everything else can be left
+        as "none".
+    g)  Click "Gen. Nodes" to generate all the points required for the NIF[s]
+        for the selected workshop[s].
+    h)  Click "Build NIFs" to create the NIF[s] from the points generated in
+        the previous step (g).
+        [Optional]: Check the "Create Import Data" option for the next steps.
+                    Without checking this GUIBuilder will not create any import
+                    data and you will have to guess the position to place your
+                    borders inside the CK/xEdit.
+    i)  Click "Import NIFs", this will open an import window.
+        NOTE:       The "Import NIFs" button won't enable if the workshop[s]
+                    already have a border linked to them.  This is because the
+                    new NIF[s] for the workshop[s] will be created based on the
+                    original NIF[s] position.  This is done so that replacing
+                    the border doesn't require any change to the plugin itself
+                    (ie, if you are creating new NIFs for vanilla workshops
+                    this means the static object and object reference do not
+                    need any changes just the presence of the new NIF).
+    h)  Click "Import" OR, record the "Extra Info" which is what the import
+        process will do for a given form so that you can manually import the
+        border NIF[s] in the CK or xEdit and perform those steps manually.
+
+
+That's it.  You now have a border that is as perfect and accurate as you set
+your markers up and the parameters you set to create the NIF[s].  No external
+requirements, simple to update and fix.
+
+
+Provided sample:
+    BorderBuilder\Custom_Vanilla_Workshop_Border_Replacements.esp
+
+
+
+Node Generation Parameters:
+
+    Folders and Files will be created in this format:
+        [Target Folder]\[Target Sub-Folder]\Meshes\[Target Mesh Folder]\[Mesh Sub-Folder]\[File Prefix][Workshop Name][File Suffix]01.nif
+        OR
+        [Target Folder]\[Target Sub-Folder]\Meshes\[Existing Border NIF file path name]
+        
+    Node Length:
+        This is the "step size" for each node generated between the markers,
+        larger values will create NIF[s] with fewer vertexes and triangles but
+        will have less accurate terrain following.
+
+    Slope Allowance:
+        In order to optimize the mesh, the slope between nodes is calculated
+        and if the difference between the slope of the nodes and the slope of
+        the previous nodes is less than or equal to this value the previous
+        node will be removed.
+        Slope is calculated as: delta Z / delta position length
+
+    Gradient Height:
+        The height in game units of the gradient portion of the border NIF[s].
+
+    Ground Offset:
+        The height in game units of the solid portion that is above the terrain
+        (or "_ForcedZ") of the border NIF[s].
+
+    Ground Sink:
+        The height in game units of the solid portion that is below the terrain
+        (or "_ForcedZ")) of the border NIF[s].  This is used to account for
+        inaccuracies of the terrain following and/or placement of "_ForcedZ"
+        markers.  Regardless of this value, the lowest detected terrain height
+        will be the base "bottom" of all nodes for the NIF and this is an
+        adjustment to that value.
+
+    Create Import Data:
+        If checked, as the NIF[s] are created additional information will be
+        generated to update the plugin including creating/updating the static
+        object and object reference of the border itself for the workshop[s].
+
+
+
+HELP!  It didn't create any NIFs for me!
+
+    First check the GUIBuilder.log folder.  While the program is running logs
+    will be created in a date and time sub-folder with individual logs per
+    thread.  By default, when the program terminates those logs will be zipped
+    into a single file that has the same date and time as the sub-folder the
+    zip file is created from.  Most log files are created with names that
+    reflect their function.  Have a look at the log[s] and see if it's
+    something like just a bad link.
+    
+    eg: "GetFirstBorderNode() returned null!" means that there were no markers
+        linked to the workshop with your "_WorkshopBorderGenerator" keyword.
+    
+    If it's not something you overlooked, an ERROR or WARNING is present or,
+    GUIBuilder crashed on you then please submit a bug report in the github
+    issue tracker with steps to reproduce the issue along with the zipped logs
+    with the date-time that show the error and a copy of the mod that caused
+    the issue.
+    
+    Issue tracker:
+    https://github.com/ForsakenShell/GUI-Builder/issues
+
+
