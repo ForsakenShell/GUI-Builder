@@ -164,8 +164,8 @@ public static class WorkerThreadPool
         {
             // Start the worker
             
-            //try
-            //{
+            try
+            {
                 if( ( _StartParams != null )&&( _Obj != null ) )
                     _StartParams( _Obj );
                 else if( _Start != null )
@@ -179,12 +179,12 @@ public static class WorkerThreadPool
                     else if( _OnFinish != null )
                         _OnFinish();
                 }
-            //}
-            //catch( Exception e )
-            //{
-            //    DebugLog.WriteLine( "An exception has occured while executing the thread" );
-            //    DebugLog.WriteLine( e.ToString() );
-            //}
+            }
+            catch( Exception e )
+            {
+                GodObject.Windows.SetEnableState( true );
+                DebugLog.WriteError( "WorkerThreadPool", "INTERNAL_WorkerThread()", "An exception has occured while executing the thread\n" + e.ToString() );
+            }
             
             if( DebugLog.Initialized )
                 DebugLog.Close();

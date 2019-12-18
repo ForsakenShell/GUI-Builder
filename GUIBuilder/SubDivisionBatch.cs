@@ -50,17 +50,17 @@ namespace GUIBuilder
         
         public static bool CalculateWorkshopEdgeFlagSegments(
             List<WorkshopScript> workshops,
-            Engine.Plugin.Forms.Keyword keyword,
+            Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword,
             Engine.Plugin.Forms.Static forcedZ,
             float nodeLength,
             float slopeAllowance,
             bool updateMapUIData )
         {
-            DebugLog.OpenIndentLevel( new string[] { "GUIBuilder.SubDivisionBatch", "CalculateWorkshopEdgeFlagSegments()", "keyword = " + keyword.ToStringNullSafe(), "workshops = " + workshops.ToStringNullSafe() } );
+            DebugLog.OpenIndentLevel( new string[] { "GUIBuilder.SubDivisionBatch", "CalculateWorkshopEdgeFlagSegments()", "keyword = " + workshopBorderGeneratorKeyword.ToStringNullSafe(), "workshops = " + workshops.ToStringNullSafe() } );
             
             if(
                 ( workshops.NullOrEmpty() )||
-                ( keyword == null )
+                ( workshopBorderGeneratorKeyword == null )
             )
                 return false;
             
@@ -72,7 +72,7 @@ namespace GUIBuilder
             foreach( var workshop in workshops )
             {
                 m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                workshop.BuildBorders( keyword, forcedZ, nodeLength, slopeAllowance, updateMapUIData );
+                workshop.BuildBorders( workshopBorderGeneratorKeyword, forcedZ, nodeLength, slopeAllowance, updateMapUIData );
             }
             
             m.StopSyncTimer( "GUIBuilder.SubDivisionBatch :: CalculateWorkshopEdgeFlagSegments() :: Completed in {0}", tStart.Ticks );

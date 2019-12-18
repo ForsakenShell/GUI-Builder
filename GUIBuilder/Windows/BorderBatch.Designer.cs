@@ -717,7 +717,7 @@ namespace GUIBuilder.Windows
             this.tbWorkshopGroundSink.Size = new System.Drawing.Size(63, 20);
             this.tbWorkshopGroundSink.TabIndex = 24;
             this.tbWorkshopGroundSink.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbWorkshopGroundSink.TextAlignChanged += new System.EventHandler(this.uiWorkshopNIFBuilderChanged);
+            this.tbWorkshopGroundSink.TextChanged += new System.EventHandler(this.uiWorkshopNIFBuilderChanged);
             // 
             // tbWorkshopFileSuffix
             // 

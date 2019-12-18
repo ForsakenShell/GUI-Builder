@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Workspace>
+  <Plugins>
+    <Filename>Fallout4.esm</Filename>
+    <Filename>Custom_Vanilla_Workshop_Border_Replacements.esp</Filename>
+  </Plugins>
+  <WorkingFile>Custom_Vanilla_Workshop_Border_Replacements.esp</WorkingFile>
+  <WorkshopBorderGenerator>
+    <Filename>Custom_Vanilla_Workshop_Border_Replacements.esp</Filename>
+    <FormID>00000FB7</FormID>
+  </WorkshopBorderGenerator>
+  <WorkshopBorderLink>
+    <Filename>Custom_Vanilla_Workshop_Border_Replacements.esp</Filename>
+    <FormID>00000F99</FormID>
+  </WorkshopBorderLink>
+  <TerrainFollowing>
+    <Filename>Custom_Vanilla_Workshop_Border_Replacements.esp</Filename>
+    <FormID>00000F9A</FormID>
+  </TerrainFollowing>
+  <ForcedZ>
+    <Filename>Custom_Vanilla_Workshop_Border_Replacements.esp</Filename>
+    <FormID>00000F9B</FormID>
+  </ForcedZ>
+</Workspace>

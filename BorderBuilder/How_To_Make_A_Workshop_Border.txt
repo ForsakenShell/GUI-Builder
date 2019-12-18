@@ -68,7 +68,7 @@ In the Creation Kit:
                     as smooth a transition as possible, but this isn't strictly
                     necessary.
     d)  Link one of your border markers to the workshop with the
-        "_WorkshopBorderGenerator" keyword.  Link to the workshop this way
+        "_WorkshopBorderGenerator" keyword.  Linking to the workshop this way
         allows mods can replace existing borders without touching the workshop
         the border is for (ie, vanilla workshops).
     e)  Save and exit

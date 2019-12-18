@@ -332,15 +332,28 @@ public static partial class NIFBuilder
             string nifPath;
             GenFilePath.FilenameFromPathname( fullPath, out nifPath );
             
-            if( ( !string.IsNullOrEmpty( nifPath ) )&&( !nifPath.CreatePath() ) )
+            if( string.IsNullOrEmpty( nifPath ) )
+            {
+                DebugLog.WriteError( "NIFBuilder.Mesh", "Write()", "nifPath is null or empty!" );
                 return false;
-            
+            }
+            if( !nifPath.CreatePath() )
+            {
+                DebugLog.WriteError( "NIFBuilder.Mesh", "Write()", string.Format( "Could not build nifPath \"{0}\"", nifPath ) );
+                return false;
+            }
+
             var fileStream = new System.IO.FileStream( fullPath, System.IO.FileMode.Create );
-            if( fileStream == null ) return false;
+            if( fileStream == null )
+            {
+                DebugLog.WriteError( "NIFBuilder.Mesh", "Write()", string.Format( "Could not create FileStream for \"{0}\"", nifPath ) );
+                return false;
+            }
             
             var binaryStream = new System.IO.BinaryWriter( fileStream );
             if( binaryStream == null )
             {
+                DebugLog.WriteError( "NIFBuilder.Mesh", "Write()", string.Format( "Could not create BinaryWriter for \"{0}\"", nifPath ) );
                 fileStream.Close();
                 return false;
             }

@@ -107,6 +107,10 @@ namespace GUIBuilder.Windows
                                 pn.ForeColor = NodeDisabledColor;
                                 n.Nodes.Add( pn );
                             }
+                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator , "BorderBatchWindow.NodeDetection.WorkshopBorderGenerator"      );
+                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink      , "BorderBatchWindow.NodeDetection.WorkshopMarkerLink"           );
+                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing, "BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing" );
+                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ         , "BorderBatchWindow.NodeDetection.BorderMarkerForcedZ"          );
                         }
                         else
                             DebugLog.WriteError( "GUIBuilder.Windows.WorkspaceSelector", "WorkspaceSelectorLoad()", string.Format( "new Workspace( \"{0}\" ) = null!", wsName ) );
@@ -117,6 +121,25 @@ namespace GUIBuilder.Windows
             onLoadComplete = true;
         }
         
+        void AddFormIdentifier( Workspace workspace, TreeNode parentNode, string identifierKey, string translationKey )
+        {
+            var formIdentifier = workspace.GetFormIdentifier( identifierKey, false );
+            if( formIdentifier != null )
+            {
+                var identifierNode = new TreeNode( translationKey.Translate() );
+                identifierNode.ForeColor = NodeDisabledColor;
+                parentNode.Nodes.Add( identifierNode );
+                var formIDText = string.Format( "{0} : {1}", "Form.FormID".Translate(), formIdentifier.FormID.ToString( "X8" ) );
+                var formIDNode = new TreeNode( formIDText );
+                formIDNode.ForeColor = NodeDisabledColor;
+                identifierNode.Nodes.Add( formIDNode );
+                var filenameText = string.Format( "{0} : {1}", "Form.Filename".Translate(), formIdentifier.Filename );
+                var filenameNode = new TreeNode( filenameText );
+                filenameNode.ForeColor = NodeDisabledColor;
+                identifierNode.Nodes.Add( filenameNode );
+            }
+        }
+
         void OnFormMove( object sender, EventArgs e )
         {
             if( !onLoadComplete )

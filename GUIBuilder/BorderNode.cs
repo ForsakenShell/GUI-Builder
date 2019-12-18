@@ -90,9 +90,9 @@ namespace GUIBuilder
         
         public bool BuildMesh( float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: Build() :: Start :: {1}:{2}:{3}", "GUIBuilder.NIFBuilder", gradientHeight, groundOffset, groundSink ) );
+            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "BuildMesh()", string.Format( "{0}:{1}:{2}", gradientHeight, groundOffset, groundSink ) } );
             Mesh = new NIFBuilder.Mesh( this, gradientHeight, groundOffset, groundSink, insideColours, outsideColours );
-            //DebugLog.Write( string.Format( "{0} :: Build() :: Complete :: {1}:{2}:{3}\n", "GUIBuilder.NIFBuilder", gradientHeight, groundOffset, groundSink ) );
+            DebugLog.CloseIndentLevel();
             return Mesh != null;
         }
         
@@ -307,10 +307,10 @@ namespace GUIBuilder
         
         public static void DumpGroupNodes( List<BorderNode> nodes, string s )
         {
-            //DebugLog.OpenIndentLevel( s );
+            DebugLog.OpenIndentLevel( s );
             for( int i = 0; i < nodes.Count; i++ )
                 DebugLog.WriteLine( "node[ " + i.ToString() + " ] = " + nodes[ i ].ToString() );
-            //DebugLog.CloseIndentLevel();
+            DebugLog.CloseIndentLevel();
         }
         
         int FindNodeAt( Vector3f p, BorderNode.NodeType type )
@@ -734,7 +734,7 @@ namespace GUIBuilder
                 var refNode = new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.MidPoint );
                 nodes.Add( refNode );
             }
-            BorderNodeGroup.DumpGroupNodes( nodes, "Generated nodes from linked refs" );
+            //BorderNodeGroup.DumpGroupNodes( nodes, "Generated nodes from linked refs" );
             
             // Check if the first and last refs are the same for a complete loop
             var nCount = nodes.Count;

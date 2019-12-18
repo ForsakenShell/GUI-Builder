@@ -33,9 +33,10 @@ namespace Fallout4
     {
         
         // Border marker nodes for workshops
-        Engine.Plugin.Forms.Keyword _WorkshopLinkKeyword = null;
-        Engine.Plugin.Forms.Keyword _MarkerNodeLinkKeyword = null;
-        List<Engine.Plugin.Forms.ObjectReference> _BorderMarkerNodes = null;
+        Engine.Plugin.Forms.Keyword _BorderGeneratorKeyword = null;
+        Engine.Plugin.Forms.Keyword _BorderMarkerLinkKeyword = null;
+        Engine.Plugin.Forms.ObjectReference _FirstBorderMarker = null;
+        List<Engine.Plugin.Forms.ObjectReference> _BorderMarkers = null;
         List<GUIBuilder.BorderNode> _nodes = null;
         
         Engine.Plugin.Forms.ObjectReference _Border = null;
@@ -62,9 +63,12 @@ namespace Fallout4
         {
             get
             {
-                var bgKYWD = GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator );
+                var wsKeyword = GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator );
+                if( ( _BorderGeneratorKeyword == null )||( ( wsKeyword != null )&&( wsKeyword != _BorderGeneratorKeyword ) ) )
+                    _BorderGeneratorKeyword = wsKeyword;
+
                 return
-                    ( bgKYWD != null )&&( GetFirstBorderNode( bgKYWD ) != null )
+                    ( _BorderGeneratorKeyword != null )&&( GetFirstBorderMarker( _BorderGeneratorKeyword ) != null )
                     ? ConflictStatus.RequiresOverride
                     : base.ConflictStatus;
             }
@@ -216,23 +220,23 @@ namespace Fallout4
         
         #endregion
         
-        public void BuildBorders( Engine.Plugin.Forms.Keyword keyword, Engine.Plugin.Forms.Static forcedZ, float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
+        public void BuildBorders( Engine.Plugin.Forms.Keyword borderGeneratorKeyword, Engine.Plugin.Forms.Static forcedZ, float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
         {
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildBorders()", this.ToString() } );
             
-            ClearKeywordAndEdgeMarkers( keyword == null );
-            if( ( keyword == null )||( Form == null ) )
+            ClearKeywordAndEdgeMarkers( borderGeneratorKeyword == null );
+            if( ( borderGeneratorKeyword == null )||( Form == null ) )
                 goto localReturnResult;
-            var firstNode = GetFirstBorderNode( keyword );
-            if( firstNode == null )
+            var firstBorderNode = GetFirstBorderMarker( borderGeneratorKeyword );
+            if( firstBorderNode == null )
             {
-                DebugLog.WriteLine( "GetFirstBorderNode() returned null! :: BorderGeneratorKeyword = " + keyword.ToStringNullSafe() );
+                DebugLog.WriteLine( "GetFirstBorderNode() returned null! :: BorderGeneratorKeyword = " + borderGeneratorKeyword.ToStringNullSafe() );
                 goto localReturnResult;
             }
-            var nodeKeyword = GetBorderNodeKeyword( firstNode );
-            if( nodeKeyword == null )
+            var borderMarkerLinkKeyword = GetBorderMarkerLinkKeyword( firstBorderNode );
+            if( borderMarkerLinkKeyword == null )
             {
-                DebugLog.WriteLine( "GetBorderNodeKeyword() returned null! :: BorderGeneratorKeyword = " + keyword.ToStringNullSafe() );
+                DebugLog.WriteLine( "GetBorderNodeKeyword() returned null! :: BorderGeneratorKeyword = " + borderGeneratorKeyword.ToStringNullSafe() );
                 goto localReturnResult;
             }
             
@@ -244,10 +248,10 @@ namespace Fallout4
                 nodeKeyword.FormID.ToString( "X8" ), nodeKeyword.EditorID,
                 firstNode.FormID.ToString( "X8" ), firstNode.EditorID ) );
             */
-            _WorkshopLinkKeyword = keyword;
-            _MarkerNodeLinkKeyword = nodeKeyword;
-            _BorderMarkerNodes = GetBorderNodes( firstNode, nodeKeyword );
-            _nodes = BorderNode.GenerateBorderNodes( Reference.Worldspace, _BorderMarkerNodes, approximateNodeLength, slopeAllowance, forcedZ );
+            //_BorderGeneratorKeyword = borderGeneratorKeyword;
+            //_BorderMarkerLinkKeyword = borderMarkerLinkKeyword;
+            _BorderMarkers = GetBorderMarkers( firstBorderNode, borderMarkerLinkKeyword );
+            _nodes = BorderNode.GenerateBorderNodes( Reference.Worldspace, _BorderMarkers, approximateNodeLength, slopeAllowance, forcedZ );
             
             SendObjectDataChangedEvent( this );
             /*
@@ -264,11 +268,21 @@ namespace Fallout4
            DebugLog.CloseIndentLevel();
         }
         
-        Engine.Plugin.Forms.ObjectReference GetFirstBorderNode( Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword )
+        Engine.Plugin.Forms.ObjectReference GetFirstBorderMarker( Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword )
         {
-            if( workshopBorderGeneratorKeyword == null )
+            var wsKeyword = workshopBorderGeneratorKeyword ?? GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator );
+            if( ( _BorderGeneratorKeyword == null ) || ( ( wsKeyword != null ) && ( wsKeyword != _BorderGeneratorKeyword ) ) )
+            {
+                _BorderGeneratorKeyword = wsKeyword;
+                _FirstBorderMarker = null;
+            }
+
+            if( _BorderGeneratorKeyword == null )
                 return null;
-            
+
+            if( _FirstBorderMarker != null )
+                return _FirstBorderMarker;
+
             var forms = Form.References;
             if( forms.NullOrEmpty() )
             {
@@ -283,84 +297,98 @@ namespace Fallout4
                     continue;
                 
                 var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, workshopBorderGeneratorKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
-                if( ( lr == null )||( lr != Reference ) )
+                if( lr == null )
                     continue;
-                
-                // *
+                if( lr != Reference )
+                {
+                    DebugLog.WriteWarning( this.GetType().ToString(), "GetFirstBorderMarker()", string.Format( "Linked Ref does not match workshop\nworkshop = {0}\nlinked ref = {1}\nreference = {2}", Reference.ToStringNullSafe(), lr.ToStringNullSafe(), refr.ToStringNullSafe() ) );
+                    continue;
+                }
+
+                /*
                 DebugLog.WriteLine( new string[] {
                     this.GetType().ToString(),
                     "GetFirstBorderNode()",
                     refr.ToStringNullSafe() } );
-                // * /
-                
-                return refr;
+                */
+
+                _FirstBorderMarker = refr;
+                break;
             }
-            return null;
+            return _FirstBorderMarker;
         }
         
-        Engine.Plugin.Forms.Keyword GetBorderNodeKeyword( Engine.Plugin.Forms.ObjectReference firstNode )
+        Engine.Plugin.Forms.Keyword GetBorderMarkerLinkKeyword( Engine.Plugin.Forms.ObjectReference firstBorderMarker )
         {
-            if( firstNode == null )
+            if( firstBorderMarker == null )
                 return null;
-            
-            var count = firstNode.LinkedRefs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+
+            var wsKeyword = GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink );
+            if( ( _BorderMarkerLinkKeyword == null ) || ( ( wsKeyword != null ) && ( wsKeyword != _BorderGeneratorKeyword ) ) )
+                _BorderMarkerLinkKeyword = wsKeyword;
+
+            if( _BorderMarkerLinkKeyword != null )
+                return _BorderMarkerLinkKeyword;
+
+            var count = firstBorderMarker.LinkedRefs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             if( count < 1 )
                 return null;
             
             for( int i = 0; i < count; i++ )
             {
-                var refr = firstNode.LinkedRefs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
+                var refr = firstBorderMarker.LinkedRefs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                 if( ( refr == null )||( refr == Reference ) )
                     continue;
                 
-                var kywd = firstNode.LinkedRefs.GetKeyword( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
+                var kywd = firstBorderMarker.LinkedRefs.GetKeyword( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                 if( kywd == null )
                     continue;
-                
+
                 /*
                 DebugLog.Write( string.Format(
-                    "Fallout4.WorkshopScript.GetBorderNodeKeyword() :: 0x{0} \"{1}\"",
+                    "Fallout4.WorkshopScript.GetBorderMarkerLinkKeyword() :: 0x{0} \"{1}\"",
                     kywd.FormID.ToString( "X8" ),
                     kywd.EditorID ) );
                 */
                 // *
                 DebugLog.WriteLine( new string[] {
                     this.GetType().ToString(),
-                    "GetBorderNodeKeyword()",
+                    "GetBorderMarkerLinkKeyword()",
                     kywd.ToStringNullSafe() } );
                 // * /
-                
-                
-                return kywd;
+
+
+                _BorderMarkerLinkKeyword = kywd;
+                break;
             }
-            return null;
+            return _BorderMarkerLinkKeyword;
         }
         
-        List<Engine.Plugin.Forms.ObjectReference> GetBorderNodes( Engine.Plugin.Forms.ObjectReference firstNode, Engine.Plugin.Forms.Keyword nodeKeyword )
+        List<Engine.Plugin.Forms.ObjectReference> GetBorderMarkers( Engine.Plugin.Forms.ObjectReference firstMarker, Engine.Plugin.Forms.Keyword linkKeyword )
         {
-            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "GetBorderNodes()", "workshop = " + this.ToStringNullSafe(), "keyword = " + nodeKeyword.ToStringNullSafe(), "firstNode = " + firstNode.ToStringNullSafe() } );
+            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "GetBorderMarkers()", "workshop = " + this.ToStringNullSafe(), "linkKeyword = " + linkKeyword.ToStringNullSafe(), "firstMarker = " + firstMarker.ToStringNullSafe() } );
             
             var list = (List<Engine.Plugin.Forms.ObjectReference>)null;
             
-            if( ( nodeKeyword == null )||( firstNode == null )||( Form == null ) )
+            if( ( linkKeyword == null )||( firstMarker == null )||( Form == null ) )
                 goto localAbort;
             
-            var node = firstNode.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var node = firstMarker.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, linkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( node == null )
                 goto localAbort;
             
             list = new List<Engine.Plugin.Forms.ObjectReference>();
             
             var closedLoop = false;
-            list.Add( firstNode );
+            list.Add( firstMarker );
             list.Add( node );
             while( true )
             {
-                node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, nodeKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, linkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 if( node == null )
                     break;
                 list.Add( node );
-                closedLoop = ( node == firstNode );
+                closedLoop = ( node == firstMarker );
                 if( closedLoop )
                     break;
             }
@@ -368,15 +396,15 @@ namespace Fallout4
             if( !closedLoop )
             {
                 var efCount = list.Count;
-                DebugLog.WriteWarning( this.GetType().ToString(), "GetBorderNodes()", string.Format( "Workshop EdgeFlags do not form a complete loop.\n\tWorkshop = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.ToString(), efCount, list[ 0 ].ToString(), list[ efCount - 1 ].ToString() ) );
+                DebugLog.WriteWarning( this.GetType().ToString(), "GetBorderMarkers()", string.Format( "Workshop border markers do not form a complete loop.\n\tWorkshop = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.ToString(), efCount, list[ 0 ].ToString(), list[ efCount - 1 ].ToString() ) );
             }
             /*
             DebugLog.Write( string.Format(
-                "Fallout4.WorkshopScript.GetBorderNodes() :: Total count: {0}",
+                "Fallout4.WorkshopScript.GetBorderMarkers() :: Total count: {0}",
                 list.Count ) );
             */
-            
-       localAbort:
+
+        localAbort:
             DebugLog.CloseIndentLevel( "nodes", list );
             return list;
         }
@@ -397,7 +425,7 @@ namespace Fallout4
             
             List<GUIBuilder.FormImport.ImportBase> result = null;
             
-            DebugLog.WriteList( "_nodes", _nodes );
+            //DebugLog.WriteList( "_nodes", _nodes );
             
             if( _nodes.NullOrEmpty() )
                 goto localReturnResult;
@@ -418,7 +446,7 @@ namespace Fallout4
             
             var originalForms = createImportData ? new List<Engine.Plugin.Form>() : null;
             
-            var keyword = _WorkshopLinkKeyword;
+            var keyword = _BorderGeneratorKeyword;
             var worldspace = Reference.Worldspace;
             var workshopFID = this.GetFormID( Engine.Plugin.TargetHandle.Master );
             var workshopName = this.NameFromEditorID;
@@ -479,8 +507,8 @@ namespace Fallout4
         
         public void ClearKeywordAndEdgeMarkers( bool sendchangedevent )
         {
-            _WorkshopLinkKeyword = null;
-            _BorderMarkerNodes = null;
+            _BorderGeneratorKeyword = null;
+            _BorderMarkers = null;
             _nodes = null;
             if( sendchangedevent )
                 SendObjectDataChangedEvent( this );

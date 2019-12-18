@@ -65,37 +65,67 @@ public static partial class NIFBuilder
             } );
         
         List<GUIBuilder.FormImport.ImportBase> list = null;
-        
+
+        if( string.IsNullOrEmpty( targetPath ) )
+        {
+            DebugLog.WriteLine( "No targetPath!" );
+            goto localAbort;
+        }
+
+        if( string.IsNullOrEmpty( location ) )
+        {
+            DebugLog.WriteLine( "No location!" );
+            goto localAbort;
+        }
+
+        if( allNodes.NullOrEmpty() )
+        {
+            DebugLog.WriteLine( "No nodes!" );
+            goto localAbort;
+        }
+
+        if( allNodes.Count < 2 )
+        {
+            BorderNodeGroup.DumpGroupNodes( allNodes, "Not enough nodes!" );
+            goto localAbort;
+        }
+
+        if( worldspace == null )
+        {
+            DebugLog.WriteLine( "No worldspace!  (Do we even need one?)" );
+            goto localAbort;
+        }
+
         if(
-            ( string.IsNullOrEmpty( targetPath ) )||
-            ( string.IsNullOrEmpty( location ) )||
-            ( allNodes.NullOrEmpty() )||
-            ( allNodes.Count < 2 )||
-            ( worldspace == null )||
+            ( splitMeshes ) &&
+            ( !string.IsNullOrEmpty( forcedNIFFile ) )
+        ){
+            DebugLog.WriteLine( "Cannot split meshes with a forcedNIFFile!" );
+            goto localAbort;
+        }
+
+        if(
+            ( enablerReference == null ) &&
             (
-                ( enablerReference == null )&&
-                (
-                    ( linkRef == null )&&
-                    ( linkKeyword == null )
-                )
-            )||
-            (
-                ( splitMeshes )&&
-                ( !string.IsNullOrEmpty( forcedNIFFile) )
+                ( linkRef == null ) &&
+                ( linkKeyword == null )
             )
-        )   goto localAbort;
+        ){
+            DebugLog.WriteLine( "No enablerReference or linkRef and linkKeyword!" );
+            goto localAbort;
+        }
         
         // If enablerKeyword is null then the enabler is linked to the border reference as it's enable parent (XESP field of the reference), ie: sub-division borders
         // otherwise, the border reference is linked to the enable parent as a standard linked reference using the keyword, ie: workshop borders
         
-        BorderNodeGroup.DumpGroupNodes( allNodes, "Pre-clone nodes:" );
+        //BorderNodeGroup.DumpGroupNodes( allNodes, "Pre-clone nodes:" );
         
         // Clone the list and the nodes so we don't corrupt the original data
         var clonedNodeList = new List<BorderNode>();
         foreach( var node in allNodes )
             clonedNodeList.Add( node.Clone() );
         
-        BorderNodeGroup.DumpGroupNodes( clonedNodeList, "Post-clone nodes:" );
+        //BorderNodeGroup.DumpGroupNodes( clonedNodeList, "Post-clone nodes:" );
         
         List<BorderNodeGroup> nodeGroups = null;
         if( !splitMeshes )
@@ -167,6 +197,10 @@ public static partial class NIFBuilder
                     var cell = worldspace.Cells.GetByGrid( group.Cell );
                     GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderReference( orgRefr, statFormID, statEditorID, worldspace, cell, group.Placement, enablerReference, linkRef, linkKeyword, layer ) );
                 }
+            }
+            else
+            {
+                DebugLog.WriteError( "NIFBuilder", "CreateNIFs()", "Could not build NIF for node group " + i );
             }
         }
         

@@ -442,10 +442,10 @@ namespace GodObject
                     
                     var association = Reflection.AssociationFrom( handle.Signature );
                     if( !association.IsValid() )
-                    {
-                        DebugLog.WriteError( "GodObject.Plugin.Data.Root", "Find()", string.Format(
-                            "Unable to get Association for Collection from {0}",
-                            handle.ToString() ) );
+                    {   // Don't throw an error on this, it's probably a form we don't need to handle
+                        //DebugLog.WriteError( "GodObject.Plugin.Data.Root", "Find()", string.Format(
+                        //    "Unable to get Association for Collection from {0}",
+                        //    handle.ToString() ) );
                         goto localReturnResult;
                     }
                     

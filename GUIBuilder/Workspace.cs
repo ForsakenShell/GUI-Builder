@@ -63,7 +63,7 @@ namespace GUIBuilder
         
         #endregion
         
-        public struct                   FormIdentifier
+        public class                    FormIdentifier
         {
             public string               Filename;
             public uint                 FormID;
@@ -74,15 +74,6 @@ namespace GUIBuilder
                 FormID   = formID;
             }
             
-            public bool                 IsValid
-            {
-                get
-                {
-                    return !string.IsNullOrEmpty( Filename ) &&
-                        Engine.Plugin.Constant.ValidFormID( FormID ) &&
-                        GodObject.Plugin.Data.Files.IsLoaded( Filename );
-                }
-            }
         }
         
         public List<string>             PluginNames
@@ -161,41 +152,38 @@ namespace GUIBuilder
             return !commit || Commit();
         }
         
-        public FormIdentifier           GetFormIdentifier( string xmlNode )
+        public FormIdentifier           GetFormIdentifier( string xmlNode, bool fileMustBeLoaded )
         {
-            var result = new FormIdentifier();
-            
             if( string.IsNullOrEmpty( xmlNode ) )
-                return result;
-            
+                return null;
+
             var node = GetNode( xmlNode );
             if( node == null )
-                return result;
+                return null;
             
             var sFormID = ReadValue<string>( node, XmlKey_FormID, null );
             if( string.IsNullOrEmpty( sFormID ) )
-                return result;
-            
+                return null;
+
             uint formID = 0;
             if( !UInt32.TryParse( sFormID, System.Globalization.NumberStyles.AllowHexSpecifier, System.Globalization.CultureInfo.InvariantCulture, out formID ) )
-                return result;
-            
+                return null;
+
             var filename = ReadValue<string>( node, XmlKey_Filename, null );
             if( string.IsNullOrEmpty( filename ) )
-                return result;
-            
-            if( !GodObject.Plugin.Data.Files.IsLoaded( filename ) )
-                return result;
-            
-            result.Filename = filename;
-            result.FormID = formID;
+                return null;
+
+            if( fileMustBeLoaded && !GodObject.Plugin.Data.Files.IsLoaded( filename ) )
+                return null;
+
+            var result = new FormIdentifier( filename, formID );
             return result;
         }
 
         public TForm                    GetIdentifierForm<TForm>( string xmlNode ) where TForm : Engine.Plugin.Form
         {
-            var fi = GetFormIdentifier( xmlNode );
-            if( fi.IsValid )
+            var fi = GetFormIdentifier( xmlNode, true );
+            if( fi!= null )
             {
                 var file = GodObject.Plugin.Data.Files.Find( fi.Filename );
                 if( file != null )

@@ -2,6 +2,7 @@
 <GUIBuilder>
     <Form.FormID>FormID</Form.FormID>
     <Form.EditorID>EditorID</Form.EditorID>
+    <Form.Filename>Filename</Form.Filename>
     <Conflict.Error>Error State</Conflict.Error>
     <Conflict.Uneditable>Uneditable Form</Conflict.Uneditable>
     <Conflict.NewForm>New Form</Conflict.NewForm>
@@ -129,7 +130,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing>Terrain Following</BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing>
     <BorderBatchWindow.NodeDetection.BorderMarkerForcedZ>Forced Z</BorderBatchWindow.NodeDetection.BorderMarkerForcedZ>
     <BorderBatchWindow.SearchingForKeyword>Searching for default keyword...</BorderBatchWindow.SearchingForKeyword>
-    <BorderBatchWindow.SearchingForForcedZStatic>Searching for default static object...</BorderBatchWindow.SearchingForForcedZStatic>
+    <BorderBatchWindow.SearchingForStatic>Searching for default static object...</BorderBatchWindow.SearchingForStatic>
     <BorderBatchWindow.BuildingWorkshopBorders>Building workhop borders...</BorderBatchWindow.BuildingWorkshopBorders>
     <BorderBatchWindow.BuildingSubDivisionBorders>Building sub-division borders...</BorderBatchWindow.BuildingSubDivisionBorders>
     <BorderBatchWindow.ImportNIFsTitle>Select NIFBuilder export file to import</BorderBatchWindow.ImportNIFsTitle>
