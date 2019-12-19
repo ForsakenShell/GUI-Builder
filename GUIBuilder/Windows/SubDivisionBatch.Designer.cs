@@ -203,7 +203,7 @@ namespace GUIBuilder.Windows
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "SubDivisionBatchWindow.Title";
             this.Text = "title";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
             this.Move += new System.EventHandler(this.OnFormMove);

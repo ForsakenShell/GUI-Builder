@@ -17,7 +17,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of BorderBatchImportWindow.
     /// </summary>
-    public partial class BatchImport : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class BatchImport : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
@@ -28,7 +28,7 @@ namespace GUIBuilder.Windows
         public bool AllImportsMatchTarget = false;
         public bool EnableControlsOnClose = true;
         public List<FormImport.ImportBase> ImportForms = null;
-        
+
         public BatchImport()
         {
             //DebugLog.Write( string.Format( "\n{0} :: cTor() :: Start", this.GetType().ToString() ) );
@@ -59,7 +59,7 @@ namespace GUIBuilder.Windows
             this.Location = GodObject.XmlConfig.ReadLocation( this );
             this.Size = GodObject.XmlConfig.ReadSize( this );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             
             this.BringToFront();
@@ -74,12 +74,12 @@ namespace GUIBuilder.Windows
             */
             
             m.SetCurrentStatusMessage( "BatchImportWindow.Analyzing".Translate() );
-            DebugLog.WriteLine( "Loading imports into SyncListView" );
             lvImportForms.SyncObjects = ImportForms;
             //SortImportForms();
             //RepopulateImportListView( false );
             
             m.PopStatusMessage();
+            pnMain.Enabled = true;
             onLoadComplete = true;
             
             //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Complete", this.GetType().ToString() ) );
@@ -94,6 +94,7 @@ namespace GUIBuilder.Windows
             //m.PopStatusMessage();
             if( EnableControlsOnClose )
                 GodObject.Windows.SetEnableState( true );
+            GodObject.Windows.SetWindow<BatchImport>( null, false );
         }
         
         void OnFormMove( object sender, EventArgs e )
@@ -108,15 +109,29 @@ namespace GUIBuilder.Windows
                 return;
             GodObject.XmlConfig.WriteSize( this );
         }
-        
+
+        public void SetEnableState( bool enabled )
+        {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate () { SetEnableState( enabled ); }, null );
+                return;
+            }
+
+            pnMain.Enabled = enabled;
+        }
+
         void btnCloseClick( object sender, EventArgs e )
         {
+            this.DialogResult = DialogResult.None;
             this.Close();
         }
         
         void btnImportSelectedClick( object sender, EventArgs e )
         {
-            ImportSelectedListViewItems();
+            var thread = WorkerThreadPool.CreateWorker( THREAD_ImportSelectedListViewItems, null );
+            if( thread != null )
+                thread.Start();
         }
         
         #endregion
@@ -180,13 +195,16 @@ namespace GUIBuilder.Windows
             tbImportMessages.Refresh();
             tbImportMessages.ScrollToCaret();
         }
-        
-        void ImportSelectedListViewItems()
+
+        #endregion
+
+        #region Import the Forms
+
+        void THREAD_ImportSelectedListViewItems()
         {
-            DebugLog.OpenIndentLevel( "ImportSelectedListViewItems()" );
-            pnMain.Enabled = false;
+            SetEnableState( false );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             tbImportMessages.Clear();
             m.StartSyncTimer();
@@ -237,11 +255,26 @@ namespace GUIBuilder.Windows
                 "GUIBuilder.BatchImportWindow :: ImportSelectedListViewItems() :: Completed in {0}",
                 tStart.Ticks );
             m.PopStatusMessage();
-            pnMain.Enabled = true;
-            DebugLog.CloseIndentLevel();
+            SetEnableState( true );
         }
-        
+
         #endregion
-        
+
+        #region Override (Ignore) Close Button
+
+        // Supress the close button on the plugin selector, close with the load/cancel buttons.
+        // https://stackoverflow.com/questions/13247629/disabling-a-windows-form-closing-button
+        const int CP_NOCLOSE_BUTTON = 0x200;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams mdiCp = base.CreateParams;
+                mdiCp.ClassStyle = mdiCp.ClassStyle | CP_NOCLOSE_BUTTON;
+                return mdiCp;
+            }
+        }
+        #endregion
+
     }
 }

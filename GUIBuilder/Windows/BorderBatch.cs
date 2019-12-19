@@ -18,7 +18,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of BorderBatch.
     /// </summary>
-    public partial class BorderBatch : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class BorderBatch : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
@@ -128,7 +128,7 @@ namespace GUIBuilder.Windows
         {
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
             GodObject.Plugin.Data.Workshops.ObjectDataChanged -= OnWorkshopListChanged;
-            GodObject.Windows.SetBorderBatchWindow( null, false );
+            GodObject.Windows.SetWindow<BorderBatch>( null, false );
         }
         
         void OnFormMove( object sender, EventArgs e )
@@ -375,7 +375,7 @@ namespace GUIBuilder.Windows
             SetEnableState( false );
             DebugLog.Open();
 
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -638,7 +638,7 @@ namespace GUIBuilder.Windows
         {
             GodObject.Windows.SetEnableState( false );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var fStart = m.SyncTimerElapsed();
@@ -900,7 +900,7 @@ namespace GUIBuilder.Windows
             if( !_importData.NullOrEmpty() )
             {
                 reEnableGUI = false;
-                var t = WorkerThreadPool.CreateWorker( ImportNIFs, null ).Start();
+                var t = WorkerThreadPool.CreateWorker( THREAD_ImportNIFs, null ).Start();
             }
             else if( !string.IsNullOrEmpty( _reImportFile ) )
             {
@@ -934,7 +934,7 @@ namespace GUIBuilder.Windows
                         else
                         {
                             reEnableGUI = false;
-                            WorkerThreadPool.CreateWorker( ImportNIFs, null ).Start();
+                            WorkerThreadPool.CreateWorker( THREAD_ImportNIFs, null ).Start();
                         }
                         
                     }
@@ -946,9 +946,8 @@ namespace GUIBuilder.Windows
                 GodObject.Windows.SetEnableState( true );
         }
         
-        void ImportNIFs()
+        void THREAD_ImportNIFs()
         {
-            DebugLog.Open();
             if( !_importData.NullOrEmpty() )
             {
                 bool tmp = false;
@@ -960,7 +959,6 @@ namespace GUIBuilder.Windows
                 if( !GUIBuilder.BorderBatch.ImportNIFs( _reImportFile, true ) )
                     GodObject.Windows.SetEnableState( true );
             }
-            DebugLog.Close();
         }
         
         #endregion

@@ -31,18 +31,13 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of Render.
     /// </summary>
-    public partial class Render : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class Render : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
+        public string XmlNodeName { get{ return "RenderWindow"; } }
+        
         bool onLoadComplete = false;
-        
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get { return null; } }
-        
-        public string XmlKey { get { return this.Name; } }
-        
-        public string XmlPath { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
         
         // Tool windows for settlement objects
         Windows.RenderChild.WorldspaceTool twWorldspaces = null;
@@ -74,8 +69,8 @@ namespace GUIBuilder.Windows
             
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             _cancelInitWindow = false;
             
@@ -83,7 +78,7 @@ namespace GUIBuilder.Windows
             tslMouseToWorldspace.Text = "";
             
             twWorldspaces = new Windows.RenderChild.WorldspaceTool();
-            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops );
+            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "Workshops", "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops );
             AddOwnedForm( twWorldspaces );
             AddOwnedForm( twWorkshops );
             twWorldspaces.Show();
@@ -91,8 +86,8 @@ namespace GUIBuilder.Windows
             
             if( GodObject.Master.AnnexTheCommonwealth.Loaded )
             {
-                twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
-                twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
+                twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "Settlements", "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
+                twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "SubDivisions", "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
                 AddOwnedForm( twSettlements );
                 AddOwnedForm( twSubDivisions );
                 twSettlements.Show();
@@ -121,17 +116,17 @@ namespace GUIBuilder.Windows
                 hints.Add( SDL2.SDL.SDL_HINT_RENDER_DRIVER );
                 hintValues.Add( GodObject.Windows.SDLVideoDriver );
             }
-            var initParams = new SDL2ThinLayer.SDLRenderer.InitParams( GodObject.Windows.GetMainWindow(), pnRenderTarget, showCursorOverControl: false, sdlHints: hints, sdlHintValues: hintValues );
+            var initParams = new SDL2ThinLayer.SDLRenderer.InitParams( GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>(), pnRenderTarget, showCursorOverControl: false, sdlHints: hints, sdlHintValues: hintValues );
             WorkerThreadPool.CreateWorker( initParams, THREAD_RENDER_Init, null ).Start();
             
             onLoadComplete = true;
             DebugLog.CloseIndentLevel();
         }
         
-        void OnFormClosing( object sender, FormClosingEventArgs e )
+        void OnFormClosed( object sender, FormClosedEventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "OnFormClosing()" } );
-            GodObject.Windows.SetRenderWindow( null, false );
+            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "OnFormClosed()" } );
+            GodObject.Windows.SetWindow<Render>( null, false );
             Shutdown();
             
             if( twWorldspaces != null ) twWorldspaces.Close();
@@ -150,14 +145,14 @@ namespace GUIBuilder.Windows
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlPath, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlPath, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
             if(
                 ( transform == null )||
                 ( !transform.Renderer.Anchored )
@@ -395,8 +390,8 @@ namespace GUIBuilder.Windows
                 
             if( tsRenderEdgeFlags.Checked )
             {
-                AddMouseOverFrom( ref newMoos, transform.AssociatedEdgeFlags, pos, maxDistance );
-                AddMouseOverFrom( ref newMoos, transform.UnassociatedEdgeFlags, pos, maxDistance );
+                AddMouseOverFrom( ref newMoos, transform.SubDivisionAssociatedEdgeFlags, pos, maxDistance );
+                AddMouseOverFrom( ref newMoos, transform.SubDivisionUnassociatedEdgeFlags, pos, maxDistance );
             }
             
             var hasMoos = !_mouseOverObjects.NullOrEmpty();
@@ -490,7 +485,7 @@ namespace GUIBuilder.Windows
             List<Volume> volumes = null;
             
             var rthlParents = transform.HighlightSubDivisions;
-            var rthlVolumes = transform.HighlightVolumes;
+            var rthlVolumes = transform.HighlightSubDivisionBuildVolumes;
             
             bool volumesChanged = false;
             
@@ -523,7 +518,7 @@ namespace GUIBuilder.Windows
             if( !volumesChanged ) return;
             
             transform.HighlightSubDivisions = parents;
-            transform.HighlightVolumes = volumes;
+            transform.HighlightSubDivisionBuildVolumes = volumes;
         }
         
         void RenderWindow_MouseWheel( SDLRenderer renderer, SDL.SDL_Event e )
@@ -882,7 +877,7 @@ namespace GUIBuilder.Windows
                 }
             }
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "RenderWindow.UpdateTransform".Translate() );
             
@@ -897,7 +892,7 @@ namespace GUIBuilder.Windows
                 transform.Settlements   = selectedSettlements;
                 transform.SubDivisions  = selectedSubdivisions;
             }
-            transform.UnassociatedEdgeFlags = unassociatedEdgeFlags;
+            transform.SubDivisionUnassociatedEdgeFlags = unassociatedEdgeFlags;
             
             //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: transform :: UpdateScene()", this.GetType().ToString(), _ResetViewportOnUpdate ) );
             

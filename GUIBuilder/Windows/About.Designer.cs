@@ -161,7 +161,6 @@ namespace GUIBuilder.Windows
             this.ShowInTaskbar = false;
             this.Tag = "AboutWindow.Title";
             this.Text = "title";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AboutWindowFormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.Load += new System.EventHandler(this.HelpAboutFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);

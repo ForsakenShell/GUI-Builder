@@ -92,7 +92,7 @@ namespace GodObject
             {
                 DebugLog.OpenIndentLevel( "GodObject.Plugin.Data :: Load()" );
                 
-                var m = GodObject.Windows.GetMainWindow();
+                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
@@ -116,7 +116,7 @@ namespace GodObject
             {
                 DebugLog.OpenIndentLevel( "GodObject.Plugin.Data :: PostLoad()" );
                 
-                var m = GodObject.Windows.GetMainWindow();
+                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
@@ -489,7 +489,7 @@ namespace GodObject
                     
                     DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.ScriptedObjects", "Load()", _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.Master ), _ScriptForm.ToString() } );
                     
-                    var m = GodObject.Windows.GetMainWindow();
+                    var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                     m.PushStatusMessage();
                     m.PushItemOfItems();
                     //m.SetCurrentStatusMessage( string.Format( "Finding all references of \"{0}\"...", _ScriptForm.EditorID ) );
@@ -569,7 +569,7 @@ namespace GodObject
                     
                     var result = true;
                     
-                    var m = GodObject.Windows.GetMainWindow();
+                    var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                     m.PushStatusMessage();
                     m.PushItemOfItems();
                     m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferencesOf".Translate(), _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );

@@ -209,7 +209,9 @@ namespace GodObject
             public string               ExtraInfo { get { return null; } }
             
             public event EventHandler   ObjectDataChanged;
-            
+
+            public bool ObjectDataChangedEventsSupressed { get { return false; } }
+
             public virtual void         SupressObjectDataChangedEvents() {}
             public virtual void         ResumeObjectDataChangedEvents( bool sendevent ) {}
             

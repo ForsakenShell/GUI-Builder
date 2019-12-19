@@ -41,7 +41,7 @@ namespace GUIBuilder
             
             var result = false;
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             var tStart = m.SyncTimerElapsed();
             
@@ -131,7 +131,7 @@ namespace GUIBuilder
             
             //DebugLog.Write( "GUIBuilder.BorderBatch.CreateNIFs() :: Start (Workshop)" );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -191,7 +191,7 @@ namespace GUIBuilder
             
             //DebugLog.Write( "\nGUIBuilder.BorderBatch.CreateNIFs() :: Start (Sub-Division)" );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();

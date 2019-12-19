@@ -84,8 +84,8 @@ namespace GUIBuilder.FormImport
                 _RecordFlags = recordFlags;
                 _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
                 _Target = classType == typeof( Engine.Plugin.Forms.ObjectReference )
-                    ? new ObjectReferenceTarget( this, targetForm, null, null )
-                    : new FormTarget( this, classType, targetForm );
+                    ? new ObjectReferenceTarget( "Target Ref", this, targetForm, null, null )
+                    : new FormTarget( "Target Form", this, classType, targetForm );
                 resolved = _Target.Resolve( failOnApplyIfUnresolved );
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
@@ -130,7 +130,7 @@ namespace GUIBuilder.FormImport
                 _Signature = signature;
                 _RecordFlags = recordFlags;
                 _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
-                _Target = new ScriptTarget( this, classType, targetScript );
+                _Target = new ScriptTarget( "Target Ref Script", this, classType, targetScript );
                 resolved = _Target.Resolve( failOnApplyIfUnresolved );
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
@@ -176,8 +176,8 @@ namespace GUIBuilder.FormImport
                 _RecordFlags = recordFlags;
                 _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
                 _Target = classType == typeof( Engine.Plugin.Forms.ObjectReference )
-                    ? new ObjectReferenceTarget( this, targetForm, worldspace, cell )
-                    : new FormTarget( this, classType, targetForm );
+                    ? new ObjectReferenceTarget( "Target Ref", this, targetForm, worldspace, cell )
+                    : new FormTarget( "Target Form", this, classType, targetForm );
                 resolved = _Target.Resolve( failOnApplyIfUnresolved );
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
@@ -212,8 +212,8 @@ namespace GUIBuilder.FormImport
                 _RecordFlags = recordFlags;
                 _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
                 _Target = classType == typeof( Engine.Plugin.Forms.ObjectReference )
-                    ? new ObjectReferenceTarget( this )
-                    : new FormTarget( this, classType );
+                    ? new ObjectReferenceTarget( "Target Ref", this )
+                    : new FormTarget( "Target Form", this, classType );
                 //_Target = new FormTarget( this, classType );
                 resolved = ParseImport( importData );
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
@@ -648,6 +648,8 @@ namespace GUIBuilder.FormImport
         public event EventHandler       ObjectDataChanged;
         bool                           _SupressEvents = false;
         
+        public bool ObjectDataChangedEventsSupressed { get { return _SupressEvents; } }
+
         public void                     SupressObjectDataChangedEvents()
         {
             _SupressEvents = true;
@@ -741,10 +743,20 @@ namespace GUIBuilder.FormImport
                 AddErrorMessage( ErrorTypes.Import, "Import in error state, cannot Apply()" );
                 goto localAbort;
             }
+            /*
             if(
                 ( _FailOnApplyIfUnresolved )&
                 ( !Resolve( _FailOnApplyIfUnresolved ) )
             )
+            {
+                AddErrorMessage( ErrorTypes.Import, "Resolve() errors, cannot Apply()" );
+                goto localAbort;
+            }
+            */
+            // Target may not resolve if this is a new form
+            _Target.Resolve( false );
+            // All reference forms must resolve, however
+            if( !ResolveReferenceForms( true ) )
             {
                 AddErrorMessage( ErrorTypes.Import, "Resolve() errors, cannot Apply()" );
                 goto localAbort;
@@ -787,15 +799,16 @@ namespace GUIBuilder.FormImport
             {
                 AddErrorMessage( ErrorTypes.Import, "An unexpected exception has occured applying import!", e );
             }
+
+            ResumeObjectDataChangedEvents( true );
+
             if( result )
             {
                 var refr = TargetForm as Engine.Plugin.Forms.ObjectReference;
-                if( refr != null ) refr.CheckForBackgroundCellChange( false );
+                if( refr != null ) refr.CheckForBackgroundCellChange( true );
             }
             else
                 DebugLog.WriteError( this.GetType().ToString(), "Apply()", "Unable to apply import to the target form!" );
-            
-            ResumeObjectDataChangedEvents( true );
             
         localAbort:
             DebugLog.CloseIndentLevel( "result", result.ToString() );
@@ -871,15 +884,23 @@ namespace GUIBuilder.FormImport
             return string.Format( "[Signature = \"{0}\" :: Target = {1}]", Signature, DisplayIDInfo() );
         }
         
+        /// <summary>
+        /// Open the import dialog and wait for it to exit.
+        /// DO NOT CALL THIS FROM THE MAIN UI THREAD!
+        /// </summary>
+        /// <param name="importForms">Forms to import</param>
+        /// <param name="enableControlsOnClose">Enable all forms when the dialog closes</param>
+        /// <param name="allImportsMatchTarget">All import targets match import data on close</param>
+        /// <returns></returns>
         public static bool              ShowImportDialog( List<ImportBase> importForms, bool enableControlsOnClose, ref bool allImportsMatchTarget )
         {
             if( importForms.NullOrEmpty() ) return false;
-            
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ShowImportDialog()" } );
+            if( System.Threading.Thread.CurrentThread.ManagedThreadId == 1 )
+                throw new Exception( "Cannot show BatchImportWindow from main thread!" );
             
             #region Import window
-            
-            var bbiw = new GUIBuilder.Windows.BatchImport();
+
+            var bbiw = GodObject.Windows.GetWindow<GUIBuilder.Windows.BatchImport>();
             bbiw.EnableControlsOnClose = enableControlsOnClose;
             bbiw.ImportForms = importForms;
             bbiw.ShowDialog();
@@ -888,7 +909,6 @@ namespace GUIBuilder.FormImport
             
             #endregion
             
-            DebugLog.CloseIndentLevel();
             return true;
         }
         

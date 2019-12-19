@@ -254,7 +254,7 @@ namespace GodObject
         
         static void THREAD_SyncGodObjects()
         {
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "Plugin.LoadBaseForms".Translate() );
             m.StartSyncTimer();
@@ -289,7 +289,7 @@ namespace GodObject
         
         static void THREAD_PluginLoader()
         {
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -396,7 +396,7 @@ namespace GodObject
                     _isLoaded = true;
                     
                     if( _openRenderWindowOnLoad )
-                        GodObject.Windows.GetRenderWindow( true );
+                        GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( true );
                 }
                 #endregion
             }

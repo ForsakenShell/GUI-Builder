@@ -318,7 +318,7 @@ namespace AnnexTheCommonwealth
         {
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromSubDivisionEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "approximateNodeLength = " + approximateNodeLength, "slopeAllowance = " + slopeAllowance, "updateMapUIData = " + updateMapUIData, this.ToString() } );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();

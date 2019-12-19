@@ -298,7 +298,7 @@ namespace GodObject
             public bool ComputeZHeightsFromVolumes( Vector2f[][] volumes, out float minZ, out float maxZ, out float averageZ, out float averageWaterZ, bool useWaterIfHigher = true, bool showScanlineProgress = false )
             {
                 //DebugLog.OpenIndentLevel( new [] { "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()" } );
-                var m = GodObject.Windows.GetMainWindow();
+                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 if( showScanlineProgress )
                     m.PushItemOfItems();
                 m.StartSyncTimer();
@@ -468,7 +468,7 @@ namespace GodObject
             {
                 //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "THREAD_LoadAndCreateHeightmapTextures()" } );
                 
-                var m = GodObject.Windows.GetMainWindow();
+                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
@@ -626,7 +626,7 @@ namespace GodObject
                     return false;
                 }
                 
-                var m = GodObject.Windows.GetMainWindow();
+                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
                 m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.Loading".Translate(), ddsFile ) );
                 m.StartSyncTimer();

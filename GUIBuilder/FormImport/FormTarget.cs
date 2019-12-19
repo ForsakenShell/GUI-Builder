@@ -27,9 +27,9 @@ namespace GUIBuilder.FormImport
             set { Value = value; }
         }
         
-        public FormTarget( ImportBase parent, Type formType, uint formID, string editorID ) : base( parent, formType, formID, editorID ) {}
-        public FormTarget( ImportBase parent, Type formType, Engine.Plugin.Form form ) : base( parent, formType, form ) {}
-        public FormTarget( ImportBase parent, Type formType ) : base( parent, formType ) {}
+        public FormTarget( string name, ImportBase parent, Type formType, uint formID, string editorID ) : base( name, parent, formType, formID, editorID ) {}
+        public FormTarget( string name, ImportBase parent, Type formType, Engine.Plugin.Form form ) : base( name, parent, formType, form ) {}
+        public FormTarget( string name, ImportBase parent, Type formType ) : base( name, parent, formType ) {}
         //public FormTarget( ImportBase parent ) : base( parent ) {}
         
         protected override void ResolveValue()

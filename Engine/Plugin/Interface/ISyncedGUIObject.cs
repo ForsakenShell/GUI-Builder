@@ -50,7 +50,9 @@ namespace Engine.Plugin.Interface
         string                          ExtraInfo                   { get; }
         
         event EventHandler              ObjectDataChanged;
-        
+
+        bool                            ObjectDataChangedEventsSupressed { get; }
+
         void                            SupressObjectDataChangedEvents();
         void                            ResumeObjectDataChangedEvents( bool sendevent );
         void                            SendObjectDataChangedEvent( object sender );

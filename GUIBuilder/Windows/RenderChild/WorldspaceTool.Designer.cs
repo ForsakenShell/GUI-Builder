@@ -376,6 +376,8 @@ namespace GUIBuilder.Windows.RenderChild
             this.gbWorldspaceTextures.PerformLayout();
             this.gbWorldspaceGridRange.ResumeLayout(false);
             this.gbWorldspaceGridRange.PerformLayout();
+            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
+            this.Move += new System.EventHandler(this.OnFormMove);
             this.pnWindow.ResumeLayout(false);
             this.ResumeLayout(false);
             

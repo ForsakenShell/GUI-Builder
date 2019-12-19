@@ -70,11 +70,11 @@ namespace GUIBuilder.FormImport
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
             NewEditorID     = newEditorID;
-            ftWorldspace    = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
-            ftCell          = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ), cell );
+            ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
+            ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ), cell );
             Position        = new Vector3f( position );
-            stSubDivision   = new ScriptTarget( this, typeof( AnnexTheCommonwealth.SubDivision ), subdivision );
-            stNeighbour     = new ScriptTarget( this, typeof( AnnexTheCommonwealth.SubDivision ), neighbour );
+            stSubDivision   = new ScriptTarget( "SubDivision", this, typeof( AnnexTheCommonwealth.SubDivision ), subdivision );
+            stNeighbour     = new ScriptTarget( "Neighbour", this, typeof( AnnexTheCommonwealth.SubDivision ), neighbour );
             
             DumpImport();
         }
@@ -82,10 +82,10 @@ namespace GUIBuilder.FormImport
         public                          ImportBorderEnablerReference( string[] importData )
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.BorderEnabler ), importData )
         {
-            ftWorldspace      = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ) );
-            ftCell            = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ) );
-            stSubDivision     = new ScriptTarget( this, typeof( AnnexTheCommonwealth.SubDivision ) );
-            stNeighbour       = new ScriptTarget( this, typeof( AnnexTheCommonwealth.SubDivision ) );
+            ftWorldspace      = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ) );
+            ftCell            = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ) );
+            stSubDivision     = new ScriptTarget( "SubDivision", this, typeof( AnnexTheCommonwealth.SubDivision ) );
+            stNeighbour       = new ScriptTarget( "Neighbour", this, typeof( AnnexTheCommonwealth.SubDivision ) );
             DumpImport();
         }
         

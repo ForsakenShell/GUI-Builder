@@ -18,7 +18,7 @@ using System.Threading;
 using Maths;
 
 using Engine;
-using GWindow = GUIBuilder.Windows;
+using GUIBuilder.Windows;
 
 using AnnexTheCommonwealth;
 
@@ -29,160 +29,91 @@ using XeLib.API;
 namespace GodObject
 {
     
-    #region Windows
-    
     public static class Windows
     {
-        
-        #region Main Window
-        
-        static GWindow.Main _MainWindow;
-        
-        public static GWindow.Main GetMainWindow( bool showWindow = false )
+
+        static List<IEnableControlForm>_Forms = null;
+
+        static TWindow                  FindAndReplaceWindow<TWindow>( TWindow newWindow, bool closeOldWindow ) where TWindow : Form, IEnableControlForm
         {
-            if( ( _MainWindow != null )&&( showWindow ) )
-                _MainWindow.BringToFront();
-            return _MainWindow;
-        }
-        
-        public static void SetMainWindow( GWindow.Main window, bool closeOldWindow = true )
-        {
-            if( ( closeOldWindow )&&( _MainWindow != null ) )
-                _MainWindow.Close();
-            _MainWindow = window;
-        }
-        
-        #endregion
-        
-        #region About Window
-        
-        static GWindow.About _AboutWindow;
-        
-        public static GWindow.About GetAboutWindow( bool showWindow = false )
-        {
-            //DebugLog.Write( "GodObjects.Windows.GetAboutWindow()" );
-            if( _AboutWindow == null )
+            if( _Forms.NullOrEmpty() )
+                _Forms = new List<IEnableControlForm>();
+            for( int i = 0; i < _Forms.Count; i++ )
             {
-                _AboutWindow = new GWindow.About();
+                var oldWindow = _Forms[ i ] as TWindow;
+                if( oldWindow != null )
+                {
+                    if( ( newWindow != null )||( closeOldWindow ) )
+                    {
+                        if( closeOldWindow )
+                            oldWindow.Close();
+                        if( newWindow == null )
+                            _Forms.RemoveAt( i );
+                        else
+                            _Forms[ i ] = newWindow;
+                        return newWindow;
+                    }
+                    return oldWindow;
+                }
+            }
+            if( newWindow != null )
+                _Forms.Add( newWindow );
+            return newWindow;
+        }
+
+        public static TWindow           GetWindow<TWindow>( bool showWindow = false ) where TWindow : Form, IEnableControlForm, new()
+        {
+            //DebugLog.Write( "GodObjects.Windows.GetWindow()" );
+            var window = FindAndReplaceWindow<TWindow>( null, false );
+            if( window == null )
+            {
+                window = new TWindow();
+                _Forms.Add( window );
                 if( showWindow )
-                    _AboutWindow.Show();
+                    window.Show();
             }
             else if( showWindow )
-                _AboutWindow.BringToFront();
-            return _AboutWindow;
+                window.BringToFront();
+            return window;
         }
-        
-        public static void SetAboutWindow( GWindow.About window, bool closeOldWindow = true )
+
+        public static void              SetWindow<TWindow>( TWindow newWindow, bool closeOldWindow = true ) where TWindow : Form, IEnableControlForm
         {
-            //DebugLog.Write( "GodObjects.Windows.SetAboutWindow()" );
-            if( _AboutWindow == window )
+            //DebugLog.Write( "GodObjects.Windows.SetWindow()" );
+            FindAndReplaceWindow<TWindow>( newWindow, closeOldWindow );
+        }
+
+        public static void              CloseAllChildWindows()
+        {
+            if( _Forms.NullOrEmpty() )
                 return;
-            if( ( closeOldWindow )&&( _AboutWindow != null ) )
-                _AboutWindow.Close();
-            _AboutWindow = window;
-        }
-        
-        #endregion
-        
-        #region Options Window
-        
-        static GWindow.Options _OptionsWindow;
-        
-        public static GWindow.Options GetOptionsWindow( bool showWindow = false )
-        {
-            //DebugLog.Write( "GodObjects.Windows.GetOptionsWindow()" );
-            if( _OptionsWindow == null )
+            for( int i = _Forms.Count - 1; i >= 0; i-- )
             {
-                _OptionsWindow = new GWindow.Options();
-                if( showWindow )
-                    _OptionsWindow.ShowDialog();
+                if( !( _Forms[ i ] is GUIBuilder.Windows.Main ) )
+                {
+                    _Forms[ i ].Close();
+                    _Forms.RemoveAt( i );
+                }
             }
-            else if( showWindow )
-                _OptionsWindow.BringToFront();
-            return _OptionsWindow;
         }
-        
-        public static void SetOptionsWindow( GWindow.Options window, bool closeOldWindow = true )
+
+        public static void              SetEnableState( bool enabled )
         {
-            //DebugLog.Write( "GodObjects.Windows.SetOptionsWindow()" );
-            if( _OptionsWindow == window )
+            if( _Forms.NullOrEmpty() )
                 return;
-            if( ( closeOldWindow )&&( _OptionsWindow != null ) )
-                _OptionsWindow.Close();
-            _OptionsWindow = window;
+            for( int i = 0; i < _Forms.Count; i++ )
+                _Forms[ i ].SetEnableState( enabled );
         }
-        
-        #endregion
-        
-        #region Border Batch Window
-        
-        static GWindow.BorderBatch _BorderBatchWindow;
-        
-        public static GWindow.BorderBatch GetBorderBatchWindow( bool showWindow = false )
-        {
-            //DebugLog.Write( "GodObjects.Windows.GetBorderBatchWindow()" );
-            if( _BorderBatchWindow == null )
-            {
-                _BorderBatchWindow = new GWindow.BorderBatch();
-                if( showWindow )
-                    _BorderBatchWindow.Show();
-            }
-            else if( showWindow )
-                _BorderBatchWindow.BringToFront();
-            return _BorderBatchWindow;
-        }
-        
-        public static void SetBorderBatchWindow( GWindow.BorderBatch window, bool closeOldWindow = true )
-        {
-            //DebugLog.Write( "GodObjects.Windows.SetBorderBatchWindow()" );
-            if( _BorderBatchWindow == window )
-                return;
-            if( ( closeOldWindow )&&( _BorderBatchWindow != null ) )
-                _BorderBatchWindow.Close();
-            _BorderBatchWindow = window;
-        }
-        
-        #endregion
-        
-        #region Sub-Division Batch Window
-        
-        static GWindow.SubDivisionBatch _SubDivisionBatchWindow;
-        
-        public static GWindow.SubDivisionBatch GetSubDivisionBatchWindow( bool showWindow = false )
-        {
-            //DebugLog.Write( "GodObjects.Windows.GetSubDivisionBatchWindow()" );
-            if( _SubDivisionBatchWindow == null )
-            {
-                _SubDivisionBatchWindow = new GWindow.SubDivisionBatch();
-                if( showWindow )
-                    _SubDivisionBatchWindow.Show();
-            }
-            else if( showWindow )
-                _SubDivisionBatchWindow.BringToFront();
-            return _SubDivisionBatchWindow;
-        }
-        
-        public static void SetSubDivisionBatchWindow( GWindow.SubDivisionBatch window, bool closeOldWindow = true )
-        {
-            //DebugLog.Write( "GodObjects.Windows.SetSubDivisionBatchWindow()" );
-            if( _SubDivisionBatchWindow == window )
-                return;
-            if( ( closeOldWindow )&&( _SubDivisionBatchWindow != null ) )
-                _SubDivisionBatchWindow.Close();
-            _SubDivisionBatchWindow = window;
-        }
-        
-        #endregion
-        
-        #region Render Window
-        
+
+        #region TODO:  Move this somewhere more appropriate
+
         const string                    XmlKey_SDLVideoDriver                   = "SDLVideoDriver";
-        
+
         static public readonly string SDLVideoDriverDefault = "Default";
         static public readonly string SDLVideoDriverSoftware = "Software";
         static public readonly int SDLVideoDriverDefaultIndex = 0;
         static public readonly string[] SDLVideoDrivers = new [] { SDLVideoDriverDefault, "Direct3D", "OpenGL", "OpenGLES", "OpenGLES2", "Metal", SDLVideoDriverSoftware };
-        
+
         static int GetDriverIndexFromName( string name )
         {
             if( string.IsNullOrEmpty( name ) ) return SDLVideoDriverDefaultIndex;
@@ -190,7 +121,7 @@ namespace GodObject
                 if( name.InsensitiveInvariantMatch( SDLVideoDrivers[ i ] ) ) return i;
             return SDLVideoDriverDefaultIndex;
         }
-        
+
         static public string SDLVideoDriver
         {
             get
@@ -212,70 +143,16 @@ namespace GodObject
             set
             {
                 SDLVideoDriver = SDLVideoDrivers[
-                    ( value < 0 )||( value > SDLVideoDrivers.Length )
+                    ( value < 0 ) || ( value > SDLVideoDrivers.Length )
                     ? SDLVideoDriverDefaultIndex
                     : value
                 ];
             }
         }
-        
-        static GWindow.Render _RenderWindow;
-        
-        public static GWindow.Render GetRenderWindow( bool showWindow = false )
-        {
-            if( _MainWindow.InvokeRequired )
-            {
-                _MainWindow.Invoke( (Action)delegate() { GetRenderWindow( showWindow ); }, null );
-                return null;
-            }
-            //DebugLog.Write( "GodObjects.Windows.GetRenderWindow()" );
-            if( _RenderWindow == null )
-            {
-                _RenderWindow = new GWindow.Render();
-                if( showWindow )
-                    _RenderWindow.Show();
-            }
-            else if( showWindow )
-                _RenderWindow.BringToFront();
-            return _RenderWindow;
-        }
-        
-        public static void SetRenderWindow( GWindow.Render window, bool closeOldWindow = true )
-        {
-            //DebugLog.Write( "GodObjects.Windows.SetRenderWindow()" );
-            if( _RenderWindow == window )
-                return;
-            if( ( closeOldWindow )&&( _RenderWindow != null ) )
-                _RenderWindow.Close();
-            _RenderWindow = window;
-        }
-        
+
         #endregion
-        
-        public static void CloseAllChildWindows()
-        {
-            SetAboutWindow( null, true );
-            SetOptionsWindow( null, true );
-            SetBorderBatchWindow( null, true );
-            SetSubDivisionBatchWindow( null, true );
-            SetRenderWindow( null, true );
-        }
-        
-        public static void SetEnableState( bool enabled )
-        {
-            if( _MainWindow != null )
-                _MainWindow.SetEnableState( enabled );
-            if( _BorderBatchWindow != null )
-                _BorderBatchWindow.SetEnableState( enabled );
-            if( _SubDivisionBatchWindow != null )
-                _SubDivisionBatchWindow.SetEnableState( enabled );
-            if( _RenderWindow != null )
-                _RenderWindow.SetEnableState( enabled );
-        }
-        
+
     }
-    
-    #endregion
-    
+
 }
 

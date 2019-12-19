@@ -14,6 +14,7 @@ using System.Windows.Forms;
 
 using Maths;
 using Engine;
+using Engine.Plugin.Forms;
 
 using Fallout4;
 using AnnexTheCommonwealth;
@@ -62,9 +63,13 @@ namespace GUIBuilder.Windows.RenderChild
         List<Settlement> _settlements;
         List<SubDivision> _subdivisions;
         
-        List<EdgeFlag> _associatedEdgeFlags;
-        List<EdgeFlag> _unassociatedEdgeFlags;
-        List<EdgeLine> _edgeLines;
+        List<EdgeFlag> _SubDivisionAssociatedEdgeFlags;
+        List<EdgeFlag> _SubDivisionUnassociatedEdgeFlags;
+        List<EdgeLine> _SubDivisionEdgeLines;
+        
+        List<ObjectReference> _WorkshopAssociatedEdgeFlags;
+        List<ObjectReference> _WorkshopUnassociatedEdgeFlags;
+        List<EdgeLine> _WorkshopEdgeLines;
         
         // Clipper inputs held for reference
         Maths.Vector2i _cellNW;
@@ -116,7 +121,9 @@ namespace GUIBuilder.Windows.RenderChild
         
         // High light parents and volumes
         List<SubDivision> hlSubDivisions = null;
-        List<Volume> hlVolumes = null;
+        List<Volume> hlSubDivisionBuildVolumes = null;
+        List<WorkshopScript> hlWorkshops = null;
+        List<ObjectReference> hlWorkshopBuildVolumes = null;
         
         //VolumeEditor attachedEditor;
         
@@ -204,13 +211,22 @@ namespace GUIBuilder.Windows.RenderChild
             _worldspace = null;
             _poolEntry = null;
             //_importMod = null;
-            _workshops = null;
+            
             _settlements = null;
+            
             _subdivisions = null;
-            _associatedEdgeFlags = null;
-            _unassociatedEdgeFlags = null;
+            _SubDivisionAssociatedEdgeFlags = null;
+            _SubDivisionUnassociatedEdgeFlags = null;
+            _SubDivisionEdgeLines = null;
             hlSubDivisions = null;
-            hlVolumes = null;
+            hlSubDivisionBuildVolumes = null;
+            
+            _workshops = null;
+            _WorkshopAssociatedEdgeFlags = null;
+            _WorkshopUnassociatedEdgeFlags = null;
+            _WorkshopEdgeLines = null;
+            hlWorkshops = null;
+            hlWorkshopBuildVolumes = null;
             
             // Reset all type fields (not strictly necessary)
             _cellNW = Maths.Vector2i.Zero;
@@ -623,6 +639,33 @@ namespace GUIBuilder.Windows.RenderChild
                 //DebugLog.Write( "GUIBuilder.RenderTransform.Workshops.Set() :: value = " + value );
                 SyncSceneUpdate( true );
                 _workshops = value;
+                _WorkshopAssociatedEdgeFlags = null;
+                _WorkshopUnassociatedEdgeFlags = null;
+                _WorkshopEdgeLines = null;
+                SyncSceneUpdate( false );
+            }
+        }
+        
+        public List<ObjectReference>            WorkshopAssociatedEdgeFlags
+        {
+            get { return _WorkshopAssociatedEdgeFlags; }
+            set
+            {
+                //DebugLog.Write( "GUIBuilder.RenderTransform.AssociatedEdgeFlags.Set() :: value = " + value );
+                SyncSceneUpdate( true );
+                _WorkshopAssociatedEdgeFlags = value;
+                SyncSceneUpdate( false );
+            }
+        }
+        
+        public List<ObjectReference>            WorskhopUnassociatedEdgeFlags
+        {
+            get { return _WorkshopUnassociatedEdgeFlags; }
+            set
+            {
+                //DebugLog.Write( "GUIBuilder.RenderTransform.UnassociatedEdgeFlags.Set() :: value = " + value );
+                SyncSceneUpdate( true );
+                _WorkshopUnassociatedEdgeFlags = value;
                 SyncSceneUpdate( false );
             }
         }
@@ -647,32 +690,33 @@ namespace GUIBuilder.Windows.RenderChild
                 //DebugLog.Write( "GUIBuilder.RenderTransform.SubDivisions.Set() :: value = " + value );
                 SyncSceneUpdate( true );
                 _subdivisions = value;
-                _associatedEdgeFlags = null;
-                _edgeLines = null;
+                _SubDivisionAssociatedEdgeFlags = null;
+                _SubDivisionUnassociatedEdgeFlags = null;
+                _SubDivisionEdgeLines = null;
                 SyncSceneUpdate( false );
             }
         }
         
-        public List<EdgeFlag>                   AssociatedEdgeFlags
+        public List<EdgeFlag>                   SubDivisionAssociatedEdgeFlags
         {
-            get { return _associatedEdgeFlags; }
+            get { return _SubDivisionAssociatedEdgeFlags; }
             set
             {
                 //DebugLog.Write( "GUIBuilder.RenderTransform.AssociatedEdgeFlags.Set() :: value = " + value );
                 SyncSceneUpdate( true );
-                _associatedEdgeFlags = value;
+                _SubDivisionAssociatedEdgeFlags = value;
                 SyncSceneUpdate( false );
             }
         }
         
-        public List<EdgeFlag>                   UnassociatedEdgeFlags
+        public List<EdgeFlag>                   SubDivisionUnassociatedEdgeFlags
         {
-            get { return _unassociatedEdgeFlags; }
+            get { return _SubDivisionUnassociatedEdgeFlags; }
             set
             {
                 //DebugLog.Write( "GUIBuilder.RenderTransform.UnassociatedEdgeFlags.Set() :: value = " + value );
                 SyncSceneUpdate( true );
-                _unassociatedEdgeFlags = value;
+                _SubDivisionUnassociatedEdgeFlags = value;
                 SyncSceneUpdate( false );
             }
         }
@@ -689,14 +733,14 @@ namespace GUIBuilder.Windows.RenderChild
             }
         }
         
-        public List<Volume>                     HighlightVolumes
+        public List<Volume>                     HighlightSubDivisionBuildVolumes
         {
-            get { return hlVolumes; }
+            get { return hlSubDivisionBuildVolumes; }
             set
             {
                 //DebugLog.Write( "GUIBuilder.RenderTransform.HighlightVolumes.Set() :: value = " + value );
                 SyncSceneUpdate( true );
-                hlVolumes = value;
+                hlSubDivisionBuildVolumes = value;
                 SyncSceneUpdate( false );
             }
         }
@@ -1212,8 +1256,8 @@ namespace GUIBuilder.Windows.RenderChild
                         AddMouseOverFrom( ref newMoos, s.BorderEnablers, mwpos, maxDistance );
             if( _renderEdgeFlags )
             {
-                AddMouseOverFrom( ref newMoos, _associatedEdgeFlags, mwpos, maxDistance );
-                AddMouseOverFrom( ref newMoos, _unassociatedEdgeFlags, mwpos, maxDistance );
+                AddMouseOverFrom( ref newMoos, _SubDivisionAssociatedEdgeFlags, mwpos, maxDistance );
+                AddMouseOverFrom( ref newMoos, _SubDivisionUnassociatedEdgeFlags, mwpos, maxDistance );
             }
             
             var hasMoos = !_mouseOverObjects.NullOrEmpty();
@@ -1499,8 +1543,8 @@ namespace GUIBuilder.Windows.RenderChild
                                 useColor = cHigh;
                             }
                             else if(
-                                ( !hlVolumes.NullOrEmpty() )&&
-                                ( hlVolumes.Contains( volume ) )
+                                ( !hlSubDivisionBuildVolumes.NullOrEmpty() )&&
+                                ( hlSubDivisionBuildVolumes.Contains( volume ) )
                             )
                             {
                                 useColor = cHigh;
@@ -1548,24 +1592,143 @@ namespace GUIBuilder.Windows.RenderChild
             catch {}
         }
         
+        void DrawBuildVolume( WorkshopScript workshop )
+        {
+            // Only show build volumes for the appropriate worldspace
+            if( ( _worldspace == null )||( workshop == null ) )
+                return;
+            //if( _worldspace.FormID != workshop.Reference.Worldspace.FormID )
+            //    return;
+            
+            var volumes = workshop.BuildVolumes;
+            if( volumes.NullOrEmpty() )
+                return;
+            
+            var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
+            
+            try
+            {
+                
+                #if DEBUG
+                if(
+                    ( !debugRenderBuildVolumes )//||
+                    //( subdivision.BorderSegments.NullOrEmpty() )
+                )
+                #endif
+                {
+                    int rb = 223;
+                    var cHigh = Color.FromArgb( 255, rb, 0, rb );
+                    rb -= 48;
+                    var cMid = Color.FromArgb( 255, rb, 0, rb );
+                    rb -= 48;
+                    var cLow = Color.FromArgb( 255, rb, 0, rb );
+                    
+                    var editorEnabled = false;//( attachedEditor != null )&&( attachedEditor.Enabled );
+                    
+                    foreach( var volume in volumes )
+                    {
+                        if( wsFID != volume.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                            continue;
+                        
+                        var useColor = editorEnabled ? cMid : cLow;
+                        if( !editorEnabled )
+                        {
+                            if( hlWorkshops.NullOrEmpty() )
+                            {
+                                useColor = cHigh;
+                            }
+                            else if(
+                                ( !hlWorkshopBuildVolumes.NullOrEmpty() )&&
+                                ( hlWorkshopBuildVolumes.Contains( volume ) )
+                            )
+                            {
+                                useColor = cHigh;
+                            }
+                            else if( hlWorkshops.Contains( workshop ) )
+                            {
+                                useColor = cMid;
+                            }
+                        }
+                        
+                        var corners = Vector2fExtensions.CalculateCornerPositions(
+                            volume.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                            volume.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                            volume.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        
+                        DrawPolyWorldTransform( corners, useColor );
+                    }
+                }
+                #if DEBUG
+                /*
+                else
+                {
+                    int r = 255;
+                    int g = 0;
+                    int b = 127;
+                    SDLRenderer.Font font = null; // TODO: FILL THIS!
+                    
+                    for( var i = 0; i < subdivision.BorderSegments.Count; i++ )
+                    {
+                        var segment = subdivision.BorderSegments[ i ];
+                        
+                        var c = Color.FromArgb( 255, r, g, b );
+                        
+                        r -= 32;
+                        g += 32;
+                        b += 64;
+                        if( r <   0 ) r += 255;
+                        if( g > 255 ) g -= 255;
+                        if( b > 255 ) b -= 255;
+                        
+                        var niP = ( segment.P0 + segment.P1 ) * 0.5f;
+                        DrawTextWorldTransform( i.ToString(), niP.X, niP.Y, c, font );
+                        DrawLineWorldTransform( segment.P0, segment.P1, c );
+                    }
+                }
+                */
+                #endif
+            }
+            // disable once EmptyGeneralCatchClause
+            catch {}
+        }
+        
         void DrawBuildVolumes()
         {
-            if( ( _worldspace == null )||( _subdivisions.NullOrEmpty() ) )
+            if( _worldspace == null )
                 return;
             
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawBuildVolumes()" } );
             
-            if( hlSubDivisions.NullOrEmpty() )
-                foreach( var subdivision in _subdivisions )
-                    DrawBuildVolume( subdivision );
-            else
+            if( !_workshops.NullOrEmpty() )
             {
-                foreach( var subdivision in _subdivisions )
-                    if( !hlSubDivisions.Contains( subdivision ) )
+                if( hlWorkshops.NullOrEmpty() )
+                    foreach( var workshop in _workshops )
+                        DrawBuildVolume( workshop );
+                else
+                {
+                    foreach( var workshop in _workshops )
+                        if( !hlWorkshops.Contains( workshop ) )
+                            DrawBuildVolume( workshop );
+                    
+                    foreach( var workshop in hlWorkshops )
+                        DrawBuildVolume( workshop );
+                }
+            }
+            
+            if( !_subdivisions.NullOrEmpty() )
+            {
+                if( hlSubDivisions.NullOrEmpty() )
+                    foreach( var subdivision in _subdivisions )
                         DrawBuildVolume( subdivision );
-                
-                foreach( var subdivision in hlSubDivisions )
-                    DrawBuildVolume( subdivision );
+                else
+                {
+                    foreach( var subdivision in _subdivisions )
+                        if( !hlSubDivisions.Contains( subdivision ) )
+                            DrawBuildVolume( subdivision );
+                    
+                    foreach( var subdivision in hlSubDivisions )
+                        DrawBuildVolume( subdivision );
+                }
             }
             
             //DebugLog.CloseIndentLevel();
@@ -1605,15 +1768,54 @@ namespace GUIBuilder.Windows.RenderChild
             catch {}
         }
         
+        void DrawSandboxVolume( WorkshopScript workshop )
+        {
+            // Only show sandbox volumes for the appropriate worldspace
+            if( ( _worldspace == null )||( workshop == null ) )
+                return;
+            //if( _worldspace.FormID != subdivision.Reference.Worldspace.FormID )
+            //    return;
+            
+            try
+            {
+                
+                var volume = workshop.SandboxVolume;
+                if( volume == null )
+                    return;
+                
+                var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
+                if( wsFID != volume.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                    return;
+                
+                var c = Color.FromArgb( 255, 204, 76, 51 );
+                
+                var corners = Vector2fExtensions.CalculateCornerPositions(
+                    volume.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                    volume.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                    volume.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                
+                //DebugLog.WriteArray( "DrawSandboxVolume() :: Corners", corners );
+                
+                DrawPolyWorldTransform( corners, c );
+            }
+            // disable once EmptyGeneralCatchClause
+            catch {}
+        }
+        
         void DrawSandboxVolumes()
         {
-            if( ( _worldspace == null )||( _subdivisions.NullOrEmpty() ) )
+            if( _worldspace == null )
                 return;
             
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawSandboxVolumes()" } );
             
-            foreach( var subdivision in _subdivisions )
-                DrawSandboxVolume( subdivision );
+            if( !_workshops.NullOrEmpty() )
+                foreach( var workshop in _workshops )
+                    DrawSandboxVolume( workshop );
+            
+            if( !_subdivisions.NullOrEmpty() )
+                foreach( var subdivision in _subdivisions )
+                    DrawSandboxVolume( subdivision );
             
             //DebugLog.CloseIndentLevel();
         }
@@ -1622,20 +1824,20 @@ namespace GUIBuilder.Windows.RenderChild
         
         #region Edge Flags Drawing
         
-        void RebuildAssociatedEdgeFlags()
+        void RebuildSubDivisionAssociatedEdgeFlags()
         {
             if(
                 ( _subdivisions.NullOrEmpty() )||
-                ( !_associatedEdgeFlags.NullOrEmpty() )||
-                ( !_edgeLines.NullOrEmpty() )
+                ( !_SubDivisionAssociatedEdgeFlags.NullOrEmpty() )||
+                ( !_SubDivisionEdgeLines.NullOrEmpty() )
                ) return;
             
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "RebuildAssociatedEdgeFlags()" } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "RebuildSubDivisionAssociatedEdgeFlags()" } );
             
             try
             {
-                _associatedEdgeFlags = new List<EdgeFlag>();
-                _edgeLines = new List<EdgeLine>();
+                _SubDivisionAssociatedEdgeFlags = new List<EdgeFlag>();
+                _SubDivisionEdgeLines = new List<EdgeLine>();
                 foreach( var s in _subdivisions )
                 {
                     var flags = s.EdgeFlags;
@@ -1644,7 +1846,7 @@ namespace GUIBuilder.Windows.RenderChild
                         var sefk = s.EdgeFlagKeyword;
                         foreach( var flag in flags )
                         {
-                            _associatedEdgeFlags.AddOnce( flag );
+                            _SubDivisionAssociatedEdgeFlags.AddOnce( flag );
                             var refr = flag.Reference;
                             var pos = refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                             var lrfs = refr.LinkedRefs;
@@ -1663,7 +1865,7 @@ namespace GUIBuilder.Windows.RenderChild
                                             pos,
                                             lref.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
                                             sefk.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                                        _edgeLines.Add( el );
+                                        _SubDivisionEdgeLines.Add( el );
                                     }
                                 }
                             }
@@ -1673,24 +1875,83 @@ namespace GUIBuilder.Windows.RenderChild
             }
             catch
             {
-                _associatedEdgeFlags = null;
-                _edgeLines = null;
+                _SubDivisionAssociatedEdgeFlags = null;
+                _SubDivisionEdgeLines = null;
             }
             DebugLog.CloseIndentLevel();
         }
         
-        void DrawEdgeFlags()
+        /*
+        void RebuildWorkshopAssociatedEdgeFlags()
+        {
+            if(
+                ( _workshops.NullOrEmpty() )||
+                ( !_WorkshopAssociatedEdgeFlags.NullOrEmpty() )||
+                ( !_WorkshopEdgeLines.NullOrEmpty() )
+               ) return;
+            
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "RebuildWorkshopAssociatedEdgeFlags()" } );
+            
+            try
+            {
+                _WorkshopAssociatedEdgeFlags = new List<ObjectReference>();
+                _WorkshopEdgeLines = new List<EdgeLine>();
+                foreach( var w in _workshops )
+                {
+                    var flags = w.EdgeFlags;
+                    if( !flags.NullOrEmpty() )
+                    {
+                        var sefk = s.EdgeFlagKeyword;
+                        foreach( var flag in flags )
+                        {
+                            _SubDivisionAssociatedEdgeFlags.AddOnce( flag );
+                            var refr = flag.Reference;
+                            var pos = refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                            var lrfs = refr.LinkedRefs;
+                            var count = lrfs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                            for( int i = 0; i < count; i++ )
+                            {
+                                var lkFID = lrfs.GetKeywordFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
+                                if( GodObject.CoreForms.IsSubDivisionEdgeFlagKeyword( lkFID ) )
+                                {
+                                    var lref = lrfs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
+                                    var lef = lref.GetScript<EdgeFlag>();
+                                    if( ( lef != null )&&( lef.AssociatedWithSubDivision( s ) ) )
+                                    {
+                                        var el = new EdgeLine(
+                                            s,
+                                            pos,
+                                            lref.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                                            sefk.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                                        _SubDivisionEdgeLines.Add( el );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                _SubDivisionAssociatedEdgeFlags = null;
+                _SubDivisionEdgeLines = null;
+            }
+            DebugLog.CloseIndentLevel();
+        }
+        */
+        
+        void DrawSubDivisionEdgeFlags()
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawEdgeFlags()" } );
             
-            RebuildAssociatedEdgeFlags();
+            RebuildSubDivisionAssociatedEdgeFlags();
             
             //DebugLog.Write( string.Format( "DrawEdgeFlags() - AssociatedEdgeFlags.Length = {0}", _associatededgeFlags.Count ) );
-            if( !_associatedEdgeFlags.NullOrEmpty() )
+            if( !_SubDivisionAssociatedEdgeFlags.NullOrEmpty() )
             {
                 try
                 {
-                    foreach( var flag in _associatedEdgeFlags )
+                    foreach( var flag in _SubDivisionAssociatedEdgeFlags )
                     {
                         var refr = flag.Reference;
                         var pos = refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
@@ -1702,11 +1963,11 @@ namespace GUIBuilder.Windows.RenderChild
             }
             
             //DebugLog.Write( string.Format( "DrawEdgeFlags() - UnassociatedEdgeFlags.Length = {0}", _unassociatededgeFlags.Count ) );
-            if( !_unassociatedEdgeFlags.NullOrEmpty() )
+            if( !_SubDivisionUnassociatedEdgeFlags.NullOrEmpty() )
             {
                 try
                 {
-                    foreach( var flag in _unassociatedEdgeFlags )
+                    foreach( var flag in _SubDivisionUnassociatedEdgeFlags )
                     {
                         var refr = flag.Reference;
                         var pos = refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
@@ -1721,22 +1982,34 @@ namespace GUIBuilder.Windows.RenderChild
             //DebugLog.CloseIndentLevel();
         }
         
-        void DrawEdgeFlagLinks()
+        void DrawSubDivisionEdgeFlagLinks()
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawEdgeFlagLinks()" } );
             
-            RebuildAssociatedEdgeFlags();
+            RebuildSubDivisionAssociatedEdgeFlags();
             
             //DebugLog.Write( string.Format( "DrawEdgeFlagLinks() - EdgeLines.Length = {0}", _edgeLines.Count ) );
-            if( _edgeLines.NullOrEmpty() )
+            if( _SubDivisionEdgeLines.NullOrEmpty() )
                 return;
                 //goto localReturnResult;
             
-            foreach( var el in _edgeLines )
+            foreach( var el in _SubDivisionEdgeLines )
                 DrawLineWorldTransform( el.p0, el.p1, el.c );
             
         //localReturnResult:
         //    DebugLog.CloseIndentLevel();
+        }
+        
+        void DrawEdgeFlagLinks()
+        {
+            //DrawWorkshopEdgeFlagLinks();
+            DrawSubDivisionEdgeFlagLinks();
+        }
+        
+        void DrawEdgeFlags()
+        {
+            //DrawWorkshopsEdgeFlags();
+            DrawSubDivisionEdgeFlags();
         }
         
         #endregion

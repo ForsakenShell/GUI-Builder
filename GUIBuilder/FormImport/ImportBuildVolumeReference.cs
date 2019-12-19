@@ -88,15 +88,15 @@ namespace GUIBuilder.FormImport
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
             NewEditorID     = newEditorID;
-            ftBaseActi      = new FormTarget( this, typeof( Engine.Plugin.Forms.Activator ), baseActi );
-            ftWorldspace    = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
-            ftCell          = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ), cell );
+            ftBaseActi      = new FormTarget( "Activator", this, typeof( Engine.Plugin.Forms.Activator ), baseActi );
+            ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
+            ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ), cell );
             Position        = new Vector3f( position );
             Rotation        = new Vector3f( rotation );
             Bounds          = new Vector3f( bounds );
-            ftLinkRef       = new FormTarget( this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
-            ftLinkKeyword   = new FormTarget( this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
-            ftLayer         = new FormTarget( this, typeof( Engine.Plugin.Forms.Layer ), layer );
+            ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
+            ftLinkKeyword   = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
+            ftLayer         = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ), layer );
             DumpImport();
         }
         
@@ -109,27 +109,27 @@ namespace GUIBuilder.FormImport
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
             NewEditorID     = newEditorID;
-            ftBaseActi      = new FormTarget( this, typeof( Engine.Plugin.Forms.Activator ), baseActi );
-            ftWorldspace    = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
-            ftCell          = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ), cell );
+            ftBaseActi      = new FormTarget( "Activator", this, typeof( Engine.Plugin.Forms.Activator ), baseActi );
+            ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
+            ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ), cell );
             Position        = new Vector3f( position );
             Rotation        = new Vector3f( rotation );
             Bounds          = new Vector3f( bounds );
-            ftLinkRef       = new FormTarget( this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
-            ftLinkKeyword   = new FormTarget( this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
-            ftLayer         = new FormTarget( this, typeof( Engine.Plugin.Forms.Layer ), Engine.Plugin.Constant.FormID_None, layerEditorID );
+            ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
+            ftLinkKeyword   = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
+            ftLayer         = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ), Engine.Plugin.Constant.FormID_None, layerEditorID );
             DumpImport();
         }
         
         public                          ImportBuildVolumeReference( string[] importData )
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.Volume ), importData )
         {
-            ftBaseActi      = new FormTarget( this, typeof( Engine.Plugin.Forms.Activator ) );
-            ftWorldspace    = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ) );
-            ftCell          = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ) );
-            ftLinkRef       = new FormTarget( this, typeof( Engine.Plugin.Forms.ObjectReference ) );
-            ftLinkKeyword   = new FormTarget( this, typeof( Engine.Plugin.Forms.Keyword ) );
-            ftLayer         = new FormTarget( this, typeof( Engine.Plugin.Forms.Layer ) );
+            ftBaseActi      = new FormTarget( "Activator", this, typeof( Engine.Plugin.Forms.Activator ) );
+            ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ) );
+            ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ) );
+            ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ) );
+            ftLinkKeyword   = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ) );
+            ftLayer         = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ) );
             DumpImport();
         }
         

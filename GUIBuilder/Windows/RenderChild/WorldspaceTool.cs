@@ -18,15 +18,11 @@ namespace GUIBuilder.Windows.RenderChild
     public partial class WorldspaceTool : Form, GodObject.XmlConfig.IXmlConfiguration
     {
         
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( false ); } }
+        public string XmlNodeName { get{ return "Worldspaces"; } }
+        
         bool onLoadComplete = false;
-        
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get { return GodObject.Windows.GetRenderWindow( false ) as GodObject.XmlConfig.IXmlConfiguration; } }
-        
-        public string XmlKey { get { return this.Text; } }
-        
-        public string XmlPath { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
+        Size _ExpandedSize;
         
         Engine.Plugin.Forms.Worldspace _SelectedWorldspace = null;
         
@@ -41,7 +37,10 @@ namespace GUIBuilder.Windows.RenderChild
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormLoad() :: Start" );
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
+            _ExpandedSize = this.Size;
+            
             onLoadComplete = true;
         }
         
@@ -57,12 +56,14 @@ namespace GUIBuilder.Windows.RenderChild
         
         void OverrideSize( Size size )
         {
+            this.ResizeEnd -= OnFormResizeEnd;
             this.Size = size;
+            this.ResizeEnd += OnFormResizeEnd;
         }
         
         void OnActivated( object sender, EventArgs e )
         {
-            OverrideSize( this.MaximumSize );
+            OverrideSize( _ExpandedSize );
         }
         
         void OnDeactivate( object sender, EventArgs e )
@@ -74,7 +75,15 @@ namespace GUIBuilder.Windows.RenderChild
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlPath, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
+        }
+        
+        void OnFormResizeEnd( object sender, EventArgs e )
+        {
+            if( !onLoadComplete )
+                return;
+            GodObject.XmlConfig.WriteSize( this );
+            _ExpandedSize = this.Size;
         }
         
         public void ResetGUIElements()
@@ -96,7 +105,7 @@ namespace GUIBuilder.Windows.RenderChild
         void UpdateGUIElements()
         {
             ResetGUIElements();
-            var rw = GodObject.Windows.GetRenderWindow( false );
+            var rw = GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( false );
             
             var worldspace = _SelectedWorldspace;
             DebugLog.WriteLine( string.Format( "{0} :: UpdateGUIElements() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );

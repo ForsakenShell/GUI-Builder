@@ -19,23 +19,21 @@ namespace GUIBuilder.Windows.RenderChild
         where TSync : class, Engine.Plugin.Interface.ISyncedGUIObject
     {
         
-        const string XmlLocation = "Location";
-        const string XmlSize = "Size";
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( false ); } }
+        
+        string _XmlNodeName = null;
+        public string XmlNodeName { get{ return _XmlNodeName; } }
+        
         bool onLoadComplete = false;
         Size _ExpandedSize;
         
         Engine.Plugin.Interface.ISyncedGUIList<TSync> _ISyncedList = null;
         Engine.Plugin.Forms.Worldspace _Worldspace;
         
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get { return GodObject.Windows.GetRenderWindow( false ) as GodObject.XmlConfig.IXmlConfiguration; } }
-        
-        public string XmlKey { get { return this.Text; } }
-        
-        public string XmlPath { get{ return GodObject.XmlConfig.XmlPathTo( this ); } }
-        
-        public SyncObjectTool( string titleTranslationKey, Engine.Plugin.Interface.ISyncedGUIList<TSync> ISyncedList = null, Type syncedEditorFormType = null )
+        public SyncObjectTool( string xmlNodeName, string titleTranslationKey, Engine.Plugin.Interface.ISyncedGUIList<TSync> ISyncedList = null, Type syncedEditorFormType = null )
         {
             InitializeComponent();
+            _XmlNodeName = xmlNodeName;
             this.Tag = titleTranslationKey;
             _ISyncedList = ISyncedList;
             lvSyncObjects.SyncedEditorFormType = syncedEditorFormType;
@@ -46,8 +44,8 @@ namespace GUIBuilder.Windows.RenderChild
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormLoad() :: Start" );
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadPoint( XmlPath, XmlLocation, this.Location );
-            this.Size = GodObject.XmlConfig.ReadSize( XmlPath, XmlSize, this.Size );
+            this.Location = GodObject.XmlConfig.ReadLocation( this );
+            this.Size = GodObject.XmlConfig.ReadSize( this );
             _ExpandedSize = this.Size;
             
             if( _ISyncedList != null )
@@ -99,14 +97,14 @@ namespace GUIBuilder.Windows.RenderChild
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WritePoint( XmlPath, XmlLocation, this.Location, true );
+            GodObject.XmlConfig.WriteLocation( this );
         }
         
         void OnFormResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
-            GodObject.XmlConfig.WriteSize( XmlPath, XmlSize, this.Size, true );
+            GodObject.XmlConfig.WriteSize( this );
             _ExpandedSize = this.Size;
         }
         

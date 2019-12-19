@@ -358,7 +358,7 @@ namespace Engine.Plugin
             }
             
             // Add the form to the container
-            var resObject = AddFromRecord( wf, resHandle );
+            var resObject = AddFromRecord( pForm, resHandle );
             if( resObject == null )
             {
                 DebugLog.WriteError( this.GetType().ToString(), "CreateNewChildForm()", string.Format( "Unable to add new child \"{0}\" Form to parent \"{1}\" Form in {4} :: 0x{2} - \"{3}\"", _Association.Signature, pForm.Signature, pForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), pForm.GetEditorID( Engine.Plugin.TargetHandle.LastValid ), wf.Filename ) );
@@ -866,7 +866,7 @@ namespace Engine.Plugin
         
         protected bool                  LoadFromEx( Interface.IXHandle source, ElementHandle handle )
         {
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushItemOfItems();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -984,7 +984,7 @@ namespace Engine.Plugin
             
             //DebugLog.OpenIndentLevel( new [] { "LoadAllForms()", string.Format( "ParentForm :: {0}", ( ParentForm == null ? "plugins" : ParentForm.ToString() ) ) } );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingSigFormsFromAncestor".Translate(), _Association.Signature, ( ParentForm == null ? "Plugin.PluginFiles".Translate() : ParentForm.ExtraInfoFor() ) ) );
             m.StartSyncTimer();
@@ -1045,7 +1045,7 @@ namespace Engine.Plugin
             if( !_FullLoadComplete ) return false;
             if( _FullPostLoadComplete ) return true;
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.PushItemOfItems();
             m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferenceOfSig".Translate(), _Association.Signature ) );

@@ -19,7 +19,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of SubDivisionBatch.
     /// </summary>
-    public partial class SubDivisionBatch : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class SubDivisionBatch : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
@@ -47,10 +47,10 @@ namespace GUIBuilder.Windows
             SetEnableState( true );
         }
         
-        void OnFormClosing( object sender, FormClosingEventArgs e )
+        void OnFormClosed( object sender, FormClosedEventArgs e )
         {
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
-            GodObject.Windows.SetSubDivisionBatchWindow( null, false );
+            GodObject.Windows.SetWindow<GUIBuilder.Windows.SubDivisionBatch>( null, false );
         }
         
         void OnFormMove( object sender, EventArgs e )
@@ -108,7 +108,7 @@ namespace GUIBuilder.Windows
                 return;
             }
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatchWindow.CheckingElements".Translate() );
             m.StartSyncTimer();
@@ -140,7 +140,7 @@ namespace GUIBuilder.Windows
                 return;
             }
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -173,7 +173,7 @@ namespace GUIBuilder.Windows
                 return;
             }
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();

@@ -424,7 +424,7 @@ namespace GUIBuilder.Windows
             this.ShowInTaskbar = false;
             this.Tag = "RenderWindow.Title";
             this.Text = "title";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
             this.Move += new System.EventHandler(this.OnFormMove);

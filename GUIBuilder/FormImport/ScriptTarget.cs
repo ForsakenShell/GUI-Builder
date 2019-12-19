@@ -27,9 +27,9 @@ namespace GUIBuilder.FormImport
             set { Value = value; }
         }
         
-        public ScriptTarget( ImportBase parent, Type scriptType, uint formID, string editorID ) : base( parent, scriptType, formID, editorID ) {}
-        public ScriptTarget( ImportBase parent, Type scriptType, Engine.Plugin.PapyrusScript script ) : base( parent, scriptType, script ) {}
-        public ScriptTarget( ImportBase parent, Type scriptType ) : base( parent, scriptType ) {}
+        public ScriptTarget( string name, ImportBase parent, Type scriptType, uint formID, string editorID ) : base( name, parent, scriptType, formID, editorID ) {}
+        public ScriptTarget( string name, ImportBase parent, Type scriptType, Engine.Plugin.PapyrusScript script ) : base( name, parent, scriptType, script ) {}
+        public ScriptTarget( string name, ImportBase parent, Type scriptType ) : base( name, parent, scriptType ) {}
         //public ScriptTarget( ImportBase parent ) : base( parent ) {}
         
         protected override void ResolveValue()

@@ -135,7 +135,7 @@ public static class WorkerThreadPool
         {
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Sync()", prefix } );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();

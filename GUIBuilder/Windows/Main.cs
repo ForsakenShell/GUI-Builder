@@ -21,7 +21,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of Main.
     /// </summary>
-    public partial class Main : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class Main : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         // Minimum sizes of the main window and render window/panel
@@ -112,7 +112,7 @@ namespace GUIBuilder.Windows
             
             var configFile = GodObject.Paths.GUIBuilderConfigFile;
             if( ( string.IsNullOrEmpty( configFile ) )||( !System.IO.File.Exists( configFile ) )||( GodObject.XmlConfig.WasReset ) )
-                GodObject.Windows.GetOptionsWindow( true );
+                GodObject.Windows.GetWindow<GUIBuilder.Windows.Options>( true );
             
             /*
             var configFile = GodObject.GUIBuilderConfigFilePath;
@@ -129,7 +129,7 @@ namespace GUIBuilder.Windows
             this.Location = GodObject.XmlConfig.ReadLocation( this );
             this.Size = GodObject.XmlConfig.ReadSize( this );
             
-            GodObject.Windows.SetMainWindow( this, false );
+            GodObject.Windows.SetWindow<Main>( this, false );
             
             ClearStatusBar();
             
@@ -553,7 +553,7 @@ namespace GUIBuilder.Windows
             
             //GodObject.Plugin.DoSampleReading();
             
-            GodObject.Windows.GetBorderBatchWindow( true );
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.BorderBatch>( true );
         }
         
         void mbiToolsSubDivisionBatchClick( object sender, EventArgs e )
@@ -569,13 +569,13 @@ namespace GUIBuilder.Windows
             
             //GodObject.Plugin.DoSampleReading();
             
-            GodObject.Windows.GetSubDivisionBatchWindow( true );
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.SubDivisionBatch>( true );
         }
         
         void mbiWindowsRendererClick( object sender, EventArgs e )
         {
             if( !GodObject.Plugin.IsLoaded ) return;
-            GodObject.Windows.GetRenderWindow( true );
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( true );
         }
         
         #endregion
@@ -584,12 +584,12 @@ namespace GUIBuilder.Windows
         
         void mbiWindowsAboutClick( object sender, EventArgs e )
         {
-            GodObject.Windows.GetAboutWindow( true );
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.About>( true );
         }
         
         void mbiToolsOptionsClick( object sender, EventArgs e )
         {
-            GodObject.Windows.GetOptionsWindow( true );
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.Options>( true );
         }
         
         #endregion

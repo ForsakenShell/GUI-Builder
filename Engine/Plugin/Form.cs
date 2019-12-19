@@ -773,6 +773,9 @@ namespace Engine.Plugin
         public virtual string           ExtraInfo                   { get { return Signature; } }
         
         bool _SupressObjectDataChangedEvent = false;
+
+        public bool                     ObjectDataChangedEventsSupressed { get { return _SupressObjectDataChangedEvent; } }
+
         public void                     SupressObjectDataChangedEvents() { _SupressObjectDataChangedEvent = true; }
         
         public void                     ResumeObjectDataChangedEvents( bool sendevent )
@@ -819,7 +822,7 @@ namespace Engine.Plugin
         {
             get
             {
-                var m = GodObject.Windows.GetMainWindow();
+                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
                 m.PushItemOfItems();
                 m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );

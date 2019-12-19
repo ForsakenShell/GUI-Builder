@@ -141,6 +141,9 @@ namespace Engine.Plugin.Forms
         
         public void CheckForBackgroundCellChange( bool sendObjectDataChangedEvent )
         {
+            if( ObjectDataChangedEventsSupressed )
+                return;
+
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "CheckForBackgroundCellChange()", this.ToStringNullSafe() } );
             
             // Changing position and some record flags will trigger XeLib to update the cell container,

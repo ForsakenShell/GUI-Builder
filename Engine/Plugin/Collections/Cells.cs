@@ -52,7 +52,7 @@ namespace Engine.Plugin.Collections
         public Plugin.Forms.Cell GetByGrid( Vector2i coords )
         {
             //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetByGrid()", "coords = " + coords.ToString(), "Worldspace = " + Worldspace.ToStringNullSafe() } );
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             //m.PushStatusMessage();
             //m.StartSyncTimer();
             //var tStart = m.SyncTimerElapsed();

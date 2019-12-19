@@ -1025,7 +1025,7 @@ namespace AnnexTheCommonwealth
         {
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) } );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();

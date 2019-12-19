@@ -18,8 +18,8 @@ namespace GodObject
         
         //static readonly string          XmlNode_Options     = "Options";
         static readonly string          XmlNode_Paths       = "Paths";
-        static readonly string          XmlKey_Language      = "Language";
-        static readonly string          XmlKey_Output        = "Output";
+        static readonly string          XmlKey_Language     = "Language";
+        static readonly string          XmlKey_Output       = "Output";
         
         #region Fallout 4 Paths
         

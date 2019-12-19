@@ -133,6 +133,7 @@
     <Compile Include="Extensions\GenRenderTransform.cs" />
     <Compile Include="Extensions\GenStream.cs" />
     <Compile Include="Extensions\GenString.cs" />
+    <Compile Include="GUIBuilder\Windows\IEnableControlForm.cs" />
     <Compile Include="GUIBuilder\Windows\PluginSelector.cs">
       <SubType>Form</SubType>
     </Compile>

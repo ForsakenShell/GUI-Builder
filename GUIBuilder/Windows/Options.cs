@@ -13,7 +13,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of Options.
     /// </summary>
-    public partial class Options : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class Options : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
@@ -56,7 +56,7 @@ namespace GUIBuilder.Windows
         
         void OnFormClosed( object sender, FormClosedEventArgs e )
         {
-            GodObject.Windows.SetOptionsWindow( null, false );
+            GodObject.Windows.SetWindow<Options>( null, false );
         }
         
         void OnFormMove( object sender, EventArgs e )
@@ -73,6 +73,8 @@ namespace GUIBuilder.Windows
             GodObject.XmlConfig.WriteSize( this );
         }
         
+        public void SetEnableState( bool enabled ) {}
+
         void cbLanguageSelectedIndexChanged(object sender, EventArgs e)
         {
             if( !onLoadComplete )

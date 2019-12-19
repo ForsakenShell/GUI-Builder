@@ -344,6 +344,9 @@ namespace Engine.Plugin
         public event EventHandler       ObjectDataChanged;
         
         bool                            _SupressObjectDataChangedEvent = false;
+
+        public bool ObjectDataChangedEventsSupressed { get { return _SupressObjectDataChangedEvent; } }
+
         public void                     SupressObjectDataChangedEvents()
         {
             _SupressObjectDataChangedEvent = true;

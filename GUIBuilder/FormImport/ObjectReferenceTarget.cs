@@ -30,26 +30,26 @@ namespace GUIBuilder.FormImport
             set { Value = value; }
         }
         
-        public ObjectReferenceTarget( ImportBase parent, uint formID, string editorID, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
-            : base( parent, typeof( Engine.Plugin.Forms.ObjectReference ), formID, editorID )
+        public ObjectReferenceTarget( string name, ImportBase parent, uint formID, string editorID, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
+            : base( name, parent, typeof( Engine.Plugin.Forms.ObjectReference ), formID, editorID )
         {
             Worldspace = worldspace;
             Cell = cell;
         }
-        public ObjectReferenceTarget( ImportBase parent, Engine.Plugin.Form form, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
-            : base( parent, typeof( Engine.Plugin.Forms.ObjectReference ), form )
+        public ObjectReferenceTarget( string name, ImportBase parent, Engine.Plugin.Form form, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
+            : base( name, parent, typeof( Engine.Plugin.Forms.ObjectReference ), form )
         {
             Worldspace = worldspace;
             Cell = cell;
         }
-        public ObjectReferenceTarget( ImportBase parent, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
-            : base( parent, typeof( Engine.Plugin.Forms.ObjectReference ) )
+        public ObjectReferenceTarget( string name, ImportBase parent, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
+            : base( name, parent, typeof( Engine.Plugin.Forms.ObjectReference ) )
         {
             Worldspace = worldspace;
             Cell = cell;
         }
-        public ObjectReferenceTarget( ImportBase parent )
-            : base( parent, typeof( Engine.Plugin.Forms.ObjectReference ) ) {}
+        public ObjectReferenceTarget( string name, ImportBase parent )
+            : base( name, parent, typeof( Engine.Plugin.Forms.ObjectReference ) ) {}
         
         protected override void ResolveValue()
         {

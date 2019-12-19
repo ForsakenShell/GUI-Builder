@@ -34,7 +34,7 @@ namespace GUIBuilder
             
             DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: ClearEdgeFlagSegments()" );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             
             foreach( var subdivision in subdivisions )
@@ -64,7 +64,7 @@ namespace GUIBuilder
             )
                 return false;
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -93,7 +93,7 @@ namespace GUIBuilder
             
             var result = false;
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
@@ -149,7 +149,7 @@ namespace GUIBuilder
         {
             DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: CheckMissingElements()" );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingElements".Translate() );
             

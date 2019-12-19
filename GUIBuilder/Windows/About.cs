@@ -13,7 +13,7 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of About.
     /// </summary>
-    public partial class About : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class About : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
@@ -66,9 +66,11 @@ namespace GUIBuilder.Windows
         
         void OnFormClosed( object sender, FormClosedEventArgs e )
         {
-            GodObject.Windows.SetAboutWindow( null, false );
+            GodObject.Windows.SetWindow<About>( null, false );
         }
-        
+
+        public void SetEnableState( bool enabled ) { }
+
         void LlblLicenseLinkClicked( object sender, LinkLabelLinkClickedEventArgs e )
         {
             OpenLinkURL( llblLicense.Text );
@@ -78,12 +80,6 @@ namespace GUIBuilder.Windows
         {
             OpenLinkURL( lblAuthor.Text );
         }
-        
-        void AboutWindowFormClosing( object sender, FormClosingEventArgs e )
-        {
-            GodObject.Windows.SetAboutWindow( null, false );
-        }
-        
         
     }
 }

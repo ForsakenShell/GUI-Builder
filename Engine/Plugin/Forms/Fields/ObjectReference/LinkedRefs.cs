@@ -202,6 +202,8 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         int                             AddEx( uint refID, uint keywordFormID )
         {
             // New element in form
+            if( _LinkedReferences == null )
+                _LinkedReferences = new List<ElementHandle>();
             var index = _LinkedReferences.Count;
             var lrh = Form.WorkingFileHandle.AddArrayItem<ElementHandle>( XPath, "", "" );
             if( !lrh.IsValid() )

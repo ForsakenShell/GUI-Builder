@@ -26,7 +26,7 @@ namespace XeLibHelper
         {
             DebugLog.OpenIndentLevel( new [] { "XeLibHelper.Thread", "Sync()", prefix } );
             
-            var m = GodObject.Windows.GetMainWindow();
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();

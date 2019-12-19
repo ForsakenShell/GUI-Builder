@@ -64,31 +64,31 @@ namespace GUIBuilder.FormImport
         public                          ImportBorderReference( Engine.Plugin.Forms.ObjectReference originalForm, uint statFormID, string statEditorID, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, AnnexTheCommonwealth.BorderEnabler borderEnabler, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, Engine.Plugin.Forms.Layer layer )
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.ObjectReference ), originalForm, worldspace, cell )
         {
-            ftBaseStat      = new FormTarget( this, typeof( Engine.Plugin.Forms.Static ), statFormID, statEditorID );
-            ftWorldspace    = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
-            ftCell          = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ), cell );
+            ftBaseStat      = new FormTarget( "Static", this, typeof( Engine.Plugin.Forms.Static ), statFormID, statEditorID );
+            ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
+            ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ), cell );
             CellGrid        = new Vector2i(
                 cell == null
                 ? Vector2i.MinValue
                 : cell.CellGrid.GetGrid( Engine.Plugin.TargetHandle.Master ) );
             Position        = new Vector3f( position );
-            stEnableParent  = new ScriptTarget( this, typeof( AnnexTheCommonwealth.BorderEnabler ), borderEnabler );
-            ftLinkRef       = new FormTarget( this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
-            ftLinkKeyword   = new FormTarget( this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
-            ftLayer         = new FormTarget( this, typeof( Engine.Plugin.Forms.Layer ), layer );
+            stEnableParent  = new ScriptTarget( "Enable Parent", this, typeof( AnnexTheCommonwealth.BorderEnabler ), borderEnabler );
+            ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
+            ftLinkKeyword   = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
+            ftLayer         = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ), layer );
             DumpImport();
         }
         
         public                          ImportBorderReference( string[] importData )
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.ObjectReference ), importData )
         {
-            ftBaseStat        = new FormTarget( this, typeof( Engine.Plugin.Forms.Static ) );
-            ftWorldspace      = new FormTarget( this, typeof( Engine.Plugin.Forms.Worldspace ) );
-            ftCell            = new FormTarget( this, typeof( Engine.Plugin.Forms.Cell ) );
-            stEnableParent    = new ScriptTarget( this, typeof( AnnexTheCommonwealth.BorderEnabler ) );
-            ftLinkRef         = new FormTarget( this, typeof( Engine.Plugin.Forms.ObjectReference ) );
-            ftLinkKeyword     = new FormTarget( this, typeof( Engine.Plugin.Forms.Keyword ) );
-            ftLayer           = new FormTarget( this, typeof( Engine.Plugin.Forms.Layer ) );
+            ftBaseStat        = new FormTarget( "Static", this, typeof( Engine.Plugin.Forms.Static ) );
+            ftWorldspace      = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ) );
+            ftCell            = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ) );
+            stEnableParent    = new ScriptTarget( "Enable Parent", this, typeof( AnnexTheCommonwealth.BorderEnabler ) );
+            ftLinkRef         = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ) );
+            ftLinkKeyword     = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ) );
+            ftLayer           = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ) );
             DumpImport();
         }
         
@@ -208,7 +208,7 @@ namespace GUIBuilder.FormImport
         protected override bool         ResolveReferenceForms( bool errorIfUnresolveable )
         {
             // Resolve required forms
-            ftBaseStat  .Resolve( false );  // BaseStat may not yet be created but part of the whole set
+            ftBaseStat  .Resolve( errorIfUnresolveable );  // BaseStat may not yet be created but part of the whole set
             ftWorldspace.Resolve( errorIfUnresolveable );
             ftCell      .Resolve( errorIfUnresolveable );
             if( ( TargetCell == null )&&( TargetWorldspace != null ) )
@@ -245,7 +245,7 @@ namespace GUIBuilder.FormImport
             
             // Minimum forms resolved?
             var minFormsFound =
-                //( ftBaseStat.IsResolved )&&
+                ( ftBaseStat.IsResolved )&&
                 ( ftWorldspace.IsResolved )&&
                 ( ftCell.IsResolved )&&
                 (
@@ -344,7 +344,7 @@ namespace GUIBuilder.FormImport
                         ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
-                refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.FormID );
+                refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.Form.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 SetTarget( refr );
                 //TargetForm = refr;
                 return true;
@@ -364,7 +364,7 @@ namespace GUIBuilder.FormImport
         {
             var refr = TargetRef;
             
-            refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.FormID );
+            refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.Form.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
             if( ftLayer.IsResolved )
                 refr.SetLayer( Engine.Plugin.TargetHandle.Working, ftLayer.FormID );
