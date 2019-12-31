@@ -17,7 +17,10 @@ namespace GUIBuilder.FormImport
     public class ImportBorderStatic : ImportBase
     {
         const string            IMPORT_SIGNATURE = "BorderStatic";
-        const uint              TARGET_RECORD_FLAGS =
+
+        public const uint       F4_BORDER_RECORD_FLAGS = 0;
+
+        public const uint       ATC_BORDER_RECORD_FLAGS =
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD;
         
         string                  NewEditorID = null;
@@ -42,12 +45,12 @@ namespace GUIBuilder.FormImport
             ) );
         }
         
-        public                          ImportBorderStatic( string[] importData )
-            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.Static ), importData )
+        public                          ImportBorderStatic( string[] importData, uint recordFlags )
+            : base( IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.Static ), importData )
         { DumpImport(); }
         
-        public                          ImportBorderStatic( Engine.Plugin.Forms.Static originalForm, string newEditorID, string nifFilePath, Vector3i minBounds, Vector3i maxBounds )
-            : base(  IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.Static ), originalForm )
+        public                          ImportBorderStatic( Engine.Plugin.Forms.Static originalForm, string newEditorID, string nifFilePath, Vector3i minBounds, Vector3i maxBounds, uint recordFlags )
+            : base(  IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.Static ), originalForm )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
                 throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
@@ -81,15 +84,18 @@ namespace GUIBuilder.FormImport
             
             if( stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( NIFFilePath ) )
                 tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
-            
-            var lods = stat.DistantLOD.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-            var updateLODs = ( lods.NullOrEmpty() )||( lods.Length < 4 );
-            if( ( !lods.NullOrEmpty() )&&( lods.Length == 4 ) )
-                for( int i = 0; i < 4; i++ )
-                    updateLODs |= !lods[ i ].InsensitiveInvariantMatch( NIFFilePath );
-            if( updateLODs )
-                tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
-            
+
+            if( ( RecordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD ) != 0 )
+            {
+                var lods = stat.DistantLOD.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var updateLODs = ( lods.NullOrEmpty() )||( lods.Length < 4 );
+                if( ( !lods.NullOrEmpty() ) && ( lods.Length == 4 ) )
+                    for( int i = 0; i < 4; i++ )
+                        updateLODs |= !lods[ i ].InsensitiveInvariantMatch( NIFFilePath );
+                if( updateLODs )
+                    tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
+            }
+
             return tmp.ConcatDisplayInfo();
         }
         
@@ -101,7 +107,8 @@ namespace GUIBuilder.FormImport
             tmp.Add( string.Format( "Min Bounds {0}", MinBounds.ToString() ) );
             tmp.Add( string.Format( "Max Bounds {0}", MaxBounds.ToString() ) );
             tmp.Add( string.Format( "Model \"{0}\"", NIFFilePath ) );
-            tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
+            if( ( RecordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD ) != 0 )
+                tmp.Add( string.Format( "Distant LOD \"{0}\"", NIFFilePath ) );
             
             return tmp.ConcatDisplayInfo();
         }
@@ -121,12 +128,15 @@ namespace GUIBuilder.FormImport
             if( !Resolve( false ) ) return false;
             var stat = TargetStatic;
             if( stat == null ) return false;
-            
-            var lods = stat.DistantLOD.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-            if( ( lods.NullOrEmpty() )||( lods.Length < 4 ) ) return false;
-            for( int i = 0; i < 4; i++ )
-                if( !lods[ i ].InsensitiveInvariantMatch( NIFFilePath ) ) return false;
-            
+
+            if( ( RecordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD ) != 0 )
+            {
+                var lods = stat.DistantLOD.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                if( ( lods.NullOrEmpty() )||( lods.Length < 4 ) ) return false;
+                for( int i = 0; i < 4; i++ )
+                    if( !lods[ i ].InsensitiveInvariantMatch( NIFFilePath ) ) return false;
+            }
+
             return
                 ( string.Compare( stat.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 )&&
                 ( stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( NIFFilePath ) )&&
@@ -194,7 +204,8 @@ namespace GUIBuilder.FormImport
             stat.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             stat.SetModel( Engine.Plugin.TargetHandle.Working, NIFFilePath );
             // Insure it's full LOD at all distances
-            stat.DistantLOD.SetValue( Engine.Plugin.TargetHandle.Working, new []{ NIFFilePath, NIFFilePath, NIFFilePath, NIFFilePath } );
+            if( ( RecordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD ) != 0 )
+                stat.DistantLOD.SetValue( Engine.Plugin.TargetHandle.Working, new []{ NIFFilePath, NIFFilePath, NIFFilePath, NIFFilePath } );
             stat.ObjectBounds.SetMinValue( Engine.Plugin.TargetHandle.Working, MinBounds );
             stat.ObjectBounds.SetMaxValue( Engine.Plugin.TargetHandle.Working, MaxBounds );
             

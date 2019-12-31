@@ -130,7 +130,7 @@ namespace AnnexTheCommonwealth
                 goto localReturnResult;
             }
             
-            var keyword = GodObject.CoreForms.SubDivisionEdgeFlagKeyword( fkFID );
+            var keyword = GodObject.CoreForms.GetSubDivisionEdgeFlagKeyword( fkFID );
             if( keyword == null )    // However, an edge flag with a bad keyword IS invalid
             {
                 keyword = fkFID != Engine.Plugin.Constant.FormID_None
@@ -1021,7 +1021,7 @@ namespace AnnexTheCommonwealth
                 SendObjectDataChangedEvent( this );
         }
         
-        public void BuildSegmentsFromEdgeFlags( float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
+        public void BuildSegmentsFromEdgeFlags( float approximateNodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) } );
             
@@ -1039,7 +1039,7 @@ namespace AnnexTheCommonwealth
             foreach( var enabler in _BorderEnablers )
             {
                 m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), enabler.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                enabler.BuildSegmentsFromSubDivisionEdgeFlags( approximateNodeLength, slopeAllowance, updateMapUIData );
+                enabler.BuildSegmentsFromSubDivisionEdgeFlags( approximateNodeLength, angleAllowance, slopeAllowance, updateMapUIData );
             }
             
             SendObjectDataChangedEvent( this );

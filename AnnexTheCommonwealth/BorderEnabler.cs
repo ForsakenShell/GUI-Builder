@@ -293,7 +293,8 @@ namespace AnnexTheCommonwealth
                     Vector3f.Zero,
                     NIFBuilder.Colours.InsideBorder,
                     NIFBuilder.Colours.OutsideBorder,
-                    originalForms
+                    originalForms,
+                    false
                     );
                 
                 if( ( createImportData )&&( !subList.NullOrEmpty() ) )
@@ -314,9 +315,9 @@ namespace AnnexTheCommonwealth
                 SendObjectDataChangedEvent( this );
         }
         
-        public void BuildSegmentsFromSubDivisionEdgeFlags( float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
+        public void BuildSegmentsFromSubDivisionEdgeFlags( float approximateNodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromSubDivisionEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "approximateNodeLength = " + approximateNodeLength, "slopeAllowance = " + slopeAllowance, "updateMapUIData = " + updateMapUIData, this.ToString() } );
+            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromSubDivisionEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "approximateNodeLength = " + approximateNodeLength, "angleAllowance = " + angleAllowance, "slopeAllowance = " + slopeAllowance, "updateMapUIData = " + updateMapUIData, this.ToString() } );
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -346,7 +347,7 @@ namespace AnnexTheCommonwealth
                     if( _segments == null )
                         _segments = new List<GUIBuilder.BorderSegment>();
                     var segment = new GUIBuilder.BorderSegment( this, bseg );
-                    segment.GenerateBorderNodes( approximateNodeLength, slopeAllowance );
+                    segment.GenerateBorderNodes( approximateNodeLength, angleAllowance, slopeAllowance );
                     _segments.Add( segment );
                 }
                 

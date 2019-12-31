@@ -220,7 +220,7 @@ namespace Fallout4
         
         #endregion
         
-        public void BuildBorders( Engine.Plugin.Forms.Keyword borderGeneratorKeyword, Engine.Plugin.Forms.Static forcedZ, float approximateNodeLength, float slopeAllowance, bool updateMapUIData )
+        public void BuildBorders( Engine.Plugin.Forms.Keyword borderGeneratorKeyword, Engine.Plugin.Forms.Static forcedZ, float approximateNodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
             DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildBorders()", this.ToString() } );
             
@@ -251,7 +251,7 @@ namespace Fallout4
             //_BorderGeneratorKeyword = borderGeneratorKeyword;
             //_BorderMarkerLinkKeyword = borderMarkerLinkKeyword;
             _BorderMarkers = GetBorderMarkers( firstBorderNode, borderMarkerLinkKeyword );
-            _nodes = BorderNode.GenerateBorderNodes( Reference.Worldspace, _BorderMarkers, approximateNodeLength, slopeAllowance, forcedZ );
+            _nodes = BorderNode.GenerateBorderNodes( Reference.Worldspace, _BorderMarkers, approximateNodeLength, angleAllowance, slopeAllowance, forcedZ );
             
             SendObjectDataChangedEvent( this );
             /*
@@ -497,7 +497,8 @@ namespace Fallout4
                     : Vector3f.Zero,
                 NIFBuilder.Colours.InsideBorder,
                 NIFBuilder.Colours.OutsideBorder,
-                originalForms
+                originalForms,
+                true
                 );
             
         localReturnResult:

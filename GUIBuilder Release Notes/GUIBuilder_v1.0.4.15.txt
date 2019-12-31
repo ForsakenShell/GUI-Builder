@@ -1,0 +1,14 @@
+@here GUIBuilder test build v1.0.4.15
+Fixes:
+    + Exception when importing border references (issue #6 in the tracker)
+    + Import window becoming unresponsive when importing
+Changes:
+    + Layout of the border batch window to separate node generation & detection and NIF parameters making it clearer as to what parameter effects what function
+    + "Create Import Data" is now checked for workshop border presets by default
+    + Improved NIF optimization
+    + Adjusted Sub-Division preset node generation parameters
+    + File versioning (Major.Minor.Revision.Build) will now be more consistent with releases and embedded strings
+Adds:
+    + Two "Low Poly" presets for workshop borders
+    + All vanilla Workshop Workbenches can now handled not just 000C1AB "WorkshopWorkbench"
+https://www.dropbox.com/s/9k61pfen1zj3cta/guibuilder_test_31_12_2019.7z?dl=0

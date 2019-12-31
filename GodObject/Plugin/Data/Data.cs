@@ -26,14 +26,12 @@ namespace GodObject
         
         public static partial class Data
         {
+
+            #region Global CoreForm Management
             
             public static void Clear()
             {
-                if( _Workshops != null )
-                {
-                    _Workshops.Dispose();
-                    _Workshops = null;
-                }
+                Workshops.Dispose();
                 
                 if( _Settlements != null )
                 {
@@ -135,9 +133,9 @@ namespace GodObject
                 
                 DebugLog.CloseIndentLevel();
             }
-            
+
             #region Old Code
-            #if OLD_CODE
+#if OLD_CODE
             
             #region Worldspaces
             
@@ -417,13 +415,15 @@ namespace GodObject
             
             #endregion
             
-            #endif
+#endif
             #endregion
-            
+
+            #endregion
+
             #region Scripted Objects
-            
+
             #region Scripted Objects Container Class
-            
+
             public class ScriptedObjects<TScript> : IDisposable, ISyncedGUIList<TScript>
                 where TScript : Engine.Plugin.PapyrusScript
             {
@@ -768,26 +768,376 @@ namespace GodObject
                 #endregion
                 
             }
-            
+
             #endregion
-            
+
             #region Scripted Object: Workshops
-            
-            static ScriptedObjects<WorkshopScript> _Workshops = null;
-            public static ScriptedObjects<WorkshopScript> Workshops
+
+            public static class Workshops
             {
-                get
+
+                #region Global BaseForm Agnosticator (BaseForm ScriptedObjects<WorkshopScript>() Handler)
+
+                static List<ScriptedObjects<WorkshopScript>> _Forms = null;
+
+                static WorkshopObjects                       _SyncedGUIList = null;
+
+                #region Disposal
+
+                private static bool Disposed = false;
+
+                public static void Dispose()
                 {
-                    if( _Workshops == null )
-                        _Workshops = new ScriptedObjects<WorkshopScript>( CoreForms.WorkshopWorkbench );
-                    return _Workshops;
+                    Dispose( true );
                 }
+
+                private static void Dispose( bool disposing )
+                {
+                    if( Disposed )
+                        return;
+                    Disposed = true;
+
+                    if( _SyncedGUIList != null )
+                    {
+                        _SyncedGUIList.Dispose();
+                        _SyncedGUIList = null;
+                    }
+
+                    if( _Forms != null )
+                    {
+                        foreach( var forms in _Forms )
+                            if( forms != null )
+                                forms.Dispose();
+                        _Forms = null;
+                    }
+                }
+
+                #endregion
+
+                #region Internal ScriptedObjects<WorkshopScript>
+
+                internal static List<ScriptedObjects<WorkshopScript>> Forms
+                {
+                    get
+                    {
+                        if( _Forms == null )
+                        {
+                            _Forms = new List<ScriptedObjects<WorkshopScript>>();
+                            foreach( var workbench in CoreForms.WorkshopWorkbenches )
+                                _Forms.Add( new ScriptedObjects<WorkshopScript>( workbench ) );
+                        }
+                        return _Forms;
+                    }
+                }
+
+                #endregion
+
+                #region Public Global Form Agnosticator (BaseForm WorkshopScript Abstractor)
+
+                public static WorkshopObjects SyncedGUIList
+                {
+                    get
+                    {
+                        if( _SyncedGUIList == null )
+                            _SyncedGUIList = new WorkshopObjects();
+                        return _SyncedGUIList;
+                    }
+                }
+
+                #endregion
+
+                #region Public Global Load/Unload
+
+                public static bool Load()
+                {
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
+                        foreach( var form in forms )
+                            if( !form.Load() ) return false;
+                    return true;
+                }
+
+                public static bool PostLoad()
+                {
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
+                        foreach( var form in forms )
+                            if( !form.PostLoad() ) return false;
+                    return true;
+                }
+
+                #endregion
+
+                #region Public Global Form Agnostic Search
+
+                public static WorkshopScript Find( uint formid )
+                {
+                    WorkshopScript result = null;
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
+                    {
+                        foreach( var form in forms )
+                        {
+                            result = form.Find( formid );
+                            if( result != null )
+                                return result;
+                        }
+                    }
+                    return null;
+                }
+
+                public static WorkshopScript Find( string editorid )
+                {
+                    WorkshopScript result = null;
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
+                    {
+                        foreach( var form in forms )
+                        {
+                            result = form.Find( editorid );
+                            if( result != null )
+                                return result;
+                        }
+                    }
+                    return null;
+                }
+
+                public static List<WorkshopScript> FindAllInWorldspace( string editorid )
+                {
+                    var worldspace = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Worldspace>( editorid );
+                    return worldspace == null
+                        ? null
+                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                }
+
+                public static List<WorkshopScript> FindAllInWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
+                {
+                    return worldspace == null
+                        ? null
+                        : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                }
+
+                public static List<WorkshopScript> FindAllInWorldspace( uint formid )
+                {
+                    var forms = Forms;
+                    if( ( forms.NullOrEmpty() ) || ( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
+                        return null;
+
+                    var list = new List<WorkshopScript>();
+
+                    foreach( var form in forms )
+                    {
+                        var workshopRefs = form.FindAllInWorldspace( formid );
+                        if( !workshopRefs.NullOrEmpty() )
+                            list.AddAll( workshopRefs );
+                    }
+
+                    return list.Count == 0
+                        ? null
+                        : list;
+                }
+
+                #endregion
+
+                #endregion
+
+                #region Global Form Reference Agnosticator (BaseForm ScriptedObjects<WorkshopScript>() -> ISyncedGUIList<WorkshopScript> Handler)
+
+                public class WorkshopObjects : IDisposable, ISyncedGUIList<WorkshopScript>
+                {
+
+                    #region Allocation
+
+                    public WorkshopObjects()
+                    {
+                    }
+
+                    #endregion
+
+                    #region Disposal
+
+                    protected bool Disposed = false;
+
+                    ~WorkshopObjects()
+                    {
+                        Dispose( true );
+                    }
+
+                    public void Dispose()
+                    {
+                        Dispose( true );
+                    }
+
+                    protected virtual void Dispose( bool disposing )
+                    {
+                        if( Disposed )
+                            return;
+                        Disposed = true;
+
+                        GodObject.Plugin.Data.Workshops.Dispose();
+
+                    }
+
+                    #endregion
+
+                    public bool IsValid { get { return Files.IsLoaded( Master.Filename.Fallout4 ); } }
+
+                    /*
+                    public bool Load()
+                    {
+                        if( !IsValid ) return false;
+                        return GodObject.Plugin.Data.Workshops.Load();
+                    }
+
+                    public bool PostLoad()
+                    {
+                        if( !IsValid ) return false;
+                        return GodObject.Plugin.Data.Workshops.Load();
+                    }
+                    */
+
+                    #region ISyncedGUIList
+
+                    #region Syncronization
+
+                    public event EventHandler  ObjectDataChanged;
+
+                    bool _SupressObjectDataChangedEvent = false;
+                    public void SupressObjectDataChangedEvents()
+                    {
+                        _SupressObjectDataChangedEvent = true;
+                    }
+                    public void ResumeObjectDataChangedEvents( bool sendevent )
+                    {
+                        _SupressObjectDataChangedEvent = false;
+                        if( sendevent )
+                            SendObjectDataChangedEvent();
+                    }
+
+                    public void SendObjectDataChangedEvent()
+                    {
+                        if( _SupressObjectDataChangedEvent )
+                            return;
+                        EventHandler handler = ObjectDataChanged;
+                        if( handler != null )
+                            handler( this, null );
+                    }
+
+                    #endregion
+
+                    #region Enumeration
+
+                    public int Count
+                    {
+                        get
+                        {
+                            var forms = Forms;
+                            if( forms.NullOrEmpty() )
+                                return 0;
+
+                            int count = 0;
+                            foreach( var form in forms )
+                                count += form.Count;
+                            return count;
+                        }
+                    }
+
+                    public void Add( WorkshopScript item )
+                    {   // TODO:  Write me
+                        throw new NotImplementedException();
+                    }
+
+                    public bool Remove( WorkshopScript item )
+                    {   // TODO:  Write me
+                        throw new NotImplementedException();
+                    }
+
+                    public List<WorkshopScript> ToList( bool includePackInReferences )
+                    {
+                        var forms = Forms;
+                        if( forms.NullOrEmpty() )
+                            return null;
+                        var list = new List<WorkshopScript>();
+                        foreach( var form in forms )
+                            list.AddAll( form.ToList( includePackInReferences ) );
+                        return list;
+                    }
+
+                    public WorkshopScript Find( uint formid )
+                    {
+                        var forms = Forms;
+                        if( forms.NullOrEmpty() )
+                            return null;
+                        WorkshopScript result = null;
+                        foreach( var form in forms )
+                        {
+                            result = form.Find( formid );
+                            if( result != null ) break;
+                        }
+                        return result;
+                    }
+
+                    public WorkshopScript Find( string editorid )
+                    {
+                        var forms = Forms;
+                        if( forms.NullOrEmpty() )
+                            return null;
+                        WorkshopScript result = null;
+                        foreach( var form in forms )
+                        {
+                            result = form.Find( editorid );
+                            if( result != null ) break;
+                        }
+                        return result;
+                    }
+
+                    public List<WorkshopScript> FindAllInWorldspace( string editorid )
+                    {
+                        var worldspace = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Worldspace>( editorid );
+                        return worldspace == null
+                            ? null
+                            : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                    }
+
+                    public List<WorkshopScript> FindAllInWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
+                    {
+                        return worldspace == null
+                            ? null
+                            : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                    }
+
+                    public List<WorkshopScript> FindAllInWorldspace( uint formid )
+                    {
+                        if( !Engine.Plugin.Constant.ValidFormID( formid ) )
+                            return null;
+
+                        var forms = Forms;
+                        if( forms.NullOrEmpty() )
+                            return null;
+
+                        var list = new List<WorkshopScript>();
+                        foreach( var form in forms )
+                            list.AddAll( form.FindAllInWorldspace( formid ) );
+
+                        return list.Count == 0
+                            ? null
+                            : list;
+                    }
+
+                    #endregion
+
+                    #endregion
+
+                }
+
+                #endregion
+
             }
-            
+
             #endregion
-            
+
             #region Scripted Object: Settlements
-            
+
             static ScriptedObjects<Settlement> _Settlements = null;
             public static ScriptedObjects<Settlement> Settlements
             {
@@ -866,59 +1216,59 @@ namespace GodObject
             public static class EdgeFlags
             {
                 
-                static List<ScriptedObjects<EdgeFlag>> _Flags = null;
-                public static List<ScriptedObjects<EdgeFlag>> Flags
+                static List<ScriptedObjects<EdgeFlag>> _Forms = null;
+                public static List<ScriptedObjects<EdgeFlag>> Forms
                 {
                     get
                     {
-                        if( _Flags == null )
+                        if( _Forms == null )
                         {
-                            _Flags = new List<ScriptedObjects<EdgeFlag>>();
-                            _Flags.Add( new ScriptedObjects<EdgeFlag>( CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag ) );
-                            _Flags.Add( new ScriptedObjects<EdgeFlag>( CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ ) );
+                            _Forms = new List<ScriptedObjects<EdgeFlag>>();
+                            _Forms.Add( new ScriptedObjects<EdgeFlag>( CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag ) );
+                            _Forms.Add( new ScriptedObjects<EdgeFlag>( CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ ) );
                         }
-                        return _Flags;
+                        return _Forms;
                     }
                 }
                 
                 public static bool Load()
                 {
-                    var edgeFlags = Flags;
-                    if( !edgeFlags.NullOrEmpty() )
-                        foreach( var edgeFlag in edgeFlags )
-                            if( !edgeFlag.Load() ) return false;
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
+                        foreach( var form in forms )
+                            if( !form.Load() ) return false;
                     return true;
                 }
                 
                 public static bool PostLoad()
                 {
-                    var edgeFlags = Flags;
-                    if( !edgeFlags.NullOrEmpty() )
-                        foreach( var edgeFlag in edgeFlags )
-                            if( !edgeFlag.PostLoad() ) return false;
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
+                        foreach( var form in forms )
+                            if( !form.PostLoad() ) return false;
                     return true;
                 }
                 
                 public static void Dispose()
                 {
-                    if( _Flags != null )
+                    if( _Forms != null )
                     {
-                        foreach( var edgeFlag in _Flags )
-                            if( edgeFlag != null )
-                                edgeFlag.Dispose();
-                        _Flags = null;
+                        foreach( var form in _Forms )
+                            if( form != null )
+                                form.Dispose();
+                        _Forms = null;
                     }
                 }
                 
-                public static Engine.Plugin.PapyrusScript Find( uint formid )
+                public static EdgeFlag Find( uint formid )
                 {
-                    Engine.Plugin.PapyrusScript result = null;
-                    var edgeFlags = Flags;
-                    if( !edgeFlags.NullOrEmpty() )
+                    EdgeFlag result = null;
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
                     {
-                        foreach( var edgeFlag in edgeFlags )
+                        foreach( var form in forms )
                         {
-                            result = edgeFlag.Find( formid );
+                            result = form.Find( formid );
                             if( result != null )
                                 return result;
                         }
@@ -926,15 +1276,15 @@ namespace GodObject
                     return null;
                 }
                 
-                public static Engine.Plugin.PapyrusScript Find( string editorid )
+                public static EdgeFlag Find( string editorid )
                 {
-                    Engine.Plugin.PapyrusScript result = null;
-                    var edgeFlags = Flags;
-                    if( !edgeFlags.NullOrEmpty() )
+                    EdgeFlag result = null;
+                    var forms = Forms;
+                    if( !forms.NullOrEmpty() )
                     {
-                        foreach( var edgeFlag in edgeFlags )
+                        foreach( var form in forms )
                         {
-                            result = edgeFlag.Find( editorid );
+                            result = form.Find( editorid );
                             if( result != null )
                                 return result;
                         }
@@ -996,15 +1346,15 @@ namespace GodObject
                 
                 public static List<EdgeFlag> FindAllInWorldspace( uint formid )
                 {
-                    var edgeFlags = Flags;
-                    if( ( edgeFlags.NullOrEmpty() )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
+                    var forms = Forms;
+                    if( ( forms.NullOrEmpty() )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
                         return null;
                     
                     var list = new List<EdgeFlag>();
                     
-                    foreach( var edgeFlag in edgeFlags )
+                    foreach( var form in forms )
                     {
-                        var edgeRefs = edgeFlag.FindAllInWorldspace( formid );
+                        var edgeRefs = form.FindAllInWorldspace( formid );
                         if( !edgeRefs.NullOrEmpty() )
                             list.AddAll( edgeRefs );
                     }

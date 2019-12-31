@@ -69,7 +69,7 @@ namespace GUIBuilder.FormImport
         
         protected override string       GetDisplayEditorID( Engine.Plugin.TargetHandle target )
         {
-            var flagBase = GodObject.CoreForms.SubDivisionEdgeFlag( TargetRef.GetName( target ) );
+            var flagBase = GodObject.CoreForms.GetSubDivisionEdgeFlag( TargetRef.GetName( target ) );
             return flagBase.ExtraInfoFor(format: "Placed instance of {0}", unresolveable: "unresolved");
         }
         

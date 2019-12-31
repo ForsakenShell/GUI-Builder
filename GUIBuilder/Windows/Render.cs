@@ -78,7 +78,7 @@ namespace GUIBuilder.Windows
             tslMouseToWorldspace.Text = "";
             
             twWorldspaces = new Windows.RenderChild.WorldspaceTool();
-            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "Workshops", "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops );
+            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "Workshops", "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops.SyncedGUIList );
             AddOwnedForm( twWorldspaces );
             AddOwnedForm( twWorkshops );
             twWorldspaces.Show();

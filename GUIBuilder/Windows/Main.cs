@@ -427,9 +427,10 @@ namespace GUIBuilder.Windows
             GodObject.Plugin.Unload();
             
             this.Translate();
-            
+
         localReturnResult:
             GodObject.Windows.SetEnableState( true );
+            DebugLog.CloseIndentLevel();
         }
         
         #region Save/Load Plugin
@@ -546,7 +547,7 @@ namespace GUIBuilder.Windows
                 ( !GodObject.Plugin.IsLoaded )||
                 (
                     ( GodObject.Plugin.Data.SubDivisions.Count == 0 )&&
-                    ( GodObject.Plugin.Data.Workshops.Count == 0 )
+                    ( GodObject.Plugin.Data.Workshops.SyncedGUIList.Count == 0 )
                 )
             )
                 return;
@@ -562,7 +563,7 @@ namespace GUIBuilder.Windows
                 ( !GodObject.Plugin.IsLoaded )||
                 (
                     ( GodObject.Plugin.Data.SubDivisions.Count == 0 )&&
-                    ( GodObject.Plugin.Data.Workshops.Count == 0 )
+                    ( GodObject.Plugin.Data.Workshops.SyncedGUIList.Count == 0 )
                 )
             )
                 return;

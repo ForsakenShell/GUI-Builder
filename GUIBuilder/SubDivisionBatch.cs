@@ -53,7 +53,8 @@ namespace GUIBuilder
             Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword,
             Engine.Plugin.Forms.Static forcedZ,
             float nodeLength,
-            float slopeAllowance,
+            double angleAllowance,
+            double slopeAllowance,
             bool updateMapUIData )
         {
             DebugLog.OpenIndentLevel( new string[] { "GUIBuilder.SubDivisionBatch", "CalculateWorkshopEdgeFlagSegments()", "keyword = " + workshopBorderGeneratorKeyword.ToStringNullSafe(), "workshops = " + workshops.ToStringNullSafe() } );
@@ -72,7 +73,7 @@ namespace GUIBuilder
             foreach( var workshop in workshops )
             {
                 m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                workshop.BuildBorders( workshopBorderGeneratorKeyword, forcedZ, nodeLength, slopeAllowance, updateMapUIData );
+                workshop.BuildBorders( workshopBorderGeneratorKeyword, forcedZ, nodeLength, angleAllowance, slopeAllowance, updateMapUIData );
             }
             
             m.StopSyncTimer( "GUIBuilder.SubDivisionBatch :: CalculateWorkshopEdgeFlagSegments() :: Completed in {0}", tStart.Ticks );
@@ -81,7 +82,7 @@ namespace GUIBuilder
             return true;
         }
         
-        public static bool CalculateSubDivisionEdgeFlagSegments( List<SubDivision> subdivisions, float nodeLength, float slopeAllowance, bool updateMapUIData )
+        public static bool CalculateSubDivisionEdgeFlagSegments( List<SubDivision> subdivisions, float nodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
             if(
                 subdivisions.NullOrEmpty() ||
@@ -130,7 +131,7 @@ namespace GUIBuilder
             foreach( var subdivision in subdivisions )
             {
                 m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                subdivision.BuildSegmentsFromEdgeFlags( nodeLength, slopeAllowance, updateMapUIData );
+                subdivision.BuildSegmentsFromEdgeFlags( nodeLength, angleAllowance, slopeAllowance, updateMapUIData );
             }
             
             result = true;

@@ -49,9 +49,16 @@ namespace Maths
             Collinear = 4,
             OverlappingRegions = 5
         }
-        
+
         #region Intersection and overlap (AKA Collission)
-        
+
+        public static float Angle( float x1, float y1, float x2, float y2 )
+        {
+            var dx = x2 - x1;
+            var dy = y2 - y1;
+            return ( 360.0f + (float)( Math.Atan2( dy, dx ) * Maths.Constant.RAD_TO_DEG ) ) % 360.0f;
+        }
+
         public static void Slope( float x1, float y1, float x2, float y2, out float A, out float B, out float C )
         {
             double tmpA, tmpB, tmpC;
@@ -834,7 +841,7 @@ namespace Maths
                     var X = hull[ hull.Count - 1 ].X;
                     var Y = hull[ hull.Count - 1 ].Y;
                     best_pt = culled[ 0 ];
-                    var best_angle = 3600.0f;
+                    var best_angle = 360.0f;
                     
                     // Search the rest of the points.
                     foreach( var pt in culled )
@@ -929,7 +936,7 @@ namespace Maths
                 }
             }
             
-            static float AngleValue( float x1, float y1, float x2, float y2 )
+            public static float AngleValue( float x1, float y1, float x2, float y2 )
             {
                 float t;
                 
@@ -949,7 +956,7 @@ namespace Maths
                 else if( dy < 0.0f )
                     t = 4.0f + t;
                 
-                return t * 90.0f;
+                return t * 9.0f;
             }
             
             // Find the slope of the edge from point i to point i+1.

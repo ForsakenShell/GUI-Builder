@@ -15,7 +15,8 @@ namespace Maths
     
     public static class Constant
     {
-        
+
+        public const float RAD_TO_DEG = (float)( 180.0d / Math.PI );
         public const float DEG_TO_RAD = (float)( Math.PI / 180.0d );
         
         // Can't be a non-zero difference less than epsilon so double it
@@ -31,14 +32,29 @@ namespace Maths
         
         public static bool ApproximatelyEquals( this float left, float right, float threshold = Constant.FLOAT_EPSILON )
         {
-            return Math.Abs( left - right ) < threshold;
+            return Math.Abs( left - right ) <= threshold;
         }
         
         public static bool ApproximatelyEquals( this double left, double right, double threshold = Constant.DOUBLE_EPSILON )
         {
-            return Math.Abs( left - right ) < threshold;
+            return Math.Abs( left - right ) <= threshold;
         }
-        
+
+        public static bool ApproximatelyEquals( this Vector3f left, Vector3f right, float threshold = Constant.FLOAT_EPSILON )
+        {
+            return
+                ( Math.Abs( left.X - right.X ) <= threshold )&&
+                ( Math.Abs( left.Y - right.Y ) <= threshold )&&
+                ( Math.Abs( left.Z - right.Z ) <= threshold );
+        }
+
+        public static bool ApproximatelyEquals( this Vector2f left, Vector2f right, float threshold = Constant.FLOAT_EPSILON )
+        {
+            return
+                ( Math.Abs( left.X - right.X ) <= threshold )&&
+                ( Math.Abs( left.Y - right.Y ) <= threshold );
+        }
+
         public static bool ApproximatelyEquals( this float left, double right, double threshold = Constant.DOUBLE_EPSILON )
         {
             return ApproximatelyEquals( (double)left, right, threshold );

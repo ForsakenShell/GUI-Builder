@@ -29,6 +29,7 @@ namespace GUIBuilder.FormImport
         
         string                         _Signature                   = null;
         uint                           _RecordFlags                 = 0;
+        public uint                     RecordFlags                 { get { return _RecordFlags; } }
         bool                           _FailOnApplyIfUnresolved     = true;
         
         ImportStates                   _ImportState                 = ImportStates.Unparsed;

@@ -27,7 +27,6 @@ namespace GUIBuilder.Windows
         bool                    onLoadComplete  = false;
         
         bool _nodesBuilt = false;
-        string _reImportFile = null;
         List<GUIBuilder.FormImport.ImportBase> _importData = null;
         
         Fallout4.WorkshopScript _sampleWorkshop = null;
@@ -46,14 +45,6 @@ namespace GUIBuilder.Windows
         ToolTip tbNIFBuilderWorkshopFilePathSampleToolTip;
         
         List<TabPage> hiddenPages = new List<TabPage>();
-        
-        bool ReImportFileValid
-        {
-            get
-            {
-                return !string.IsNullOrEmpty( _reImportFile ) && System.IO.File.Exists( _reImportFile );
-            }
-        }
         
         #region Window management
         
@@ -105,10 +96,10 @@ namespace GUIBuilder.Windows
                 
                 RepopulatePresetComboBoxes( cbWorkshopPresets   , NIFBuilder.Preset.WorkshopPresets   );
                 
-                cbRestrictWorkshopBorderKeywords.Text = string.Format( "{0}\n{1}", "BorderBatchWindow.NodeDetection.Restrict".Translate(), GodObject.Plugin.Data.Files.Working.Filename );
+                cbRestrictWorkshopBorderKeywords.Text = string.Format( "{0}:\n{1}", "BorderBatchWindow.NodeDetection.Restrict".Translate(), GodObject.Plugin.Data.Files.Working.Filename );
                 
                 //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
-                GodObject.Plugin.Data.Workshops.ObjectDataChanged += OnWorkshopListChanged;
+                GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged += OnWorkshopListChanged;
                 UpdateWorkshopList( false );
                 
                 RepopulateWorkshopNodeDetectionForms();
@@ -127,7 +118,7 @@ namespace GUIBuilder.Windows
         void OnFormClosing( object sender, FormClosingEventArgs e )
         {
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
-            GodObject.Plugin.Data.Workshops.ObjectDataChanged -= OnWorkshopListChanged;
+            GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged -= OnWorkshopListChanged;
             GodObject.Windows.SetWindow<BorderBatch>( null, false );
         }
         
@@ -437,7 +428,7 @@ namespace GUIBuilder.Windows
         
         void UpdateWorkshopList( bool updateSampleDisplay )
         {
-            var workshops = GodObject.Plugin.Data.Workshops.ToList( false );
+            var workshops = GodObject.Plugin.Data.Workshops.SyncedGUIList.ToList( false );
             if( workshops.NullOrEmpty() )
                 _sampleWorkshop = null;
             else
@@ -489,7 +480,6 @@ namespace GUIBuilder.Windows
             GodObject.Windows.SetEnableState( false );
             
             _nodesBuilt = false;
-            _reImportFile = null;
             _importData = null;
             
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
@@ -520,19 +510,22 @@ namespace GUIBuilder.Windows
                     var nodeLength = ( wsPreset == null )
                         ? float.Parse( tbWorkshopNodeLength.Text )
                         : wsPreset.NodeLength;
+                    var angleAllowance = ( wsPreset == null )
+                        ? float.Parse( tbWorkshopNodeAngleAllowance.Text )
+                        : wsPreset.AngleAllowance;
                     var slopeAllowance = ( wsPreset == null )
-                        ? float.Parse( tbWorkshopSlopeAllowance.Text )
+                        ? float.Parse( tbWorkshopNodeSlopeAllowance.Text )
                         : wsPreset.SlopeAllowance;
                     if( GUIBuilder.SubDivisionBatch.CalculateWorkshopEdgeFlagSegments(
                         workshops,
                         _WorkshopBorderGeneratorKeyword,
                         _WorkshopForcedZMarker,
                         nodeLength,
+                        angleAllowance,
                         slopeAllowance,
                         false ) )
                     {
                         _nodesBuilt = true;
-                        _reImportFile = null;
                         _importData = null;
                     }
                 }
@@ -547,20 +540,23 @@ namespace GUIBuilder.Windows
                     var nodeLength = ( sdPreset == null )
                         ? float.Parse( tbSubDivisionNodeLength.Text )
                         : sdPreset.NodeLength;
+                    var angleAllowance = ( sdPreset == null )
+                        ? float.Parse( tbSubDivisionNodeAngleAllowance.Text )
+                        : sdPreset.AngleAllowance;
                     var slopeAllowance = ( sdPreset == null )
-                        ? float.Parse( tbSubDivisionSlopeAllowance.Text )
+                        ? float.Parse( tbSubDivisionNodeSlopeAllowance.Text )
                         : sdPreset.SlopeAllowance;
                     var createImportData = ( sdPreset == null )
-                        ? cbSubDivisionCreateImportData.Checked
+                        ? cbSubDivisionNIFCreateImportData.Checked
                         : sdPreset.CreateImportData;
                     if( GUIBuilder.SubDivisionBatch.CalculateSubDivisionEdgeFlagSegments(
                         subDivisions,
                         nodeLength,
+                        angleAllowance,
                         slopeAllowance,
                         createImportData ) )
                     {
                         _nodesBuilt = true;
-                        _reImportFile = null;
                         _importData = null;
                     }
                 }
@@ -588,23 +584,23 @@ namespace GUIBuilder.Windows
                 target += @"\";
             
             var wsPreset = FullChildSelectedWorkshopPreset;
-            var wsFilePrefix = tbWorkshopFilePrefix.Text;
+            var wsFilePrefix = tbWorkshopNIFFilePrefix.Text;
             var wsName = _sampleWorkshop    != null ? _sampleWorkshop   .NameFromEditorID : "";
             var wsSample = NIFBuilder.Mesh.BuildFilePath(
                 tbMeshDirectory.Text,
-                ( wsPreset != null ? wsPreset.MeshSubDirectory : tbWorkshopMeshSubDirectory.Text ),
-                ( wsPreset != null ? wsPreset.FilePrefix : tbWorkshopFilePrefix.Text ),
+                ( wsPreset != null ? wsPreset.MeshSubDirectory : tbWorkshopNIFMeshSubDirectory.Text ),
+                ( wsPreset != null ? wsPreset.FilePrefix : tbWorkshopNIFFilePrefix.Text ),
                 wsName,
-                ( wsPreset != null ? wsPreset.FileSuffix : tbWorkshopFileSuffix.Text )
+                ( wsPreset != null ? wsPreset.FileSuffix : tbWorkshopNIFFileSuffix.Text )
                 );
             
-            tbWorkshopSampleFilePath.Text = wsSample;
-            tbNIFBuilderWorkshopFilePathSampleToolTip.SetToolTip( tbWorkshopSampleFilePath, wsSample );
+            tbWorkshopNIFSampleFilePath.Text = wsSample;
+            tbNIFBuilderWorkshopFilePathSampleToolTip.SetToolTip( tbWorkshopNIFSampleFilePath, wsSample );
             
             if( GodObject.Master.AnnexTheCommonwealth.Loaded )
             {
                 var sdPreset = FullChildSelectedSubDivisionPreset;
-                var sdFilePrefix = tbSubDivisionFilePrefix.Text;
+                var sdFilePrefix = tbSubDivisionNIFFilePrefix.Text;
                 var sdName = _sampleSubDivision != null ? _sampleSubDivision.NameFromEditorID : "";
                 var sdNeighbourName = "Main";
                 var subBorders = _sampleSubDivision != null ? _sampleSubDivision.BorderEnablers : null;
@@ -619,14 +615,14 @@ namespace GUIBuilder.Windows
                 
                 var sdSample = NIFBuilder.Mesh.BuildFilePath(
                     tbMeshDirectory.Text,
-                    ( sdPreset != null ? sdPreset.MeshSubDirectory : tbSubDivisionMeshSubDirectory.Text ),
-                    ( sdPreset != null ? sdPreset.FilePrefix : tbSubDivisionFilePrefix.Text ),
+                    ( sdPreset != null ? sdPreset.MeshSubDirectory : tbSubDivisionNIFMeshSubDirectory.Text ),
+                    ( sdPreset != null ? sdPreset.FilePrefix : tbSubDivisionNIFFilePrefix.Text ),
                     sdName,
-                    ( sdPreset != null ? sdPreset.FileSuffix : tbSubDivisionFileSuffix.Text ), 1,
+                    ( sdPreset != null ? sdPreset.FileSuffix : tbSubDivisionNIFFileSuffix.Text ), 1,
                     sdNeighbourName, 1 );
                 
-                tbNIFBuilderSubDivisionSampleFilePath.Text = sdSample;
-                tbNIFBuilderSubDivisionFilePathSampleToolTip.SetToolTip( tbNIFBuilderSubDivisionSampleFilePath, sdSample );
+                tbNIFBuilderSubDivisionNIFSampleFilePath.Text = sdSample;
+                tbNIFBuilderSubDivisionFilePathSampleToolTip.SetToolTip( tbNIFBuilderSubDivisionNIFSampleFilePath, sdSample );
             }
             
             //DebugLog.CloseIndentLevel();
@@ -643,7 +639,6 @@ namespace GUIBuilder.Windows
             m.StartSyncTimer();
             var fStart = m.SyncTimerElapsed();
             
-            _reImportFile = null;
             _importData = null;
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
@@ -661,16 +656,16 @@ namespace GUIBuilder.Windows
                 var wsPreset = SelectedWorkshopPreset;
                 if( wsPreset == null )
                 {
-                    var createImportData = cbWorkshopCreateImportData.Checked;
+                    var createImportData = cbWorkshopNIFCreateImportData.Checked;
                     var subList = GUIBuilder.BorderBatch.CreateNIFs(
                         "Custom",
                         workshops,
-                        float.Parse( tbWorkshopGradientHeight.Text ),
-                        float.Parse( tbWorkshopGroundOffset.Text ),
-                        float.Parse( tbWorkshopGroundSink.Text ),
-                        targetPath, tbWorkshopTargetSuffix.Text,
-                        meshSuffix, tbWorkshopMeshSubDirectory.Text,
-                        tbWorkshopFilePrefix.Text, tbWorkshopFileSuffix.Text,
+                        float.Parse( tbWorkshopNIFGradientHeight.Text ),
+                        float.Parse( tbWorkshopNIFGroundOffset.Text ),
+                        float.Parse( tbWorkshopNIFGroundSink.Text ),
+                        targetPath, tbWorkshopNIFTargetSubDirectory.Text,
+                        meshSuffix, tbWorkshopNIFMeshSubDirectory.Text,
+                        tbWorkshopNIFFilePrefix.Text, tbWorkshopNIFFileSuffix.Text,
                         createImportData );
                     if( ( createImportData )&&( !subList.NullOrEmpty() ) )
                     {
@@ -709,17 +704,17 @@ namespace GUIBuilder.Windows
                     var sdPreset = SelectedSubDivisionPreset;
                     if( sdPreset == null )
                     {
-                        var createImportData = cbSubDivisionCreateImportData.Checked;
+                        var createImportData = cbSubDivisionNIFCreateImportData.Checked;
                         var subList = GUIBuilder.BorderBatch.CreateNIFs(
                             "Custom",
                             subDivisions,
-                            float.Parse( tbSubDivisionGradientHeight.Text ),
-                            float.Parse( tbSubDivisionGroundOffset.Text ),
-                            float.Parse( tbSubDivisionGroundSink.Text ),
-                            targetPath, tbSubDivisionTargetSuffix.Text,
-                            meshSuffix, tbSubDivisionMeshSubDirectory.Text,
-                            tbSubDivisionFilePrefix.Text, tbSubDivisionFileSuffix.Text,
-                            cbSubDivisionCreateImportData.Checked );
+                            float.Parse( tbSubDivisionNIFGradientHeight.Text ),
+                            float.Parse( tbSubDivisionNIFGroundOffset.Text ),
+                            float.Parse( tbSubDivisionNIFGroundSink.Text ),
+                            targetPath, tbSubDivisionNIFTargetSubDirectory.Text,
+                            meshSuffix, tbSubDivisionNIFMeshSubDirectory.Text,
+                            tbSubDivisionNIFFilePrefix.Text, tbSubDivisionNIFFileSuffix.Text,
+                            cbSubDivisionNIFCreateImportData.Checked );
                         if( ( createImportData )&&( !subList.NullOrEmpty() ) )
                         {
                             if( list == null )
@@ -885,7 +880,7 @@ namespace GUIBuilder.Windows
         void tbNIFBuilderNIFFilePathSampleMouseClick( object sender, MouseEventArgs e )
         {
             // Supress user changes to the filepath sample textbox
-            tbWorkshopSampleFilePath.Parent.Focus();
+            tbWorkshopNIFSampleFilePath.Parent.Focus();
         }
         
         #endregion
@@ -894,71 +889,22 @@ namespace GUIBuilder.Windows
         
         void btnImportNIFsClick( object sender, EventArgs e )
         {
-            GodObject.Windows.SetEnableState( false );
-            var reEnableGUI = true;
-            
-            if( !_importData.NullOrEmpty() )
+            if( _importData.NullOrEmpty() ) return;
+            var t = WorkerThreadPool.CreateWorker( THREAD_ImportNIFs, null );
+            if( t != null )
             {
-                reEnableGUI = false;
-                var t = WorkerThreadPool.CreateWorker( THREAD_ImportNIFs, null ).Start();
+                GodObject.Windows.SetEnableState( false );
+                t.Start();
             }
-            else if( !string.IsNullOrEmpty( _reImportFile ) )
-            {
-                var dlg = new OpenFileDialog();
-                dlg.Title = "BorderBatchWindow.ImportNIFsTitle".Translate();
-                dlg.Filter = string.Format( "{0}|NIFBuilder_BorderNIFs_*.txt|{1}|*.*", "BorderBatchWindow.ImportExportFilter".Translate(), "BorderBatchWindow.ImportAllFilter".Translate() );
-                dlg.InitialDirectory = GodObject.Paths.NIFBuilderOutput;
-                dlg.FileName = _reImportFile;
-                dlg.RestoreDirectory = true;
-                dlg.DereferenceLinks = true;
-                dlg.CheckFileExists = true;
-                dlg.CheckPathExists = true;
-                dlg.Multiselect = false;
-                if( dlg.ShowDialog() == DialogResult.OK )
-                {
-                    var fileToLoad = dlg.FileName; // Allow import files from anywhere
-                    if( !string.IsNullOrEmpty( fileToLoad ) )
-                    {
-                        DebugLog.WriteLine( "User selected: " + fileToLoad );
-                        // eg:
-                        //User selected: C:\Games\Steam\steamapps\common\Fallout 4\BorderBuilder\Output\NIFBuilder_BorderNIFs_AnnexTheCommonwealth_esp_29_09_2018_9_00_00_AM.txt
-                        
-                        // If the plugin loader returns true, the loader thread will re-enable the GUI
-                        //reEnableGUI &= !GodObject.Plugin.Load( fileToLoad );
-                        
-                        _reImportFile = fileToLoad;
-                        if( !ReImportFileValid )
-                        {
-                            _reImportFile = null;
-                        }
-                        else
-                        {
-                            reEnableGUI = false;
-                            WorkerThreadPool.CreateWorker( THREAD_ImportNIFs, null ).Start();
-                        }
-                        
-                    }
-                }
-                dlg.Dispose();
-            }
-            
-            if( reEnableGUI )
-                GodObject.Windows.SetEnableState( true );
         }
         
         void THREAD_ImportNIFs()
         {
-            if( !_importData.NullOrEmpty() )
-            {
-                bool tmp = false;
-                if( !FormImport.ImportBase.ShowImportDialog( _importData, true, ref tmp ) )
-                    GodObject.Windows.SetEnableState( true );
-            }
-            else if( !string.IsNullOrEmpty( _reImportFile ) )
-            {
-                if( !GUIBuilder.BorderBatch.ImportNIFs( _reImportFile, true ) )
-                    GodObject.Windows.SetEnableState( true );
-            }
+            if( _importData.NullOrEmpty() )
+                return;
+            bool tmp = false;
+            if( !FormImport.ImportBase.ShowImportDialog( _importData, true, ref tmp ) )
+                GodObject.Windows.SetEnableState( true );
         }
         
         #endregion
@@ -1009,9 +955,10 @@ namespace GUIBuilder.Windows
         static bool UpdatingPresetUI = false;
         static void UpdatePresetUI(
             List<NIFBuilder.Preset> presets, int index, ComboBox cbPresets,
+            TextBox nodeLength,
+            TextBox angleAllowance, TextBox slopeAllowance,
             TextBox targetSuffix, TextBox meshSubDirectory,
             TextBox filePrefix, TextBox fileSuffix,
-            TextBox nodeLength, TextBox slopeAllowance,
             TextBox gradientHeight, TextBox groundOffset, TextBox groundSink,
             CheckBox createImportData )
         {
@@ -1035,7 +982,8 @@ namespace GUIBuilder.Windows
                 SetPresetUIValue( filePrefix        , preset.FilePrefix       );
                 SetPresetUIValue( fileSuffix        , preset.FileSuffix       );
                 SetPresetUIValue( nodeLength        , preset.NodeLength       );
-                SetPresetUIValue( slopeAllowance    , preset.SlopeAllowance   );
+                SetPresetUIValue( angleAllowance    , (float)preset.AngleAllowance );
+                SetPresetUIValue( slopeAllowance    , (float)preset.SlopeAllowance );
                 SetPresetUIValue( gradientHeight    , preset.GradientHeight  , preset.SetOfPresets );
                 SetPresetUIValue( groundOffset      , preset.GroundOffset    , preset.SetOfPresets );
                 SetPresetUIValue( groundSink        , preset.GroundSink      , preset.SetOfPresets );
@@ -1053,16 +1001,17 @@ namespace GUIBuilder.Windows
                 NIFBuilder.Preset.WorkshopPresets,
                 index,
                 cbWorkshopPresets,
-                tbWorkshopTargetSuffix,
-                tbWorkshopMeshSubDirectory,
-                tbWorkshopFilePrefix,
-                tbWorkshopFileSuffix,
                 tbWorkshopNodeLength,
-                tbWorkshopSlopeAllowance,
-                tbWorkshopGradientHeight,
-                tbWorkshopGroundOffset,
-                tbWorkshopGroundSink,
-                cbWorkshopCreateImportData );
+                tbWorkshopNodeAngleAllowance,
+                tbWorkshopNodeSlopeAllowance,
+                tbWorkshopNIFTargetSubDirectory,
+                tbWorkshopNIFMeshSubDirectory,
+                tbWorkshopNIFFilePrefix,
+                tbWorkshopNIFFileSuffix,
+                tbWorkshopNIFGradientHeight,
+                tbWorkshopNIFGroundOffset,
+                tbWorkshopNIFGroundSink,
+                cbWorkshopNIFCreateImportData );
             UpdateNIFFilePathSampleInternal();
         }
         
@@ -1072,16 +1021,17 @@ namespace GUIBuilder.Windows
                 NIFBuilder.Preset.SubDivisionPresets,
                 index,
                 cbSubDivisionPresets,
-                tbSubDivisionTargetSuffix,
-                tbSubDivisionMeshSubDirectory,
-                tbSubDivisionFilePrefix,
-                tbSubDivisionFileSuffix,
                 tbSubDivisionNodeLength,
-                tbSubDivisionSlopeAllowance,
-                tbSubDivisionGradientHeight,
-                tbSubDivisionGroundOffset,
-                tbSubDivisionGroundSink,
-                cbSubDivisionCreateImportData );
+                tbSubDivisionNodeAngleAllowance,
+                tbSubDivisionNodeSlopeAllowance,
+                tbSubDivisionNIFTargetSubDirectory,
+                tbSubDivisionNIFMeshSubDirectory,
+                tbSubDivisionNIFFilePrefix,
+                tbSubDivisionNIFFileSuffix,
+                tbSubDivisionNIFGradientHeight,
+                tbSubDivisionNIFGroundOffset,
+                tbSubDivisionNIFGroundSink,
+                cbSubDivisionNIFCreateImportData );
             UpdateNIFFilePathSampleInternal();
         }
         

@@ -1,3 +1,5 @@
+GUIBuilder v1.0.4.15
+
 How to create a custom terrain following workshop border for your custom
 settlement.
 
@@ -22,8 +24,8 @@ In the Creation Kit:
     c)  Place markers at the outside corners and intersections of your build
         volumes and link them in a clockwise order with the
         "_WorkshopBorderLink" keyword you created in the first step (a).
-        NOTE:       It is important that your markers are in clockwise order,
-                    it is this order that correctly assigns the "inside"
+        NOTE:       It is important that your markers are linked in clockwise
+                    order, it is this order that correctly assigns the "inside"
                     (green) and "outside" (red) textures of the border.
         Pro-tip:    Create a new layer for your border nodes and set it as the
                     active layer, freeze all other layers to avoid accidental
@@ -132,22 +134,27 @@ Provided sample:
 
 Node Generation Parameters:
 
-    Folders and Files will be created in this format:
-        [Target Folder]\[Target Sub-Folder]\Meshes\[Target Mesh Folder]\[Mesh Sub-Folder]\[File Prefix][Workshop Name][File Suffix]01.nif
-        OR
-        [Target Folder]\[Target Sub-Folder]\Meshes\[Existing Border NIF file path name]
-        
     Node Length:
-        This is the "step size" for each node generated between the markers,
-        larger values will create NIF[s] with fewer vertexes and triangles but
-        will have less accurate terrain following.
+        This is the "step size" for each node generated between the border
+        markers placed and linked in the Creation Kit.  Larger node lengths
+        will create NIF[s] with fewer vertexes and triangles but may have
+        less accurate terrain following as fewer points on the terrain
+        (heightmaps for the worldspace) are looked at.
 
-    Slope Allowance:
-        In order to optimize the mesh, the slope between nodes is calculated
-        and if the difference between the slope of the nodes and the slope of
-        the previous nodes is less than or equal to this value the previous
-        node will be removed.
-        Slope is calculated as: delta Z / delta position length
+    Angle Allowance & Slope Allowance:
+        These two values control the node optimization where the nodes are
+        merged if the angle or the slope is within the allowances between the
+        current node and the two nodes after that.  If they are, the middle
+        node is merged into the first node. Both angle and slope calculations
+        look at the first and last nodes and, middle and last nodes.
+        Slope is calculated as: delta Z / delta (X, Y) length
+
+NIF Creation Parameters:
+
+    Create Import Data:
+        If checked, as the NIF[s] are created additional information will be
+        generated to update the plugin including creating/updating the static
+        object and object reference of the border itself for the workshop[s].
 
     Gradient Height:
         The height in game units of the gradient portion of the border NIF[s].
@@ -164,11 +171,26 @@ Node Generation Parameters:
         will be the base "bottom" of all nodes for the NIF and this is an
         adjustment to that value.
 
-    Create Import Data:
-        If checked, as the NIF[s] are created additional information will be
-        generated to update the plugin including creating/updating the static
-        object and object reference of the border itself for the workshop[s].
+    Folders and Files will be created in this format:
+        [Target Folder]\[Target Sub-Folder]\Meshes\[Target Mesh Folder]\[Mesh Sub-Folder]\[File Prefix][Workshop Name][File Suffix]01.nif
+        OR
+        [Target Folder]\[Target Sub-Folder]\Meshes\[Existing Border NIF file path name]
 
+Node Detection Parameters:
+
+    Restrict to:
+        This restricts loading every form (of the appropriate type) into the
+        dropdown control to only the working file.
+
+    Keywords & Static Markers:
+        These are the keywords in either all the loaded plugins or just the
+        working file.  These should be set to the forms you created in steps
+        (a) and (b) of the Creation Kit portion of this document.
+        
+        If a workspace has been created then only these forms are loaded when
+        the workspace is loaded in the future.
+        
+        devnote: TODO: Toggling "Restrict To" will force all the appropriate forms to load.  [devnote: As it applies to workspaces, currently does not load forms]
 
 
 HELP!  It didn't create any NIFs for me!
@@ -187,8 +209,7 @@ HELP!  It didn't create any NIFs for me!
     If it's not something you overlooked, an ERROR or WARNING is present or,
     GUIBuilder crashed on you then please submit a bug report in the github
     issue tracker with steps to reproduce the issue along with the zipped logs
-    with the date-time that show the error and a copy of the mod that caused
-    the issue.
+    with the date-time that show the error.
     
     Issue tracker:
     https://github.com/ForsakenShell/GUI-Builder/issues

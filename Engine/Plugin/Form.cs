@@ -668,7 +668,8 @@ namespace Engine.Plugin
             
             RecalcHandleIndexes();
             result = true;
-            
+            Disposed = false;
+
         localAbort:
             //DebugLog.CloseIndentLevel( "_Handles", _Handles );
             return result;

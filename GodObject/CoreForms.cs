@@ -4,6 +4,8 @@
  * Core forms used by GUIBuilder, these forms are loaded as soon as the masters/plugins are loaded.
  * 
  */
+//#define INCLUDE_SCRIPT_THREADING_FORMS
+
 using System;
 
 using Master = GodObject.Master;
@@ -15,6 +17,9 @@ namespace GodObject
     
     public static class CoreForms
     {
+
+        #region Core Forms by EditorID
+        
         // TODO: FIX THESE CONSTANTS FOR ACTUAL GAME SETTING FORMS AND MOVE THEM INTO THEIR PROPER PLACE!
         public const float FO4_fSandboxCylinderBottom   =  -100.0f;
         public const float FO4_fSandboxCylinderTop      =  1280.0f;
@@ -22,7 +27,10 @@ namespace GodObject
         public const float ATC_fSandboxCylinderTop      =  2560.0f;
         
         public static Engine.Plugin.Forms.Container WorkshopWorkbench                       = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x000C1AEB );
-        
+        public static Engine.Plugin.Forms.Container WorkshopWorkbenchInterior               = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x0012E2C4 );
+        public static Engine.Plugin.Forms.Container WorkshopWorkbenchNonSettlement          = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x00246F86 );
+        public static Engine.Plugin.Forms.Container WorkshopWorkbenchWireOnly               = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x000C1AEC );
+
         public static Engine.Plugin.Forms.Keyword WorkshopLinkedBuildAreaEdge               = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x001A0DD8 );
         public static Engine.Plugin.Forms.Keyword WorkshopLinkedPrimitive                   = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x000B91E6 );
         public static Engine.Plugin.Forms.Keyword WorkshopLinkSandbox                       = new Engine.Plugin.Forms.Keyword    ( Master.Filename.Fallout4      , 0x0022B5A7 );
@@ -39,14 +47,17 @@ namespace GodObject
         public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_BorderEnabler              = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x000A5A22 );
         public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_SpawnMarker                = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x000C4DBD );
         public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_SandboxVolume              = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BD4 );
+
+        #if INCLUDE_SCRIPT_THREADING_FORMS
+
+        public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_ForcedPersistManager      = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110B8B );
+        public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_ForcedPersistScanner      = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BEE );
+        public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_EnhancedSandboxScanner    = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BEF );
+        public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_UpdateSettlementOnLoad    = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BF1 );
+        public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_UpdateSubDivisionOnLoad   = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BF2 );
         
-        // Script Threading
-        //public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_ForcedPersistManager      = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110B8B );
-        //public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_ForcedPersistScanner      = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BEE );
-        //public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_EnhancedSandboxScanner    = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BEF );
-        //public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_UpdateSettlementOnLoad    = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BF1 );
-        //public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_UpdateSubDivisionOnLoad   = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BF2 );
-        
+        #endif
+
         public static Engine.Plugin.Forms.Keyword ESM_ATC_KYWD_LinkedWorkshop               = new Engine.Plugin.Forms.Keyword    ( Master.Filename.AnnexTheCommonwealth   , 0x00048D56 );
         public static Engine.Plugin.Forms.Keyword ESM_ATC_KYWD_LinkedSettlement             = new Engine.Plugin.Forms.Keyword    ( Master.Filename.AnnexTheCommonwealth   , 0x00048D58 );
         public static Engine.Plugin.Forms.Keyword ESM_ATC_KYWD_LinkedBorder                 = new Engine.Plugin.Forms.Keyword    ( Master.Filename.AnnexTheCommonwealth   , 0x00048D59 );
@@ -81,7 +92,10 @@ namespace GodObject
             // Fallout 4
             
             WorkshopWorkbench,
-            
+            WorkshopWorkbenchInterior,
+            WorkshopWorkbenchNonSettlement,
+            WorkshopWorkbenchWireOnly,
+
             WorkshopLinkedBuildAreaEdge,
             WorkshopLinkedPrimitive,
             WorkshopLinkSandbox,
@@ -100,14 +114,17 @@ namespace GodObject
             ESM_ATC_ACTI_BorderEnabler,
             ESM_ATC_ACTI_SpawnMarker,
             ESM_ATC_ACTI_SandboxVolume,
+
+            #if INCLUDE_SCRIPT_THREADING_FORMS
             
-            // Script Threading
-            //ESM_ATC_ACTI_ForcedPersistManager,
-            //ESM_ATC_ACTI_ForcedPersistScanner,
-            //ESM_ATC_ACTI_EnhancedSandboxScanner,
-            //ESM_ATC_ACTI_UpdateSettlementOnLoad,
-            //ESM_ATC_ACTI_UpdateSubDivisionOnLoad,
+            ESM_ATC_ACTI_ForcedPersistManager,
+            ESM_ATC_ACTI_ForcedPersistScanner,
+            ESM_ATC_ACTI_EnhancedSandboxScanner,
+            ESM_ATC_ACTI_UpdateSettlementOnLoad,
+            ESM_ATC_ACTI_UpdateSubDivisionOnLoad,
             
+            #endif
+
             ESM_ATC_KYWD_LinkedWorkshop,
             ESM_ATC_KYWD_LinkedSettlement,
             ESM_ATC_KYWD_LinkedBorder,
@@ -138,13 +155,69 @@ namespace GodObject
             ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ
             
         };
-        
-        static Engine.Plugin.Forms.Static[] _SubDivisionEdgeFlags = {
+
+        #endregion
+
+        #region Workshops
+
+        public static Engine.Plugin.Forms.Container[] WorkshopWorkbenches =
+        {
+            WorkshopWorkbench,
+            WorkshopWorkbenchInterior,
+            WorkshopWorkbenchNonSettlement,
+            WorkshopWorkbenchWireOnly
+        };
+
+        public static bool IsWorkshopWorkbench( uint formID )
+        {
+            if( !Engine.Plugin.Constant.ValidFormID( formID ) )
+                return false;
+            foreach( var workbench in WorkshopWorkbenches )
+                if( workbench.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return true;
+            return false;
+        }
+
+        public static Engine.Plugin.Forms.Container GetWorkshopWorkbench( uint formID )
+        {
+            if( !Engine.Plugin.Constant.ValidFormID( formID ) )
+                return null;
+            foreach( var workbench in WorkshopWorkbenches )
+                if( workbench.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return workbench;
+            return null;
+        }
+
+        #endregion
+
+        #region Sub-Division Edge Flag Markers
+
+        public static Engine.Plugin.Forms.Static[] SubDivisionEdgeFlags = {
             ESM_ATC_STAT_SubDivisionEdgeFlag,
             ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ
         };
-        
-        static Engine.Plugin.Forms.Keyword[] _SubDivisionEdgeFlagKeywords = {
+
+        public static bool IsSubDivisionEdgeFlag( uint formID )
+        {
+            if( !Engine.Plugin.Constant.ValidFormID( formID ) )
+                return false;
+            foreach( var baseFlag in SubDivisionEdgeFlags )
+                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return true;
+            return false;
+        }
+
+        public static Engine.Plugin.Forms.Static GetSubDivisionEdgeFlag( uint formID )
+        {
+            if( !Engine.Plugin.Constant.ValidFormID( formID ) )
+                return null;
+            foreach( var baseFlag in SubDivisionEdgeFlags )
+                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return baseFlag;
+            return null;
+        }
+
+        #endregion
+
+        #region Sub-Division Edge Flag Keywords
+
+        public static Engine.Plugin.Forms.Keyword[] SubDivisionEdgeFlagKeywords = {
             ESM_ATC_KYWD_SubDivision_EdgeLink_A,
             ESM_ATC_KYWD_SubDivision_EdgeLink_B,
             ESM_ATC_KYWD_SubDivision_EdgeLink_C,
@@ -154,48 +227,32 @@ namespace GodObject
             ESM_ATC_KYWD_SubDivision_EdgeLink_G,
             ESM_ATC_KYWD_SubDivision_EdgeLink_H
         };
-        
-        public static Engine.Plugin.Forms.Static SubDivisionEdgeFlag( uint formID )
-        {
-            if( !Engine.Plugin.Constant.ValidFormID( formID ) )
-                return null;
-            foreach( var baseFlag in _SubDivisionEdgeFlags )
-                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return baseFlag;
-            return null;
-        }
-        
-        public static bool IsSubDivisionEdgeFlag( uint formID )
-        {
-            if( !Engine.Plugin.Constant.ValidFormID( formID ) )
-                return false;
-            foreach( var baseFlag in _SubDivisionEdgeFlags )
-                if( baseFlag.GetFormID( Engine.Plugin.TargetHandle.Master ) == formID ) return true;
-            return false;
-        }
-        
+
         public static bool IsSubDivisionEdgeFlagKeyword( uint formID )
         {
             if( !Engine.Plugin.Constant.ValidFormID( formID ) )
                 return false;
-            foreach( var sefk in _SubDivisionEdgeFlagKeywords )
+            foreach( var sefk in SubDivisionEdgeFlagKeywords )
                 if( formID == sefk.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                     return true;
             return false;
         }
         
-        public static Engine.Plugin.Forms.Keyword SubDivisionEdgeFlagKeyword( uint formID )
+        public static Engine.Plugin.Forms.Keyword GetSubDivisionEdgeFlagKeyword( uint formID )
         {
             if( !Engine.Plugin.Constant.ValidFormID( formID ) )
                 return null;
-            foreach( var sefk in _SubDivisionEdgeFlagKeywords )
+            foreach( var sefk in SubDivisionEdgeFlagKeywords )
                 if( formID == sefk.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                     return sefk;
             return null;
         }
-        
+
+        #endregion
+
     }
-    
+
     #endregion
-    
+
 }
 

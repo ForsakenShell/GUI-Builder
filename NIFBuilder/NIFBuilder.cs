@@ -55,7 +55,8 @@ public static partial class NIFBuilder
             Vector3f originalMeshPosition,
             uint[] insideColours,
             uint[] outsideColours,
-            List<Engine.Plugin.Form> originalForms )
+            List<Engine.Plugin.Form> originalForms,
+            bool workshopBorder )
     {
         DebugLog.OpenIndentLevel( new string [] { "NIFBuilder", "CreateNIFs()",
             Mesh.BuildTargetPath( targetPath, targetSuffix ),
@@ -181,8 +182,13 @@ public static partial class NIFBuilder
                     var keys = string.IsNullOrEmpty( forcedNIFFile )
                         ? Mesh.MatchKeys( location, neighbour, group.BorderIndex, group.NIFIndex )
                         : Mesh.MatchKeys( group.Mesh.nifFile );
-                    
+
                     // Create an import for the Static Object
+                    
+                    uint recordFlags = workshopBorder
+                        ? GUIBuilder.FormImport.ImportBorderStatic.F4_BORDER_RECORD_FLAGS
+                        : GUIBuilder.FormImport.ImportBorderStatic.ATC_BORDER_RECORD_FLAGS;
+
                     var orgStat = group.BestStaticFormFromOriginalsFor( originalForms, keys, true );
                     var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_None : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
                     var statEditorID = group.Mesh.nifFile;
@@ -190,12 +196,17 @@ public static partial class NIFBuilder
                     var maxBounds = group.MaxBounds; // the elevation differences from the center (placement)
                     minBounds.Z -= (int)groundSink;  // point, so add the appropriate offsets for the mesh
                     maxBounds.Z += (int)( groundOffset + gradientHeight );
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, minBounds, maxBounds ) );
                     
+                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, minBounds, maxBounds, recordFlags ) );
+
                     // Create an import for the Object Reference
-                    var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
+                    recordFlags = workshopBorder
+                        ? GUIBuilder.FormImport.ImportBorderReference.F4_BORDER_RECORD_FLAGS
+                        : GUIBuilder.FormImport.ImportBorderReference.ATC_BORDER_RECORD_FLAGS;
+                    
+                        var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
                     var cell = worldspace.Cells.GetByGrid( group.Cell );
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderReference( orgRefr, statFormID, statEditorID, worldspace, cell, group.Placement, enablerReference, linkRef, linkKeyword, layer ) );
+                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderReference( orgRefr, statFormID, statEditorID, worldspace, cell, group.Placement, enablerReference, linkRef, linkKeyword, layer, recordFlags ) );
                 }
             }
             else

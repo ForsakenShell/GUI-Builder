@@ -109,18 +109,20 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.TargetDirectory>Target Folder</BorderBatchWindow.TargetDirectory>
     <BorderBatchWindow.Tab.SubDivisions>Sub-Divisions</BorderBatchWindow.Tab.SubDivisions>
     <BorderBatchWindow.Tab.Workshops>Workshops</BorderBatchWindow.Tab.Workshops>
-    <BorderBatchWindow.NodesAndNIFs>Node and NIF Generation</BorderBatchWindow.NodesAndNIFs>
-    <BorderBatchWindow.NodesAndNIFs.Preset>Preset</BorderBatchWindow.NodesAndNIFs.Preset>
-    <BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>Target Sub-Folder</BorderBatchWindow.NodesAndNIFs.TargetSubDirectory>
-    <BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>Mesh Sub-Folder</BorderBatchWindow.NodesAndNIFs.MeshSubDirectory>
-    <BorderBatchWindow.NodesAndNIFs.FilePrefix>File Prefix</BorderBatchWindow.NodesAndNIFs.FilePrefix>
-    <BorderBatchWindow.NodesAndNIFs.FileSuffix>File Suffix</BorderBatchWindow.NodesAndNIFs.FileSuffix>
-    <BorderBatchWindow.NodesAndNIFs.NodeLength>Node Length</BorderBatchWindow.NodesAndNIFs.NodeLength>
-    <BorderBatchWindow.NodesAndNIFs.SlopeAllowance>Slope Allowance</BorderBatchWindow.NodesAndNIFs.SlopeAllowance>
-    <BorderBatchWindow.NodesAndNIFs.GradientHeight>Gradient Height</BorderBatchWindow.NodesAndNIFs.GradientHeight>
-    <BorderBatchWindow.NodesAndNIFs.GroundOffset>Ground Offset</BorderBatchWindow.NodesAndNIFs.GroundOffset>
-    <BorderBatchWindow.NodesAndNIFs.GroundSink>Ground Sink</BorderBatchWindow.NodesAndNIFs.GroundSink>
-    <BorderBatchWindow.NodesAndNIFs.CreateImports>Create Import Data</BorderBatchWindow.NodesAndNIFs.CreateImports>
+    <BorderBatchWindow.Preset>Preset</BorderBatchWindow.Preset>
+    <BorderBatchWindow.Node.Parameters>Node Parameters</BorderBatchWindow.Node.Parameters>
+    <BorderBatchWindow.Node.Length>Node Length</BorderBatchWindow.Node.Length>
+    <BorderBatchWindow.Node.AngleAllowance>Angle Allowance</BorderBatchWindow.Node.AngleAllowance>
+    <BorderBatchWindow.Node.SlopeAllowance>Slope Allowance</BorderBatchWindow.Node.SlopeAllowance>
+    <BorderBatchWindow.NIF.Parameters>NIF Parameters</BorderBatchWindow.NIF.Parameters>
+    <BorderBatchWindow.NIF.CreateImports>Create Import Data</BorderBatchWindow.NIF.CreateImports>
+    <BorderBatchWindow.NIF.GradientHeight>Gradient Height</BorderBatchWindow.NIF.GradientHeight>
+    <BorderBatchWindow.NIF.GroundOffset>Ground Offset</BorderBatchWindow.NIF.GroundOffset>
+    <BorderBatchWindow.NIF.GroundSink>Ground Sink</BorderBatchWindow.NIF.GroundSink>
+    <BorderBatchWindow.NIF.TargetSubDirectory>Target Sub-Folder</BorderBatchWindow.NIF.TargetSubDirectory>
+    <BorderBatchWindow.NIF.MeshSubDirectory>Mesh Sub-Folder</BorderBatchWindow.NIF.MeshSubDirectory>
+    <BorderBatchWindow.NIF.FilePrefix>File Prefix</BorderBatchWindow.NIF.FilePrefix>
+    <BorderBatchWindow.NIF.FileSuffix>File Suffix</BorderBatchWindow.NIF.FileSuffix>
     <BorderBatchWindow.NodeDetection>Node Detection</BorderBatchWindow.NodeDetection>
     <BorderBatchWindow.NodeDetection.Restrict>Restrict to</BorderBatchWindow.NodeDetection.Restrict>
     <BorderBatchWindow.NodeDetection.Keywords>Keywords</BorderBatchWindow.NodeDetection.Keywords>
@@ -209,6 +211,8 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <NIFBuilder.Preset.Custom>Custom</NIFBuilder.Preset.Custom>
     <NIFBuilder.Preset.VanillaWorkshop>Vanilla Workshop</NIFBuilder.Preset.VanillaWorkshop>
     <NIFBuilder.Preset.VanillaWorkshopGS>Vanilla Workshop w/GS</NIFBuilder.Preset.VanillaWorkshopGS>
+    <NIFBuilder.Preset.VanillaWorkshopLP>Vanilla Workshop Low Poly</NIFBuilder.Preset.VanillaWorkshopLP>
+    <NIFBuilder.Preset.VanillaWorkshopGSLP>Vanilla Workshop w/GS Low Poly</NIFBuilder.Preset.VanillaWorkshopGSLP>
     <NIFBuilder.Preset.ATCTall>Tall</NIFBuilder.Preset.ATCTall>
     <NIFBuilder.Preset.ATCMedium>Medium</NIFBuilder.Preset.ATCMedium>
     <NIFBuilder.Preset.ATCSmall>Vanilla Workshop</NIFBuilder.Preset.ATCSmall>

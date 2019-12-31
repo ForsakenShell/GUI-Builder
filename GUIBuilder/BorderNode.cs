@@ -308,8 +308,27 @@ namespace GUIBuilder
         public static void DumpGroupNodes( List<BorderNode> nodes, string s )
         {
             DebugLog.OpenIndentLevel( s );
-            for( int i = 0; i < nodes.Count; i++ )
-                DebugLog.WriteLine( "node[ " + i.ToString() + " ] = " + nodes[ i ].ToString() );
+            if( !nodes.NullOrEmpty() )
+            {
+                for( int i = 0; i < nodes.Count; i++ )
+                {
+                    //DebugLog.WriteLine( "node[ " + i.ToString() + " ] = " + nodes[ i ].ToString() );
+                    var i1 = i == nodes.Count - 1 ? 0 : i + 1;
+                    var r0 = nodes[ i ].P;
+                    var r1 = nodes[ i1 ].P;
+                    var dist = (double)( r1 - r0 ).Length2D;
+                    var slope = ( (double)r1.Z - (double)r0.Z ) / dist;
+                    var angle = Maths.Geometry.Angle( r0.X, r0.Y, r1.X, r1.Y );
+                    DebugLog.WriteLine( string.Format(
+                        "node[ {0} ] = {1} :: To [ {2} ] = Length = {3}, Slope = {4}, Angle = {5}", i,
+                        nodes[ i ].ToString(),
+                        i1,
+                        dist.ToString(),
+                        slope.ToString(),
+                        angle.ToString()
+                        ) );
+                }
+            }
             DebugLog.CloseIndentLevel();
         }
         
@@ -497,8 +516,8 @@ namespace GUIBuilder
     {
         
         public const float MIN_NODE_LENGTH = 4.0f;
-        
-        public const float MIN_SLOPE_ALLOWANCE = 0.0001f;
+        public const float MIN_ANGLE_ALLOWANCE = 1.5f;
+        public const float MIN_SLOPE_ALLOWANCE = 0.001f;
         
         public enum NodeType
         {
@@ -550,7 +569,7 @@ namespace GUIBuilder
                 Type.ToString() );
         }
         
-        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<EdgeFlag> flags, float approximateNodeLength, float slopeAllowance, Engine.Plugin.Forms.Static forcedZ )
+        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<EdgeFlag> flags, float approximateNodeLength, double angleAllowance, double slopeAllowance, Engine.Plugin.Forms.Static forcedZ )
         {
             if( ( worldspace == null )||( flags.NullOrEmpty() ) )
                 return null;
@@ -563,10 +582,10 @@ namespace GUIBuilder
                 
                 refPoints.Add( p );
             }
-            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, slopeAllowance );
+            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance );
         }
         
-        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<Engine.Plugin.Forms.ObjectReference> references, float approximateNodeLength, float slopeAllowance, Engine.Plugin.Forms.Static forcedZ )
+        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<Engine.Plugin.Forms.ObjectReference> references, float approximateNodeLength, double angleAllowance, double slopeAllowance, Engine.Plugin.Forms.Static forcedZ )
         {
             if( ( worldspace == null )||( references.NullOrEmpty() ) )
                 return null;
@@ -579,22 +598,37 @@ namespace GUIBuilder
                 
                 refPoints.Add( p );
             }
-            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, slopeAllowance );
+            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance );
         }
-        
-        static void DumpReferencePoints( IList<Vector3f> refPoints, string s )
+
+        static void DumpReferencePoints( IList<Vector3f> refPoints, string extra )
         {
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.BorderNode", "DumpReferencePoints()", refPoints.Count.ToString(), s } );
-            for( int i = 0; i < refPoints.Count; i++ )
-                DebugLog.WriteLine( string.Format(
-                    "\trefPoint[ {0} ] = ( {1}, {2} )", i,
-                    refPoints[ i ].WorldspaceToCellGrid().ToString(),
-                    refPoints[ i ].ToString()
-                    ) );
+            DebugLog.OpenIndentLevel( extra );
+            if( !refPoints.NullOrEmpty() )
+            {
+                for( int i = 0; i < refPoints.Count; i++ )
+                {
+                    var i1 = i == refPoints.Count - 1 ? 0 : i + 1;
+                    var r0 = refPoints[ i ];
+                    var r1 = refPoints[ i1 ];
+                    var dist = (double)( r1 - r0 ).Length2D;
+                    var slope = ( (double)r1.Z - (double)r0.Z ) / dist;
+                    var angle = Maths.Geometry.Angle( r0.X, r0.Y, r1.X, r1.Y );
+                    DebugLog.WriteLine( string.Format(
+                        "refPoint[ {0} ] = ( {1}, {2} ) :: To [ {3} ] = Length = {4}, Slope = {5}, Angle = {6}", i,
+                        refPoints[ i ].WorldspaceToCellGrid().ToString(),
+                        refPoints[ i ].ToString(),
+                        i1,
+                        dist.ToString(),
+                        slope.ToString(),
+                        angle.ToString()
+                        ) );
+                }
+            }
             DebugLog.CloseIndentLevel();
         }
         
-        static List<BorderNode> GenerateBorderNodes( GodObject.WorldspaceDataPool.PoolEntry wpEntry, IList<Vector3f> refPoints, float nodeLength, float slopeAllowance )
+        static List<BorderNode> GenerateBorderNodes( GodObject.WorldspaceDataPool.PoolEntry wpEntry, IList<Vector3f> refPoints, float nodeLength, double angleAllowance, double slopeAllowance )
         {
             DebugLog.OpenIndentLevel( "GUIBuilder.BorderNode :: GenerateBorderNodes()" );
             List<BorderNode> nodes = null;
@@ -618,18 +652,25 @@ namespace GUIBuilder
             }
             
             nodeLength     = nodeLength     < BorderNode.MIN_NODE_LENGTH     ? BorderNode.MIN_NODE_LENGTH     : nodeLength;
+            angleAllowance = angleAllowance < BorderNode.MIN_ANGLE_ALLOWANCE ? BorderNode.MIN_ANGLE_ALLOWANCE : angleAllowance;
             slopeAllowance = slopeAllowance < BorderNode.MIN_SLOPE_ALLOWANCE ? BorderNode.MIN_SLOPE_ALLOWANCE : slopeAllowance;
-            
-            DumpReferencePoints( refPoints, string.Format( "nodeLength = {0} :: slopeAllowance = {1}", nodeLength, slopeAllowance ) );
-            
+
+            //DumpReferencePoints( refPoints, "Input Marker Points" );
+
+            // Generate all nodes first
+
+            DebugLog.OpenIndentLevel( "Calculating nodes from reference objects and terrain" );
+
             var lowestFloor = float.MaxValue;
             var rCount = refPoints.Count - 1;
             nodes = new List<BorderNode>();
             for( int i = 0; i < rCount; i++ )
             {
+                DebugLog.OpenIndentLevel( string.Format( "Starting scan of ref marker {0} -> {1}", i, i + 1 ) );
+
                 // Reference points
-                var rp0 = refPoints[ i     ];
-                var rp1 = refPoints[ i + 1 ];
+                var rp0 = new Vector3f( refPoints[ i     ] );
+                var rp1 = new Vector3f( refPoints[ i + 1 ] );
                 
                 // Does this segment have forced Z?
                 var forcedZRef = ( rp0.Z > float.MinValue );
@@ -657,95 +698,69 @@ namespace GUIBuilder
                     wh = wpEntry.WaterHeightAtWorldPos( lastPos.X, lastPos.Y );
                     lastPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
                 }
-                
+
                 // Add node from current position
-                var refNode = new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.MidPoint );
-                nodes.Add( refNode );
+                var debugStartNodeCount = nodes.Count;
+                nodes.Add( new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.StartPoint ) );
                 
                 // Stride to next reference point
-                var lastNode = refNode;
-                for( int j = 0; j < chunks - 1; j++ )
+                for( int j = 0; j < chunks; j++ )
                 {
                     // Next position and reference point
-                    var curPos = lastPos + stride;
-                    lh = wpEntry.LandHeightAtWorldPos( curPos.X, curPos.Y );
+                    var newPos = lastPos + stride;
+                    lh = wpEntry.LandHeightAtWorldPos( newPos.X, newPos.Y );
                     if( lh < lowestFloor ) lowestFloor = lh;
                     if( !forcedZStride )
                     {   // Not between forced Z markers, follow terrain
-                        wh = wpEntry.WaterHeightAtWorldPos( curPos.X, curPos.Y );
-                        curPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
+                        wh = wpEntry.WaterHeightAtWorldPos( newPos.X, newPos.Y );
+                        newPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
                     }
-                    
-                    // Get slopes of the last node to the reference node as well as the current node
-                    // to the reference node, if they are the same (or close enough) then update the
-                    // last node with the current node data; this will eliminate extraneous nodes.
-                    var addThisNode = true;
-                    var updateRefNode = false;
-                    if( refNode != lastNode ) // Don't try to merge a reference node with itself
-                    {
-                        var lrLength = ( lastNode.P2 - refNode.P2 ).Length;
-                        var lrSlope = ( lastNode.P.Z - refNode.P.Z ) / lrLength;
-                        
-                        var curP2 = new Vector2f( curPos );
-                        var crLength = ( curP2 - refNode.P2 ).Length;
-                        var crSlope = ( curPos.Z - refNode.P.Z ) / crLength;
-                        
-                        if( lrSlope.ApproximatelyEquals( crSlope, slopeAllowance ) )
-                            addThisNode = false;
-                        else
-                            updateRefNode = true;
-                    }
-                    
-                    if( addThisNode )
-                    {
-                        // Set the reference node to the last node and add a new node from current position
-                        if( updateRefNode ) refNode = lastNode;
-                        lastNode = new BorderNode( curPos.WorldspaceToCellGrid(), curPos, lh, NodeType.MidPoint );
-                        nodes.Add( lastNode );
-                    }
-                    else
-                    {
-                        // Update the last nodes position and floor, maintaining the reference node
-                        lastNode.P = new Vector3f( curPos );
-                        lastNode.CellGrid = curPos.WorldspaceToCellGrid();
-                        lastNode.Floor = lh;
-                    }
+
+                    nodes.Add( new BorderNode( newPos.WorldspaceToCellGrid(), newPos, lh,
+                        j == chunks - 1
+                        ? NodeType.EndPoint
+                        : NodeType.MidPoint ) );
                     
                     // Current position = Next position
-                    lastPos = curPos;
-                }
-            }
-            {   // Add last reference point
-                var rp0 = refPoints[ rCount ];
-                
-                // Does reference have forced Z?
-                var forcedZRef = ( rp0.Z > float.MinValue );
-                
-                var lastPos = new Vector3f( rp0 );
-                float lh = wpEntry.LandHeightAtWorldPos( lastPos.X, lastPos.Y );
-                if( lh < lowestFloor ) lowestFloor = lh;
-                if( !forcedZRef )
-                {   // Not forced Z reference, use terrain
-                    var wh = wpEntry.WaterHeightAtWorldPos( lastPos.X, lastPos.Y );
-                    lastPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
+                    lastPos = newPos;
                 }
                 
-                // Add node from last position
-                var refNode = new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.MidPoint );
-                nodes.Add( refNode );
-            }
-            //BorderNodeGroup.DumpGroupNodes( nodes, "Generated nodes from linked refs" );
-            
-            // Check if the first and last refs are the same for a complete loop
-            var nCount = nodes.Count;
-            if( MergeNodes( nodes, 0, nCount - 1, BorderNode.MIN_NODE_LENGTH, NodeType.MidPoint ) )
-                nCount--;   // Merged, update the node count
-            else
-            {   // First and last nodes are different points
-                nodes[ 0 ].Type = NodeType.StartPoint;
-                nodes[ nCount - 1 ].Type = NodeType.EndPoint;
+                var debugEndNodeCount = nodes.Count;
+                DebugLog.WriteLine( string.Format( "Added {0} nodes = {1} - {2}", ( debugEndNodeCount - debugStartNodeCount ), debugStartNodeCount, ( debugEndNodeCount - 1 ) ) );
+                DebugLog.CloseIndentLevel();
             }
             
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Generated Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2}", nodeLength, angleAllowance, slopeAllowance ) );
+            DebugLog.CloseIndentLevel();
+
+            DebugLog.OpenIndentLevel( "Optimizing nodes from position, angle and slope" );
+
+            // Merge any nodes that have the same 2D position
+            for( int i = 0; i < nodes.Count; )
+            {
+                var i1 = ( i + 1 ) % nodes.Count;
+                if( !PositionMerge( nodes, i, i1, BorderNode.MIN_NODE_LENGTH ) )
+                    i++;
+            }
+
+            // Check the first and last points are propery mid points or start and end points
+            if( nodes[ nodes.Count - 1 ].Type == NodeType.MidPoint )
+                nodes[ 0 ].Type = NodeType.MidPoint;
+            if( nodes[ 0 ].Type == NodeType.StartPoint )
+                nodes[ nodes.Count - 1 ].Type = NodeType.EndPoint;
+
+            // Merge nodes for slope if they are colinear
+            for( int i = 0; i < nodes.Count; )
+            {
+                var i1 = ( i + 1 ) % nodes.Count;
+                var i2 = ( i + 2 ) % nodes.Count;
+                if( !SlopeMerge( nodes, i, i1, i2, angleAllowance, slopeAllowance ) )
+                    i++;
+            }
+
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Optimized Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2}", nodeLength, angleAllowance, slopeAllowance ) );
+            DebugLog.CloseIndentLevel();
+
             //BorderNodeGroup.DumpGroupNodes( nodes, "Merged list from generated nodes from linked refs" );
             // If there's not enough nodes to generate a mesh with, return nothing
             if( nodes.Count < 2 ) return null;
@@ -753,33 +768,71 @@ namespace GUIBuilder
             // Update all the node floors with the lowest value for the entire mesh
             foreach( var node in nodes )
                 node.Floor = lowestFloor;
-            
-        localAbort:
-            DebugLog.CloseIndentLevel( "nodes", nodes );
+
+            localAbort:
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Final Node Set :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2}", nodeLength, angleAllowance, slopeAllowance ) );
+            //DebugLog.CloseIndentLevel( "nodes", nodes );
+            DebugLog.CloseIndentLevel();
             return nodes;
         }
-        
-        static bool MergeNodes( List<BorderNode> list, int dest, int src, float tollerance, NodeType newType )
+
+        static bool SlopeMerge( List<BorderNode> list, int i0, int i1, int i2, double angleAllowance, double slopeAllowance )
         {
-            var n0 = list[ dest ];
-            var n1 = list[ src ];
-            var result = MergeNodeData( n0, n1, tollerance, newType );
-            if( result )
-                list.RemoveAt( src );    // Now remove the redundant node
-            return result;
+            var n0 = list[ i0 ];
+            var n1 = list[ i1 ];
+            var n2 = list[ i2 ];
+
+            // Can only slope merge if the middle point is actually a mid point
+            if( n1.Type != NodeType.MidPoint )
+                return false;       // ...Did nothing
+
+            // Are they co-linear?
+            var angle02 = Maths.Geometry.Angle( n0.P.X, n0.P.Y, n2.P.X, n2.P.Y );
+            var angle12 = Maths.Geometry.Angle( n1.P.X, n1.P.Y, n2.P.X, n2.P.Y );
+            if( !angle02.ApproximatelyEquals( angle12, angleAllowance ) )
+                return false;       // ...Did nothing
+
+            // Now compare slopes
+            var len02 = (double)( n0.P2 - n2.P2 ).Length;
+            var slope02 = ( (double)n0.P.Z - (double)n2.P.Z ) / len02;
+
+            var len12 = (double)( n1.P2 - n2.P2 ).Length;
+            var slope12 = ( (double)n1.P.Z - (double)n2.P.Z ) / len12;
+
+            if( !slope02.ApproximatelyEquals( slope12, slopeAllowance ) )
+                return false;       // ...Did nothing
+
+            // i0.i2 and i1.i2 share the same slope (or close enough);
+            // Use the lower floor for i0 and remove i1
+            n0.Floor = Math.Min( n0.Floor, n1.Floor );
+
+            list.RemoveAt( i1 );
+            DebugLog.WriteLine( string.Format( "Merged node {0} into {1} for slope and angle with {2} :: slopes = {3} ? {4} :: angles = {5} ? {6}", i1, i0, i2, slope02, slope12, angle02, angle12 ) );
+            return true;            // Removed a node
         }
-        
-        static bool MergeNodeData( BorderNode dest, BorderNode src, float tollerance, NodeType newType )
+
+        static bool PositionMerge( List<BorderNode> list, int i0, int i1, float tollerance )
         {
-            // Compare by tollerance to account for floating point inaccuracies of the last stride between reference points
-            if( ( dest.P2 - src.P2 ).Length > tollerance )
-                return false;       //  ...Do nothing
-            // dest and src node share the same x,y (or close enough); update dest data from src
-            // Use the higher z pos and lower floor then update the node type
-            dest.P.Z = Math.Max( dest.P.Z, src.P.Z );
-            dest.Floor = Math.Min( dest.Floor, src.Floor );
-            dest.Type = newType;       // Set the new type if they are merged
-            return true;
+            var n0 = list[ i0 ];
+            var n1 = list[ i1 ];
+
+            // Compare 2S distance between nodes
+            if( ( n0.P2 - n1.P2 ).Length > tollerance )
+                return false;       //  ...Did nothing
+            
+            // i0 and i1 share the same x,y (or close enough);
+            // Use the higher z pos and lower floor, change the node type if an end point becomes a middle point
+            n0.P.Z = Math.Max( n0.P.Z, n1.P.Z );
+            n0.Floor = Math.Min( n0.Floor, n1.Floor );
+            if( ( n0.Type == NodeType.EndPoint ) && ( n1.Type == NodeType.StartPoint ) )
+            {
+                n0.P.X = n1.P.X;    // Use the start point position of the merged node
+                n0.P.Y = n1.P.Y;
+                n0.Type = NodeType.MidPoint;
+            }
+            list.RemoveAt( i1 );
+            DebugLog.WriteLine( string.Format( "Merge node {0} into {1} for position :: {2} ? {3}", i1, i0, n0.P2.ToString(), n1.P2.ToString() ) );
+            return true;            // Removed a node
         }
         
         public static Vector3f Centre( List<BorderNode> nodes, bool averageZ = false )

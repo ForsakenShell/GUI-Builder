@@ -31,11 +31,11 @@ namespace GUIBuilder
         public List<EdgeFlag> Flags { get{ return _flags; } }
         public List<BorderNode> Nodes { get{ return _nodes; } }
         
-        public void GenerateBorderNodes( float approximateNodeLength, float slopeAllowance )
+        public void GenerateBorderNodes( float approximateNodeLength, double angleAllowance, double slopeAllowance )
         {
             if( ( _enabler == null )||( _enabler.Reference == null )||( _enabler.Reference.Worldspace == null )||( _flags.NullOrEmpty() ) )
                 return;
-            _nodes = BorderNode.GenerateBorderNodes( _enabler.Reference.Worldspace, _flags, approximateNodeLength, slopeAllowance, GodObject.CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ );
+            _nodes = BorderNode.GenerateBorderNodes( _enabler.Reference.Worldspace, _flags, approximateNodeLength, angleAllowance, slopeAllowance, GodObject.CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ );
         }
         
     }

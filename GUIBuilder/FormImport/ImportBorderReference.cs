@@ -17,7 +17,11 @@ namespace GUIBuilder.FormImport
     public class ImportBorderReference : ImportBase
     {
         const string            IMPORT_SIGNATURE = "BorderRef";
-        const uint              TARGET_RECORD_FLAGS =
+
+        public const uint       F4_BORDER_RECORD_FLAGS =
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled;
+
+        public const uint       ATC_BORDER_RECORD_FLAGS =
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.IsFullLOD |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.LODRespectsEnableState |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn |
@@ -61,8 +65,8 @@ namespace GUIBuilder.FormImport
             ) );
         }
         
-        public                          ImportBorderReference( Engine.Plugin.Forms.ObjectReference originalForm, uint statFormID, string statEditorID, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, AnnexTheCommonwealth.BorderEnabler borderEnabler, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, Engine.Plugin.Forms.Layer layer )
-            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.ObjectReference ), originalForm, worldspace, cell )
+        public                          ImportBorderReference( Engine.Plugin.Forms.ObjectReference originalForm, uint statFormID, string statEditorID, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, AnnexTheCommonwealth.BorderEnabler borderEnabler, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, Engine.Plugin.Forms.Layer layer, uint recordFlags )
+            : base( IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.ObjectReference ), originalForm, worldspace, cell )
         {
             ftBaseStat      = new FormTarget( "Static", this, typeof( Engine.Plugin.Forms.Static ), statFormID, statEditorID );
             ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
@@ -79,8 +83,8 @@ namespace GUIBuilder.FormImport
             DumpImport();
         }
         
-        public                          ImportBorderReference( string[] importData )
-            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.ObjectReference ), importData )
+        public                          ImportBorderReference( string[] importData, uint recordFlags )
+            : base( IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.ObjectReference ), importData )
         {
             ftBaseStat        = new FormTarget( "Static", this, typeof( Engine.Plugin.Forms.Static ) );
             ftWorldspace      = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ) );
@@ -212,7 +216,7 @@ namespace GUIBuilder.FormImport
             ftWorldspace.Resolve( errorIfUnresolveable );
             ftCell      .Resolve( errorIfUnresolveable );
             if( ( TargetCell == null )&&( TargetWorldspace != null ) )
-                ftCell.Form = Engine.Plugin.Forms.Worldspace.GetCellForRefr( TargetWorldspace, Position, TARGET_RECORD_FLAGS );
+                ftCell.Form = Engine.Plugin.Forms.Worldspace.GetCellForRefr( TargetWorldspace, Position, RecordFlags );
             
             // Can't get references of a form that doesn't exist (yet)
             if( ( TargetForm == null )&&( ftBaseStat.Form != null ) )
