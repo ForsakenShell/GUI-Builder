@@ -1,0 +1,44 @@
+Fallout 4 Power Grid Notes:
+
+All power connectors, generators, lamps, and splines placed in the CK require the workshop to have a "Power Grid" table filled with all the power connections for the workshop.  This table cannot be created in-game by script placed object (only player placed) thus we need to create it in the mod itself to work.  This file serves as my notes on how I have found the power grid system to work and all it's requirements.
+
+"Reference" is an Object Reference that exists in a Cell.
+
+"Power Reference" is a placed power connector, consumer, generator, terminal, etc.
+
+"Base Form" is the activator, light, terminal, etc of the Reference.
+
+"Power Grid" is a field (only viewable in xEdit) on the "WorkshopScript Reference".
+
+What an object is and how it works is based primarily on keywords, actor values.
+
+Power Reference Requirements:
+    + Linked References:
+        To WorkshopScript Reference with keyword WorkshopItemKeyword [KYWD:00054BA6]
+    + Wired Connection Requirements:
+        + CK   : A "Spline Reference" (REFR:BNDS) between the connectors of two different Power References
+        + xEdit: "Spline Connection"[s] are required for wired connections.  All Spline Connections are bi-directional (A will link to B and B will link to A) and use the same Spline Reference on both Power References.
+
+Base Form Requirements:
+    + Keyword[s]:
+        WorkshopPowerConnection [KYWD:00054BA4] - For wired connections
+        WorkshopCanBePowered [KYWD:0003037E] - For consumers, some connectors (eg, the large vanilla power pylon)
+        WorkshopStartPoweredOn [KYWD:0004455B] - For on/off switchable objects
+        WorkshopStartUnpoweredOff [KYWD:0004455C] - For on/off switchable objects
+        BlockPlayerActivation [KYWD:001CD02B] - For non switchable activators and or player interactable furniture
+        WorkshopSwitchActivatorKeyword [KYWD:001690A4] - For on/off switchable objects
+    + Optional Actor Values (PRPS - Properties):
+        PowerGenerated [AVIF:0000032E] - Any positive value, this makes this connector a power generator
+        PowerRadiation [AVIF:0000032F] - Any positive value, this controls the wireless transmission range for wireless consumers
+        PowerRequired [AVIF:00000330] - Any positive value, this is the amount of power required for consumers
+        WorkshopSnapTransmitsPower [AVIF:00000354] - 1.0, this controls whether the object makes power connections through snap points
+        WorkshopCanBePoweredAV [AVIF:0024A03A] - ?, only used by VaultTec DLC for vault pieces
+    + Any Form type allowed
+
+WorkshopScript Reference Requirements:
+    + Power Grid:
+        This contains all the power connections in the settlement and are considered bi-directional.
+        Every connection has two "Nodes" and optionally a "Line" between them.
+        What Power Reference is what Node does not matter but that Node pair will only exist once in the entire Power Grid.
+        Wired connections will have the Line set to the Spline Reference for the connection.
+        If a connection is wireless or through a snap point, it will still have a connection in the Power Grid but it will have no Line.
