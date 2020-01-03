@@ -10,7 +10,7 @@ All power connectors, generators, lamps, and splines placed in the CK require th
     Fallout 4 CK Spline Tutorial:
     https://www.youtube.com/watch?v=9HyruGEFNEk
 
-"Workshop Reference" must have WorkshopScript (or child script) attached to the Reference or Base Form.
+"Workshop Reference" is the reference that hosts the "Power Grid" and all Power References must link to it with keyword WorkshopItemKeyword [KYWD:00054BA6].
 
 "Base Form" is the activator, light, terminal, etc of the Reference.
 
