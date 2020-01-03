@@ -1,6 +1,6 @@
 Fallout 4 Power Grid Notes:
 
-All power connectors, generators, lamps, and splines placed in the CK require the workshop to have a "Power Grid" table filled with all the power connections for the workshop.  This table cannot be created in-game by script placed object (only player placed) thus we need to create it in the mod itself to work.  This file serves as my notes on how I have found the power grid system to work and all it's requirements.
+All power connectors, generators, lamps, and splines placed in the CK require the workshop to have a "Power Grid" table filled with all the power connections for the workshop.  This table cannot be created in-game by script placed objects (only player placed) thus we need to create it in the mod itself to work.  This file serves as my notes on how I have found the power grid system to work and all it's requirements.
 
 "Reference" is an Object Reference that exists in a Cell.
 
@@ -14,7 +14,7 @@ All power connectors, generators, lamps, and splines placed in the CK require th
 
 "Base Form" is the activator, light, terminal, etc of the Reference.
 
-"Spline Connection" is a field (only viewable in xEdit) on Power References and Spline References.  All Spline Connections refer to a set of one Spline Reference and two both Power References and represent a bi-directional connection between the Power References through the Spline Reference.
+"Spline Connection" is a field (only viewable in xEdit) on Power References and Spline References.  All Spline Connections refer to a set of one Spline Reference and two Power References and represent a bi-directional connection between the Power References through the Spline Reference.
 
 "Power Grid" is a field (only viewable in xEdit) on the Workshop Reference.
     This contains all the "Power Connections" ([Power Grid\Connections]) for the Workshop and the "Nodes" are considered bi-directional through an optional "Line".
@@ -28,7 +28,7 @@ Power Reference Requirements:
     + Base Form can be any type allowed that supports Keywords and/or Actor Values
     + Must be persistent
     + Linked References:
-        To WorkshopScript Reference with keyword WorkshopItemKeyword [KYWD:00054BA6]
+        To Workshop Reference with keyword WorkshopItemKeyword [KYWD:00054BA6]
     + Wired Connection Requirements (for pre-wired Power References):
         + CK:
             A Spline Reference between the connectors of two different Power References
@@ -39,9 +39,9 @@ Spline Reference Requirements:
     + Base Form can only be Bendable Spline (Default workshop wire: BlackWireSpline01 [BNDS:0001D971])
     + Must be persistent
     + Linked References:
-        To WorkshopScript Reference with keyword WorkshopItemKeyword [KYWD:00054BA6]
+        To Workshop Reference with keyword WorkshopItemKeyword [KYWD:00054BA6]
     + xEdit:
-        All Spline References should have one "Spline Connection"to each of the two Power References they connect.
+        All Spline References should have one Spline Connection to each of the two Power References they connect.
         It does not matter which Power Reference is which Spline Connection.
 
 Base Form Requirements and Options:
