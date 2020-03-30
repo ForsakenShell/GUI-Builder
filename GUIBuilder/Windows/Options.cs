@@ -13,26 +13,39 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of Options.
     /// </summary>
-    public partial class Options : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
+    public partial class Options : WindowBase
     {
-        
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
-        public string XmlNodeName { get{ return "OptionsWindow"; } }
-        
-        bool onLoadComplete = false;
-        
-        public Options()
+
+        /// <summary>
+        /// Use GodObject.Windows.GetWindow<Options>() to create this Window
+        /// </summary>
+
+        private System.Windows.Forms.TextBox[] tbNIFExportInfo;
+
+        public Options() : base( true )
         {
             InitializeComponent();
+            tbNIFExportInfo = new System.Windows.Forms.TextBox[]{
+                tbNIFExportInfo_0,
+                tbNIFExportInfo_1,
+                tbNIFExportInfo_2,
+                tbNIFExportInfo_3
+            };
         }
         
-        void OnFormLoad( object sender, EventArgs e )
+        
+        #region GodObject.XmlConfig.IXmlConfiguration
+        
+        
+        public override string XmlNodeName { get { return "OptionsWindow"; } }
+        
+        
+        #endregion
+        
+        
+        void Options_OnLoad( object sender, EventArgs e )
         {
-            this.Translate( true );
             tbSDLVideoRenderWarning.Text = string.Format( "OptionsWindow.SDLHint.Warning".Translate(), GodObject.Windows.SDLVideoDriverSoftware );
-            
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
             
             lvAlwaysSelectMasters.SyncObjects = GodObject.Master.Files;
             UpdateCSColors();
@@ -48,49 +61,77 @@ namespace GUIBuilder.Windows
                 cbSDLVideoDriver.Items.Add( GodObject.Windows.SDLVideoDrivers[ i ] );
             cbSDLVideoDriver.SelectedIndex = GodObject.Windows.SDLVideoDriverIndex;
             
+            cbLogMainToConsole.Checked = GodObject.XmlConfig.ReadValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_MirrorToConsole, false );
             cbZipLogFiles.Checked = GodObject.XmlConfig.ReadValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_ZipLogs, true );
-            
-            this.BringToFront();
-            onLoadComplete = true;
-        }
-        
-        void OnFormClosed( object sender, FormClosedEventArgs e )
-        {
-            GodObject.Windows.SetWindow<Options>( null, false );
-        }
-        
-        void OnFormMove( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteSize( this );
-        }
-        
-        public void SetEnableState( bool enabled ) {}
 
+            RepopulateExportInfoTextBoxes();
+
+            this.BringToFront();
+        }
+        
         void cbLanguageSelectedIndexChanged(object sender, EventArgs e)
         {
-            if( !onLoadComplete )
-                return;
+            if( !OnLoadComplete ) return;
             GodObject.Paths.Language = cbLanguage.Text;
         }
         
         void cbSDLVideoDriverSelectedIndexChanged( object sender, EventArgs e )
         {
-            if( !onLoadComplete )
-                return;
+            if( !OnLoadComplete ) return;
             GodObject.Windows.SDLVideoDriverIndex = cbSDLVideoDriver.SelectedIndex;
         }
         
-        #region Conflict Status
+        void cbLogMainToConsoleCheckedChanged( object sender, EventArgs e )
+        {
+            if( !OnLoadComplete ) return;
+            GodObject.XmlConfig.WriteValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_MirrorToConsole, cbLogMainToConsole.Checked, true );
+        }
         
+        void cbZipLogFilesCheckedChanged( object sender, EventArgs e )
+        {
+            if( !OnLoadComplete ) return;
+            GodObject.XmlConfig.WriteValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_ZipLogs, cbZipLogFiles.Checked, true );
+        }
+
+        #region NIF ExportInfo
+
+        bool blockExportInfoUI = false;
+
+        void tbNIFExportInfoTextChanged( object sender, EventArgs e )
+        {
+            if( !OnLoadComplete ) return;
+            if( blockExportInfoUI ) return;
+
+            var exportInfo = new string[ 4 ];
+            for( int i = 0; i < 4; i++ )
+                exportInfo[ i ] = tbNIFExportInfo[ i ].Text;
+
+            NIFBuilder.ExportInfo = exportInfo;
+        }
+        
+        void btnNIFExportInfoResetClick( object sender, EventArgs e )
+        {
+            if( !OnLoadComplete ) return;
+            if( blockExportInfoUI ) return;
+            blockExportInfoUI = true;
+
+            NIFBuilder.ExportInfo = null;
+            RepopulateExportInfoTextBoxes();
+
+            blockExportInfoUI = false;
+        }
+
+        void RepopulateExportInfoTextBoxes()
+        {
+            var exportInfo = NIFBuilder.ExportInfo;
+            for( int i = 0; i < 4; i++ )
+                tbNIFExportInfo[ i ].Text = exportInfo[ i ];
+        }
+
+        #endregion
+
+        #region Conflict Status
+
         void UpdateCSColors()
         {
             tbCSInvalid.BackColor = Engine.Plugin.ConflictStatus.Invalid.GetConflictStatusBackColor();
@@ -101,13 +142,6 @@ namespace GUIBuilder.Windows
             tbCSOverrideInWorkingFile.BackColor = Engine.Plugin.ConflictStatus.OverrideInWorkingFile.GetConflictStatusBackColor();
             tbCSOverrideInPostLoad.BackColor = Engine.Plugin.ConflictStatus.OverrideInPostLoad.GetConflictStatusBackColor();
             tbCSRequiresOverride.BackColor = Engine.Plugin.ConflictStatus.RequiresOverride.GetConflictStatusBackColor();
-        }
-        
-        void cbZipLogFilesCheckedChanged( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_ZipLogs, cbZipLogFiles.Checked, true );
         }
         
         #endregion

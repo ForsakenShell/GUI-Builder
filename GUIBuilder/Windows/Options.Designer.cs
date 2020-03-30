@@ -31,7 +31,15 @@ namespace GUIBuilder.Windows
         private System.Windows.Forms.TextBox tbLanguageRestart;
         private System.Windows.Forms.TextBox tbCSOverrideInPostLoad;
         private System.Windows.Forms.CheckBox cbZipLogFiles;
-        
+        private System.Windows.Forms.CheckBox cbLogMainToConsole;
+        private System.Windows.Forms.GroupBox gbLogs;
+        private System.Windows.Forms.GroupBox gbNIFExportInfo;
+        private System.Windows.Forms.TextBox tbNIFExportInfo_3;
+        private System.Windows.Forms.TextBox tbNIFExportInfo_2;
+        private System.Windows.Forms.TextBox tbNIFExportInfo_1;
+        private System.Windows.Forms.TextBox tbNIFExportInfo_0;
+        private System.Windows.Forms.Button btnNIFExportInfoReset;
+
         /// <summary>
         /// Disposes resources used by the form.
         /// </summary>
@@ -53,6 +61,7 @@ namespace GUIBuilder.Windows
         /// </summary>
         void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Options));
             this.gbAlwaysSelectMasters = new System.Windows.Forms.GroupBox();
             this.lvAlwaysSelectMasters = new GUIBuilder.Windows.Controls.SyncedListView<GodObject.Master.File>();
             this.tbCSInvalid = new System.Windows.Forms.TextBox();
@@ -72,11 +81,32 @@ namespace GUIBuilder.Windows
             this.tbSDLVideoRenderWarning = new System.Windows.Forms.TextBox();
             this.gbSDLHints = new System.Windows.Forms.GroupBox();
             this.cbZipLogFiles = new System.Windows.Forms.CheckBox();
+            this.cbLogMainToConsole = new System.Windows.Forms.CheckBox();
+            this.gbLogs = new System.Windows.Forms.GroupBox();
+            this.gbNIFExportInfo = new System.Windows.Forms.GroupBox();
+            this.btnNIFExportInfoReset = new System.Windows.Forms.Button();
+            this.tbNIFExportInfo_3 = new System.Windows.Forms.TextBox();
+            this.tbNIFExportInfo_2 = new System.Windows.Forms.TextBox();
+            this.tbNIFExportInfo_1 = new System.Windows.Forms.TextBox();
+            this.tbNIFExportInfo_0 = new System.Windows.Forms.TextBox();
+            this.WindowPanel.SuspendLayout();
             this.gbAlwaysSelectMasters.SuspendLayout();
             this.gbConflictStatus.SuspendLayout();
             this.gbLanguage.SuspendLayout();
             this.gbSDLHints.SuspendLayout();
+            this.gbLogs.SuspendLayout();
+            this.gbNIFExportInfo.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // WindowPanel
+            // 
+            this.WindowPanel.Controls.Add(this.gbNIFExportInfo);
+            this.WindowPanel.Controls.Add(this.gbLogs);
+            this.WindowPanel.Controls.Add(this.gbAlwaysSelectMasters);
+            this.WindowPanel.Controls.Add(this.gbConflictStatus);
+            this.WindowPanel.Controls.Add(this.gbLanguage);
+            this.WindowPanel.Controls.Add(this.gbSDLHints);
+            this.WindowPanel.Size = new System.Drawing.Size(627, 431);
             // 
             // gbAlwaysSelectMasters
             // 
@@ -86,7 +116,7 @@ namespace GUIBuilder.Windows
             this.gbAlwaysSelectMasters.Controls.Add(this.lvAlwaysSelectMasters);
             this.gbAlwaysSelectMasters.Location = new System.Drawing.Point(3, 3);
             this.gbAlwaysSelectMasters.Name = "gbAlwaysSelectMasters";
-            this.gbAlwaysSelectMasters.Size = new System.Drawing.Size(309, 95);
+            this.gbAlwaysSelectMasters.Size = new System.Drawing.Size(309, 311);
             this.gbAlwaysSelectMasters.TabIndex = 0;
             this.gbAlwaysSelectMasters.TabStop = false;
             this.gbAlwaysSelectMasters.Tag = "OptionsWindow.Masters";
@@ -108,7 +138,7 @@ namespace GUIBuilder.Windows
             this.lvAlwaysSelectMasters.Location = new System.Drawing.Point(6, 19);
             this.lvAlwaysSelectMasters.MultiSelect = false;
             this.lvAlwaysSelectMasters.Name = "lvAlwaysSelectMasters";
-            this.lvAlwaysSelectMasters.Size = new System.Drawing.Size(297, 70);
+            this.lvAlwaysSelectMasters.Size = new System.Drawing.Size(297, 281);
             this.lvAlwaysSelectMasters.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.LoadOrder;
             this.lvAlwaysSelectMasters.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvAlwaysSelectMasters.SyncedEditorFormType = null;
@@ -124,7 +154,7 @@ namespace GUIBuilder.Windows
             this.tbCSInvalid.Location = new System.Drawing.Point(9, 19);
             this.tbCSInvalid.Name = "tbCSInvalid";
             this.tbCSInvalid.ReadOnly = true;
-            this.tbCSInvalid.Size = new System.Drawing.Size(292, 13);
+            this.tbCSInvalid.Size = new System.Drawing.Size(291, 13);
             this.tbCSInvalid.TabIndex = 0;
             this.tbCSInvalid.Tag = "Conflict.Error";
             this.tbCSInvalid.Text = "Error State";
@@ -137,7 +167,7 @@ namespace GUIBuilder.Windows
             this.tbCSNewForm.Location = new System.Drawing.Point(9, 45);
             this.tbCSNewForm.Name = "tbCSNewForm";
             this.tbCSNewForm.ReadOnly = true;
-            this.tbCSNewForm.Size = new System.Drawing.Size(292, 13);
+            this.tbCSNewForm.Size = new System.Drawing.Size(291, 13);
             this.tbCSNewForm.TabIndex = 2;
             this.tbCSNewForm.Tag = "Conflict.NewForm";
             this.tbCSNewForm.Text = "New Form";
@@ -150,7 +180,7 @@ namespace GUIBuilder.Windows
             this.tbCSOverrideInAncestor.Location = new System.Drawing.Point(9, 71);
             this.tbCSOverrideInAncestor.Name = "tbCSOverrideInAncestor";
             this.tbCSOverrideInAncestor.ReadOnly = true;
-            this.tbCSOverrideInAncestor.Size = new System.Drawing.Size(292, 13);
+            this.tbCSOverrideInAncestor.Size = new System.Drawing.Size(291, 13);
             this.tbCSOverrideInAncestor.TabIndex = 4;
             this.tbCSOverrideInAncestor.Tag = "Conflict.OverrideInAncestor";
             this.tbCSOverrideInAncestor.Text = "Override in Ancestor";
@@ -163,7 +193,7 @@ namespace GUIBuilder.Windows
             this.tbCSOverrideInWorkingFile.Location = new System.Drawing.Point(9, 84);
             this.tbCSOverrideInWorkingFile.Name = "tbCSOverrideInWorkingFile";
             this.tbCSOverrideInWorkingFile.ReadOnly = true;
-            this.tbCSOverrideInWorkingFile.Size = new System.Drawing.Size(292, 13);
+            this.tbCSOverrideInWorkingFile.Size = new System.Drawing.Size(291, 13);
             this.tbCSOverrideInWorkingFile.TabIndex = 5;
             this.tbCSOverrideInWorkingFile.Tag = "Conflict.OverrideInWorkingFile";
             this.tbCSOverrideInWorkingFile.Text = "Override in Working File";
@@ -176,7 +206,7 @@ namespace GUIBuilder.Windows
             this.tbCSNoConflict.Location = new System.Drawing.Point(9, 58);
             this.tbCSNoConflict.Name = "tbCSNoConflict";
             this.tbCSNoConflict.ReadOnly = true;
-            this.tbCSNoConflict.Size = new System.Drawing.Size(292, 13);
+            this.tbCSNoConflict.Size = new System.Drawing.Size(291, 13);
             this.tbCSNoConflict.TabIndex = 3;
             this.tbCSNoConflict.Tag = "Conflict.None";
             this.tbCSNoConflict.Text = "No Conflict";
@@ -190,7 +220,7 @@ namespace GUIBuilder.Windows
             this.tbCSRequiresOverride.Location = new System.Drawing.Point(9, 110);
             this.tbCSRequiresOverride.Name = "tbCSRequiresOverride";
             this.tbCSRequiresOverride.ReadOnly = true;
-            this.tbCSRequiresOverride.Size = new System.Drawing.Size(292, 13);
+            this.tbCSRequiresOverride.Size = new System.Drawing.Size(291, 13);
             this.tbCSRequiresOverride.TabIndex = 6;
             this.tbCSRequiresOverride.Tag = "Conflict.OverrideRequired";
             this.tbCSRequiresOverride.Text = "Requires Override";
@@ -203,7 +233,7 @@ namespace GUIBuilder.Windows
             this.tbCSUneditable.Location = new System.Drawing.Point(9, 32);
             this.tbCSUneditable.Name = "tbCSUneditable";
             this.tbCSUneditable.ReadOnly = true;
-            this.tbCSUneditable.Size = new System.Drawing.Size(292, 13);
+            this.tbCSUneditable.Size = new System.Drawing.Size(291, 13);
             this.tbCSUneditable.TabIndex = 1;
             this.tbCSUneditable.Tag = "Conflict.Uneditable";
             this.tbCSUneditable.Text = "Uneditable";
@@ -216,15 +246,14 @@ namespace GUIBuilder.Windows
             this.tbCSOverrideInPostLoad.Location = new System.Drawing.Point(9, 97);
             this.tbCSOverrideInPostLoad.Name = "tbCSOverrideInPostLoad";
             this.tbCSOverrideInPostLoad.ReadOnly = true;
-            this.tbCSOverrideInPostLoad.Size = new System.Drawing.Size(292, 13);
+            this.tbCSOverrideInPostLoad.Size = new System.Drawing.Size(291, 13);
             this.tbCSOverrideInPostLoad.TabIndex = 7;
             this.tbCSOverrideInPostLoad.Tag = "Conflict.OverrideInPostLoad";
             this.tbCSOverrideInPostLoad.Text = "Override in Post Load File";
             // 
             // gbConflictStatus
             // 
-            this.gbConflictStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbConflictStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.gbConflictStatus.Controls.Add(this.tbCSOverrideInPostLoad);
             this.gbConflictStatus.Controls.Add(this.tbCSUneditable);
             this.gbConflictStatus.Controls.Add(this.tbCSRequiresOverride);
@@ -233,7 +262,7 @@ namespace GUIBuilder.Windows
             this.gbConflictStatus.Controls.Add(this.tbCSOverrideInAncestor);
             this.gbConflictStatus.Controls.Add(this.tbCSNewForm);
             this.gbConflictStatus.Controls.Add(this.tbCSInvalid);
-            this.gbConflictStatus.Location = new System.Drawing.Point(3, 104);
+            this.gbConflictStatus.Location = new System.Drawing.Point(318, 3);
             this.gbConflictStatus.Name = "gbConflictStatus";
             this.gbConflictStatus.Size = new System.Drawing.Size(309, 129);
             this.gbConflictStatus.TabIndex = 1;
@@ -262,7 +291,7 @@ namespace GUIBuilder.Windows
             this.tbLanguageRestart.Multiline = true;
             this.tbLanguageRestart.Name = "tbLanguageRestart";
             this.tbLanguageRestart.ReadOnly = true;
-            this.tbLanguageRestart.Size = new System.Drawing.Size(295, 38);
+            this.tbLanguageRestart.Size = new System.Drawing.Size(297, 38);
             this.tbLanguageRestart.TabIndex = 4;
             this.tbLanguageRestart.TabStop = false;
             this.tbLanguageRestart.Tag = "OptionsWindow.LanguageRestart";
@@ -270,11 +299,10 @@ namespace GUIBuilder.Windows
             // 
             // gbLanguage
             // 
-            this.gbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbLanguage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.gbLanguage.Controls.Add(this.tbLanguageRestart);
             this.gbLanguage.Controls.Add(this.cbLanguage);
-            this.gbLanguage.Location = new System.Drawing.Point(3, 239);
+            this.gbLanguage.Location = new System.Drawing.Point(318, 265);
             this.gbLanguage.Name = "gbLanguage";
             this.gbLanguage.Size = new System.Drawing.Size(309, 90);
             this.gbLanguage.TabIndex = 3;
@@ -284,6 +312,7 @@ namespace GUIBuilder.Windows
             // 
             // lblSDLVideoDriver
             // 
+            this.lblSDLVideoDriver.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblSDLVideoDriver.Location = new System.Drawing.Point(9, 94);
             this.lblSDLVideoDriver.Name = "lblSDLVideoDriver";
             this.lblSDLVideoDriver.Size = new System.Drawing.Size(100, 21);
@@ -293,7 +322,7 @@ namespace GUIBuilder.Windows
             // 
             // cbSDLVideoDriver
             // 
-            this.cbSDLVideoDriver.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.cbSDLVideoDriver.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cbSDLVideoDriver.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbSDLVideoDriver.FormattingEnabled = true;
@@ -305,14 +334,15 @@ namespace GUIBuilder.Windows
             // 
             // tbSDLVideoRenderWarning
             // 
-            this.tbSDLVideoRenderWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tbSDLVideoRenderWarning.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbSDLVideoRenderWarning.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbSDLVideoRenderWarning.Location = new System.Drawing.Point(9, 19);
+            this.tbSDLVideoRenderWarning.Location = new System.Drawing.Point(6, 19);
             this.tbSDLVideoRenderWarning.Multiline = true;
             this.tbSDLVideoRenderWarning.Name = "tbSDLVideoRenderWarning";
             this.tbSDLVideoRenderWarning.ReadOnly = true;
-            this.tbSDLVideoRenderWarning.Size = new System.Drawing.Size(292, 66);
+            this.tbSDLVideoRenderWarning.Size = new System.Drawing.Size(297, 66);
             this.tbSDLVideoRenderWarning.TabIndex = 3;
             this.tbSDLVideoRenderWarning.TabStop = false;
             this.tbSDLVideoRenderWarning.Tag = "";
@@ -320,12 +350,12 @@ namespace GUIBuilder.Windows
             // 
             // gbSDLHints
             // 
-            this.gbSDLHints.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.gbSDLHints.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbSDLHints.Controls.Add(this.tbSDLVideoRenderWarning);
             this.gbSDLHints.Controls.Add(this.cbSDLVideoDriver);
             this.gbSDLHints.Controls.Add(this.lblSDLVideoDriver);
-            this.gbSDLHints.Location = new System.Drawing.Point(3, 335);
+            this.gbSDLHints.Location = new System.Drawing.Point(318, 138);
             this.gbSDLHints.Name = "gbSDLHints";
             this.gbSDLHints.Size = new System.Drawing.Size(309, 121);
             this.gbSDLHints.TabIndex = 2;
@@ -335,43 +365,129 @@ namespace GUIBuilder.Windows
             // 
             // cbZipLogFiles
             // 
-            this.cbZipLogFiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.cbZipLogFiles.Checked = true;
             this.cbZipLogFiles.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbZipLogFiles.Location = new System.Drawing.Point(3, 462);
+            this.cbZipLogFiles.Location = new System.Drawing.Point(6, 42);
             this.cbZipLogFiles.Name = "cbZipLogFiles";
-            this.cbZipLogFiles.Size = new System.Drawing.Size(309, 24);
+            this.cbZipLogFiles.Size = new System.Drawing.Size(297, 23);
             this.cbZipLogFiles.TabIndex = 4;
             this.cbZipLogFiles.Tag = "OptionsWindow.ZipLogFiles";
             this.cbZipLogFiles.Text = "Zippity-do-da";
             this.cbZipLogFiles.UseVisualStyleBackColor = true;
             this.cbZipLogFiles.CheckedChanged += new System.EventHandler(this.cbZipLogFilesCheckedChanged);
             // 
+            // cbLogMainToConsole
+            // 
+            this.cbLogMainToConsole.Location = new System.Drawing.Point(6, 19);
+            this.cbLogMainToConsole.Name = "cbLogMainToConsole";
+            this.cbLogMainToConsole.Size = new System.Drawing.Size(297, 23);
+            this.cbLogMainToConsole.TabIndex = 5;
+            this.cbLogMainToConsole.Tag = "OptionsWindow.LogMainToConsole";
+            this.cbLogMainToConsole.Text = "Console me";
+            this.cbLogMainToConsole.UseVisualStyleBackColor = true;
+            this.cbLogMainToConsole.CheckedChanged += new System.EventHandler(this.cbLogMainToConsoleCheckedChanged);
+            // 
+            // gbLogs
+            // 
+            this.gbLogs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbLogs.Controls.Add(this.cbLogMainToConsole);
+            this.gbLogs.Controls.Add(this.cbZipLogFiles);
+            this.gbLogs.Location = new System.Drawing.Point(318, 361);
+            this.gbLogs.Name = "gbLogs";
+            this.gbLogs.Size = new System.Drawing.Size(309, 70);
+            this.gbLogs.TabIndex = 6;
+            this.gbLogs.TabStop = false;
+            this.gbLogs.Tag = "OptionsWindow.Logs";
+            this.gbLogs.Text = "Logs";
+            // 
+            // gbNIFExportInfo
+            // 
+            this.gbNIFExportInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbNIFExportInfo.Controls.Add(this.btnNIFExportInfoReset);
+            this.gbNIFExportInfo.Controls.Add(this.tbNIFExportInfo_3);
+            this.gbNIFExportInfo.Controls.Add(this.tbNIFExportInfo_2);
+            this.gbNIFExportInfo.Controls.Add(this.tbNIFExportInfo_1);
+            this.gbNIFExportInfo.Controls.Add(this.tbNIFExportInfo_0);
+            this.gbNIFExportInfo.Location = new System.Drawing.Point(3, 320);
+            this.gbNIFExportInfo.Name = "gbNIFExportInfo";
+            this.gbNIFExportInfo.Size = new System.Drawing.Size(309, 111);
+            this.gbNIFExportInfo.TabIndex = 7;
+            this.gbNIFExportInfo.TabStop = false;
+            this.gbNIFExportInfo.Tag = "OptionsWindow.NIFExportInfo";
+            this.gbNIFExportInfo.Text = "sNIF ei strings";
+            // 
+            // btnNIFExportInfoReset
+            // 
+            this.btnNIFExportInfoReset.Image = ((System.Drawing.Image)(resources.GetObject("btnNIFExportInfoReset.Image")));
+            this.btnNIFExportInfoReset.Location = new System.Drawing.Point(285, 0);
+            this.btnNIFExportInfoReset.Name = "btnNIFExportInfoReset";
+            this.btnNIFExportInfoReset.Size = new System.Drawing.Size(18, 18);
+            this.btnNIFExportInfoReset.TabIndex = 4;
+            this.btnNIFExportInfoReset.UseVisualStyleBackColor = true;
+            this.btnNIFExportInfoReset.Click += new System.EventHandler(this.btnNIFExportInfoResetClick);
+            // 
+            // tbNIFExportInfo_3
+            // 
+            this.tbNIFExportInfo_3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbNIFExportInfo_3.Location = new System.Drawing.Point(6, 85);
+            this.tbNIFExportInfo_3.MaxLength = 254;
+            this.tbNIFExportInfo_3.Name = "tbNIFExportInfo_3";
+            this.tbNIFExportInfo_3.Size = new System.Drawing.Size(297, 20);
+            this.tbNIFExportInfo_3.TabIndex = 3;
+            this.tbNIFExportInfo_3.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
+            // 
+            // tbNIFExportInfo_2
+            // 
+            this.tbNIFExportInfo_2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbNIFExportInfo_2.Location = new System.Drawing.Point(6, 63);
+            this.tbNIFExportInfo_2.MaxLength = 254;
+            this.tbNIFExportInfo_2.Name = "tbNIFExportInfo_2";
+            this.tbNIFExportInfo_2.Size = new System.Drawing.Size(297, 20);
+            this.tbNIFExportInfo_2.TabIndex = 2;
+            this.tbNIFExportInfo_2.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
+            // 
+            // tbNIFExportInfo_1
+            // 
+            this.tbNIFExportInfo_1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbNIFExportInfo_1.Location = new System.Drawing.Point(6, 41);
+            this.tbNIFExportInfo_1.MaxLength = 254;
+            this.tbNIFExportInfo_1.Name = "tbNIFExportInfo_1";
+            this.tbNIFExportInfo_1.Size = new System.Drawing.Size(297, 20);
+            this.tbNIFExportInfo_1.TabIndex = 1;
+            this.tbNIFExportInfo_1.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
+            // 
+            // tbNIFExportInfo_0
+            // 
+            this.tbNIFExportInfo_0.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbNIFExportInfo_0.Location = new System.Drawing.Point(6, 19);
+            this.tbNIFExportInfo_0.MaxLength = 254;
+            this.tbNIFExportInfo_0.Name = "tbNIFExportInfo_0";
+            this.tbNIFExportInfo_0.Size = new System.Drawing.Size(297, 20);
+            this.tbNIFExportInfo_0.TabIndex = 0;
+            this.tbNIFExportInfo_0.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
+            // 
             // Options
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(314, 488);
-            this.Controls.Add(this.cbZipLogFiles);
-            this.Controls.Add(this.gbLanguage);
-            this.Controls.Add(this.gbSDLHints);
-            this.Controls.Add(this.gbConflictStatus);
-            this.Controls.Add(this.gbAlwaysSelectMasters);
+            this.ClientSize = new System.Drawing.Size(627, 431);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(600, 800);
+            this.MaximumSize = new System.Drawing.Size(800, 800);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(322, 512);
+            this.MinimumSize = new System.Drawing.Size(635, 455);
             this.Name = "Options";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "OptionsWindow.Title";
             this.Text = "Title";
             this.TopMost = true;
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
+            this.ClientOnLoad += new System.EventHandler(this.Options_OnLoad);
+            this.WindowPanel.ResumeLayout(false);
             this.gbAlwaysSelectMasters.ResumeLayout(false);
             this.gbConflictStatus.ResumeLayout(false);
             this.gbConflictStatus.PerformLayout();
@@ -379,6 +495,9 @@ namespace GUIBuilder.Windows
             this.gbLanguage.PerformLayout();
             this.gbSDLHints.ResumeLayout(false);
             this.gbSDLHints.PerformLayout();
+            this.gbLogs.ResumeLayout(false);
+            this.gbNIFExportInfo.ResumeLayout(false);
+            this.gbNIFExportInfo.PerformLayout();
             this.ResumeLayout(false);
 
         }

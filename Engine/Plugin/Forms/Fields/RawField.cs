@@ -81,7 +81,7 @@ namespace Engine.Plugin.Forms
         //protected bool                  DeleteRootElement( bool createOverride, bool sendObjectDataChangedEvent )
         public bool                     DeleteRootElement( bool createOverride, bool sendObjectDataChangedEvent )
         {
-            //DebugLog.Write( string.Format( "{0} :: CreateRootElement :: createOverride = {1}", this.GetType().ToString(), createOverride ) );
+            //DebugLog.Write( string.Format( "{0} :: CreateRootElement :: createOverride = {1}", this.FullTypeName(), createOverride ) );
             var h = Form.WorkingFileHandle;
             if( !h.IsValid() )
             {
@@ -95,7 +95,7 @@ namespace Engine.Plugin.Forms
         
         protected bool                  CreateRootElement( bool createOverride, bool sendObjectDataChangedEvent )
         {
-            //DebugLog.Write( string.Format( "{0} :: CreateRootElement :: createOverride = {1}", this.GetType().ToString(), createOverride ) );
+            //DebugLog.Write( string.Format( "{0} :: CreateRootElement :: createOverride = {1}", this.FullTypeName(), createOverride ) );
             var h = Form.WorkingFileHandle;
             if( !h.IsValid() )
             {
@@ -115,11 +115,10 @@ namespace Engine.Plugin.Forms
             if( !elementHandle.IsValid() )
             {
                 DebugLog.WriteLine( string.Format(
-                    "{0} :: AddElement :: Unable to AddElement \"{1}\" to 0x{2} - \"{3}\"",
-                    this.GetType().ToString(),
+                    "Unable to AddElement \"{0}\" to {1}",
                     elementPath,
-                    this.Form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                    this.Form.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ) );
+                    this.Form.IDString ),
+                    true );
                 return false;
             }
             elementHandle.Dispose();
@@ -142,7 +141,35 @@ namespace Engine.Plugin.Forms
             Form.WorkingFileHandle.SetFloatValueEx( BuildPath( path ), value );
             if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
         }
-        
+
+        protected sbyte                 ReadSByte( ElementHandle handle, string path, sbyte defaultValue = 0 )
+        {
+            var elementPath = BuildPath( path );
+            return !handle.HasElement( elementPath )
+                ? defaultValue
+                : handle.GetSByteValueEx( elementPath );
+        }
+        protected void                  WriteSByte( string path, sbyte value, bool sendObjectDataChangedEvent )
+        {
+            if( !CreateRootElement( true, false ) ) return;
+            Form.WorkingFileHandle.SetSByteValueEx( BuildPath( path ), value );
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
+        }
+
+        protected byte                  ReadUByte( ElementHandle handle, string path, byte defaultValue = 0 )
+        {
+            var elementPath = BuildPath( path );
+            return !handle.HasElement( elementPath )
+                ? defaultValue
+                : handle.GetUByteValueEx( elementPath );
+        }
+        protected void                  WriteUByte( string path, byte value, bool sendObjectDataChangedEvent )
+        {
+            if( !CreateRootElement( true, false ) ) return;
+            Form.WorkingFileHandle.SetUByteValueEx( BuildPath( path ), value );
+            if( sendObjectDataChangedEvent ) Form.SendObjectDataChangedEvent( null );
+        }
+
         protected int                   ReadInt( ElementHandle handle, string path, int defaultValue = 0 )
         {
             var elementPath = BuildPath( path );

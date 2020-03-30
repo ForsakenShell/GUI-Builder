@@ -15,6 +15,9 @@ using Engine.Plugin.Attributes;
 namespace Engine.Plugin.Interface
 {
     
+    // Is this needed?  There is only one collection class so an interface is needless
+
+    /*
     public interface ICollection
     {
         
@@ -50,7 +53,7 @@ namespace Engine.Plugin.Interface
         bool                            Add( IXHandle syncObject );
         void                            Remove( IXHandle syncObject );
         
-        IXHandle                        FindEx( ClassAssociation targetAssociation, FormHandle handle = null, uint formid = 0, string editorid = null, bool tryLoad = true );
+        IXHandle                        FindEx( ClassAssociation targetAssociation, FormHandle handle = null, uint formid = 0, string editorid = null, bool tryLoad = true, bool alreadyHoldsRootLock = false );
         
         IXHandle                        Find( XeLib.FormHandle handle, bool tryLoad = true );
         
@@ -66,15 +69,17 @@ namespace Engine.Plugin.Interface
         #endregion
         
     }
-    
+    */
+
     public static partial class Extensions
     {
-        public static bool              IsValid( this ICollection collection )
+        //public static bool              IsValid( this ICollection collection )
+        public static bool              IsValid( this Collection collection )
         {
             return
-                ( collection != null )&&
-                ( collection.Association != null )&&
-                ( !string.IsNullOrEmpty( collection.Association.Signature ) )&&
+                ( collection != null ) &&
+                ( collection.Association != null ) &&
+                ( !string.IsNullOrEmpty( collection.Association.Signature ) ) &&
                 ( collection.Association.ClassType != null );
         }
         

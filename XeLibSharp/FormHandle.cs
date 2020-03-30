@@ -174,9 +174,10 @@ namespace XeLib
         public void DumpContainerTree()
         {
             DebugLog.WriteLine( string.Format(
-                "XeLibSharp.FormHandle :: DumpContainerTree() :: 0x{0} - \"{1}\"",
+                "IXHandle.IDString".Translate(),
                 FormID.ToString( "X8" ),
-                EditorID ) );
+                EditorID ),
+                true );
             uint uContainer = XHandle;
             while( XeLib.Internal.Functions.GetContainer( uContainer, out uContainer ) )
             {
@@ -185,15 +186,16 @@ namespace XeLib
                 string eid = null;
                 fid = Records.GetFormIDEx( uContainer );
                 eid = RecordValues.GetEditorIDEx( uContainer );
-                var tmp =
-                    string.Format(
-                        "{0}{1}",
-                        fid != 0xFFFFFFFF ? string.Format( " 0x{0}", fid.ToString( "X8" ) ) : null,
-                        !string.IsNullOrEmpty( eid ) ? string.Format( " \"{0}\"", eid ) : null );
+                string id = null;
+                if( ( fid != 0xFFFFFFFF )||( !string.IsNullOrEmpty( id ) ) )
+                    id = " :: " + string.Format(
+                        "IXHandle.IDString".Translate(),
+                        fid.ToString( "X8" ),
+                        eid );
                 DebugLog.WriteLine( string.Format(
-                    "\tContainer :: {0} :: {1}",
+                    "\tContainer :: {0}{1}",
                     et.ToString(),
-                    tmp ) );
+                    id ) );
             }
         }
         

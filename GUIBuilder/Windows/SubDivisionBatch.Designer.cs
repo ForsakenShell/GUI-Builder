@@ -12,7 +12,6 @@ namespace GUIBuilder.Windows
         /// Designer variable used to keep track of non-visual components.
         /// </summary>
         System.ComponentModel.IContainer components = null;
-        System.Windows.Forms.Panel pnWindow;
         System.Windows.Forms.GroupBox gbSubDivisionFunctions;
         System.Windows.Forms.Button btnOptimizeSandboxVolumes;
         System.Windows.Forms.Button btnCheckMissingElements;
@@ -44,7 +43,6 @@ namespace GUIBuilder.Windows
         /// </summary>
         void InitializeComponent()
         {
-            this.pnWindow = new System.Windows.Forms.Panel();
             this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.gbSubDivisionFunctions = new System.Windows.Forms.GroupBox();
             this.gbElements = new System.Windows.Forms.GroupBox();
@@ -54,22 +52,16 @@ namespace GUIBuilder.Windows
             this.btnNormalizeBuildVolumes = new System.Windows.Forms.Button();
             this.btnOptimizeSandboxVolumes = new System.Windows.Forms.Button();
             this.btnFinalizeElements = new System.Windows.Forms.Button();
-            this.pnWindow.SuspendLayout();
+            this.WindowPanel.SuspendLayout();
             this.gbSubDivisionFunctions.SuspendLayout();
             this.gbElements.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnWindow
             // 
-            this.pnWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnWindow.Controls.Add(this.lvSubDivisions);
-            this.pnWindow.Controls.Add(this.gbSubDivisionFunctions);
-            this.pnWindow.Location = new System.Drawing.Point(0, 0);
-            this.pnWindow.Name = "pnWindow";
-            this.pnWindow.Size = new System.Drawing.Size(514, 404);
-            this.pnWindow.TabIndex = 0;
+            this.WindowPanel.Controls.Add(this.lvSubDivisions);
+            this.WindowPanel.Controls.Add(this.gbSubDivisionFunctions);
+            this.WindowPanel.Size = new System.Drawing.Size( 514, 404 );
             // 
             // lvSubDivisions
             // 
@@ -193,7 +185,7 @@ namespace GUIBuilder.Windows
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(514, 404);
-            this.Controls.Add(this.pnWindow);
+            this.Controls.Add(this.WindowPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -203,13 +195,12 @@ namespace GUIBuilder.Windows
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "SubDivisionBatchWindow.Title";
             this.Text = "title";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
-            this.pnWindow.ResumeLayout(false);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
+            this.ClientOnLoad += new System.EventHandler(this.SubDivisionBatch_OnLoad);
             this.gbSubDivisionFunctions.ResumeLayout(false);
             this.gbElements.ResumeLayout(false);
+            this.WindowPanel.ResumeLayout( false );
+            this.WindowPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }

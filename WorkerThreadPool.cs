@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Reflection;
 
 public static class WorkerThreadPool
 {
@@ -17,12 +18,81 @@ public static class WorkerThreadPool
     public delegate void ThreadStartParams( object obj );
     public delegate void ThreadOnFinish();
     public delegate void ThreadOnFinishParams( object obj );
-    
+
+    #region Global Unique Thread Identities
+
+    [ThreadStatic]
+    static MethodBase _StartMethodBase = null;
+
+    public static MethodBase StartMethodBase
+    {
+        get
+        {
+            return _StartMethodBase;
+        }
+        set
+        {
+            if( _StartMethodBase != null )
+                throw new Exception( "StartMethodBase can only be set once per thread" );
+            _StartMethodBase = value;
+        }
+    }
+
+    static public string StartMethodBaseName( bool trimThreadPrefix )
+    {
+        return GenString.FormatMethod( StartMethodBase, null, false, trimThreadPrefix, true );
+    }
+
+    static public string StartMethodBaseNameFriendly( bool trimThreadPrefix )
+    {
+        return GenString
+            .FormatMethod( StartMethodBase, null, false, trimThreadPrefix, true )
+            .ReplaceInvalidFilenameChars();
+    }
+
+    static public int CurrentThreadID { get { return Thread.CurrentThread.ManagedThreadId; } }
+
+    /// <summary>
+    /// The thread.Name field must be set before calling this function.
+    /// Returns a unique filename friendly ID string for a thread.
+    /// </summary>
+    /// <param name="thread"></param>
+    /// <returns>Unique string for any given thread</returns>
+    public static string FriendlyThreadIdName( Thread thread = null )
+    {
+        thread = thread ?? Thread.CurrentThread;
+        return string.Format(
+                "{0}0x{1}_{2}",
+                GenString.THREAD_PREFIX,
+                thread.ManagedThreadId.ToString( "X8" ),
+                thread.Name
+            );
+    }
+
+    public static void SetName( string name )
+    {
+        SetName( null, name );
+    }
+
+    public static void SetName( Thread thread, string name )
+    {
+        if( string.IsNullOrEmpty( name ) ) return;
+        ( thread ?? Thread.CurrentThread ).Name = name;
+    }
+
+    public static string GetName( Thread thread = null )
+    {
+        return ( thread ?? Thread.CurrentThread ).Name;
+    }
+
+    #endregion
+
     public class WorkerThread : IDisposable
     {
-        
+
         Thread _thread = null;
-        
+        MethodBase _StartMethodBase = null;
+
         internal object _Obj;
         
         internal bool _StopSignal;
@@ -31,39 +101,64 @@ public static class WorkerThreadPool
         internal ThreadStartParams _StartParams;
         internal ThreadOnFinish _OnFinish;
         internal ThreadOnFinishParams _OnFinishParams;
-        
+
         #region Allocation & Disposal
-        
+
         #region Allocation
-        
-        public WorkerThread( ThreadStart start, ThreadOnFinish onFinish )
+
+        public WorkerThread( ThreadStart start, ThreadOnFinish onFinish, MethodBase reportStartMethod = null, string nameSuffix = null )
         {
-            INTERNAL_cTor( null, start, onFinish, null, null );
+            INTERNAL_cTor( null, start, onFinish, null, null, reportStartMethod, nameSuffix );
         }
         
-        public WorkerThread( object obj, ThreadStartParams startParams, ThreadOnFinishParams onFinishParams )
+        public WorkerThread( object obj, ThreadStartParams startParams, ThreadOnFinishParams onFinishParams, MethodBase reportStartMethod = null, string nameSuffix  = null )
         {
-            INTERNAL_cTor( obj, null, null, startParams, onFinishParams );
+            INTERNAL_cTor( obj, null, null, startParams, onFinishParams, reportStartMethod, nameSuffix );
         }
         
-        void INTERNAL_cTor( object obj, ThreadStart start, ThreadOnFinish onFinish, ThreadStartParams startParams, ThreadOnFinishParams onFinishParams )
+        void INTERNAL_cTor( object obj, ThreadStart start, ThreadOnFinish onFinish, ThreadStartParams startParams, ThreadOnFinishParams onFinishParams, MethodBase reportStartMethod, string nameSuffix )
         {
             _Obj = obj;
             
             _StopSignal = false;
-            
+
             _Start = start;
             _OnFinish = onFinish;
-            
+
             _StartParams = startParams;
             _OnFinishParams = onFinishParams;
-            
-            _thread = new Thread( INTERNAL_WorkerThread );
-            _thread.Name =
-                start       != null ? start      .Method.Name :
-                startParams != null ? startParams.Method.Name :
-                "Thread_ID_0x" + _thread.ManagedThreadId.ToString( "X8" );
-                
+
+            _StartMethodBase = reportStartMethod != null
+                ? reportStartMethod
+                : _StartParams != null
+                        ? _StartParams.Method
+                        : _Start?.Method;
+
+            var _nameSuffix = nameSuffix == null ? null : "_" + nameSuffix;
+            var _nameFriendly =
+                GenString.FormatMethod(
+                    _StartMethodBase,
+                    null, false, true, true
+                ).ReplaceInvalidFilenameChars();
+
+            var _name =  string.Format(
+                "{0}{1}",
+                _nameFriendly,
+                _nameSuffix );
+
+            _thread = new Thread( InvokeWorker )
+            {
+                Name = _name
+            };
+
+            /*
+                !string.IsNullOrEmpty( threadName )
+                ? threadName
+                :
+                    start       != null ? start      .Method.Name :
+                    startParams != null ? startParams.Method.Name :
+                    "Thread_ID_0x" + _thread.ManagedThreadId.ToString( "X8" );
+            */
         }
         
         #endregion
@@ -86,7 +181,8 @@ public static class WorkerThreadPool
         {
             if( Disposed )
                 return;
-            
+            Disposed = true;
+
             if( IsRunning )
                 Stop( true );
             
@@ -101,7 +197,6 @@ public static class WorkerThreadPool
             _thread = null;
             
             WorkerThreadPool.INTERNAL_RemoveWorker( this );
-            Disposed = true;
         }
         
         #endregion
@@ -119,22 +214,24 @@ public static class WorkerThreadPool
         {
             if( ( !IsReady )||( IsRunning )||( _StopSignal ) )
                 return false;
+            DebugLog.WriteLine( FriendlyThreadIdName( _thread ), true );
             _thread.Start();
             return IsRunning;
         }
         
         public void Stop( bool sync )
         {
+            DebugLog.WriteLine( FriendlyThreadIdName( _thread ), true );
             _StopSignal = true;
             if( sync )
                 while( IsRunning )
                     System.Threading.Thread.Sleep( 0 );
         }
         
-        public bool Sync( string prefix, WorkerThreadPool.WorkerThread syncWith = null )
+        public bool Sync( string wThreadTypeMethod, WorkerThreadPool.WorkerThread syncWith = null )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Sync()", prefix } );
-            
+            DebugLog.OpenIndentLevel( wThreadTypeMethod, false );
+
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.StartSyncTimer();
@@ -149,8 +246,7 @@ public static class WorkerThreadPool
                     break;
             }
             
-            var syncMsg = prefix + " :: Thread finished in {0}";
-            m.StopSyncTimer( syncMsg, tStart.Ticks );
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             
             DebugLog.CloseIndentLevel();
@@ -160,32 +256,37 @@ public static class WorkerThreadPool
         
         #endregion
         
-        void INTERNAL_WorkerThread()
+        void InvokeWorker()
         {
+            // Set the thread static global
+            StartMethodBase = _StartMethodBase;
+
             // Start the worker
-            
             try
             {
-                if( ( _StartParams != null )&&( _Obj != null ) )
+                if( _StartParams != null )
                     _StartParams( _Obj );
-                else if( _Start != null )
-                    _Start();
-                
-                // OnFinish callback
-                if( !_StopSignal )
-                {
-                    if( ( _OnFinishParams != null )&&( _Obj != null ) )
-                        _OnFinishParams( _Obj );
-                    else if( _OnFinish != null )
-                        _OnFinish();
-                }
+                else _Start?.Invoke();
             }
             catch( Exception e )
             {
                 GodObject.Windows.SetEnableState( true );
-                DebugLog.WriteError( "WorkerThreadPool", "INTERNAL_WorkerThread()", "An exception has occured while executing the thread\n" + e.ToString() );
+                DebugLog.WriteException( e );
             }
-            
+
+            // OnFinish callback
+            try
+            {
+                if( _OnFinishParams != null )
+                    _OnFinishParams( _Obj );
+                else _OnFinish?.Invoke();
+            }
+            catch( Exception e )
+            {
+                GodObject.Windows.SetEnableState( true );
+                DebugLog.WriteError( "An exception has occured while executing the thread OnFinish handler\n" + e.ToString() );
+            }
+
             if( DebugLog.Initialized )
                 DebugLog.Close();
         }
@@ -196,26 +297,26 @@ public static class WorkerThreadPool
     
     #region Public API to create and manage workers
     
-    public static WorkerThread CreateWorker( ThreadStart start, ThreadOnFinish onFinish )
+    public static WorkerThread CreateWorker( ThreadStart start, ThreadOnFinish onFinish, MethodBase reportStartMethod = null, string nameSuffix = null )
     {
         if( _workers == null )
             _workers = new List<WorkerThread>();
         if( _workers == null )
             return null;
-        var w = new WorkerThread( start, onFinish );
+        var w = new WorkerThread( start, onFinish, reportStartMethod, nameSuffix );
         if( ( w == null )||( !w.IsReady ) )
             return null;
         _workers.Add( w );
         return w;
     }
     
-    public static WorkerThread CreateWorker( object obj, ThreadStartParams startParams, ThreadOnFinishParams onFinishParams )
+    public static WorkerThread CreateWorker( object obj, ThreadStartParams startParams, ThreadOnFinishParams onFinishParams, MethodBase reportStartMethod = null, string nameSuffix = null )
     {
         if( _workers == null )
             _workers = new List<WorkerThread>();
         if( _workers == null )
             return null;
-        var w = new WorkerThread( obj, startParams, onFinishParams );
+        var w = new WorkerThread( obj, startParams, onFinishParams, reportStartMethod, nameSuffix );
         if( ( w == null )||( !w.IsReady ) )
             return null;
         _workers.Add( w );
@@ -224,15 +325,17 @@ public static class WorkerThreadPool
     
     public static void StopAllWorkers( bool sync, bool disposeOfWorkers )
     {
-        DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers()" );
+        DebugLog.OpenIndentLevel();
         
         if( sync )
-            DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers() :: Syncing..." );
+            DebugLog.WriteLine( "Syncing..." );
         
         INTERNAL_StopActiveWorkers( sync, disposeOfWorkers );
         
         if( sync )
-            DebugLog.WriteLine( "WorkerThreadPool.StopAllWorkers() :: ...Stopped" );
+            DebugLog.WriteLine( "...Stopped" );
+
+        DebugLog.CloseIndentLevel();
     }
     
     public static bool AnyActiveWorkers { get { return INTERNAL_AnyWorkerActive(); } }

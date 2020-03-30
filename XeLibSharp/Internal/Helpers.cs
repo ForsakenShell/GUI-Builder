@@ -48,10 +48,19 @@ namespace XeLib.Internal
             return Encoding.Unicode.GetString(bytes, 0, len * 2);
         }
 
+        public static byte[] GetResultRawBytes( int len )
+        {
+            if( len < 1 ) return null;
+            var bytes = new Byte[ len ];
+            return Functions.GetResultBytes( bytes, len )
+                ? bytes
+                : null;
+        }
+
         public static string GetResultString( int len )
         {
             if( len < 1 ) return null;
-            var bytes = new Byte[ len * 2 ];
+            var bytes = new byte[ len * 2 ];
             return Functions.GetResultString( bytes, len )
                 ? Encoding.Unicode.GetString( bytes, 0, len *2 )
                 : null;

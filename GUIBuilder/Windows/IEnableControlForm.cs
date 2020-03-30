@@ -6,9 +6,18 @@ using System.Threading.Tasks;
 
 namespace GUIBuilder.Windows
 {
+
+    public delegate void SetEnableStateHandler( bool enabled );
+
     public interface IEnableControlForm
     {
-        void SetEnableState( bool enabled );
-        void Close();
+
+        event SetEnableStateHandler OnSetEnableState;
+
+        void                        SetEnableState( bool enabled );
+
+        void                        Close();
+        bool                        InvokeRequired { get; }
+        object                      Invoke( Delegate method, params object[] args );
     }
 }

@@ -21,7 +21,8 @@ namespace GUIBuilder
         public const string ImportModPath = "Mods";
         public const string RenderTransformImagePath = "RenderTransform";
         public const string DefaultNIFBuilderOutputPath = "Output";
-        
+        public const string LogFilePath = "Logs";
+
         public const string GUIBuilderConfigFile = "GUIBuilder_Options.xml";
         
         public static readonly string DefaultLanguage = "English (UK)";

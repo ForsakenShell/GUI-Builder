@@ -25,12 +25,11 @@ namespace GUIBuilder.FormImport
         protected override void         DumpImport()
         {
             //return;
-            DebugLog.WriteLine( string.Format(
-                "\n{0}{1}{2}{3}{4}{5}",
-                this.GetType()  .ToString(),
-                Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
-                string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID )
-            ) );
+            DebugLog.WriteStrings( null, new [] {
+                this.TypeFullName(),
+                Target          .DisplayIDInfo( "Target Form = {0}", "unresolved" ),
+                string.Format( "NewEditorID = \"{0}\"", NewEditorID ) },
+                false, true, false, false );
         }
         
         public                          ImportLayer( string[] importData )
@@ -41,7 +40,7 @@ namespace GUIBuilder.FormImport
             : base(  IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( Engine.Plugin.Forms.Layer ), originalForm )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
             
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
@@ -108,7 +107,7 @@ namespace GUIBuilder.FormImport
         {
             try
             {
-                var cLayers = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Layer>( true, false );
+                var cLayers = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Layer>( true, false, false );
                 if( cLayers == null )
                 {
                     AddErrorMessage( ErrorTypes.Import, "Unable to get root container for Layers" );

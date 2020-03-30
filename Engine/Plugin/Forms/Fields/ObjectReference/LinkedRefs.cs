@@ -51,7 +51,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             
             ClearCurrentLinkedRefHandles();
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetLinkedRefsFromForm()", Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "GetLinkedRefsFromForm()", Form.ToString() } );
             
             _LastHandle = h;
             
@@ -71,7 +71,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
                     m += "\n";
                     m += s;
                 }
-                DebugLog.WriteWarning( this.GetType().ToString(), "GetLinkedRefsFromForm()", m );
+                DebugLog.WriteWarning( m );
                 return;
                 //goto localReturnResult;
             }
@@ -87,7 +87,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public int                      FindKeywordIndex( TargetHandle target, uint keywordFormID )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "FindKeywordIndex()", "keywordFormID = 0x" + keywordFormID.ToString( "X8" ), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "FindKeywordIndex()", "keywordFormID = 0x" + keywordFormID.ToString( "X8" ), Form.ToString() } );
             int result = -1;
             
             if( ( keywordFormID == Engine.Plugin.Constant.FormID_None )||( keywordFormID == Engine.Plugin.Constant.FormID_Invalid ) )
@@ -107,7 +107,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public int                      FindReferenceIndex( TargetHandle target, uint refID )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "FindReferenceIndex()", "refID = 0x" + refID.ToString( "X8" ), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "FindReferenceIndex()", "refID = 0x" + refID.ToString( "X8" ), Form.ToString() } );
             
             int result = -1;
             
@@ -134,7 +134,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public Forms.ObjectReference    GetLinkedRef( TargetHandle target, uint keywordFormID )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetLinkedRef()", "keywordFormID = 0x" + keywordFormID.ToString( "X8" ), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "GetLinkedRef()", "keywordFormID = 0x" + keywordFormID.ToString( "X8" ), Form.ToString() } );
             GetLinkedRefsFromForm( target );
             
             int index = FindKeywordIndex( target, keywordFormID );
@@ -208,7 +208,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             var lrh = Form.WorkingFileHandle.AddArrayItem<ElementHandle>( XPath, "", "" );
             if( !lrh.IsValid() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "AddEx()", string.Format(
+                DebugLog.WriteError( string.Format(
                     "Unable to AddArrayItem() \"{0}\" to {1}",
                     XPath,
                     this.Form.ToString() ) );
@@ -249,11 +249,10 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             var lrHandle = _LinkedReferences[ index ];
             if( !Elements.RemoveElementOrParentEx( lrHandle.XHandle ) )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "RemoveEx()", string.Format(
-                    "Unable to RemoveElementOrParentEx() 0x{0} from 0x{1} - \"{2}\"",
+                DebugLog.WriteError( string.Format(
+                    "Unable to RemoveElementOrParentEx() 0x{0} from {1}",
                     lrHandle.ToString(),
-                    this.Form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                    this.Form.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ) );
+                    this.Form.IDString ) );
                 return false;
             }
             _LinkedReferences.RemoveAt( index );
@@ -267,7 +266,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public uint                     GetReferenceID( TargetHandle target, int index )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetReferenceID()", "index = " + index.ToString(), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "GetReferenceID()", "index = " + index.ToString(), Form.ToString() } );
             uint result = Constant.FormID_Invalid;
             
             GetLinkedRefsFromForm( target );
@@ -300,7 +299,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public Forms.ObjectReference    GetReference( TargetHandle target, int index )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetReference()", "index = " + index.ToString(), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "GetReference()", "index = " + index.ToString(), Form.ToString() } );
             Forms.ObjectReference result = null;
             
             GetLinkedRefsFromForm( target );
@@ -319,7 +318,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         public void                     SetReference( TargetHandle target, int index, Forms.ObjectReference value )
         {
             if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: SetReference() :: Target must be TargetHandle.Working!" );
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SetReference()", "index = " + index.ToString(), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "SetReference()", "index = " + index.ToString(), Form.ToString() } );
             
             GetLinkedRefsFromForm( target );
             
@@ -346,7 +345,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public uint                     GetKeywordFormID( TargetHandle target, int index )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetKeywordFormID()", "index = " + index.ToString(), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "GetKeywordFormID()", "index = " + index.ToString(), Form.ToString() } );
             uint result = Constant.FormID_Invalid;
             
             GetLinkedRefsFromForm( target );
@@ -379,7 +378,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         
         public Forms.Keyword            GetKeyword( TargetHandle target, int index )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetKeyword()", "index = " + index.ToString(), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "GetKeyword()", "index = " + index.ToString(), Form.ToString() } );
             Forms.Keyword result = null;
             
             GetLinkedRefsFromForm( target );
@@ -398,7 +397,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
         public void                     SetKeyword( TargetHandle target, int index, Forms.Keyword value )
         {
             if( target != TargetHandle.Working ) throw new System.ArgumentException( "Engine.Plugin.Forms.Fields.ObjectReference.LinkedRefs :: SetKeyword() :: Target must be TargetHandle.Working!" );
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SetKeyword()", "index = " + index.ToString(), Form.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "SetKeyword()", "index = " + index.ToString(), Form.ToString() } );
             
             GetLinkedRefsFromForm( target );
             

@@ -33,7 +33,7 @@ namespace Engine.Plugin
         #region Meta data
         
         IXHandle                        _Ancestor                   = null; // Ancestral form (eg, a CELL for a REFR form)
-        ICollection                     _Collection                 = null;
+        Collection                      _ParentCollection           = null;
         List<ElementHandle>             _Handles                    = null;
         int                             _LastFullRequiredHandleIndex = -1;
         int                             _LastFullOptionalHandleIndex = -1;
@@ -41,7 +41,7 @@ namespace Engine.Plugin
         
         List<PapyrusScript>             _Scripts                    = null;
         
-        List<ICollection>               _Collections                = null;
+        List<Collection>                _ChildCollections           = null;
         
         string                          _Forced_Filename            = null;
         uint                            _Forced_FormID              = Constant.FormID_Invalid;
@@ -57,26 +57,26 @@ namespace Engine.Plugin
             if( Association == null )
                 throw new Exception( string.Format( "Cannot get Association for {0}", this.GetType() ) );
             if( ( string.IsNullOrEmpty( Signature ) )||( Signature.Length != 4 ) )
-                throw new ArgumentException( string.Format( "{1} :: Invalid Signature :: \"{0}\"", Signature, this.GetType().ToString() ) );
+                throw new ArgumentException( string.Format( "{1} :: Invalid Signature :: \"{0}\"", Signature, this.TypeFullName() ) );
             _Forced_Filename = filename;
-            _Forced_FormID = formID;
+            _Forced_FormID = formID & 0x00FFFFFF;
             CreateFields();
         }
         
         //protected Form( ICollection collection, IDataSync ancestor, RecordHandle handle )
-        protected                       Form( ICollection collection, IXHandle ancestor, FormHandle handle )
+        protected                       Form( Collection parentCollection, IXHandle ancestor, FormHandle handle )
         {
             bool throwError = false;
             string errorString = "";
             if( Association == null )
             {
                 throwError = true;
-                errorString += string.Format( "\tError :: Cannot get Association for {0}\n", this.GetType() );
+                errorString += string.Format( "\tCannot get Association for {0}\n", this.GetType() );
             }
             if( !ancestor.IsValid() )
             {
                 throwError = true;
-                errorString += "\tError :: Ancestor must be valid\n";
+                errorString += "\tAncestor must be valid\n";
             }
             else
             {
@@ -87,41 +87,41 @@ namespace Engine.Plugin
                     if( !aCanHaveMe )
                     {
                         throwError = true;
-                        errorString += "\tError :: Ancestor does not have an association for this Form type\n";
+                        errorString += "\tAncestor does not have an association for this Form type\n";
                     }
                 }
                 else if( !Association.AllowRootCollection )
                 {
                     throwError = true;
-                    errorString += "\tError :: Form type cannot be in a root (file) level container\n";
+                    errorString += "\tForm type cannot be in a root (file) level container\n";
                 }
             }
             if( ( string.IsNullOrEmpty( Signature ) )||( Signature.Length != 4 ) )
             {
                 throwError = true;
-                errorString += "\tError :: Invalid Signature\n";
+                errorString += "\tInvalid Signature\n";
             }
-            if( collection == null )
+            if( parentCollection == null )
             {
                 throwError = true;
-                errorString += "\tError :: Collection cannot be null\n";
+                errorString += "\tparentCollection cannot be null\n";
             }
             if( !handle.IsValid() )
             {
                 throwError = true;
-                errorString += "\tError :: Invalid Handle\n";
+                errorString += "\tInvalid Handle\n";
             }
             var rSig = handle.Signature;
             if( rSig != Signature )
             {
                 throwError = true;
-                errorString += "\tError :: Record signature does not match Form signature\n";
+                errorString += "\tRecord signature does not match Form signature\n";
             }
             var isMaster = handle.IsMaster;
             if( !isMaster )
             {
                 throwError = true;
-                errorString += "\tError :: Handle must be the master record\n";
+                errorString += "\tHandle must be the master record\n";
             }
             if( throwError )
             {
@@ -139,8 +139,7 @@ namespace Engine.Plugin
                 }
                 catch {}
                 errorString= string.Format(
-                    "\n{0} :: cTOR()\n{1}\tHandle = 0x{2}\n\tPath = \"{8}\"\n\tHandle File = \"{3}\"\n\tForm Signature = \"{4}\"\n\tRecord Signature = \"{5}\"\n\tFormID = 0x{6}\n\tIsMaster = {7}\n\tAncestor = {9}",
-                    this.GetType().ToString(),
+                    "{0}\tHandle = 0x{1}\n\tPath = \"{7}\"\n\tHandle File = \"{2}\"\n\tForm Signature = \"{3}\"\n\tRecord Signature = \"{4}\"\n\tFormID = 0x{5}\n\tIsMaster = {6}\n\tAncestor = {8}",
                     errorString,
                     handle.ToString(),
                     ( file == null ? "Unresolvable" : file.Filename ),
@@ -150,10 +149,10 @@ namespace Engine.Plugin
                     rPath,
                     ancestor.ToStringNullSafe()
                    );
-                DebugLog.WriteLine( errorString );
-                throw new ArgumentNullException( errorString );
+                DebugLog.WriteError( errorString );
+                throw new ArgumentNullException( this.TypeFullName(), errorString );
             }
-            _Collection = collection;
+            _ParentCollection = parentCollection;
             _Ancestor = ancestor;
             CreateFields();
             GetHandles( handle );
@@ -171,7 +170,7 @@ namespace Engine.Plugin
             //Attributes.AssociationExtensions.Dump( associations, "Creating form for:" );
             if( association.HasChildCollections )
             {
-                _Collections = new List<ICollection>();
+                _ChildCollections = new List<Collection>();
                 foreach( var childContainerType in association.ChildTypes )
                 {
                     var childAssociation = Plugin.Attributes.Reflection.AssociationFrom( childContainerType );
@@ -181,7 +180,7 @@ namespace Engine.Plugin
                     var childContainer = Activator.CreateInstance( childAssociation.CollectionClassType, new object[]{ childAssociation, this } ) as Collection;
                     if( childContainer == null )
                         throw new Exception( string.Format( "Unable to create Child Container {0} for Form Type {1}", ( childAssociation.CollectionClassType == null ? "null" : childAssociation.CollectionClassType.ToString() ), ( childContainerType == null ? "null" : childContainerType.ToString() ) ) );
-                    _Collections.Add( childContainer );
+                    _ChildCollections.Add( childContainer );
                 }
             }
             
@@ -210,7 +209,17 @@ namespace Engine.Plugin
         {
             if( Disposed )
                 return;
-            
+            Disposed = true;
+
+            if( !_ChildCollections.NullOrEmpty() )
+                foreach( var collection in _ChildCollections )
+                    collection.Dispose();
+            _ChildCollections = null;
+
+            if( _ParentCollection != null )
+                _ParentCollection.Remove( this );
+            _ParentCollection = null;
+
             if( !_Handles.NullOrEmpty() )
             {
                 ElementHandle.ReleaseHandles( _Handles );
@@ -221,8 +230,9 @@ namespace Engine.Plugin
             _WorkingFileHandleIndex = -1;
             
             _Ancestor       = null;
-            
-            Disposed = true;
+
+            _References     = null;
+
         }
         
         #endregion
@@ -235,7 +245,9 @@ namespace Engine.Plugin
         {
             return GetFormID( Engine.Plugin.TargetHandle.Master ).GetHashCode() ^ Signature.GetHashCode();
         }
-        
+
+        public string                   IDString                    { get { return string.Format( "IXHandle.IDString".Translate(), GetFormID( TargetHandle.Master ).ToString( "X8" ), GetEditorID( TargetHandle.LastValid ) ); } }
+
         public override string          ToString()
         {
             if( this == null )
@@ -250,7 +262,7 @@ namespace Engine.Plugin
                 strScripts = "[";
                 for( int i = 0; i < _Scripts.Count; i++ )
                 {
-                    var strS = ( _Scripts[ i ] == null ? "[null]" : string.Format( "\"{0}\"", _Scripts[ i ].Signature ) );
+                    var strS = _Scripts[ i ].ToStringNullSafe();
                     if( i > 0 )
                         strScripts += ", ";
                     strScripts += strS;
@@ -263,7 +275,7 @@ namespace Engine.Plugin
                 strHandles = "[";
                 for( int i = 0; i < _Handles.Count; i++ )
                 {
-                    var strH = ( _Handles[ i ] == null ? "[null]" : _Handles[ i ].ToString() );
+                    var strH = _Handles[ i ].ToStringNullSafe();
                     if( i > 0 )
                         strHandles += ", ";
                     strHandles += strH;
@@ -273,7 +285,7 @@ namespace Engine.Plugin
             var str = string.Format(
                 "[{0}typeof( Form ) = {1}{2}{3}]",
                 ( strExtra == null ? null : string.Format( "{0} :: ", strExtra ) ),
-                this.GetType().ToString(),
+                this.TypeFullName(),
                 ( strScripts == null ? null : string.Format( " :: scripts = {0}", strScripts ) ),
                 ( strHandles == null ? null : string.Format( " :: handles = {0}", strHandles ) )
             );
@@ -308,7 +320,9 @@ namespace Engine.Plugin
                 return files;
             }
         }
-        
+
+        public uint                     ForcedFormID            { get { return _Forced_FormID; } }
+
         public string                   ForcedFilename          { get { return _Forced_Filename; } }
         
         public string[]                 Filenames
@@ -322,7 +336,15 @@ namespace Engine.Plugin
                 return filenames;
             }
         }
-        
+
+        public string                   GetFilename( TargetHandle target )
+        {
+            var fh = Engine.Plugin.Extensions.TargetHandleExtensions.HandleFromTarget( this, target ) as FormHandle;
+            if( !fh.IsValid() )
+                throw new ArgumentException( "Cannot get Filename for Form" );
+            return fh.Filename;
+        }
+
         public uint                     LoadOrder               { get { return GetFormID( Engine.Plugin.TargetHandle.Master ) >> 24; } }
         
         /*
@@ -404,7 +426,7 @@ namespace Engine.Plugin
         
         public virtual bool             Load()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Load()", this.ToStringNullSafe() } );
+            //DebugLog.OpenIndentLevel( this.ToStringNullSafe(), true );
             //DebugDump( TargetHandle.Master );
             //DebugLog.CloseIndentLevel();
             return true;
@@ -412,7 +434,7 @@ namespace Engine.Plugin
         
         public virtual bool             PostLoad()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "PostLoad()", this.ToStringNullSafe() } );
+            //DebugLog.OpenIndentLevel( this.ToStringNullSafe(), true );
             //DebugDump( TargetHandle.Master );
             //DebugLog.CloseIndentLevel();
             return true;
@@ -453,18 +475,18 @@ namespace Engine.Plugin
         
         public bool                     AddNewHandle( ElementHandle newHandle )
         {
-            //DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "AddNewHandle()", newHandle.ToStringNullSafe(), System.Environment.StackTrace } );
+            //DebugLog.OpenIndentLevel( new string[] { newHandle.ToStringNullSafe(), System.Environment.StackTrace }, true );
             
             bool result = false;
             
             if( !newHandle.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "{0} :: AddNewHandle() :: newHandle is invalid!", this.GetType().ToString() ) );
+                DebugLog.WriteLine( "newHandle is invalid!", true );
                 goto localAbort;
             }
             if( ( newHandle as FormHandle ) == null )
             {
-                DebugLog.WriteLine( string.Format( "{0} :: AddNewHandle() :: newHandle is not a FormHandle!", this.GetType().ToString() ) );
+                DebugLog.WriteLine( "newHandle is not a FormHandle!", true );
                 goto localAbort;
             }
             
@@ -481,7 +503,7 @@ namespace Engine.Plugin
             insertAt = HandleExtensions.InsertHandleIndex( _Handles, newHandle );
             if( insertAt < 0 )
             {
-                DebugLog.WriteWarning( this.GetType().ToString(), "AddNewHandle()", string.Format( "Unable to get load order insertion index for newHandle {0}", newHandle.ToString() ) );
+                DebugLog.WriteWarning( string.Format( "Unable to get load order insertion index for newHandle {0}", newHandle.ToString() ) );
                 goto localAbort;
             }
             
@@ -514,7 +536,7 @@ namespace Engine.Plugin
         {
             if( !fromHandle.IsValid() )
             {
-                DebugLog.WriteLine( new [] { this.GetType().ToString(), "CopyAsOverride", "fromHandle is null!" } );
+                DebugLog.WriteLine( "fromHandle is null!", true );
                 return null;
             }
             if( IsInWorkingFile() ) return WorkingFileHandle;
@@ -528,7 +550,7 @@ namespace Engine.Plugin
             /*
             DebugLog.Write( string.Format(
                 "\n{0} :: CopyAsOverride() :: 0x{1} - \"{2}\" :: CopyElement() :: OverrideHandle = 0x{3} :: dstContainer = 0x{4}",
-                this.GetType().ToString(),
+                this.FullTypeName(),
                 this.FormID.ToString( "X8" ),
                 this.EditorID.ToString(),
                 OverrideHandle.ToString(),
@@ -540,9 +562,8 @@ namespace Engine.Plugin
             var resHandle = fromHandle.CopyElement<FormHandle>( workingFile.WorkingFileHandle, false );
             if( !resHandle.IsValid() )
             {
-                DebugLog.WriteLine( string.Format(
-                    "\n{0} :: CopyAsOverride()\n\t***** Unable to copy override! *****\n\t{1}\n\tWorkingFile = \"{2}\"\n",
-                    this.GetType().ToString(),
+                DebugLog.WriteError( string.Format(
+                    "Unable to copy override!\n\t{0}\n\tWorkingFile = \"{1}\"",
                     fromHandle.ToString(),
                     workingFile.Filename ) );
                 //DebugDump();
@@ -552,7 +573,7 @@ namespace Engine.Plugin
             // Update the handles
             if( !AddNewHandle( resHandle ) )
             {
-                DebugLog.WriteLine( new [] { this.GetType().ToString(), "CopyAsOverride", "Unable to add new handle for override to Form!" } );
+                DebugLog.WriteError( string.Format( "Unable to add new handle for override to Form!\n{0}", fromHandle.ToString() ) );
                 resHandle.Dispose();
                 return null;
             }
@@ -567,7 +588,7 @@ namespace Engine.Plugin
                     var h = workingFile.MasterHandle.GetRecord( GetFormID( Engine.Plugin.TargetHandle.Master ), false );
                     if( !a.AddNewHandle( h ) )
                     {
-                        DebugLog.WriteLine( new [] { this.GetType().ToString(), "CopyAsOverride", "Unable to add new handle for override to Form to ancestor...why are we doing this?" } );
+                        DebugLog.WriteLine( new [] { this.FullTypeName(), "CopyAsOverride", "Unable to add new handle for override to Form to ancestor...why are we doing this?" } );
                         return null;
                     }
                 }
@@ -575,7 +596,7 @@ namespace Engine.Plugin
                 // *
                 DebugLog.Write( string.Format(
                     "\n{0} :: CopyAsOverride() :: 0x{1} - \"{2}\" :: Ancestor.IsInWorkingFile() :: 0x{3} - \"{4}\"",
-                    this.GetType().ToString(),
+                    this.FullTypeName(),
                     this.FormID.ToString( "X8" ),
                     this.EditorID.ToString(),
                     Ancestor.FormID.ToString( "X8" ),
@@ -600,7 +621,7 @@ namespace Engine.Plugin
             /*
             DebugLog.Write( string.Format(
                 "\n{0} :: CopyAsOverride() :: 0x{1} - \"{2}\" :: Complete",
-                this.GetType().ToString(),
+                this.FullTypeName(),
                 this.FormID.ToString( "X8" ),
                 this.EditorID.ToString() ) );
             */
@@ -611,8 +632,16 @@ namespace Engine.Plugin
         bool                            GetHandles( FormHandle hSource = null )
         {
             if( !_Handles.NullOrEmpty() ) return true;
-            //DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "GetHandles()", hSource.ToStringNullSafe() } );
             
+            var validForcedFormID = Engine.Plugin.Constant.ValidFormID( _Forced_FormID );
+            var validForcedFilename = !string.IsNullOrEmpty( _Forced_Filename );
+            var forcedFileIsLoaded = validForcedFilename ? GodObject.Plugin.Data.Files.IsLoaded( _Forced_Filename ) : false;
+
+            if( ( Disposed )&&( ( !validForcedFormID )||( !validForcedFilename )||( !forcedFileIsLoaded ) ) )
+                return false;
+
+            //DebugLog.OpenIndentLevel( hSource.ToStringNullSafe(), true );
+
             bool result = false;
             
             if( hSource.IsValid() )
@@ -622,29 +651,29 @@ namespace Engine.Plugin
             }
             else
             {
-                if( !Engine.Plugin.Constant.ValidFormID( _Forced_FormID ) )
+                if( !validForcedFormID )
                 {
-                    DebugLog.WriteError( this.GetType().ToString(), "GetHandles()", "FormID is invalid" );
+                    DebugLog.WriteError( "FormID is invalid" );
                     goto localAbort;
                 }
-                if( !Engine.Plugin.Constant.ValidEditorID( _Forced_Filename ) )
+                if( !validForcedFilename )
                 {
-                    DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Filename is invalid for 0x{0}", _Forced_FormID.ToString( "X8" ) ) );
+                    DebugLog.WriteError( string.Format( "Filename is invalid for 0x{0}", _Forced_FormID.ToString( "X8" ) ) );
                     goto localAbort;
                 }
-                if( !GodObject.Plugin.Data.Files.IsLoaded( _Forced_Filename ) )
+                if( !forcedFileIsLoaded )
                     return false;   // Not an error, user didn't select this core dependancy
                 var m = GodObject.Plugin.Data.Files.Find( _Forced_Filename );
                 if( ( m == null )||( m.LoadOrder == Constant.LO_Invalid ) )
                 {
-                    DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Unable to get file for 0x{0} - \"{1}\"", _Forced_FormID.ToString( "X8" ), _Forced_Filename ) );
+                    DebugLog.WriteError( string.Format( "Unable to get file {0} for Form 0x{1}", _Forced_Filename, _Forced_FormID.ToString( "X8" ) ) );
                     goto localAbort;
                 }
                 var fID = _Forced_FormID | m.GetFormID( Engine.Plugin.TargetHandle.Master );
                 hSource = m.MasterHandle.GetMasterRecord( fID, false );
                 if( !hSource.IsValid() )
                 {
-                    DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Unable to GetMasterRecord for 0x{0} - \"{1}\"", _Forced_FormID.ToString( "X8" ), _Forced_Filename ) );
+                    DebugLog.WriteError( string.Format( "Unable to GetMasterRecord from file {0} for Form 0x{0}", _Forced_Filename, _Forced_FormID.ToString( "X8" ) ) );
                     goto localAbort;
                 }
             }
@@ -653,7 +682,7 @@ namespace Engine.Plugin
             if( rSig != Signature )
             {
                 hSource.Dispose();
-                DebugLog.WriteError( this.GetType().ToString(), "GetHandles()",string.Format( "Record has invalid signature for 0x{0} :: Expected \"{1}\" got \"{2}\"", _Forced_FormID.ToString( "X8" ), Signature, rSig ) );
+                DebugLog.WriteError( string.Format( "Record has invalid signature for 0x{0} :: Expected \"{1}\" got \"{2}\"", _Forced_FormID.ToString( "X8" ), Signature, rSig ) );
                 goto localAbort;
             }
             
@@ -665,8 +694,17 @@ namespace Engine.Plugin
                 foreach( var hOverride in hOverrides )
                     if( ( !_Handles.Contains( hOverride ) )&&( !_Handles.Any( h => h.DuplicateOf( hOverride ) ) ) )
                         _Handles.Add( hOverride );
-            
+
             RecalcHandleIndexes();
+
+            // No collection means this is a CoreForm or an "early load" CustomForm
+            if( _ParentCollection == null )
+            {
+                _ParentCollection = GodObject.Plugin.Data.Root.GetCollection( this.GetType(), true, false, false );
+                if( _ParentCollection != null )
+                    _ParentCollection.Add( this );
+            }
+
             result = true;
             Disposed = false;
 
@@ -719,15 +757,15 @@ namespace Engine.Plugin
         
         #region Parent container collection
         
-        public ICollection              Collection
+        public Collection               ParentCollection
         {
-            get { return _Collection; }
+            get { return _ParentCollection; }
             set
             {
-                if( _Collection == value ) return;
-                if( _Collection != null ) _Collection.Remove( this );
-                _Collection = value;
-                if( _Collection != null ) _Collection.Add( this );
+                if( _ParentCollection == value ) return;
+                if( _ParentCollection != null ) _ParentCollection.Remove( this );
+                _ParentCollection = value;
+                if( _ParentCollection != null ) _ParentCollection.Add( this );
             }
         }
         
@@ -735,29 +773,29 @@ namespace Engine.Plugin
         
         #region Child collections
         
-        public void                     AddICollection( ICollection container )
+        public void                     AddCollection( Collection container )
         {
-            if( _Collections == null ) _Collections = new List<ICollection>();
-            _Collections.Add( container );
+            if( _ChildCollections == null ) _ChildCollections = new List<Collection>();
+            _ChildCollections.Add( container );
         }
         
-        public ICollection              CollectionFor( string signature )
+        public Collection               CollectionFor( string signature )
         {
-            return _Collections.NullOrEmpty() ? null : _Collections.Find( c => c.Association.Signature == signature );
+            return _ChildCollections.NullOrEmpty() ? null : _ChildCollections.Find( c => c.Association.Signature == signature );
         }
         
-        public ICollection              CollectionFor<TSync>() where TSync : class, IXHandle
+        public Collection               CollectionFor<TSync>() where TSync : class, IXHandle
         {
-            return _Collections.NullOrEmpty() ? null : _Collections.Find( c => c.Association.ClassType == typeof( TSync ) );
+            return _ChildCollections.NullOrEmpty() ? null : _ChildCollections.Find( c => c.Association.ClassType == typeof( TSync ) );
         }
         
-        public ICollection              CollectionFor( ClassAssociation association )
+        public Collection               CollectionFor( ClassAssociation association )
         {
-            return !Plugin.Attributes.AssociationExtensions.IsValid( association ) || _Collections.NullOrEmpty() ? null : _Collections.Find( c => c.Association.ClassType == association.ClassType );
+            return !Plugin.Attributes.AssociationExtensions.IsValid( association ) || _ChildCollections.NullOrEmpty() ? null : _ChildCollections.Find( c => c.Association.ClassType == association.ClassType );
         }
         
         // Don't return list, clone it so the caller cannot directly manipulate it.  Adding/Removing collections should be done through the proper API calls.
-        public List<ICollection>        ChildCollections            { get { return _Collections.Clone(); } }
+        public List<Collection>         ChildCollections            { get { return _ChildCollections.Clone(); } }
         
         #endregion
         
@@ -766,8 +804,6 @@ namespace Engine.Plugin
         #endregion
         
         #region ISyncedGUIObject
-        
-        //public string                   IDString                    { get { return string.Format( "0x{0} - \"{1}\"", FormID.ToString( "X8" ), EditorID ); } }
         
         public event EventHandler       ObjectDataChanged;
         
@@ -781,6 +817,7 @@ namespace Engine.Plugin
         
         public void                     ResumeObjectDataChangedEvents( bool sendevent )
         {
+
             _SupressObjectDataChangedEvent = false;
             if( sendevent ) SendObjectDataChangedEvent( this );
         }
@@ -804,63 +841,68 @@ namespace Engine.Plugin
         
         #region Form Specific Functions
         
-        public static TForm             CreateForm<TForm>( ICollection collection, IXHandle ancestor, ElementHandle handle ) where TForm : class, IXHandle
+        public static TForm             CreateForm<TForm>( Collection parentCollection, IXHandle ancestor, ElementHandle handle ) where TForm : class, IXHandle
         {
-            if( typeof( TForm ) != collection.Association.ClassType )
+            if( typeof( TForm ) != parentCollection.Association.ClassType )
             {
-                DebugLog.WriteLine( string.Format( "{0} :: CreateForm<TForm>()", string.Format( "TForm does not match Collection Form Type :: {0} != {1}", typeof( TForm ).ToString(), collection.Association.ClassType.ToString() ) ) );
+                DebugLog.WriteError( string.Format( "TForm does not match Collection Form Type :: {0} != {1}", typeof( TForm ).ToString(), parentCollection.Association.ClassType.ToString() ) );
                 return null;
             }
-            return CreateForm( collection, ancestor, handle ) as TForm;
+            return CreateForm( parentCollection, ancestor, handle ) as TForm;
         }
         
-        public static IXHandle          CreateForm( ICollection collection, IXHandle ancestor, ElementHandle handle )
+        public static IXHandle          CreateForm( Collection parentCollection, IXHandle ancestor, ElementHandle handle )
         {
-            return Activator.CreateInstance( collection.Association.ClassType, new Object[] { collection, ancestor, handle } ) as IXHandle;
+            return Activator.CreateInstance( parentCollection.Association.ClassType, new Object[] { parentCollection, ancestor, handle } ) as IXHandle;
         }
-        
+
+        List<Form>                      _References = null;
         public List<Form>               References
         {
             get
             {
-                var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
-                m.PushStatusMessage();
-                m.PushItemOfItems();
-                m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "References", this.ToString() } );
-                
-                List<Form> resultList = null;
-                
-                var oh = MasterHandle as FormHandle;
-                if( !oh.IsValid() ) goto localReturnResult;
-                
-                var refs = oh.GetReferencedBy();
-                if( refs.NullOrEmpty() ) goto localReturnResult;
-                
-                resultList = new List<Form>();
-                var max = refs.Length;
-                for( int i = 0; i < max; i++ )
+                if( _References.NullOrEmpty() )
                 {
-                    m.SetItemOfItems( i, max );
-                    var refHandle = refs[ i ];
-                    #region Debug dump
-                    //var rFID = refHandle.FormID;
-                    //var rSig = refHandle.Signature;
-                    //DebugLog.WriteLine( "[ " + i + " ] = " + rSig + " 0x" + rFID.ToString( "X8" ) );
-                    #endregion
-                    // Add the form to the return list
-                    var rForm = GodObject.Plugin.Data.Root.Find( refHandle ) as Form;
-                    if( ( rForm != null )&&( resultList.IndexOf( rForm ) < 0 ) ) resultList.Add( rForm );
+                    var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
+                    m.PushStatusMessage();
+                    m.PushItemOfItems();
+                    m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), IDString ) );
+
+                    //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "References", this.IDString } );
+
+                    List<Form> resultList = null;
+
+                    var mh = MasterHandle as FormHandle;
+                    if( !mh.IsValid() ) goto localReturnResult;
+
+                    var refs = mh.GetReferencedBy();
+                    if( refs.NullOrEmpty() ) goto localReturnResult;
+
+                    resultList = new List<Form>();
+                    var max = refs.Length;
+                    for( int i = 0; i < max; i++ )
+                    {
+                        m.SetItemOfItems( i, max );
+                        var refHandle = refs[ i ];
+                        #region Debug dump
+                        //var rFID = refHandle.FormID;
+                        //var rSig = refHandle.Signature;
+                        //DebugLog.WriteLine( "[ " + i + " ] = " + rSig + " 0x" + rFID.ToString( "X8" ) );
+                        #endregion
+                        // Add the form to the return list
+                        var rForm = GodObject.Plugin.Data.Root.Find( refHandle ) as Form;
+                        if( ( rForm != null ) && ( resultList.IndexOf( rForm ) < 0 ) ) resultList.Add( rForm );
+                    }
+
+                localReturnResult:
+                    //DebugLog.CloseIndentLevel<Form>( "Forms", resultList );
+                    m.PopItemOfItems();
+                    m.PopStatusMessage();
+                    _References = resultList.NullOrEmpty()
+                        ? null
+                        : resultList;
                 }
-                
-            localReturnResult:
-                //DebugLog.CloseIndentLevel<Form>( "Forms", resultList );
-                m.PopItemOfItems();
-                m.PopStatusMessage();
-                return resultList.NullOrEmpty()
-                    ? null
-                    : resultList;
+                return _References;
             }
         }
         
@@ -931,7 +973,7 @@ namespace Engine.Plugin
             get
             {
                 var mo = new List<string>();
-                mo.Add( string.Format( "{0}: 0x{1} - \"{2}\"", Signature, GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                mo.Add( string.Format( "{0}: {1}", Signature, IDString ) );
                 var moel = MouseOverExtra;
                 if( !moel.NullOrEmpty() )
                     foreach( var moe in moel )

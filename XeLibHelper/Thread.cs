@@ -22,9 +22,9 @@ namespace XeLibHelper
         
         #region Syncronization
         
-        public static bool Sync( string prefix, WorkerThreadPool.WorkerThread syncWith = null )
+        public static bool Sync( string xThreadTypeMethod, WorkerThreadPool.WorkerThread syncWith = null )
         {
-            DebugLog.OpenIndentLevel( new [] { "XeLibHelper.Thread", "Sync()", prefix } );
+            DebugLog.OpenIndentLevel( xThreadTypeMethod, false );
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -52,22 +52,17 @@ namespace XeLibHelper
                 
                 state = Setup.GetLoaderStatus();
             }
-            
-            var syncMsg = prefix + " :: Thread finished in {0}";
-            m.StopSyncTimer( syncMsg, tStart.Ticks );
-            
+
             var s = Messages.GetMessages();
             if( !string.IsNullOrEmpty( s ) )
             {
                 DebugLog.WriteLine( string.Format(
-                    string.IsNullOrEmpty( prefix )
-                    ? "{0} :: XEditLib output:\n{1}"
-                    : "{0} :: " + prefix + " :: XEditLib output:\n{1}"
-                    , "XeLibHelper.Thread :: Sync()"
+                    "XEditLib output:\n{0}"
                     , s ) );
                 Messages.ClearMessages();
             }
-            
+
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             
             DebugLog.CloseIndentLevel();

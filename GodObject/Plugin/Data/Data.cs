@@ -88,7 +88,7 @@ namespace GodObject
             
             public static void Load()
             {
-                DebugLog.OpenIndentLevel( "GodObject.Plugin.Data :: Load()" );
+                DebugLog.OpenIndentLevel();
                 
                 var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
@@ -104,7 +104,7 @@ namespace GodObject
                 EdgeFlags.Load();
                 BorderEnablers.Load();
                 
-                m.StopSyncTimer( "Godbject.Plugin.Data :: Load() :: Completed in {0}", tStart.Ticks );
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
                 
                 DebugLog.CloseIndentLevel();
@@ -112,7 +112,7 @@ namespace GodObject
             
             public static void PostLoad()
             {
-                DebugLog.OpenIndentLevel( "GodObject.Plugin.Data :: PostLoad()" );
+                DebugLog.OpenIndentLevel();
                 
                 var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
@@ -128,7 +128,7 @@ namespace GodObject
                 EdgeFlags.PostLoad();
                 BorderEnablers.PostLoad();
                 
-                m.StopSyncTimer( "Godbject.Plugin.Data :: PostLoad() :: Completed in {0}", tStart.Ticks );
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
                 
                 DebugLog.CloseIndentLevel();
@@ -432,6 +432,8 @@ namespace GodObject
                 Engine.Plugin.Form          _ScriptForm = null;
                 Dictionary<uint,TScript>    _ScriptForms = null;
                 
+                public Engine.Plugin.Form   ScriptForm {  get { return _ScriptForm; } }
+
                 #region Allocation
                 
                 public ScriptedObjects( Engine.Plugin.Form baseform )
@@ -487,7 +489,7 @@ namespace GodObject
                     if( !_IsValid )
                         return false;
                     
-                    DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.ScriptedObjects", "Load()", _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.Master ), _ScriptForm.ToString() } );
+                    DebugLog.OpenIndentLevel( _ScriptForm.IDString );
                     
                     var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                     m.PushStatusMessage();
@@ -501,14 +503,16 @@ namespace GodObject
                     var soh = _ScriptForm.MasterHandle;
                     if( !soh.IsValid() )
                     {
-                        DebugLog.WriteError( this.GetType().ToString(), "Load()", "_ScriptForm.MasterHandle is invalid!" );
+                        DebugLog.WriteError( "_ScriptForm.MasterHandle is invalid!" );
                         goto localReturnResult;
                     }
                     
                     var iforms = _ScriptForm.References;
                     if( iforms.NullOrEmpty() )
                     {
-                        DebugLog.WriteError( this.GetType().ToString(), "Load()", "_ScriptForm.References returned NULL!" );
+                        //DebugLog.WriteError( this.FullTypeName(), "Load()", "_ScriptForm.References returned NULL!" );
+                        // Not necessarily an error, maybe there are just no references
+                        result = true;
                         goto localReturnResult;
                     }
                     
@@ -519,14 +523,14 @@ namespace GodObject
                     
                     _ScriptForms = new Dictionary<uint,TScript>();
                     
-                    m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), bfFID.ToString( "X8" ), bfEID ) );
+                    m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), string.Format( "IXHandle.IDString".Translate(), bfFID.ToString( "X8" ), bfEID ) ) );
                     var max = iforms.Count;
                     for( int index = 0; index < max; index++ )
                     {
                         m.SetItemOfItems( index, max );
                         var iform = iforms[ index ];
                         var refr = iform as Engine.Plugin.Forms.ObjectReference;
-                        //DebugLog.WriteLine( string.Format( "[ {0} ] :: Load() :: {1}\n{{", index, refr.ToStringNullSafe() ) );
+                        //DebugLog.WriteLine( string.Format( "[ {0} ] :: Load() :: {1}\n{{", index, refr.IDString ) );
                         if( refr != null )
                         {
                             var rFID = refr.GetFormID( Engine.Plugin.TargetHandle.Master );
@@ -539,7 +543,7 @@ namespace GodObject
                                     _ScriptForms[ rFID ] = script;
                                     if( !script.Load() )
                                     {
-                                        DebugLog.WriteError( this.GetType().ToString(), "Load()", "_ScriptForm.Reference[ " + index + " ].Load() returned false!" );
+                                        DebugLog.WriteError( "_ScriptForm.Reference[ " + index + " ].Load() returned false!" );
                                         goto localReturnResult;
                                     }
                                 }
@@ -551,12 +555,11 @@ namespace GodObject
                     result = true;
                     
                 localReturnResult:
-                    var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
-                    m.StopSyncTimer( string.Format( "{0} :: Load() :: Completed in {1}", this.GetType().ToString(), "{0}" ), tStart.Ticks );
+                    m.StopSyncTimer( tStart );
                     m.PopItemOfItems();
                     m.PopStatusMessage();
                     
-                    DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
+                    DebugLog.CloseIndentLevel( "result", result.ToString() );
                     return result;
                 }
                 
@@ -565,14 +568,14 @@ namespace GodObject
                     if( !_IsValid )
                         return false;
                     
-                    DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "PostLoad()", _ScriptForm.ToString() } );
+                    DebugLog.OpenIndentLevel( _ScriptForm.IDString );
                     
                     var result = true;
                     
                     var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                     m.PushStatusMessage();
                     m.PushItemOfItems();
-                    m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferencesOf".Translate(), _ScriptForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), _ScriptForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    m.SetCurrentStatusMessage( string.Format( "Plugin.PostLoadReferencesOf".Translate(), _ScriptForm.IDString ) );
                     m.StartSyncTimer();
                     var tStart = m.SyncTimerElapsed();
                     
@@ -592,14 +595,13 @@ namespace GodObject
                                 break;
                         }
                     }
-                    
+
                 //localReturnResult:
-                    var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
-                    m.StopSyncTimer( string.Format( "{0} :: PostLoad() :: Completed in {1}", this.GetType().ToString(), "{0}" ), tStart.Ticks );
+                    m.StopSyncTimer( tStart );
                     m.PopItemOfItems();
                     m.PopStatusMessage();
                     
-                    DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
+                    DebugLog.CloseIndentLevel( "result", result.ToString() );
                     return result;
                 }
                 
@@ -713,7 +715,7 @@ namespace GodObject
                     //var cWorldspaces = GodObject.Plugin.Data.Root.GetContainer<Engine.Plugin.Forms.Worldspace>( true, false );
                     //if( cWorldspaces == null )
                     //{
-                    //    DebugLog.Write( string.Format( "{0} :: FindAllInWorldspace() :: Unable to get root container for Worldspaces!", this.GetType().ToString() ) );
+                    //    DebugLog.Write( string.Format( "{0} :: FindAllInWorldspace() :: Unable to get root container for Worldspaces!", this.FullTypeName() ) );
                     //    return null;
                     //}
                     //var worldspace = cWorldspaces.Find<Engine.Plugin.Forms.Worldspace>( editorid );
@@ -727,7 +729,7 @@ namespace GodObject
                 {
                     if( !_IsValid )
                         return null;
-                    //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace.ToStringNullSafe() ) );
+                    //DebugLog.WriteLine( string.Format( "worldspace ? {0}", ( worldspace == null ? "[null]" : worldspace.IDString ), true );
                     return worldspace == null
                         ? null
                         : FindAllInWorldspace( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) );
@@ -736,7 +738,7 @@ namespace GodObject
                 //bool doOnceInFindAllInWorldspace = false;
                 public List<TScript> FindAllInWorldspace( uint formid )
                 {
-                    //DebugLog.WriteLine( string.Format( "{0} :: FindAllInWorldspace() :: worldspace ? 0x{1}", this.GetType().ToString(), formid.ToString( "X8" ) ) );
+                    //DebugLog.WriteLine( string.Format( "worldspace ? 0x{1}", formid.ToString( "X8" ) ), true );
                     if( ( !_IsValid )||( _ScriptForms == null )||( !Engine.Plugin.Constant.ValidFormID( formid ) ) )
                         return null;
                     
@@ -750,7 +752,7 @@ namespace GodObject
                             var refr = kv.Value.Reference;
                             var cell = refr == null ? null : refr.Cell;
                             var wrld = cell == null ? null : cell.Worldspace;
-                            DebugLog.WriteLine( new [] { kv.Value.ToString(), refr.ToStringNullSafe(), cell.ToStringNullSafe(), wrld.ToStringNullSafe() } );
+                            DebugLog.WriteLine( new [] { kv.Value.IDString, refr?.IDString, cell?.IDString, wrld?.IDString } );
                         }
                         */
                         if( ( kv.Value.Reference.Worldspace != null )&&( kv.Value.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) == formid ) )
@@ -1043,13 +1045,45 @@ namespace GodObject
                     }
 
                     public void Add( WorkshopScript item )
-                    {   // TODO:  Write me
-                        throw new NotImplementedException();
+                    {
+                        throw new NotImplementedException( "Use Add( int formID, string plugin ) instead!" );
                     }
 
                     public bool Remove( WorkshopScript item )
                     {   // TODO:  Write me
                         throw new NotImplementedException();
+                    }
+
+                    public void Remove( uint formID, string plugin )
+                    {
+                        var ws = GodObject.Plugin.Workspace;
+                        if( ws == null ) return;
+                        // TODO: Write me!
+                    }
+
+                    public void Add( uint formID, string plugin, bool loadForm, bool addToWorkspace )
+                    {
+                        Engine.Plugin.Forms.Container customWorkbench;
+                        if( GodObject.CoreForms.TryAddCustomWorkshopWorkbench( formID, plugin, out customWorkbench ) )
+                        {
+                            var sow = new ScriptedObjects<WorkshopScript>( customWorkbench );
+                            if( loadForm )
+                            {
+                                if( !sow.Load() )
+                                    throw new InvalidOperationException( "ScriptObjects<WorkshopScript>.Load() returned false!" );
+                                if( !sow.PostLoad() )
+                                    throw new InvalidOperationException( "ScriptObjects<WorkshopScript>.PostLoad() returned false!" );
+                            }
+                            Forms.Add( sow );
+                        }
+                        if( ( customWorkbench != null )&&( addToWorkspace ) )
+                        {
+                            var ws = GodObject.Plugin.Workspace;
+                            if( ws != null )
+                            {
+                                // TODO: Write me!
+                            }
+                        }
                     }
 
                     public List<WorkshopScript> ToList( bool includePackInReferences )

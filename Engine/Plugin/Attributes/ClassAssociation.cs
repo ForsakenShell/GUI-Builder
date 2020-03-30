@@ -6,6 +6,7 @@
  *
  */
 #define DUMP_ASSOCIATIONS
+#define DUMP_STACK_WITH_ACCOCIATION_DUMP
 
 using System;
 using System.Collections.Generic;
@@ -42,11 +43,11 @@ namespace Engine.Plugin.Attributes
             get { return _ClassType; }
             set
             {
-                if( _ClassTypeSetOnce ) throw new Exception( string.Format( "{0}\n\tError :: ClassType can only be set once on a ClassAssociation!\nStack:\n{1}", this.GetType().ToString(), Environment.StackTrace ) );
+                if( _ClassTypeSetOnce ) throw new Exception( string.Format( "{0}\n\tError :: ClassType can only be set once on a ClassAssociation!\nStack:\n{1}", this.TypeFullName(), Environment.StackTrace ) );
                 _ClassTypeSetOnce = true;
                 if( value == null ) return;
                 if( !value.HasInterface<Interface.IXHandle>() )
-                    throw new Exception( string.Format( "{0}\n\tError :: ClassType must implement IXHandle!\n{1}", this.GetType().ToString(), Environment.StackTrace ) );
+                    throw new Exception( string.Format( "{0}\n\tError :: ClassType must implement IXHandle!\n{1}", this.TypeFullName(), Environment.StackTrace ) );
                 _ClassType = value;
             }
         }
@@ -130,7 +131,7 @@ namespace Engine.Plugin.Attributes
         public                          ClassAssociation( string signature, string prettyName )
         {
             if( string.IsNullOrEmpty( signature ) )
-                throw new Exception( string.Format( "{0}\n\tError :: Signature cannot be null or empty!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0}\n\tError :: Signature cannot be null or empty!", this.TypeFullName() ) );
             Signature = signature;
             PrettyName = prettyName;
         }
@@ -138,9 +139,9 @@ namespace Engine.Plugin.Attributes
         public                          ClassAssociation( string signature, string prettyName, bool allowRootCollection, Type collectionClassType )
         {
             if( string.IsNullOrEmpty( signature ) )
-                throw new Exception( string.Format( "{0}\n\tError :: Signature cannot be null or empty!", this.GetType().ToString() ) );
-            if( ( collectionClassType == null )||( !collectionClassType.HasInterface<Interface.ICollection>() ) )
-                throw new Exception( string.Format( "{0}\n\tError :: collectionClassType cannot be null and must implement ICollection!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0}\n\tError :: Signature cannot be null or empty!", this.TypeFullName() ) );
+            if( ( collectionClassType == null )||( !collectionClassType.IsClassOrSubClassOf( typeof( Collection ) ) ) )
+                throw new Exception( string.Format( "{0}\n\tError :: collectionClassType cannot be null and must be [a sub-class of] Collection!", this.TypeFullName() ) );
             CollectionClassType = collectionClassType;
             Signature = signature;
             AllowRootCollection = allowRootCollection;
@@ -150,9 +151,9 @@ namespace Engine.Plugin.Attributes
         public                          ClassAssociation( string signature, string prettyName, bool allowRootCollection, Type collectionClassType, Type[] children )
         {
             if( string.IsNullOrEmpty( signature ) )
-                throw new Exception( string.Format( "{0}\n\tError :: Signature cannot be null or empty!", this.GetType().ToString() ) );
-            if( ( collectionClassType == null )||( !collectionClassType.HasInterface<Interface.ICollection>() ) )
-                throw new Exception( string.Format( "{0}\n\tError :: collectionClassType cannot be null and must implement ICollection!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0}\n\tError :: Signature cannot be null or empty!", this.TypeFullName() ) );
+            if( ( collectionClassType == null )||( !collectionClassType.IsClassOrSubClassOf( typeof( Collection ) ) ) )
+                throw new Exception( string.Format( "{0}\n\tError :: collectionClassType cannot be null and must be [a sub-class of] Collection!", this.TypeFullName() ) );
             CollectionClassType = collectionClassType;
             Signature = signature;
             AllowRootCollection = allowRootCollection;
@@ -167,166 +168,11 @@ namespace Engine.Plugin.Attributes
                 : string.Format(
                     "{3}[Signature = \"{0}\" :: ClassType = {1} :: CollectionClassType = {2}]",
                     Signature,
-                    ( _ClassType.ToStringNullSafe() ),
-                    ( CollectionClassType.ToStringNullSafe() ),
+                    ( _ClassType.FullName() ),
+                    ( CollectionClassType.FullName() ),
                     ( PrettyName == null ? null : string.Format( "{0} = ", PrettyName ) )
                 );
         }
-        
-    }
-    
-    public static partial class AssociationExtensions
-    {
-        
-        public static bool              IsValid( this ClassAssociation association )
-        {
-            return
-                ( association != null )&&
-                ( !string.IsNullOrEmpty( association.Signature ) )&&
-                ( association.ClassType != null )&&
-                ( association.ClassType.GetInterface( typeof( Engine.Plugin.Interface.IXHandle ).Name ) != null );
-        }
-        
-        public static void              Dump( this ClassAssociation association, string prefix = null )
-        {
-            if( string.IsNullOrEmpty( prefix ) ) prefix = "ClassAssociation";
-            DebugLog.WriteLine( string.Format(
-                "{0}\n\tSignature = \"{1}\"\n\tClass Type = \"{2}\"\n\tCollection Class Type = \"{3}\"\n\tAllow Root Collection = {4}\n\tHas Child Collections = {5}",
-                prefix,
-                association.Signature,
-                ( association.ClassType.ToStringNullSafe() ),
-                ( association.CollectionClassType.ToStringNullSafe() ),
-                association.AllowRootCollection,
-                association.HasChildCollections
-            ) );
-            if( association.HasChildCollections )
-            {
-                foreach( var childType in association.ChildTypes )
-                {
-                    var associations = Reflection.AssociationFrom( childType );
-                    if( !associations.IsValid() ) continue;
-                    DebugLog.WriteLine( string.Format(
-                        "\t\tChild :: \"{0}\" - {1}",
-                        associations.Signature,
-                        ( associations.ClassType.ToStringNullSafe() )
-                    ) );
-                }
-            }
-        }
-    }
-    
-    public static partial class Reflection
-    {
-        
-        #region Attributes from Signature/Type
-        
-        public static ClassAssociation  AssociationFrom( string signature )
-        {
-            var associations = AllAssociations;
-            if( associations == null ) return null;
-            foreach( var association in associations )
-                if( association.Signature == signature ) return association;
-            return null;
-        }
-        
-        public static ClassAssociation  AssociationFrom( Type type )
-        {
-            var associations = AllAssociations;
-            if( associations == null ) return null;
-            foreach( var association in associations )
-                if( association.ClassType == type ) return association;
-            return null;
-        }
-        
-        public static List<ClassAssociation> ParentAssociationsOf( string childSignature )
-        {
-            var childAttributes = AssociationFrom( childSignature );
-            return ParentAssociationsOf( childAttributes );
-        }
-        
-        public static List<ClassAssociation> ParentAssociationsOf( Type childType )
-        {
-            var childAttributes = AssociationFrom( childType );
-            return ParentAssociationsOf( childAttributes );
-        }
-        
-        public static List<ClassAssociation> ParentAssociationsOf( ClassAssociation childAssociation )
-        {
-            if( !childAssociation.IsValid() ) return null;
-            var associations = AllAssociations;
-            if( associations == null ) return null;
-            var list = new List<ClassAssociation>();
-            foreach( var association in associations )
-                if(
-                    ( association.AllowRootCollection )&&
-                    ( association.HasChildOrGrandchildAssociationOf( childAssociation ) )
-                )   list.AddOnce( association );
-            return list.NullOrEmpty()
-                ? null
-                : list;
-        }
-        
-        #endregion
-        
-        #region Global enumeration of Associations
-        
-        static List<ClassAssociation>  _AllAssociations = null;
-        public static List<ClassAssociation> AllAssociations
-        {
-            get
-            {
-                if( _AllAssociations == null )
-                    _AllAssociations = GetAllAssociations();
-                return _AllAssociations;
-            }
-        }
-        
-        #if DUMP_ASSOCIATIONS
-        static bool                 ____doDebugDumpOnce = false;
-        #endif
-        
-        static List<ClassAssociation>   GetAllAssociations()
-        {
-            var thisAssembly = Assembly.GetExecutingAssembly();
-            if( thisAssembly == null ) return null;
-            
-            var list = thisAssembly
-                .GetTypes()
-                // disable once ConvertClosureToMethodGroup
-                .Where( type => type.HasAttribute<ClassAssociation>() )
-                .ToList();
-            if( list.NullOrEmpty() ) return null;
-            
-            Type foo = null;
-            var bar = foo.HasAttribute<ClassAssociation>();
-            var result = new List<ClassAssociation>();
-            foreach( var type in list )
-            {
-                ClassAssociation association = null;
-                if( !type.TryGetAttribute<ClassAssociation>( out association ) ) continue;
-                association.ClassType = type;
-                result.Add( association );
-            }
-            
-            #region Debug dump
-            #if DUMP_ASSOCIATIONS
-            
-            if( !____doDebugDumpOnce )
-            {
-                ____doDebugDumpOnce = true;
-                DebugLog.OpenIndentLevel(  new [] { "Engine.Plugin.Attributes.Reflection", "GetAllAssociations()" } );
-                for( int i = 0; i < result.Count; i++ )
-                    result[ i ].Dump( string.Format( "ClassAssociation[ {0} ]", i ) );
-                DebugLog.CloseIndentLevel();
-            }
-            
-            #endif
-            #endregion
-            
-            return result;
-        }
-        
-        #endregion
         
     }
     

@@ -51,7 +51,7 @@ namespace Engine.Plugin.Collections
         
         public Plugin.Forms.Cell GetByGrid( Vector2i coords )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GetByGrid()", "coords = " + coords.ToString(), "Worldspace = " + Worldspace.ToStringNullSafe() } );
+            //DebugLog.OpenIndentLevel( new [] { "coords = " + coords.ToString(), "Worldspace = " + Worldspace?.IDString }, true );
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             //m.PushStatusMessage();
             //m.StartSyncTimer();
@@ -62,12 +62,12 @@ namespace Engine.Plugin.Collections
             
             if( !this.IsValid() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "GetByGrid()", "Cell Collection is not valid!" );
+                DebugLog.WriteError( "Cell Collection is not valid!" );
                 goto localReturnResult;
             }
             
             //if( _ByGrid == null )
-            //    DebugLog.WriteLine( "No grid dictionary" + Worldspace == null ? null : string.Format( " for WRLD = 0x{0} - \"{1}\"", Worldspace.GetFormID( TargetHandle.Master ).ToString( "X8" ), Worldspace.GetEditorID( TargetHandle.LastValid ) ) );
+            //    DebugLog.WriteLine( "No grid dictionary" + Worldspace == null ? null : string.Format( " for WRLD = {0}", Worldspace.IDString ) );
             
             // Return now it's been loaded already
             if( ( _ByGrid != null )&&( _ByGrid.TryGetValue( coords, out cell ) ) )
@@ -82,7 +82,7 @@ namespace Engine.Plugin.Collections
                 ( coords.X > wsMax.X )||( coords.X < wsMin.X )||
                 ( coords.Y > wsMax.Y )||( coords.Y < wsMin.Y )
             ){
-                DebugLog.WriteError( this.GetType().ToString(), "GetByGrid()", "Grid is out of bounds for the worldspace :: " + coords.ToString() + " :: " + wsMax.ToString() + " - " + wsMin.ToString() );
+                DebugLog.WriteError( "Grid is out of bounds for the worldspace :: " + coords.ToString() + " :: " + wsMax.ToString() + " - " + wsMin.ToString() );
                 goto localReturnResult;
             }
             
@@ -168,7 +168,7 @@ namespace Engine.Plugin.Collections
                         found = true;
                         m.SetCurrentStatusMessage( string.Format( "Cells.LoadingRange".Translate(), tbName, tsbName, wsHandle.Filename ) );
                         //DebugLog.WriteLine( "Loading Cells containing " + coords.ToString() + " from " + tbName + " " + tsbName + " in " + wsHandle.Filename );
-                        LoadFromEx( ParentForm, sbHandle );
+                        LoadFromEx( ParentForm, sbHandle, true );
                         break;
                     }
                     
@@ -199,7 +199,7 @@ namespace Engine.Plugin.Collections
         
         public override bool Add( IXHandle syncObject )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Add()", syncObject.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "Add()", syncObject.ToString() } );
             var result = false;
             var cell = syncObject as Plugin.Forms.Cell;
             var interiorCell = false;
@@ -208,7 +208,7 @@ namespace Engine.Plugin.Collections
             // Not a cell?  wth?
             if( cell == null )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "Add()", string.Format( "Invalid object to add to collection.\nCollection = {0}\nObject = {1}", this.ToString(), syncObject.ToString() ) );
+                DebugLog.WriteError( string.Format( "Invalid object to add to collection.\nCollection = {0}\nObject = {1}", this.ToString(), syncObject.IDString ) );
                 goto localReturnResult;
             }
             
@@ -248,14 +248,14 @@ namespace Engine.Plugin.Collections
             _ByGrid = _ByGrid ?? new Dictionary<Vector2i, Engine.Plugin.Forms.Cell>();
             
             //if( _ByGrid == null )
-            //    DebugLog.WriteLine( "No grid dictionary" + Worldspace == null ? null : string.Format( " for WRLD = 0x{0} - \"{1}\"", Worldspace.GetFormID( TargetHandle.Master ).ToString( "X8" ), Worldspace.GetEditorID( TargetHandle.LastValid ) ) );
+            //    DebugLog.WriteLine( "No grid dictionary" + Worldspace == null ? null : string.Format( " for WRLD = {0}", Worldspace.IDString ) );
             
             _ByGrid[ cell.CellGrid.GetGrid( TargetHandle.Master ) ] = cell;
             
             result = true;
             
         localReturnResult:
-            //DebugLog.WriteLine( new [] { cell == null ? "SyncObject is not a CELL" : ( persistentCell ? "Persistent " : null ) + ( interiorCell ? "Interior " : null ) + string.Format( "CELL = {2}0x{0} - \"{1}\"", cell.GetFormID( TargetHandle.Master ).ToString( "X8" ), cell.GetEditorID( TargetHandle.LastValid ), ( !interiorCell && !persistentCell ) ? string.Format( "{0} :: ", cell.CellGrid.GetGrid( TargetHandle.Master ).ToString() ) : null ), Worldspace == null ? null : string.Format( "WRLD = 0x{0} - \"{1}\"", Worldspace.GetFormID( TargetHandle.Master ).ToString( "X8" ), Worldspace.GetEditorID( TargetHandle.LastValid ) ) } );
+            //DebugLog.WriteLine( new [] { cell == null ? "SyncObject is not a CELL" : ( persistentCell ? "Persistent " : null ) + ( interiorCell ? "Interior " : null ) + string.Format( "CELL = {1}{0}", cell.IDString, ( !interiorCell && !persistentCell ) ? string.Format( "{0} :: ", cell.CellGrid.GetGrid( TargetHandle.Master ).ToString() ) : null ), Worldspace == null ? null : string.Format( "WRLD = {0}", Worldspace.IDString ) } );
             //DebugLog.CloseIndentLevel( "result", result.ToString() );
             return result;
         }

@@ -83,7 +83,7 @@ namespace Engine.Plugin.PapyrusScripts
         
         public bool                     DeleteProperty( bool createOverride, bool sendObjectDataChangedEvent )
         {
-            //DebugLog.Write( string.Format( "{0} :: DeleteProperty :: createOverride = {1}", this.GetType().ToString(), createOverride ) );
+            //DebugLog.Write( string.Format( "{0} :: DeleteProperty :: createOverride = {1}", this.FullTypeName(), createOverride ) );
             if( !Script.IsInWorkingFile() )
             {
                 if( !createOverride ) return false;

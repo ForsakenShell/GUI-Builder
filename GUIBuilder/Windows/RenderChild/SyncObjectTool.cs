@@ -114,7 +114,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void UpdateSyncedList( Engine.Plugin.Forms.Worldspace worldspace )
         {
-            DebugLog.WriteLine( string.Format( "{0} :: UpdateSyncedList() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
+            DebugLog.WriteLine( string.Format( "worldspace ? {0}", worldspace == null ? "null" : worldspace.ToString() ), true );
             SyncObjects = worldspace == null ? null : _ISyncedList.FindAllInWorldspace( worldspace );
         }
         
@@ -131,7 +131,7 @@ namespace GUIBuilder.Windows.RenderChild
             }
             set
             {
-                DebugLog.WriteLine( string.Format( "{0} :: Worldspace :: worldspace ? {1}", this.GetType().ToString(), value == null ? "null" : value.ToString() ) );
+                DebugLog.WriteLine( string.Format( "worldspace ? {0}", this.TypeFullName(), value == null ? "null" : value.ToString() ), true );
                 _Worldspace = value;
                 UpdateSyncedList( _Worldspace );
             }
@@ -142,12 +142,12 @@ namespace GUIBuilder.Windows.RenderChild
         {
             get
             {
-                //DebugLog.Write( string.Format( "\n{0} :: SyncObjects_Get()", this.GetType().ToString() ) );
+                //DebugLog.Write( string.Format( "\n{0} :: SyncObjects_Get()", this.FullTypeName() ) );
                 return lvSyncObjects.SyncObjects;
             }
             set
             {
-                //DebugLog.Write( string.Format( "\n{0} :: SelectedSyncObjects_Set() :: value ? {1}", this.GetType().ToString(), value == null ? "false" : "true" ) );
+                //DebugLog.Write( string.Format( "\n{0} :: SelectedSyncObjects_Set() :: value ? {1}", this.FullTypeName(), value == null ? "false" : "true" ) );
                 lvSyncObjects.SyncObjects = value;
             }
         }
@@ -157,7 +157,7 @@ namespace GUIBuilder.Windows.RenderChild
         {
             get
             {
-                //DebugLog.Write( string.Format( "\n{0} :: SelectedSyncObjects_Get()", this.GetType().ToString() ) );
+                //DebugLog.Write( string.Format( "\n{0} :: SelectedSyncObjects_Get()", this.FullTypeName() ) );
                 return lvSyncObjects.GetSelectedSyncObjects();
             }
         }
@@ -172,7 +172,7 @@ namespace GUIBuilder.Windows.RenderChild
         {
             get
             {
-                //DebugLog.Write( string.Format( "\n{0} :: AnythingSelected_Get()", this.GetType().ToString() ) );
+                //DebugLog.Write( string.Format( "\n{0} :: AnythingSelected_Get()", this.FullTypeName() ) );
                 return lvSyncObjects.AnythingSelected;
             }
         }

@@ -18,28 +18,34 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of BorderBatch.
     /// </summary>
-    public partial class BorderBatch : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
+    public partial class BorderBatch : WindowBase
     {
         
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
-        public string XmlNodeName { get{ return "BorderBatchWindow"; } }
         
-        bool                    onLoadComplete  = false;
-        
+        /// <summary>
+        /// Use GodObject.Windows.GetWindow<BorderBatch>() to create this Window
+        /// </summary>
+        public BorderBatch() : base( true )
+        {
+            InitializeComponent();
+            this.OnSetEnableState   += new SetEnableStateHandler( this.OnFormSetEnableState );
+        }
+
+
+        #region GodObject.XmlConfig.IXmlConfiguration
+
+
+        public override string XmlNodeName { get { return "BorderBatchWindow"; } }
+
+
+        #endregion
+
         bool _nodesBuilt = false;
         List<GUIBuilder.FormImport.ImportBase> _importData = null;
         
         Fallout4.WorkshopScript _sampleWorkshop = null;
         SubDivision _sampleSubDivision = null;
         
-        List<Engine.Plugin.Forms.Keyword> _WorkshopBorderKeywordPool = null;
-        List<Engine.Plugin.Forms.Static>  _WorkshopBorderStaticPool = null;
-
-        Engine.Plugin.Forms.Keyword _WorkshopBorderGeneratorKeyword = null;
-        Engine.Plugin.Forms.Keyword _WorkshopBorderLinkKeyword = null;
-        Engine.Plugin.Forms.Static _WorkshopTerrainFollowingMarker = null;
-        Engine.Plugin.Forms.Static _WorkshopForcedZMarker = null;
-
         ToolTip tbNIFBuilderTargetFolderToolTip;
         ToolTip tbNIFBuilderSubDivisionFilePathSampleToolTip;
         ToolTip tbNIFBuilderWorkshopFilePathSampleToolTip;
@@ -48,111 +54,69 @@ namespace GUIBuilder.Windows
         
         #region Window management
         
-        public BorderBatch()
+        void BorderBatch_OnLoad( object sender, EventArgs e )
         {
-            //
-            // The InitializeComponent() call is required for Windows Forms designer support.
-            //
-            InitializeComponent();
-            
-            //
-            // TODO: Add constructor code after the InitializeComponent() call.
-            //
-        }
-        
-        void OnFormLoad( object sender, EventArgs e )
-        {
-            this.Translate( true );
-            
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
-            
             tbTargetFolder.Text = GodObject.Paths.NIFBuilderOutput;
             
             tbNIFBuilderTargetFolderToolTip = new ToolTip();
             tbNIFBuilderTargetFolderToolTip.ShowAlways = true;
             tbNIFBuilderTargetFolderToolTip.SetToolTip( tbTargetFolder, tbTargetFolder.Text );
             
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( !GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
+                EnablePage( tpSubDivisions, false );
+            else
             {
                 tbNIFBuilderSubDivisionFilePathSampleToolTip = new ToolTip();
                 tbNIFBuilderSubDivisionFilePathSampleToolTip.ShowAlways = true;
+
+                int presetIndex = ( ( GodObject.Plugin.Workspace != null ) && ( GodObject.Plugin.Workspace.HasSubDivisonPreset ) ) ? 0 : 1;
+                RepopulatePresetComboBoxes( cbSubDivisionPresets, NIFBuilder.Preset.SubDivisionPresets, presetIndex );
                 
-                RepopulatePresetComboBoxes( cbSubDivisionPresets, NIFBuilder.Preset.SubDivisionPresets );
-                
+                UpdateSubDivisionList( false );
                 lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
                 GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
-                UpdateSubDivisionList( false );
-                
+
                 EnablePage( tpSubDivisions, true );
             }
+
+            if( !GodObject.Master.Loaded( GodObject.Master.Fallout4 ) )
+                EnablePage( tpWorkshops, false );
             else
-                EnablePage( tpSubDivisions, false );
-            
-            if( GodObject.Master.Fallout4.Loaded )
             {
                 tbNIFBuilderWorkshopFilePathSampleToolTip = new ToolTip();
                 tbNIFBuilderWorkshopFilePathSampleToolTip.ShowAlways = true;
-                
-                RepopulatePresetComboBoxes( cbWorkshopPresets   , NIFBuilder.Preset.WorkshopPresets   );
-                
-                cbRestrictWorkshopBorderKeywords.Text = string.Format( "{0}:\n{1}", "BorderBatchWindow.NodeDetection.Restrict".Translate(), GodObject.Plugin.Data.Files.Working.Filename );
-                
+
+                int presetIndex = ( ( GodObject.Plugin.Workspace != null ) && ( GodObject.Plugin.Workspace.HasWorkshopPreset ) ) ? 0 : 1;
+                RepopulatePresetComboBoxes( cbWorkshopPresets, NIFBuilder.Preset.WorkshopPresets, presetIndex );
+
+                UpdateWorkshopList( false );
                 //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
                 GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged += OnWorkshopListChanged;
-                UpdateWorkshopList( false );
-                
-                RepopulateWorkshopNodeDetectionForms();
-                
+
                 EnablePage( tpWorkshops, true );
             }
-            else
-                EnablePage( tpWorkshops, false );
-            
-            onLoadComplete = true;
-            
+
             UpdateNIFFilePathSampleInternal();
-            SetEnableState( true );
         }
-        
+
         void OnFormClosing( object sender, FormClosingEventArgs e )
         {
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
             GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged -= OnWorkshopListChanged;
-            GodObject.Windows.SetWindow<BorderBatch>( null, false );
         }
-        
-        void OnFormMove( object sender, EventArgs e )
+
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enabled">Enable state to set</param>
+        void OnFormSetEnableState( bool enabled )
         {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteSize( this );
-        }
-        
-        public void SetEnableState( bool enabled )
-        {
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
-                return;
-            }
-            
             btnClear.Enabled = _nodesBuilt;
             btnGenNodes.Enabled = !_nodesBuilt;
             btnBuildNIFs.Enabled = _nodesBuilt;
-            btnImportNIFs.Enabled = _importData != null;// ReImportFileValid; // Use file selector for this
-            //pnNIFBuilder.Enabled = !cbNIFBuilderFullATCSet.Checked;
-            
-            pnWindow.Enabled = enabled;
+            btnImportNIFs.Enabled = _importData != null;
         }
-        
+
         void EnablePage( TabPage page, bool enable )
         {
             if( enable )
@@ -168,264 +132,11 @@ namespace GUIBuilder.Windows
                 tcObjectSelect.TabPages.Remove( page );
             }
         }
-        
-        #endregion
-        
-        #region Store Workshop Node Detection Forms To Workspace
-        
-        bool SaveWorkshopNodeDetectionFormToWorkspace<TForm>( ComboBox control, string detectionSuffix, ref TForm form, List<TForm> list ) where TForm : Engine.Plugin.Form
-        {
-            if( control == null ) return false;
-            if( string.IsNullOrEmpty( detectionSuffix ) ) return false;
-            if( list.NullOrEmpty() ) return false;
-            
-            var i = control.SelectedIndex - 1;
-            if( i < 0 ) return false;
-            if( i >= list.Count ) return false;
-            
-            form = list[ i ];
-            if( form == null ) return false;
-            
-            var ws = GodObject.Plugin.Workspace;
-            return ( ws != null )&&
-                ws.SetFormIdentifier( detectionSuffix, form.MasterHandle.Filename, form.GetFormID( Engine.Plugin.TargetHandle.Master ), true );
-        }
-        
-        void cbWorkshopKeywordBorderGeneratorSelectedIndexChanged( object sender, EventArgs e )
-        {
-            SaveWorkshopNodeDetectionFormToWorkspace(
-                cbWorkshopKeywordBorderGenerator,
-                GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator,
-                ref _WorkshopBorderGeneratorKeyword,
-                _WorkshopBorderKeywordPool );
-        }
-        
-        void cbWorkshopKeywordBorderLinkSelectedIndexChanged( object sender, EventArgs e )
-        {
-            SaveWorkshopNodeDetectionFormToWorkspace(
-                cbWorkshopKeywordBorderLink,
-                GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink,
-                ref _WorkshopBorderLinkKeyword,
-                _WorkshopBorderKeywordPool );
-        }
-        
-        void cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged( object sender, EventArgs e )
-        {
-            SaveWorkshopNodeDetectionFormToWorkspace(
-                cbWorkshopBorderMarkerTerrainFollowing,
-                GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing,
-                ref _WorkshopTerrainFollowingMarker,
-                _WorkshopBorderStaticPool );
-        }
-        
-        void cbWorkshopBorderMarkerForcedZSelectedIndexChanged( object sender, EventArgs e )
-        {
-            SaveWorkshopNodeDetectionFormToWorkspace(
-                cbWorkshopBorderMarkerForcedZ,
-                GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ,
-                ref _WorkshopForcedZMarker,
-                _WorkshopBorderStaticPool );
-        }
 
         #endregion
 
-        #region Repopulate Workshop Node Detection Forms
-
-        void cbRestrictWorkshopBorderKeywordsChanged( object sender, EventArgs e )
-        {
-            RepopulateWorkshopNodeDetectionForms();
-        }
-        
-        void RepopulateWorkshopNodeDetectionForms()
-        {
-            var thread = WorkerThreadPool.CreateWorker( Thread_RepopulateWorkshopNodeDetectionForms, null );
-            if( thread == null ) return;
-            thread.Start();
-        }
-        
-        void ResetWorkshopNodeDetectionFormControl( ComboBox control )
-        {
-            if( control == null ) return;
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { ResetWorkshopNodeDetectionFormControl( control ); }, null );
-                return;
-            }
-            
-            control.Items.Clear();
-            control.Items.Add( " [NONE] " );
-        }
-        
-        void AddWorkshopNodeDetectionFormControlItem( ComboBox control, string text )
-        {
-            if( control == null ) return;
-            if( string.IsNullOrEmpty( text ) ) return;
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { AddWorkshopNodeDetectionFormControlItem( control, text ); }, null );
-                return;
-            }
-            
-            control.Items.Add( text );
-        }
-        
-        TForm FindAndSetWorkshopNodeDetectionFormControlDefault<TForm>( ComboBox control, List<TForm> forms, string suffix ) where TForm : Engine.Plugin.Form
-        {
-            TForm result = null;
-            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "FindAndSetWorkshopNodeDetectionFormControlDefault<TForm>()", suffix } );
-            
-            if( control == null ) goto localAbort;
-            if( forms.NullOrEmpty() ) goto localAbort;
-            if( string.IsNullOrEmpty( suffix ) ) goto localAbort;
-            
-            var lSuffix = suffix.ToLower();
-            var sIndex = 0; // Default "None"
-            
-            // Try to find the "default" form
-            for( int i = 0; i < forms.Count; i++ )
-            {
-                var form = forms[ i ];
-                var fEDID = form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                //DebugLog.Write( string.Format( "\t{0} - \"{1}\" - 0x{2} \"{3}\"", i, ( form == null ? "null" : form.Signature ), ( form == null ? 0 : form.FormID ).ToString( "X8" ), fEDID ) );
-                if( !string.IsNullOrEmpty( fEDID ) )
-                {
-                    var lcase = fEDID.ToLower();
-                    if( lcase.EndsWith( lSuffix ) )
-                    {
-                        result = form;
-                        sIndex = 1 + i; // Skip "None"
-                        break;
-                    }
-                }
-            }
-            SetWorkshopNodeDetectionFormControlDefault( control, sIndex );
-            
-        localAbort:
-            DebugLog.CloseIndentLevel( "result", result );
-            return result;
-        }
-        
-        void SetWorkshopNodeDetectionFormControlDefault( ComboBox control, int index )
-        {
-            if( control == null ) return;
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { SetWorkshopNodeDetectionFormControlDefault( control, index ); }, null );
-                return;
-            }
-            
-            control.SelectedIndex =
-                index < 0 ? 0
-                : index >= control.Items.Count ? 0
-                : index;
-        }
-        
-        void LoadDetectionForms<TForm>( int filter, string detectionSuffix, ref List<TForm> list ) where TForm : Engine.Plugin.Form
-        {
-            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "LoadDetectionKeyword<TForm>()", detectionSuffix } );
-
-            // Check if there is a workspace that defines the control form
-            var wsForm = GodObject.Plugin.Workspace?.GetIdentifierForm<TForm>( detectionSuffix );
-            if( wsForm != null )
-            {
-                list = list ?? new List<TForm>();
-                list.AddOnce( wsForm );
-                list.Sort( ( x, y ) => ( x.GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 1 ) );
-            }
-            else if( list.NullOrEmpty() )
-            {
-                var cForms = GodObject.Plugin.Data.Root.GetCollection<TForm>( true, true );
-                if( cForms != null )
-                    list = cForms.ToList<TForm>( filter );
-                if( !list.NullOrEmpty() )
-                    list.Sort( ( x, y ) => ( x.GetFormID( Engine.Plugin.TargetHandle.Master ) < y.GetFormID( Engine.Plugin.TargetHandle.Master ) ? -1 : 1 ) );
-            }
-            
-            DebugLog.CloseIndentLevel();
-        }
-
-        void RepopulateWorkshopNodeDetectionControl<TForm>( ComboBox control, string detectionSuffix, List<TForm> list ) where TForm : Engine.Plugin.Form
-        {
-            if( control == null ) return;
-            
-            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "RepopulateWorkshopNodeDetectionControl<TForm>()", detectionSuffix } );
-            
-            ResetWorkshopNodeDetectionFormControl( control );
-            
-            foreach( var form in list )
-                AddWorkshopNodeDetectionFormControlItem( control, string.Format( "0x{0} - \"{1}\"", form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-
-            // Try to find the "default" form
-            FindAndSetWorkshopNodeDetectionFormControlDefault( control, list, "_" + detectionSuffix );
-            
-            DebugLog.CloseIndentLevel();
-        }
-        
-        void Thread_RepopulateWorkshopNodeDetectionForms()
-        {
-            SetEnableState( false );
-            DebugLog.Open();
-
-            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
-            m.PushStatusMessage();
-            m.StartSyncTimer();
-            var tStart = m.SyncTimerElapsed();
-
-            var restricted = cbRestrictWorkshopBorderKeywords.Checked;
-            var filter = restricted ? (int)GodObject.Plugin.Data.Files.Working.LoadOrder : -1;
-
-            _WorkshopBorderKeywordPool = null;
-            _WorkshopBorderStaticPool = null;
-
-            #region Keywords
-            
-            m.SetCurrentStatusMessage( "BorderBatchWindow.SearchingForKeyword".Translate() );
-
-            LoadDetectionForms( filter, GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator, ref _WorkshopBorderKeywordPool );
-            LoadDetectionForms( filter, GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink, ref _WorkshopBorderKeywordPool );
-
-            RepopulateWorkshopNodeDetectionControl(
-                cbWorkshopKeywordBorderGenerator,
-                GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator,
-                _WorkshopBorderKeywordPool );
-            
-            RepopulateWorkshopNodeDetectionControl(
-                cbWorkshopKeywordBorderLink,
-                GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink,
-                _WorkshopBorderKeywordPool );
-
-            #endregion
-
-            #region Statics
-
-            m.SetCurrentStatusMessage( "BorderBatchWindow.SearchingForStatic".Translate() );
-
-            LoadDetectionForms( filter, GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing, ref _WorkshopBorderStaticPool );
-            LoadDetectionForms( filter, GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ, ref _WorkshopBorderStaticPool );
-
-            RepopulateWorkshopNodeDetectionControl(
-                cbWorkshopBorderMarkerTerrainFollowing,
-                GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing,
-                _WorkshopBorderStaticPool );
-            
-            RepopulateWorkshopNodeDetectionControl(
-                cbWorkshopBorderMarkerForcedZ,
-                GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ,
-                _WorkshopBorderStaticPool );
-
-            #endregion
-
-            m.StopSyncTimer( "Thread_RepopulateWorkshopNodeDetectionForms()", tStart.Ticks );
-            m.PopStatusMessage();
-
-            DebugLog.Close();
-            SetEnableState( true );
-        }
-        
-        #endregion
-        
         #region Sync'd list monitoring
-        
+
         void UpdateWorkshopList( bool updateSampleDisplay )
         {
             var workshops = GodObject.Plugin.Data.Workshops.SyncedGUIList.ToList( false );
@@ -475,7 +186,7 @@ namespace GUIBuilder.Windows
         
         #region Clear out existing sub-division edge flag segments
         
-        void ClearEdgeFlagSegments()
+        void THREAD_ClearEdgeFlagSegments()
         {
             GodObject.Windows.SetEnableState( false );
             
@@ -483,101 +194,142 @@ namespace GUIBuilder.Windows
             _importData = null;
             
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
-            GUIBuilder.SubDivisionBatch.ClearEdgeFlagSegments( subdivisions );
+            GUIBuilder.SubDivisionBatch.ClearEdgeFlagNodes( subdivisions );
             
             GodObject.Windows.SetEnableState( true );
         }
         
         void btnClearClick( object sender, EventArgs e )
         {
-            WorkerThreadPool.CreateWorker( ClearEdgeFlagSegments, null ).Start();
+            WorkerThreadPool.CreateWorker( THREAD_ClearEdgeFlagSegments, null ).Start();
         }
         
         #endregion
         
         #region Calculate edge flag segments
         
-        void THREAD_CalculateBorderNodesFromEdgeFlags()
+        class ThreadParams_CalculateBorderNodes
         {
-            GodObject.Windows.SetEnableState( false );
-            
-            var workshops = lvWorkshops.GetSelectedSyncObjects();
-            if( !workshops.NullOrEmpty() )
+            public readonly List<Fallout4.WorkshopScript> Workshops;
+            public readonly List<AnnexTheCommonwealth.SubDivision> SubDivisions;
+            public readonly NIFBuilder.Preset WorkshopPreset;
+            public readonly NIFBuilder.Preset SubDivisionPreset;
+            public readonly bool UpdateMapUIData;
+
+            public ThreadParams_CalculateBorderNodes(
+                List<Fallout4.WorkshopScript> workshops,
+                List<AnnexTheCommonwealth.SubDivision> subDivisions,
+                NIFBuilder.Preset workshopPreset,
+                NIFBuilder.Preset subDivisionPreset,
+                bool updateMapUIData
+            )
             {
-                if( _WorkshopBorderGeneratorKeyword != null )
+                Workshops = workshops;
+                SubDivisions = subDivisions;
+                WorkshopPreset = workshopPreset;
+                SubDivisionPreset = subDivisionPreset;
+                UpdateMapUIData = updateMapUIData;
+            }
+        }
+
+        void THREAD_CalculateBorderNodes( object obj )
+        {
+            var parameters = obj as ThreadParams_CalculateBorderNodes;
+            _nodesBuilt = false;
+            _importData?.Clear();
+            var nodesBuilt = false;
+
+            if( ( !parameters.Workshops.NullOrEmpty() )&&( parameters.WorkshopPreset != null ) )
+            {
+                var kywdWBG = GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword;
+                var kywdWBL = GUIBuilder.CustomForms.WorkshopBorderLinkKeyword;
+                var statWFZ = GUIBuilder.CustomForms.WorkshopForcedZMarker;
+                var lcrtBWB = GUIBuilder.CustomForms.WorkshopBorderWithBottomRef;
+                if( kywdWBG != null )
                 {
-                    var wsPreset = SelectedWorkshopPreset;
-                    var nodeLength = ( wsPreset == null )
-                        ? float.Parse( tbWorkshopNodeLength.Text )
-                        : wsPreset.NodeLength;
-                    var angleAllowance = ( wsPreset == null )
-                        ? float.Parse( tbWorkshopNodeAngleAllowance.Text )
-                        : wsPreset.AngleAllowance;
-                    var slopeAllowance = ( wsPreset == null )
-                        ? float.Parse( tbWorkshopNodeSlopeAllowance.Text )
-                        : wsPreset.SlopeAllowance;
-                    if( GUIBuilder.SubDivisionBatch.CalculateWorkshopEdgeFlagSegments(
-                        workshops,
-                        _WorkshopBorderGeneratorKeyword,
-                        _WorkshopForcedZMarker,
-                        nodeLength,
-                        angleAllowance,
-                        slopeAllowance,
-                        false ) )
+                    if( GUIBuilder.WorkshopBatch.CalculateWorkshopBorderMarkerNodes(
+                        parameters.Workshops,
+                        kywdWBG,
+                        kywdWBL,
+                        statWFZ,
+                        lcrtBWB,
+                        parameters.WorkshopPreset.NodeLength,
+                        parameters.WorkshopPreset.AngleAllowance,
+                        parameters.WorkshopPreset.SlopeAllowance,
+                        parameters.UpdateMapUIData ) )
                     {
-                        _nodesBuilt = true;
-                        _importData = null;
+                        nodesBuilt = true;
                     }
                 }
             }
             
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( ( !parameters.SubDivisions.NullOrEmpty() )&&( parameters.SubDivisionPreset != null ) )
             {
-                var subDivisions = lvSubDivisions.GetSelectedSyncObjects();
-                if( !subDivisions.NullOrEmpty() )
+                if( GUIBuilder.SubDivisionBatch.CalculateSubDivisionEdgeFlagNodes(
+                    parameters.SubDivisions,
+                    parameters.SubDivisionPreset.NodeLength,
+                    parameters.SubDivisionPreset.AngleAllowance,
+                    parameters.SubDivisionPreset.SlopeAllowance,
+                    parameters.UpdateMapUIData ) )
                 {
-                    var sdPreset = SelectedSubDivisionPreset;
-                    var nodeLength = ( sdPreset == null )
-                        ? float.Parse( tbSubDivisionNodeLength.Text )
-                        : sdPreset.NodeLength;
-                    var angleAllowance = ( sdPreset == null )
-                        ? float.Parse( tbSubDivisionNodeAngleAllowance.Text )
-                        : sdPreset.AngleAllowance;
-                    var slopeAllowance = ( sdPreset == null )
-                        ? float.Parse( tbSubDivisionNodeSlopeAllowance.Text )
-                        : sdPreset.SlopeAllowance;
-                    var createImportData = ( sdPreset == null )
-                        ? cbSubDivisionNIFCreateImportData.Checked
-                        : sdPreset.CreateImportData;
-                    if( GUIBuilder.SubDivisionBatch.CalculateSubDivisionEdgeFlagSegments(
-                        subDivisions,
-                        nodeLength,
-                        angleAllowance,
-                        slopeAllowance,
-                        createImportData ) )
-                    {
-                        _nodesBuilt = true;
-                        _importData = null;
-                    }
+                    nodesBuilt = true;
                 }
             }
-            
+
+            _nodesBuilt = nodesBuilt;
             GodObject.Windows.SetEnableState( true );
         }
         
         void btnGenNodesClick( object sender, EventArgs e )
         {
-            WorkerThreadPool.CreateWorker( THREAD_CalculateBorderNodesFromEdgeFlags, null ).Start();
+            GodObject.Windows.SetEnableState( false );
+
+            var workshops = lvWorkshops.GetSelectedSyncObjects();
+            if( !workshops.NullOrEmpty() )
+            {
+                if(
+                    ( GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword == null )||
+                    ( GUIBuilder.CustomForms.WorkshopBorderLinkKeyword      == null )//||
+                    //( GUIBuilder.CustomForms.WorkshopTerrainFollowingMarker == null )||
+                    //( GUIBuilder.CustomForms.WorkshopForcedZMarker          == null )||
+                    //( GUIBuilder.CustomForms.WorkshopBorderWithBottomRef    == null )
+                )
+                {
+                    GodObject.Windows.GetWindow<CustomForms>( true );
+                    SetEnableState( true );
+                    return;
+                }
+            }
+
+            var subDivisions = GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth )
+                    ? lvSubDivisions.GetSelectedSyncObjects()
+                    : null;
+            if( ( workshops.NullOrEmpty() )&&( subDivisions.NullOrEmpty() ) )
+            {
+                SetEnableState( true );
+                return;
+            }
+
+            var wsPreset = SelectedWorkshopPreset;
+            var sdPreset = SelectedSubDivisionPreset;
+            object obj = new ThreadParams_CalculateBorderNodes( workshops, subDivisions, wsPreset, sdPreset, false );
+            var thread = WorkerThreadPool.CreateWorker( obj, THREAD_CalculateBorderNodes, null );
+            if( thread == null )
+            {
+                SetEnableState( true );
+                return;
+            }
+            thread.Start();
         }
-        
+
         #endregion
-        
+
         void UpdateNIFFilePathSampleInternal()
         {
-            if( !onLoadComplete )
+            if( !OnLoadComplete )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "UpdateNIFFilePathSampleInternal()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "UpdateNIFFilePathSampleInternal()" } );
             
             var target = tbTargetFolder.Text;
             if( ( !string.IsNullOrEmpty( target ) )&&( target[ target.Length - 1 ] != '\\' ) )
@@ -597,7 +349,7 @@ namespace GUIBuilder.Windows
             tbWorkshopNIFSampleFilePath.Text = wsSample;
             tbNIFBuilderWorkshopFilePathSampleToolTip.SetToolTip( tbWorkshopNIFSampleFilePath, wsSample );
             
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
                 var sdPreset = FullChildSelectedSubDivisionPreset;
                 var sdFilePrefix = tbSubDivisionNIFFilePrefix.Text;
@@ -630,7 +382,7 @@ namespace GUIBuilder.Windows
         
         #region Build NIFs
         
-        void CreateNIFs()
+        void THREAD_BuildNIFs()
         {
             GodObject.Windows.SetEnableState( false );
             
@@ -641,13 +393,14 @@ namespace GUIBuilder.Windows
             
             _importData = null;
             List<GUIBuilder.FormImport.ImportBase> list = null;
-            
+
             var targetPath = tbTargetFolder.Text;
             var meshSuffix = tbMeshDirectory.Text;
             
             var workshops = lvWorkshops.GetSelectedSyncObjects();
             if( !workshops.NullOrEmpty() )
             {
+                DebugLog.OpenIndentLevel( "Workshop Borders", false );
                 m.PushStatusMessage();
                 m.SetCurrentStatusMessage( "BorderBatchWindow.BuildingWorkshopBorders".Translate() );
                 m.StartSyncTimer();
@@ -657,7 +410,7 @@ namespace GUIBuilder.Windows
                 if( wsPreset == null )
                 {
                     var createImportData = cbWorkshopNIFCreateImportData.Checked;
-                    var subList = GUIBuilder.BorderBatch.CreateNIFs(
+                    var subList = GUIBuilder.WorkshopBatch.BuildNIFs(
                         "Custom",
                         workshops,
                         float.Parse( tbWorkshopNIFGradientHeight.Text ),
@@ -686,16 +439,18 @@ namespace GUIBuilder.Windows
                             list.AddAll( subList );
                     }
                 }
-                
-                m.StopSyncTimer( "GUIBuilder.BorderBatchWindow :: CreateNIFs() :: Workshop Borders :: Completed in {0}", tStart.Ticks );
+
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
+                DebugLog.CloseIndentLevel();
             }
             
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
                 var subDivisions = lvSubDivisions.GetSelectedSyncObjects();
                 if( !subDivisions.NullOrEmpty() )
                 {
+                    DebugLog.OpenIndentLevel( "Sub-Division Borders", false );
                     m.PushStatusMessage();
                     m.SetCurrentStatusMessage( "BorderBatchWindow.BuildingSubDivisionBorders".Translate() );
                     m.StartSyncTimer();
@@ -705,7 +460,7 @@ namespace GUIBuilder.Windows
                     if( sdPreset == null )
                     {
                         var createImportData = cbSubDivisionNIFCreateImportData.Checked;
-                        var subList = GUIBuilder.BorderBatch.CreateNIFs(
+                        var subList = GUIBuilder.SubDivisionBatch.BuildNIFs(
                             "Custom",
                             subDivisions,
                             float.Parse( tbSubDivisionNIFGradientHeight.Text ),
@@ -734,14 +489,15 @@ namespace GUIBuilder.Windows
                                 list.AddAll( subList );
                         }
                     }
-                    
-                    m.StopSyncTimer( "GUIBuilder.BorderBatchWindow :: CreateNIFs() :: Sub-Division Borders :: Completed in {0}", tStart.Ticks );
+
+                    m.StopSyncTimer( tStart );
                     m.PopStatusMessage();
+                    DebugLog.CloseIndentLevel();
                 }
             }
             
             _importData = list;
-            m.StopSyncTimer( "GUIBuilder.BorderBatchWindow :: CreateNIFs() Completed in {0}", fStart.Ticks );
+            m.StopSyncTimer( fStart );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
         }
@@ -770,7 +526,7 @@ namespace GUIBuilder.Windows
                 }
                 return list;
             }
-            return GUIBuilder.BorderBatch.CreateNIFs(
+            return GUIBuilder.WorkshopBatch.BuildNIFs(
                 preset.Name,
                 workshops,
                 preset.GradientHeight,
@@ -808,7 +564,7 @@ namespace GUIBuilder.Windows
                 }
                 return list;
             }
-            return GUIBuilder.BorderBatch.CreateNIFs(
+            return GUIBuilder.SubDivisionBatch.BuildNIFs(
                 preset.Name,
                 subDivisions,
                 preset.GradientHeight,
@@ -829,11 +585,11 @@ namespace GUIBuilder.Windows
                 tbNIFBuilderTargetFolderMouseClick( null, null );
                 if( string.IsNullOrEmpty( tbTargetFolder.Text ) )
                 {
-                    DebugLog.WriteLine( new string[] { "GUIBuilder.Windows.BorderBatch", "btnBuildNIFsClick()", "No target folder selected!" } );
+                    DebugLog.WriteLine( "No target folder selected!", true );
                     return;
                 }
             }
-            WorkerThreadPool.CreateWorker( CreateNIFs, null ).Start();
+            WorkerThreadPool.CreateWorker( THREAD_BuildNIFs, null ).Start();
         }
         
         void tbNIFBuilderTargetFolderMouseClick( object sender, MouseEventArgs e )
@@ -913,7 +669,7 @@ namespace GUIBuilder.Windows
         
         #region Update Preset UI
         
-        static void RepopulatePresetComboBoxes( ComboBox cb, List<NIFBuilder.Preset> presets )
+        static void RepopulatePresetComboBoxes( ComboBox cb, List<NIFBuilder.Preset> presets, int selectedIndex )
         {
             cb.Items.Clear();
             cb.Items.Add( "NIFBuilder.Preset.Custom".Translate() );
@@ -922,7 +678,7 @@ namespace GUIBuilder.Windows
             {
                 for( int i = 0; i < count; i++ )
                     cb.Items.Add( presets[ i ].Name );
-                cb.SelectedIndex = 1;
+                cb.SelectedIndex = selectedIndex;
             }
             else
                 cb.SelectedIndex = 0;
@@ -954,7 +710,9 @@ namespace GUIBuilder.Windows
         
         static bool UpdatingPresetUI = false;
         static void UpdatePresetUI(
-            List<NIFBuilder.Preset> presets, int index, ComboBox cbPresets,
+            ref NIFBuilder.Preset lastPreset,
+            NIFBuilder.Preset newPreset,
+            int index, ComboBox cbPresets,
             TextBox nodeLength,
             TextBox angleAllowance, TextBox slopeAllowance,
             TextBox targetSuffix, TextBox meshSubDirectory,
@@ -962,10 +720,11 @@ namespace GUIBuilder.Windows
             TextBox gradientHeight, TextBox groundOffset, TextBox groundSink,
             CheckBox createImportData )
         {
-            if( UpdatingPresetUI )
-                return;
-            
+            if( UpdatingPresetUI ) return;
             UpdatingPresetUI = true;
+
+            DebugLog.WriteStrings( null, new string[] { "lastPreset = " + lastPreset.ToStringNullSafe(), "newPreset = " + newPreset.ToStringNullSafe() }, false, true, false, false );
+
             if( index < 0 )
                 index = 0;
             
@@ -974,31 +733,52 @@ namespace GUIBuilder.Windows
             if( cbPresets.SelectedIndex != index )
                 cbPresets.SelectedIndex = index;
             
-            if( index > 0 )
+            if( ( lastPreset != null )&&( lastPreset.AllowWriteback ) )
             {
-                var preset = presets[ index - 1 ];
-                SetPresetUIValue( targetSuffix      , preset.TargetSuffix     );
-                SetPresetUIValue( meshSubDirectory  , preset.MeshSubDirectory );
-                SetPresetUIValue( filePrefix        , preset.FilePrefix       );
-                SetPresetUIValue( fileSuffix        , preset.FileSuffix       );
-                SetPresetUIValue( nodeLength        , preset.NodeLength       );
-                SetPresetUIValue( angleAllowance    , (float)preset.AngleAllowance );
-                SetPresetUIValue( slopeAllowance    , (float)preset.SlopeAllowance );
-                SetPresetUIValue( gradientHeight    , preset.GradientHeight  , preset.SetOfPresets );
-                SetPresetUIValue( groundOffset      , preset.GroundOffset    , preset.SetOfPresets );
-                SetPresetUIValue( groundSink        , preset.GroundSink      , preset.SetOfPresets );
-                SetPresetUIValue( createImportData  , preset.CreateImportData, preset.SetOfPresets );
+                lastPreset.NodeLength       = float.Parse( nodeLength.Text );
+                lastPreset.AngleAllowance   = double.Parse( angleAllowance.Text );
+                lastPreset.SlopeAllowance   = double.Parse( slopeAllowance.Text );
+                lastPreset.GradientHeight   = float.Parse( gradientHeight.Text );
+                lastPreset.GroundOffset     = float.Parse( groundOffset.Text );
+                lastPreset.GroundSink       = float.Parse( groundSink.Text );
+                lastPreset.TargetSuffix     = targetSuffix.Text;
+                lastPreset.MeshSubDirectory = meshSubDirectory.Text;
+                lastPreset.FilePrefix       = filePrefix.Text;
+                lastPreset.FileSuffix       = fileSuffix.Text;
+                lastPreset.CreateImportData = createImportData.Checked;
+                lastPreset.Serialize();
             }
-            else if( createImportData != null )
-                SetPresetUIValue( createImportData  , createImportData.Checked, false );
-            
+            if( newPreset != lastPreset )
+            {
+                if( newPreset != null )
+                {
+                    SetPresetUIValue( targetSuffix      , newPreset.TargetSuffix );
+                    SetPresetUIValue( meshSubDirectory  , newPreset.MeshSubDirectory );
+                    SetPresetUIValue( filePrefix        , newPreset.FilePrefix );
+                    SetPresetUIValue( fileSuffix        , newPreset.FileSuffix );
+                    SetPresetUIValue( nodeLength        , newPreset.NodeLength );
+                    SetPresetUIValue( angleAllowance    , (float)newPreset.AngleAllowance );
+                    SetPresetUIValue( slopeAllowance    , (float)newPreset.SlopeAllowance );
+                    SetPresetUIValue( gradientHeight    , newPreset.GradientHeight      , newPreset.SetOfPresets );
+                    SetPresetUIValue( groundOffset      , newPreset.GroundOffset        , newPreset.SetOfPresets );
+                    SetPresetUIValue( groundSink        , newPreset.GroundSink          , newPreset.SetOfPresets );
+                    SetPresetUIValue( createImportData  , newPreset.CreateImportData    , newPreset.SetOfPresets );
+                }
+                lastPreset = newPreset;
+            }
+            //else if( createImportData != null )
+            //    SetPresetUIValue( createImportData  , createImportData.Checked, false );
+
             UpdatingPresetUI = false;
         }
-        
+
+        NIFBuilder.Preset _LastWorkshopPreset = null;
         void UpdateWorkshopPresetUI( int index )
         {
+            var newPreset = SelectedWorkshopPreset;
             UpdatePresetUI(
-                NIFBuilder.Preset.WorkshopPresets,
+                ref _LastWorkshopPreset,
+                newPreset,
                 index,
                 cbWorkshopPresets,
                 tbWorkshopNodeLength,
@@ -1011,14 +791,17 @@ namespace GUIBuilder.Windows
                 tbWorkshopNIFGradientHeight,
                 tbWorkshopNIFGroundOffset,
                 tbWorkshopNIFGroundSink,
-                cbWorkshopNIFCreateImportData );
+                cbWorkshopNIFCreateImportData ); ;
             UpdateNIFFilePathSampleInternal();
         }
-        
+
+        NIFBuilder.Preset _LastSubDivisionPreset = null;
         void UpdateSubDivisionPresetUI( int index )
         {
+            var newPreset = SelectedSubDivisionPreset;
             UpdatePresetUI(
-                NIFBuilder.Preset.SubDivisionPresets,
+                ref _LastSubDivisionPreset,
+                newPreset,
                 index,
                 cbSubDivisionPresets,
                 tbSubDivisionNodeLength,
@@ -1039,32 +822,34 @@ namespace GUIBuilder.Windows
         
         #region Get Selected Preset
         
-        NIFBuilder.Preset GetPreset( List<NIFBuilder.Preset> list, int index, bool fullChild = false )
+        NIFBuilder.Preset GetPreset( NIFBuilder.Preset defaultPreset, List<NIFBuilder.Preset> list, int index, bool fullChild = false )
         {
-            if( index < 0 ) return null;
-            if( list.NullOrEmpty() ) return null;
-            if( index >= list.Count ) return null;
+            //Console.WriteLine( "GetPreset()" );
+            if( index < 0 ) return defaultPreset;
+            if( list.NullOrEmpty() ) return defaultPreset;
+            if( index >= list.Count ) return defaultPreset;
             var preset = list[ index ];
             if( ( fullChild )&&( preset.SetOfPresets ) )
             {
                 for( int i = 0; i < preset.SubSets.Count; i++ )
                 {
-                    var child = GetPreset( preset.SubSets, i, fullChild );
-                    if( child != null ) return child;
+                    var child = GetPreset( defaultPreset, preset.SubSets, i, fullChild );
+                    if( ( child != null )&&( child != defaultPreset ) ) return child;
                 }
             }
             return preset;
         }
         
-        int _SelectedWorkshopPreset = -1;
-        int _SelectedSubDivisionPreset = -1;
+        int _SelectedWorkshopPreset = 0;
+        int _SelectedSubDivisionPreset = 0;
         
         NIFBuilder.Preset SelectedWorkshopPreset
         {
             get
             {
-                if( _SelectedWorkshopPreset < 1 ) return null;
+                //Console.WriteLine( "SelectedWorkshopPreset" );
                 return GetPreset(
+                    GodObject.Plugin.Workspace?.WorkshopPreset,
                     NIFBuilder.Preset.WorkshopPresets,
                     _SelectedWorkshopPreset - 1,
                     false );
@@ -1075,8 +860,9 @@ namespace GUIBuilder.Windows
         {
             get
             {
-                if( _SelectedWorkshopPreset < 1 ) return null;
+                //Console.WriteLine( "FullChildSelectedWorkshopPreset" );
                 return GetPreset(
+                    GodObject.Plugin.Workspace?.WorkshopPreset,
                     NIFBuilder.Preset.WorkshopPresets,
                     _SelectedWorkshopPreset - 1,
                     true );
@@ -1087,8 +873,9 @@ namespace GUIBuilder.Windows
         {
             get
             {
-                if( _SelectedSubDivisionPreset < 1 ) return null;
+                //Console.WriteLine( "SelectedSubDivisionPreset" );
                 return GetPreset(
+                    GodObject.Plugin.Workspace?.SubDivisionPreset,
                     NIFBuilder.Preset.SubDivisionPresets,
                     _SelectedSubDivisionPreset - 1,
                     false );
@@ -1099,8 +886,9 @@ namespace GUIBuilder.Windows
         {
             get
             {
-                if( _SelectedSubDivisionPreset < 1 ) return null;
+                //Console.WriteLine( "FullChildSelectedSubDivisionPreset" );
                 return GetPreset(
+                    GodObject.Plugin.Workspace?.SubDivisionPreset,
                     NIFBuilder.Preset.SubDivisionPresets,
                     _SelectedSubDivisionPreset - 1,
                     true );
@@ -1113,7 +901,7 @@ namespace GUIBuilder.Windows
         
         void cbWorkshopPresetsSelectedIndexChanged( object sender, EventArgs e )
         {
-            if( UpdatingPresetUI )return;
+            if( UpdatingPresetUI ) return;
             _SelectedWorkshopPreset = cbWorkshopPresets.SelectedIndex;
             UpdateWorkshopPresetUI( _SelectedWorkshopPreset );
         }
@@ -1127,16 +915,16 @@ namespace GUIBuilder.Windows
         
         void uiWorkshopNIFBuilderChanged( object sender, EventArgs e )
         {
-            if( ( !onLoadComplete )||( UpdatingPresetUI ) )return;
+            if( ( !OnLoadComplete )||( UpdatingPresetUI ) )return;
             _SelectedWorkshopPreset = 0;
-            UpdateWorkshopPresetUI( 0 );
+            UpdateWorkshopPresetUI( _SelectedWorkshopPreset );
         }
         
         void uiSubDivisionNIFBuilderChanged( object sender, EventArgs e )
         {
-            if( ( !onLoadComplete )||( UpdatingPresetUI ) ) return;
+            if( ( !OnLoadComplete )||( UpdatingPresetUI ) ) return;
             _SelectedSubDivisionPreset = 0;
-            UpdateSubDivisionPresetUI( 0 );
+            UpdateSubDivisionPresetUI( _SelectedSubDivisionPreset );
         }
         
         #endregion
@@ -1155,8 +943,6 @@ namespace GUIBuilder.Windows
                     break;
                     
                 case 1:
-                    if( ( _WorkshopBorderKeywordPool.NullOrEmpty() )||( _WorkshopBorderStaticPool.NullOrEmpty() ) )
-                        RepopulateWorkshopNodeDetectionForms();
                     if( lvWorkshops.Visible )
                         lvWorkshops.RepopulateListView();
                     break;

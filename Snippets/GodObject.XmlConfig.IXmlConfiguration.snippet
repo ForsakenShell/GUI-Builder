@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>GodObject.XmlConfig.IXmlConfiguration</Title>
+            <Author>1000101</Author>
+            <Description>Core functionality for System.Windows.Forms.Form</Description>
+            <Shortcut>Snippet_IXmlConfiguration_Form</Shortcut>
+            <SnippetTypes>
+                <SnippetType>Expansion</SnippetType>
+            </SnippetTypes>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>FormType</ID>
+                    <ToolTip>System.Windows.Forms.Form or child class implementing GodObject.XmlConfig.IXmlConfiguration.</ToolTip>
+                    <Default>System.Windows.Forms.Form</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="CSharp">
+                <![CDATA[
+        // Snippet_IXmlConfiguration_Form
+        // FormType = $FormType$
+        
+        
+        public $FormType$()
+        {
+            InitializeComponent();
+            
+            this.SuspendLayout();
+            
+            this.Translate( true );
+            
+            this.Location       = GodObject.XmlConfig.ReadLocation( this );
+            this.Size           = GodObject.XmlConfig.ReadSize( this );
+            
+            this.ResizeEnd      += new System.EventHandler( this.IXmlConfiguration_OnFormResizeEnd );
+            this.Move           += new System.EventHandler( this.IXmlConfiguration_OnFormMove );
+            
+            this.ResumeLayout( false );
+        }
+        
+        
+        #region GodObject.XmlConfig.IXmlConfiguration
+        
+        
+        #region Internal
+        
+        void IXmlConfiguration_OnFormMove( object sender, EventArgs e )
+        {
+            GodObject.XmlConfig.WriteLocation( this );
+        }
+        
+        void IXmlConfiguration_OnFormResizeEnd( object sender, EventArgs e )
+        {
+            GodObject.XmlConfig.WriteSize( this );
+        }
+        
+        #endregion
+        
+        
+        #region Interface
+        
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent
+        {
+            get { throw new NotImplementedException(); }                // TODO: WRITE ME!
+        }
+        
+        public string XmlNodeName
+        {
+            get { throw new NotImplementedException(); }                // TODO: WRITE ME!
+        }
+        
+        #endregion
+        
+        
+        #endregion]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

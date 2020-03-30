@@ -23,24 +23,27 @@ namespace GUIBuilder.Windows
     /// </summary>
     public partial class Main : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
-        
+
         // Minimum sizes of the main window and render window/panel
         readonly Size SIZE_ZERO = new Size( 0, 0 );
         readonly Size MIN_RENDER_SIZE = new Size( 700, 42 );
         readonly Size MAX_RENDER_SIZE = new Size( 65536, 42 );
         
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
-        public string XmlNodeName { get{ return "MainWindow"; } }
-        
-        bool onLoadComplete = false;
+        //bool onLoadComplete = false;
         
         const string TIME_FORMAT = @"mm\:ss";
-        
+
+        bool everythingUnloaded = true;
+
         #region Main Start/Stop
         
         public Main()
         {
+            //Console.WriteLine( "GUIBuilder.Windows.Main.cTor()" );
+
+            //onLoadComplete = false;
             InitializeComponent();
+
             // Calculate form size based on the current Windows theme
             var fbs = Maths.GenSize.Multiply( SystemInformation.FrameBorderSize, 2 );
             var cs = new Size(
@@ -60,12 +63,26 @@ namespace GUIBuilder.Windows
             if( _already_shutdown )
                 return;
             _already_shutdown = true;
+
+            GodObject.Windows.SetEnableState( false );
             
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "MainShutdown()" } );
-            
-            ClearStatusBar();
-            sbiCaption.Text = "Shutting down...";
-            
+            DebugLog.OpenIndentLevel();
+
+            var thread = new System.Threading.Thread( THREAD_MainShutdown )
+            {
+                Name = GenString.FormatMethod( this.GetType().GetMethodBase( "THREAD_MainShutdown" ), null, false, true, true ).ReplaceInvalidFilenameChars()
+            };
+            thread.Start();
+        }
+
+        void THREAD_MainShutdown()
+        {
+            WorkerThreadPool.StartMethodBase = System.Reflection.MethodInfo.GetCurrentMethod();
+            //Console.WriteLine( "GUIBuilder.Windows.Main.MainShutdown()" );
+
+            sbiCaption.Text = "MainWindow.Shutdown".Translate();
+
+            /* Plugin loader is a worker thread which will get stopped below, this way means that we have to wait for the loader
             if( GodObject.Plugin.IsLoading )
             {
                 DebugLog.WriteLine( "Waiting for Plugin Loader..." );
@@ -73,124 +90,125 @@ namespace GUIBuilder.Windows
                     System.Threading.Thread.Sleep(100);
                 DebugLog.WriteLine( "Plugin Loader finished" );
             }
-            
+            */
+
             WorkerThreadPool.StopAllWorkers( true, true );
             
-            DisposeOfSyncTimer();
             GodObject.Windows.CloseAllChildWindows();
-            
+
+            bool terminateScheduled = false;
+
             if( GodObject.Plugin.IsLoaded )
             {
                 DebugLog.WriteLine( "Unloading plugin" );
-                GodObject.Plugin.Unload();
+                terminateScheduled = GodObject.Plugin.Unload( MainShutdownTerminate );
             }
+
+            if( !terminateScheduled )
+                MainShutdownTerminate();
+
+            DebugLog.Close();
+        }
+
+        void MainShutdownTerminate()
+        {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate () { MainShutdownTerminate(); }, null );
+                return;
+            }
+
+            ClearStatusBar();
+            DisposeOfSyncTimer();
+
             GodObject.Plugin.Denit();
-            
+
+            everythingUnloaded = true;
+
             DebugLog.WriteLine( "Application.Exit()" );
             Application.Exit();
+
             DebugLog.WriteLine( "Complete" );
-            
             DebugLog.CloseIndentLevel();
         }
-        
+
         void OnFormLoad( object sender, EventArgs e )
         {
-            if( !GodObject.Plugin.Initialize() )
-            {
-                MessageBox.Show( "Unable to find Fallout 4!\n\nMake sure you have the game installed correctly.", "GUIBuilder Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
-                Application.Exit();
-                return;
-            }
-            
-            var bbPath = GodObject.Paths.BorderBuilder;
-            if( string.IsNullOrEmpty( bbPath ) )
-            {
-                MessageBox.Show( string.Format( "Unable to find \"{0}\"\n\nMake sure you have the GUIBuilder installed correctly.", Constant.BorderBuilderPath ), "GUIBuilder Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
-                Application.Exit();
-                return;
-            }
-            
-            var configFile = GodObject.Paths.GUIBuilderConfigFile;
-            if( ( string.IsNullOrEmpty( configFile ) )||( !System.IO.File.Exists( configFile ) )||( GodObject.XmlConfig.WasReset ) )
-                GodObject.Windows.GetWindow<GUIBuilder.Windows.Options>( true );
-            
-            /*
-            var configFile = GodObject.GUIBuilderConfigFilePath;
-            if( string.IsNullOrEmpty( configFile ) )
-            {
-                MessageBox.Show( string.Format( "Unable to find \"{0}\\{1}\"\n\nMake sure you have the GUIBuilder installed correctly.", Constant.BorderBuilderPath, Constant.GUIBuilderConfigFile ), "GUIBuilder Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
-                Application.Exit();
-                return;
-            }
-            */
-            
+            SetEnableState( false );
+
+            this.Location       = GodObject.XmlConfig.ReadLocation( this );
+            this.Size           = GodObject.XmlConfig.ReadSize( this );
+
+            this.ResizeEnd      += new System.EventHandler( this.IXmlConfiguration_OnFormResizeEnd );
+            this.Move           += new System.EventHandler( this.IXmlConfiguration_OnFormMove );
+
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
-            
-            GodObject.Windows.SetWindow<Main>( this, false );
+            GodObject.Windows.SetWindow<Main>( this );
             
             ClearStatusBar();
-            
-            onLoadComplete = true;
+            SetEnableState( true );
+            //onLoadComplete = true;
             
         }
-        
+
         void OnFormClosing( object sender, FormClosingEventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "OnFormClosing()" } );
-            MainShutdown();
-            DebugLog.CloseIndentLevel();
+            e.Cancel = !everythingUnloaded;
+            if( e.Cancel )
+            {
+                if( _already_shutdown )
+                {
+                    nextShutdownMessageReminder = syncStopwatch.Elapsed.Seconds + 4;
+                    sbiCaption.Text = "MainWindow.AlreadyShutdown".Translate();
+                }
+                else
+                    MainShutdown();
+            }
         }
-        
+
+        void OnFormClosed( object sender, FormClosedEventArgs e )
+        {
+            GodObject.Windows.ClearWindow<Main>();
+        }
+
         void OnMenuExitClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "OnMenuExitClick()" } );
             MainShutdown();
-            DebugLog.CloseIndentLevel();
         }
-        
-        void OnFormMove( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        
-        #endregion
-        
-        #region Global Form and Status bar update
-        
+
+
+        #region GUIBuilder.Windows.IEnableControlForm
+
+
+        #region Interface
+
+        public event GUIBuilder.Windows.SetEnableStateHandler  OnSetEnableState;
+
         /// <summary>
-        /// Long running functions should disable the main form so the user can't spam inputs.  Don't forget to enable the form again after the long-running function is complete so the user can continue to use the program.
+        /// Enable or disable this windows main panel.
         /// </summary>
-        /// <param name="enabled">true to enable the form and it's controls, false to disable the form and it's controls.</param>
+        /// <param name="enabled">Enable state to set</param>
         public void SetEnableState( bool enabled )
         {
             if( this.InvokeRequired )
             {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
+                this.Invoke( (Action)delegate () { SetEnableState( enabled ); }, null );
                 return;
             }
+
             mbMain.Enabled = enabled;
             if( GodObject.Plugin.IsLoaded )
             {
-                mbiFileCreateWorkspace.Enabled = ( enabled )&&( GodObject.Plugin.Workspace == null );
+                mbiFileCreateWorkspace.Enabled = ( enabled ) && ( GodObject.Plugin.Workspace == null );
                 mbiFileLoadWorkspace.Enabled = false;
                 mbiFileLoadPlugin.Enabled = false;
                 mbiFileSavePlugin.Enabled = enabled;
                 mbiFileCloseFiles.Enabled = enabled;
                 mbiToolsBorderBatch.Enabled = enabled;
-                mbiToolsSubDivisionBatch.Enabled = ( enabled )&&( GodObject.Master.AnnexTheCommonwealth.Loaded );
+                mbiToolsSubDivisionBatch.Enabled = ( enabled ) && ( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) );
                 mbiToolsRendererWindow.Enabled = enabled;
+                mbiToolsCustomForms.Enabled = enabled;
             }
             else
             {
@@ -202,9 +220,58 @@ namespace GUIBuilder.Windows
                 mbiToolsBorderBatch.Enabled = false;
                 mbiToolsSubDivisionBatch.Enabled = false;
                 mbiToolsRendererWindow.Enabled = false;
+                mbiToolsCustomForms.Enabled = false;
             }
+
+            if( OnSetEnableState != null )
+                OnSetEnableState( enabled );
         }
-        
+
+        #endregion
+
+
+        #endregion
+
+
+        #region GodObject.XmlConfig.IXmlConfiguration
+
+
+        #region Internal
+
+        void IXmlConfiguration_OnFormMove( object sender, EventArgs e )
+        {
+            GodObject.XmlConfig.WriteLocation( this );
+        }
+
+        void IXmlConfiguration_OnFormResizeEnd( object sender, EventArgs e )
+        {
+            GodObject.XmlConfig.WriteSize( this );
+        }
+
+        #endregion
+
+
+        #region Interface
+
+        public GodObject.XmlConfig.IXmlConfiguration XmlParent
+        {
+            get { return null; }
+        }
+
+        public string XmlNodeName
+        {
+            get { return "MainWindow"; }
+        }
+
+        #endregion
+
+
+        #endregion
+
+        #endregion
+
+        #region Global Form and Status bar update
+
         void ClearStatusBar()
         {
             if( this.InvokeRequired )
@@ -354,28 +421,30 @@ namespace GUIBuilder.Windows
             if( syncTimer == null )
             {
                 syncTimer = new Timer();
-                syncTimer.Interval = 250;       // 4 updates per second is plenty enough
+                syncTimer.Interval = 1000;       // 1 update per second is plenty enough
                 syncTimer.Tick += OnSyncTimerTick;
                 syncTimer.Start();
             }
         }
         
-        public void StopSyncTimer( string consoleLog = null, long start = 0 )
+        public long StopSyncTimer( TimeSpan start, string logExtra = null, bool prefixCallerId = false )
+        {
+            var elapsed = syncStopwatch != null
+                ? syncStopwatch.Elapsed.Ticks - start.Ticks
+                : 0;
+            var callerId = prefixCallerId ? GenString.GetCallerId( 1, null, false, false, true ) : null;
+            var tmp = new TimeSpan( elapsed );
+            DebugLog.WriteStrings( null, new string[] { callerId, logExtra, string.Format( "Completed in {0}", tmp.ToString() ) }, false, true, false, false, false );
+            StopSyncTimerEx();
+            return elapsed;
+        }
+        
+        void StopSyncTimerEx()
         {
             if( this.InvokeRequired )
             {
-                this.Invoke( (Action)delegate() { StopSyncTimer( consoleLog, start ); }, null );
+                this.Invoke( (Action)delegate() { StopSyncTimerEx(); }, null );
                 return;
-            }
-            var elapsed = syncStopwatch != null
-                ? syncStopwatch.Elapsed.Ticks - start
-                : 0;
-            if( !string.IsNullOrEmpty( consoleLog ) )
-            {
-                //if( !consoleLog.Contains( "{0}" ) )
-                //    consoleLog += " :: Completed in {0}";
-                var tmp = new TimeSpan( elapsed );
-                DebugLog.WriteLine( string.Format( consoleLog, tmp.ToString() ) );
             }
             SyncTimerCounter--;
             if( SyncTimerCounter <= 0 )
@@ -405,11 +474,20 @@ namespace GUIBuilder.Windows
                 syncStopwatch = null;
             }
         }
-        
+
+        static long nextShutdownMessageReminder = 0;
         void OnSyncTimerTick( object sender, EventArgs e )
         {
             if( ( syncTimer == null )||( syncStopwatch == null ) ) return;
             sbiTimeElapsed.Text = syncStopwatch.Elapsed.ToString( TIME_FORMAT );
+            if( _already_shutdown )
+            {
+                if( syncStopwatch.Elapsed.Seconds > nextShutdownMessageReminder )
+                {
+                    nextShutdownMessageReminder = syncStopwatch.Elapsed.Seconds + 4;
+                    sbiCaption.Text = "MainWindow.Shutdown".Translate();
+                }
+            }
         }
         
         #endregion
@@ -418,26 +496,34 @@ namespace GUIBuilder.Windows
         
         void mbiFileCloseFilesClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileCloseFilesClick()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileCloseFilesClick()" } );
             GodObject.Windows.SetEnableState( false );
+
+            var result = true;
             
             if( ( GodObject.Plugin.IsLoading )||( !GodObject.Plugin.IsLoaded ) )
                 goto localReturnResult;
-            
-            GodObject.Plugin.Unload();
-            
-            this.Translate();
 
+            result = GodObject.Plugin.Unload( OnPluginCloseComplete );
+            
         localReturnResult:
-            GodObject.Windows.SetEnableState( true );
-            DebugLog.CloseIndentLevel();
+            if( !result )
+                GodObject.Windows.SetEnableState( true );
+            //DebugLog.CloseIndentLevel();
         }
-        
+
+        void OnPluginCloseComplete()
+        {
+            everythingUnloaded = true;
+            this.Translate();
+            GodObject.Windows.SetEnableState( true );
+        }
+
         #region Save/Load Plugin
-        
+
         void mbiFileSavePluginClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileSavePluginClick()" } );
+            DebugLog.OpenIndentLevel();
             GodObject.Windows.SetEnableState( false );
             
             if( !GodObject.Plugin.IsLoaded )
@@ -458,7 +544,7 @@ namespace GUIBuilder.Windows
             if( !result )
             {
                 saveMsg = string.Format( "Unable to save \"{0}\"\n{1}", wfn, saveMsg );
-                DebugLog.WriteError( this.GetType().ToString(), "mbiFileSavePluginClick()", saveMsg );
+                DebugLog.WriteError( saveMsg );
                 MessageBox.Show( saveMsg, "Error Saving", MessageBoxButtons.OK, MessageBoxIcon.Error );
             }
             else if( !string.IsNullOrEmpty( saveMsg ) )
@@ -475,7 +561,7 @@ namespace GUIBuilder.Windows
         
         void mbiFileLoadPluginClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileLoadPluginClick()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileLoadPluginClick()" } );
             GodObject.Windows.SetEnableState( false );
             var reEnableGUI = true;
             
@@ -524,17 +610,18 @@ namespace GUIBuilder.Windows
                 var wf = dlg.WorkingFile;
                 var sp = dlg.SelectedPlugins;
                 var orwol = dlg.OpenRenderWindowOnLoad;
-                
+
 #endif
-                
+
                 // If the plugin loader returns true, the loader thread will re-enable the GUI
-                reEnableGUI &= !GodObject.Plugin.Load( wf, sp, orwol );
+                everythingUnloaded = !GodObject.Plugin.Load( wf, sp, orwol );
+                reEnableGUI &= everythingUnloaded;
             }
             
         localReturnResult:
             if( reEnableGUI )
                 GodObject.Windows.SetEnableState( true );
-            DebugLog.CloseIndentLevel();
+            //DebugLog.CloseIndentLevel();
         }
         
         #endregion
@@ -593,11 +680,16 @@ namespace GUIBuilder.Windows
             GodObject.Windows.GetWindow<GUIBuilder.Windows.Options>( true );
         }
         
+        void mbiToolsCustomFormsClick( object sender, EventArgs e )
+        {
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.CustomForms>( true );
+        }
+        
         #endregion
         
         void mbiFileLoadWorkspaceClick( object sender, EventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "mbiFileLoadWorkspaceClick()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileLoadWorkspaceClick()" } );
 
             GodObject.Windows.SetEnableState( false );
             var reEnableGUI = true;
@@ -637,15 +729,16 @@ namespace GUIBuilder.Windows
 #else
                 var sws = dlg.SelectedWorkspace;
 #endif
-                
+
                 // If the plugin loader returns true, the loader thread will re-enable the GUI
-                reEnableGUI &= !GodObject.Plugin.Load( sws );
+                everythingUnloaded = !GodObject.Plugin.Load( sws );
+                reEnableGUI &= everythingUnloaded;
             }
             
         localReturnResult:
             if( reEnableGUI )
                 GodObject.Windows.SetEnableState( true );
-            DebugLog.CloseIndentLevel();
+            //DebugLog.CloseIndentLevel();
         }
         
         void mbiFileCreateWorkspaceClick( object sender, EventArgs e )

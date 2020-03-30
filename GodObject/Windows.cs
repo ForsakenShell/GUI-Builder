@@ -34,40 +34,28 @@ namespace GodObject
 
         static List<IEnableControlForm>_Forms = null;
 
-        static TWindow                  FindAndReplaceWindow<TWindow>( TWindow newWindow, bool closeOldWindow ) where TWindow : Form, IEnableControlForm
+        static IEnableControlForm FindWindow( Type type )
         {
-            if( _Forms.NullOrEmpty() )
-                _Forms = new List<IEnableControlForm>();
+            if( _Forms.NullOrEmpty() ) return null;
             for( int i = 0; i < _Forms.Count; i++ )
-            {
-                var oldWindow = _Forms[ i ] as TWindow;
-                if( oldWindow != null )
-                {
-                    if( ( newWindow != null )||( closeOldWindow ) )
-                    {
-                        if( closeOldWindow )
-                            oldWindow.Close();
-                        if( newWindow == null )
-                            _Forms.RemoveAt( i );
-                        else
-                            _Forms[ i ] = newWindow;
-                        return newWindow;
-                    }
-                    return oldWindow;
-                }
-            }
-            if( newWindow != null )
-                _Forms.Add( newWindow );
-            return newWindow;
+                if( _Forms[ i ].GetType() == type )
+                    return _Forms[ i ];
+            return null;
+        }
+
+        static TWindow                  FindWindow<TWindow>() where TWindow : Form, IEnableControlForm
+        {
+            return FindWindow( typeof( TWindow ) ) as TWindow;
         }
 
         public static TWindow           GetWindow<TWindow>( bool showWindow = false ) where TWindow : Form, IEnableControlForm, new()
         {
             //DebugLog.Write( "GodObjects.Windows.GetWindow()" );
-            var window = FindAndReplaceWindow<TWindow>( null, false );
+            var window = FindWindow<TWindow>();
             if( window == null )
             {
                 window = new TWindow();
+                _Forms = _Forms ?? new List<IEnableControlForm>();
                 _Forms.Add( window );
                 if( showWindow )
                     window.Show();
@@ -77,24 +65,79 @@ namespace GodObject
             return window;
         }
 
-        public static void              SetWindow<TWindow>( TWindow newWindow, bool closeOldWindow = true ) where TWindow : Form, IEnableControlForm
+        public static void              SetWindow<TWindow>( TWindow newWindow, bool closeOldWindow = false ) where TWindow : Form, IEnableControlForm, new()
         {
-            //DebugLog.Write( "GodObjects.Windows.SetWindow()" );
-            FindAndReplaceWindow<TWindow>( newWindow, closeOldWindow );
+            //DebugLog.Write( "GodObjects.Windows.GetWindow()" );
+            var window = FindWindow<TWindow>();
+            if( window == null )
+            {
+                if( newWindow == null ) return;
+                _Forms = _Forms ?? new List<IEnableControlForm>();
+                _Forms.Add( newWindow );
+            }
+            else
+            {
+                if( closeOldWindow )
+                {
+                    window.Close();
+                    //window.Dispose();
+                }
+                _Forms.Remove( window );
+                if( newWindow == null )
+                {
+                    if( _Forms.NullOrEmpty() )
+                        _Forms = null;
+                    return;
+                }
+                _Forms.Add( newWindow );
+            }
+        }
+
+        public static void              ClearWindow<TWindow>( bool closeOldWindow = false ) where TWindow : Form, IEnableControlForm
+        {
+            var window = FindWindow<TWindow>();
+            if( window == null ) return;
+            if( closeOldWindow )
+            {
+                window.Close();
+                //window.Dispose();
+            }
+            if( _Forms != null )
+                _Forms.Remove( window );
+            if( _Forms.NullOrEmpty() )
+                _Forms = null;
+        }
+
+        public static void              ClearWindow( Type type, bool closeOldWindow = false )
+        {
+            var window = FindWindow( type );
+            if( window == null ) return;
+            if( closeOldWindow )
+            {
+                window.Close();
+                //window.Dispose();
+            }
+            if( _Forms != null )
+                _Forms.Remove( window );
+            if( _Forms.NullOrEmpty() )
+                _Forms = null;
         }
 
         public static void              CloseAllChildWindows()
         {
-            if( _Forms.NullOrEmpty() )
-                return;
-            for( int i = _Forms.Count - 1; i >= 0; i-- )
+            if( _Forms.NullOrEmpty() ) return;
+            var forms = _Forms;
+            _Forms = null;  // Temporarily set a null list while closing child windows (prevents closing windows from removing the window in ClearWindow())
+            for( int i = forms.Count - 1; i >= 0; i-- )
             {
-                if( !( _Forms[ i ] is GUIBuilder.Windows.Main ) )
+                var form = forms[ i ];
+                if( !( form is GUIBuilder.Windows.Main ) )
                 {
-                    _Forms[ i ].Close();
-                    _Forms.RemoveAt( i );
+                    form.Close();
+                    forms.RemoveAt( i );
                 }
             }
+            _Forms = forms;  // Should now only be the main window
         }
 
         public static void              SetEnableState( bool enabled )

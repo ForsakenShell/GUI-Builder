@@ -36,14 +36,7 @@ namespace GUIBuilder.Windows
         
         public WorkspaceSelector()
         {
-            //
-            // The InitializeComponent() call is required for Windows Forms designer support.
-            //
             InitializeComponent();
-            
-            //
-            // TODO: Add constructor code after the InitializeComponent() call.
-            //
         }
         
         void WorkspaceSelectorLoad( object sender, EventArgs e )
@@ -107,37 +100,55 @@ namespace GUIBuilder.Windows
                                 pn.ForeColor = NodeDisabledColor;
                                 n.Nodes.Add( pn );
                             }
-                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator , "BorderBatchWindow.NodeDetection.WorkshopBorderGenerator"      );
-                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink      , "BorderBatchWindow.NodeDetection.WorkshopMarkerLink"           );
-                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_STAT_TerrainFollowing, "BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing" );
-                            AddFormIdentifier( ws, n, GUIBuilder.BorderBatch.WSDS_STAT_ForcedZ         , "BorderBatchWindow.NodeDetection.BorderMarkerForcedZ"          );
+                            AddFormIdentifier( ws, n, GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator , "BorderBatchWindow.NodeDetection.WorkshopBorderGenerator"      );
+                            AddFormIdentifier( ws, n, GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink      , "BorderBatchWindow.NodeDetection.WorkshopMarkerLink"           );
+                            AddFormIdentifier( ws, n, GUIBuilder.WorkshopBatch.WSDS_STAT_TerrainFollowing, "BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing" );
+                            AddFormIdentifier( ws, n, GUIBuilder.WorkshopBatch.WSDS_STAT_ForcedZ         , "BorderBatchWindow.NodeDetection.BorderMarkerForcedZ"          );
+                            {
+                                var workshopIdentifiers = ws.WorkshopWorkbenches;
+                                if( !workshopIdentifiers.NullOrEmpty() )
+                                {
+                                    var wsnp = new TreeNode( "WorkspaceSelector.WorkshopWorkbenches".Translate() );
+                                    wsnp.ForeColor = NodeDisabledColor;
+                                    n.Nodes.Add( wsnp );
+                                    foreach( var identifier in workshopIdentifiers )
+                                        AddFormIdentifier( identifier, wsnp, "WorkspaceSelector.Container" );
+                                }
+                            }
                         }
                         else
-                            DebugLog.WriteError( "GUIBuilder.Windows.WorkspaceSelector", "WorkspaceSelectorLoad()", string.Format( "new Workspace( \"{0}\" ) = null!", wsName ) );
+                            DebugLog.WriteError( string.Format( "new Workspace( \"{0}\" ) = null!", wsName ) );
                     }
                 }
             }
             
             onLoadComplete = true;
         }
-        
+
         void AddFormIdentifier( Workspace workspace, TreeNode parentNode, string identifierKey, string translationKey )
         {
-            var formIdentifier = workspace.GetFormIdentifier( identifierKey, false );
-            if( formIdentifier != null )
-            {
-                var identifierNode = new TreeNode( translationKey.Translate() );
-                identifierNode.ForeColor = NodeDisabledColor;
-                parentNode.Nodes.Add( identifierNode );
-                var formIDText = string.Format( "{0} : {1}", "Form.FormID".Translate(), formIdentifier.FormID.ToString( "X8" ) );
-                var formIDNode = new TreeNode( formIDText );
-                formIDNode.ForeColor = NodeDisabledColor;
-                identifierNode.Nodes.Add( formIDNode );
-                var filenameText = string.Format( "{0} : {1}", "Form.Filename".Translate(), formIdentifier.Filename );
-                var filenameNode = new TreeNode( filenameText );
-                filenameNode.ForeColor = NodeDisabledColor;
-                identifierNode.Nodes.Add( filenameNode );
-            }
+            AddFormIdentifier( workspace.GetFormIdentifier( identifierKey, false ), parentNode, translationKey );
+        }
+        
+        void AddFormIdentifier( Workspace.FormIdentifier identifier, TreeNode parentNode, string translationKey )
+        {
+            if( ( identifier == null )||( parentNode == null ) )
+                return;
+            
+            var identifierNode = new TreeNode( translationKey.Translate() );
+            identifierNode.ForeColor = NodeDisabledColor;
+            
+            var formIDText = string.Format( "{0} : {1}", "Form.FormID".Translate(), identifier.FormID.ToString( "X8" ) );
+            var formIDNode = new TreeNode( formIDText );
+            formIDNode.ForeColor = NodeDisabledColor;
+            
+            var filenameText = string.Format( "{0} : {1}", "Form.Filename".Translate(), identifier.Filename );
+            var filenameNode = new TreeNode( filenameText );
+            filenameNode.ForeColor = NodeDisabledColor;
+
+            identifierNode.Nodes.Add( formIDNode );
+            identifierNode.Nodes.Add( filenameNode );
+            parentNode.Nodes.Add( identifierNode );
         }
 
         void OnFormMove( object sender, EventArgs e )

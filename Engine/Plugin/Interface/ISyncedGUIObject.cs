@@ -60,7 +60,9 @@ namespace Engine.Plugin.Interface
         bool                            InitialCheckedOrSelectedState();
         
         bool                            ObjectChecked( bool checkedValue );
-        
+
+        int                             GetHashCode();
+
     }
-    
+
 }

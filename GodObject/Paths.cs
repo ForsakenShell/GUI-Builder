@@ -177,8 +177,9 @@ namespace GodObject
                     if( string.IsNullOrEmpty( bbPath ) )
                         return null;
                     var tryFile = bbPath + GUIBuilder.Constant.GUIBuilderConfigFile;
-                    if( !tryFile.TryAssignFile( ref _GUIBuilderConfigFile ) )
-                        return null;
+                    //if( !tryFile.TryAssignFile( ref _GUIBuilderConfigFile ) )
+                    //    return null;
+                    _GUIBuilderConfigFile = tryFile; // Force config file regardless of it's existance
                 }
                 return _GUIBuilderConfigFile;
             }
@@ -291,9 +292,27 @@ namespace GodObject
                 return result;
             }
         }
-        
+
+        static string _debugLog = null;
+        public static string DebugLog
+        {
+            get
+            {
+                if( string.IsNullOrEmpty( _debugLog ) )
+                {
+                    var bbPath = BorderBuilder;
+                    if( string.IsNullOrEmpty( bbPath ) )
+                        return null;
+                    var tryPath = bbPath + GUIBuilder.Constant.LogFilePath;
+                    if( !tryPath.TryAssignPath( ref _debugLog, true ) )
+                        return null;
+                }
+                return _debugLog;
+            }
+        }
+
         #endregion
     }
-    
+
 }
 

@@ -24,7 +24,6 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.ToolStripButton tsRenderSettlements;
         System.Windows.Forms.ToolStripButton tsRenderSubDivisions;
         System.Windows.Forms.ToolStripButton tsRenderEdgeFlagLinks;
-        System.Windows.Forms.Panel pnWindow;
         System.Windows.Forms.ToolStripButton tsRenderWorkshops;
         System.Windows.Forms.ToolStripButton tsRenderSandboxVolumes;
         System.Windows.Forms.ToolStripTextBox tsMinSettlementObjectsRenderSize;
@@ -82,7 +81,6 @@ namespace GUIBuilder.Windows
             this.tslMouseToWorldspace = new System.Windows.Forms.ToolStripLabel();
             this.tslEditorSelectionMode = new System.Windows.Forms.ToolStripLabel();
             this.pnRenderTarget = new System.Windows.Forms.Panel();
-            this.pnWindow = new System.Windows.Forms.Panel();
             tsRenderSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             tsRenderSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             tsRenderSeparator3 = new System.Windows.Forms.ToolStripSeparator();
@@ -91,8 +89,14 @@ namespace GUIBuilder.Windows
             tsRenderSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             tsRenderSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.tsRenderWindow.SuspendLayout();
-            this.pnWindow.SuspendLayout();
+            this.WindowPanel.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // pnWindow
+            // 
+            this.WindowPanel.Controls.Add( this.tsRenderWindow );
+            this.WindowPanel.Controls.Add( this.pnRenderTarget );
+            this.WindowPanel.Size = new System.Drawing.Size( 771, 355 );
             // 
             // tsRenderSeparator1
             // 
@@ -389,49 +393,25 @@ namespace GUIBuilder.Windows
             // 
             // pnRenderTarget
             // 
-            this.pnRenderTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnRenderTarget.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.pnRenderTarget.Cursor = System.Windows.Forms.Cursors.Cross;
-            this.pnRenderTarget.Location = new System.Drawing.Point(0, 23);
-            this.pnRenderTarget.Name = "pnRenderTarget";
             this.pnRenderTarget.Size = new System.Drawing.Size(771, 332);
-            this.pnRenderTarget.TabIndex = 8;
-            // 
-            // pnWindow
-            // 
-            this.pnWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnWindow.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.pnWindow.Controls.Add(this.tsRenderWindow);
-            this.pnWindow.Controls.Add(this.pnRenderTarget);
-            this.pnWindow.Location = new System.Drawing.Point(0, 0);
-            this.pnWindow.Name = "pnWindow";
-            this.pnWindow.Size = new System.Drawing.Size(771, 355);
-            this.pnWindow.TabIndex = 17;
             // 
             // Render
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(771, 355);
-            this.Controls.Add(this.pnWindow);
+            this.Controls.Add(this.WindowPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(420, 360);
             this.Name = "Render";
             this.ShowInTaskbar = false;
             this.Tag = "RenderWindow.Title";
             this.Text = "title";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
+            this.ClientOnLoad += new System.EventHandler(this.Render_OnLoad);
             this.tsRenderWindow.ResumeLayout(false);
-            this.tsRenderWindow.PerformLayout();
-            this.pnWindow.ResumeLayout(false);
-            this.pnWindow.PerformLayout();
+            this.WindowPanel.ResumeLayout(false);
+            this.WindowPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }

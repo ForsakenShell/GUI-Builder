@@ -26,13 +26,18 @@ public static class GenFilePath
         return System.DateTime.Now.ToString( format ).ReplaceInvalidFilenameChars();
     }
     
-    public static string ReplaceInvalidFilenameChars( this string filename, bool replaceSpaces = true, bool replaceDots = true, bool replaceColons = true, bool replaceSlashes = true )
+    public static string ReplaceInvalidFilenameChars( this string filename, bool replaceSpaces = true, bool replaceDots = true, bool replaceColons = true, bool replaceSlashes = true, bool replaceGLThan = true, bool removeBrackets = true )
     {
-        var workingFile = filename;
+        var                       workingFile = filename;
+        if( removeBrackets      ) workingFile = workingFile.StripFrom( "(", StringComparison.InvariantCultureIgnoreCase )
+                                                           .StripFrom( ")", StringComparison.InvariantCultureIgnoreCase );
         if( replaceSpaces       ) workingFile = workingFile.Replace( ' ', '_' );
         if( replaceDots         ) workingFile = workingFile.Replace( '.', '_' );
         if( replaceColons       ) workingFile = workingFile.Replace( ':', '_' );
-        if( replaceSlashes      ) workingFile = workingFile.Replace( '/', '_' ).Replace( '\\', '_' );
+        if( replaceSlashes      ) workingFile = workingFile.Replace( '/', '_' )
+                                                           .Replace( '\\', '_' );
+        if( replaceGLThan       ) workingFile = workingFile.Replace( '<', '[' )
+                                                           .Replace( '>', ']' );
         return workingFile;
     }
     

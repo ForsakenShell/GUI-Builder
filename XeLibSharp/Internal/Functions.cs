@@ -19,11 +19,16 @@ namespace XeLib.Internal
 
         //WordBool(__cdecl* GetResultString)(PWChar, Integer);
         [DllImport(DllPath, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool GetResultString(Byte[] result, int len);
+        public static extern bool GetResultString(byte[] result, int len);
 
         //WordBool(__cdecl* GetResultArray)(PCardinal, Integer);
         [DllImport(DllPath, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public static extern bool GetResultArray(uint[] result, int len);
+
+        //This function is only used by "resources", it will not return record/element/field BLOBs
+        //WordBool(__cdecl* GetResultBytes)(PByte, Integer);
+        [DllImport( DllPath, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl )]
+        public static extern bool GetResultBytes( byte[] result, int len );
 
         //WordBool(__cdecl* GetGlobal)(PWChar, PInteger);
         [DllImport(DllPath, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]

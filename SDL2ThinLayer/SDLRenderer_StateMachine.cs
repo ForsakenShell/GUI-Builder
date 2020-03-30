@@ -415,7 +415,7 @@ namespace SDL2ThinLayer
         bool INTERNAL_Init_SDLThread()
         {
             // Create a thread for the object
-            _sdlThread = new Thread( INTERNAL_SDLThread_Main );
+            _sdlThread = new Thread( THREAD_INTERNAL_SDL_Main );
             if( _sdlThread == null )
                 return false;
                 //throw new Exception( "Unable to create thread!" );

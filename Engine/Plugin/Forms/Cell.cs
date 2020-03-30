@@ -13,7 +13,7 @@ using XeLib;
 namespace Engine.Plugin.Forms
 {
     
-    [Attributes.FormAssociation( "CELL", "Cell", true, typeof( Engine.Plugin.Collections.Cells ), new Type[]{ typeof( Engine.Plugin.Forms.ObjectReference ) } )]
+    [Attributes.FormAssociation( "CELL", "Cell", true, typeof( Engine.Plugin.Collections.Cells ), new Type[]{ typeof( Engine.Plugin.Forms.Landscape ), typeof( Engine.Plugin.Forms.ObjectReference ) } )]
     public class Cell : Form
     {
         
@@ -35,13 +35,13 @@ namespace Engine.Plugin.Forms
         public Cell( string filename, uint formID ) : base( filename, formID ) {}
         
         //public Cell( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Cell( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle ) {}
+        public Cell( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
         
         public override void CreateChildFields()
         {
-            _FullName = new Fields.Shared.FullName( this );
-            _Flags = new Fields.Cell.Flags( this );
-            _CellGrid = new Fields.Cell.CellGrid( this );
+            _FullName    = new Fields.Shared.FullName( this );
+            _Flags       = new Fields.Cell.Flags( this );
+            _CellGrid    = new Fields.Cell.CellGrid( this );
             _WaterHeight = new Engine.Plugin.Forms.Fields.Cell.WaterHeight( this );
         }
         
@@ -56,7 +56,7 @@ namespace Engine.Plugin.Forms
         {
             var result = _ObjectReferences.LoadFrom( this );
             if( !result )
-                DebugLog.Write( string.Format( "{0} :: ObjectReferences.LoadFrom returned false!", this.GetType().ToString() ) );
+                DebugLog.Write( string.Format( "{0} :: ObjectReferences.LoadFrom returned false!", this.FullTypeName() ) );
             return result;
         }
         */
@@ -109,9 +109,8 @@ namespace Engine.Plugin.Forms
         {
             var f = GetFlags( target );
             //DebugLog.WriteLine( string.Format(
-            //    "0x{0} - \"{1}\" :: Cell Flags: 0x{2}",
-            //    GetFormID( target ).ToString( "X8" ),
-            //    GetEditorID( target ),
+            //    "{0} :: Cell Flags: 0x{1}",
+            //    IDString,
             //    f.ToString( "X8" ) ) );
             return ( f & (uint)Engine.Plugin.Forms.Fields.Cell.Flags.Flag.PackInCell ) != 0;
         }
@@ -123,7 +122,15 @@ namespace Engine.Plugin.Forms
                 return CollectionFor<Engine.Plugin.Forms.ObjectReference>() as Engine.Plugin.Collection;
             }
         }
-        
+
+        public Engine.Plugin.Collection Landscapes
+        {
+            get
+            {
+                return CollectionFor<Engine.Plugin.Forms.Landscape>() as Engine.Plugin.Collection;
+            }
+        }
+
         public Worldspace Worldspace
         {
             get

@@ -69,7 +69,9 @@ namespace XeLib.API
         {
             int len;
             if( ( !Functions.GetLoadOrder( out len ) )||( len < 1 ) ) return null;
-            var unfiltered = Helpers.GetResultString( len ).Split( new [] { '\r', '\n' } );
+            var unsplit = Helpers.GetResultString( len );
+            if( string.IsNullOrEmpty( unsplit ) ) return null;
+            var unfiltered = unsplit.Split( new [] { '\r', '\n' } );
             if( unfiltered.NullOrEmpty() ) return null;
             var lo = new List<LoadOrderItem>();
             for( int i = 0; i < unfiltered.Length; i++ )
@@ -141,7 +143,7 @@ namespace XeLib.API
         
         public static FileHandle[] GetLoadedFiles( bool excludeHardcoded = true )
         {
-            DebugLog.OpenIndentLevel( new [] { "XeLib.API.Setup", "GetLoadedFiles()", "excludeHardcoded = " + excludeHardcoded } );
+            //DebugLog.OpenIndentLevel( "excludeHardcoded = " + excludeHardcoded, true );
             var fileHandles = Elements.GetElementsEx<FileHandle>( ElementHandle.BaseXHandleValue );
             
             if( excludeHardcoded )
@@ -153,7 +155,7 @@ namespace XeLib.API
                 fileHandles = filteredHandles;
             }
             
-            DebugLog.CloseIndentLevel();
+            //DebugLog.CloseIndentLevel();
             return fileHandles;
         }
         

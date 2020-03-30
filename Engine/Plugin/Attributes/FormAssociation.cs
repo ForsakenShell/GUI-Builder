@@ -29,31 +29,4 @@ namespace Engine.Plugin.Attributes
         
     }
     
-    public static partial class Reflection
-    {
-        
-        #region Form Attributes from Signature/Type
-        
-        public static FormAssociation   FormAssociationFrom( string signature )
-        {
-            var associations = AllAssociations;
-            if( associations == null ) return null;
-            foreach( var association in associations )
-                if( association.Signature == signature ) return association as FormAssociation;
-            return null;
-        }
-        
-        public static FormAssociation   FormAssociationFrom( Type type )
-        {
-            var associations = AllAssociations;
-            if( associations == null ) return null;
-            foreach( var association in associations )
-                if( association.ClassType == type ) return association as FormAssociation;
-            return null;
-        }
-        
-        #endregion
-        
-    }
-    
 }

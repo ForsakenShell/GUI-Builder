@@ -31,13 +31,16 @@ namespace Fallout4
     [Engine.Plugin.Attributes.ScriptAssociation( "WorkshopScript" )]
     public class WorkshopScript : Engine.Plugin.PapyrusScript
     {
-        
-        // Border marker nodes for workshops
-        Engine.Plugin.Forms.Keyword _BorderGeneratorKeyword = null;
-        Engine.Plugin.Forms.Keyword _BorderMarkerLinkKeyword = null;
-        Engine.Plugin.Forms.ObjectReference _FirstBorderMarker = null;
+
+        // Forms for workshop borders
+        //Engine.Plugin.Forms.Keyword _BorderGeneratorKeyword = null;
+        //Engine.Plugin.Forms.Keyword _GUIBuilder.CustomForms.WorkshopBorderLinkKeyword = null;
+
+        //Engine.Plugin.Forms.LocationRef _BorderWithBottomRef = null;
+
+
         List<Engine.Plugin.Forms.ObjectReference> _BorderMarkers = null;
-        List<GUIBuilder.BorderNode> _nodes = null;
+        public List<GUIBuilder.BorderNode> BorderNodes = null;
         
         Engine.Plugin.Forms.ObjectReference _Border = null;
         
@@ -52,7 +55,8 @@ namespace Fallout4
         
         public WorkshopScript( Engine.Plugin.Forms.ObjectReference reference ) : base( reference )
         {
-            LocationName = string.Format( "0x{0} - No location", reference.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) );
+            // TODO : DO THIS PROPERLY!
+            LocationName = string.Format( "{0} - No location", reference.IDString );
         }
 
         #endregion
@@ -63,12 +67,8 @@ namespace Fallout4
         {
             get
             {
-                var wsKeyword = GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator );
-                if( ( _BorderGeneratorKeyword == null )||( ( wsKeyword != null )&&( wsKeyword != _BorderGeneratorKeyword ) ) )
-                    _BorderGeneratorKeyword = wsKeyword;
-
                 return
-                    ( _BorderGeneratorKeyword != null )&&( GetFirstBorderMarker( _BorderGeneratorKeyword ) != null )
+                    ( GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword != null ) && ( GetFirstBorderMarker( false ) != null )
                     ? ConflictStatus.RequiresOverride
                     : base.ConflictStatus;
             }
@@ -87,7 +87,7 @@ namespace Fallout4
             }
         }
         
-        Engine.Plugin.Forms.ObjectReference BorderReference
+        public Engine.Plugin.Forms.ObjectReference BorderReference
         {
             get
             {
@@ -100,13 +100,15 @@ namespace Fallout4
                     var wlbae = GodObject.CoreForms.WorkshopLinkedBuildAreaEdge;
                     if( wlbae == null )
                         return null;
-                    
+
+                    var wlbaeFID = wlbae.GetFormID( Engine.Plugin.TargetHandle.Master );
+
                     foreach( var form in forms )
                     {
                         var refr = form as Engine.Plugin.Forms.ObjectReference;
                         if( refr == null )
                             continue;
-                        var refrRef = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, wlbae.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                        var refrRef = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, wlbaeFID );
                         if( ( refrRef != null )&&( refrRef == Reference ) )
                         {
                             _Border = refr;
@@ -147,7 +149,7 @@ namespace Fallout4
             }
         }
         
-        Engine.Plugin.Forms.Static BorderStatic
+        public Engine.Plugin.Forms.Static BorderStatic
         {
             get
             {
@@ -220,297 +222,126 @@ namespace Fallout4
         
         #endregion
         
-        public void BuildBorders( Engine.Plugin.Forms.Keyword borderGeneratorKeyword, Engine.Plugin.Forms.Static forcedZ, float approximateNodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
-        {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildBorders()", this.ToString() } );
-            
-            ClearKeywordAndEdgeMarkers( borderGeneratorKeyword == null );
-            if( ( borderGeneratorKeyword == null )||( Form == null ) )
-                goto localReturnResult;
-            var firstBorderNode = GetFirstBorderMarker( borderGeneratorKeyword );
-            if( firstBorderNode == null )
-            {
-                DebugLog.WriteLine( "GetFirstBorderNode() returned null! :: BorderGeneratorKeyword = " + borderGeneratorKeyword.ToStringNullSafe() );
-                goto localReturnResult;
-            }
-            var borderMarkerLinkKeyword = GetBorderMarkerLinkKeyword( firstBorderNode );
-            if( borderMarkerLinkKeyword == null )
-            {
-                DebugLog.WriteLine( "GetBorderNodeKeyword() returned null! :: BorderGeneratorKeyword = " + borderGeneratorKeyword.ToStringNullSafe() );
-                goto localReturnResult;
-            }
-            
-            /*
-            DebugLog.WriteLine( string.Format(
-                "Fallout4.WorkshopScript.BuildBorders() :: Start :: workshop 0x{0} \"{1}\" :: workshop link keyword 0x{2} \"{3}\" :: node link keyword 0x{4} \"{5}\" :: first node 0x{6} \"{7}\"",
-                this.FormID.ToString( "X8" ), this.EditorID,
-                keyword.FormID.ToString( "X8" ), keyword.EditorID,
-                nodeKeyword.FormID.ToString( "X8" ), nodeKeyword.EditorID,
-                firstNode.FormID.ToString( "X8" ), firstNode.EditorID ) );
-            */
-            //_BorderGeneratorKeyword = borderGeneratorKeyword;
-            //_BorderMarkerLinkKeyword = borderMarkerLinkKeyword;
-            _BorderMarkers = GetBorderMarkers( firstBorderNode, borderMarkerLinkKeyword );
-            _nodes = BorderNode.GenerateBorderNodes( Reference.Worldspace, _BorderMarkers, approximateNodeLength, angleAllowance, slopeAllowance, forcedZ );
-            
-            SendObjectDataChangedEvent( this );
-            /*
-            DebugLog.WriteLine( string.Format( "Fallout4.WorkshopScript.BuildBorders() :: Complete :: workshop 0x{0} \"{1}\" :: keyword 0x{2} \"{3}\"", this.FormID.ToString( "X8" ), this.EditorID, keyword.FormID.ToString( "X8" ), keyword.EditorID ) );
-            DebugLog.WriteLine( string.Format(
-                "Fallout4.WorkshopScript.BuildBorders() :: Complete :: workshop 0x{0} \"{1}\" :: workshop link keyword 0x{2} \"{3}\" :: node link keyword 0x{4} \"{5}\" :: first node 0x{6} \"{7}\" :: node count = {8}",
-                this.FormID.ToString( "X8" ), this.EditorID,
-                keyword.FormID.ToString( "X8" ), keyword.EditorID,
-                nodeKeyword.FormID.ToString( "X8" ), nodeKeyword.EditorID,
-                firstNode.FormID.ToString( "X8" ), firstNode.EditorID,
-                _BorderMarkerNodes.NullOrEmpty() ? 0 : _BorderMarkerNodes.Count ) );
-            */
-        localReturnResult:
-           DebugLog.CloseIndentLevel();
-        }
-        
-        Engine.Plugin.Forms.ObjectReference GetFirstBorderMarker( Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword )
-        {
-            var wsKeyword = workshopBorderGeneratorKeyword ?? GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderGenerator );
-            if( ( _BorderGeneratorKeyword == null ) || ( ( wsKeyword != null ) && ( wsKeyword != _BorderGeneratorKeyword ) ) )
-            {
-                _BorderGeneratorKeyword = wsKeyword;
-                _FirstBorderMarker = null;
-            }
 
-            if( _BorderGeneratorKeyword == null )
-                return null;
-
-            if( _FirstBorderMarker != null )
-                return _FirstBorderMarker;
+        Engine.Plugin.Forms.ObjectReference GetFirstBorderMarker( bool warnOnMissingLink )
+        {
+            Engine.Plugin.Forms.ObjectReference result = null;
+            
+            if( GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword == null )
+            {
+                DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator ) );
+                goto localAbort;
+            }
 
             var forms = Form.References;
             if( forms.NullOrEmpty() )
             {
-                DebugLog.WriteLine( new string[] { "Workshop has no other forms referencing it" } );
-                return null;
+                DebugLog.WriteError( "Workshop has no other forms referencing it" );
+                goto localAbort;
             }
-            
+
+            var kywdWBG = GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.GetFormID( TargetHandle.Master );
+
             foreach( var form in forms )
             {
                 var refr = form as Engine.Plugin.Forms.ObjectReference;
                 if( refr == null )
                     continue;
                 
-                var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, workshopBorderGeneratorKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                var lr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBG );
                 if( lr == null )
                     continue;
                 if( lr != Reference )
                 {
-                    DebugLog.WriteWarning( this.GetType().ToString(), "GetFirstBorderMarker()", string.Format( "Linked Ref does not match workshop\nworkshop = {0}\nlinked ref = {1}\nreference = {2}", Reference.ToStringNullSafe(), lr.ToStringNullSafe(), refr.ToStringNullSafe() ) );
-                    continue;
+                    DebugLog.WriteError( string.Format( "Linked Ref does not match workshop\nworkshop = {0}\nlinked ref = {1}\nreference = {2}\nkeyword = {3}", Reference.IDString, lr.IDString, refr.IDString, GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.IDString ) );
+                    goto localAbort;
                 }
 
-                /*
-                DebugLog.WriteLine( new string[] {
-                    this.GetType().ToString(),
-                    "GetFirstBorderNode()",
-                    refr.ToStringNullSafe() } );
-                */
-
-                _FirstBorderMarker = refr;
+                result = refr;
                 break;
             }
-            return _FirstBorderMarker;
-        }
-        
-        Engine.Plugin.Forms.Keyword GetBorderMarkerLinkKeyword( Engine.Plugin.Forms.ObjectReference firstBorderMarker )
-        {
-            if( firstBorderMarker == null )
-                return null;
 
-            var wsKeyword = GodObject.Plugin.Workspace?.GetIdentifierForm<Engine.Plugin.Forms.Keyword>( GUIBuilder.BorderBatch.WSDS_KYWD_BorderLink );
-            if( ( _BorderMarkerLinkKeyword == null ) || ( ( wsKeyword != null ) && ( wsKeyword != _BorderGeneratorKeyword ) ) )
-                _BorderMarkerLinkKeyword = wsKeyword;
+            if( ( result == null )&&( warnOnMissingLink ) )
+                DebugLog.WriteWarning( string.Format( "Workshop {0} does not have any references linked to it with keyword {1}\nThis warning \"may\" be safely ignored for this workshop \"depending\" on the context in which it was given.\neg, you didn't setup and link any border markers for it but accidentally selected the workshop when generating nodes.", this.IDString, GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.IDString ) );
 
-            if( _BorderMarkerLinkKeyword != null )
-                return _BorderMarkerLinkKeyword;
-
-            var count = firstBorderMarker.LinkedRefs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-            if( count < 1 )
-                return null;
-            
-            for( int i = 0; i < count; i++ )
-            {
-                var refr = firstBorderMarker.LinkedRefs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
-                if( ( refr == null )||( refr == Reference ) )
-                    continue;
-                
-                var kywd = firstBorderMarker.LinkedRefs.GetKeyword( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
-                if( kywd == null )
-                    continue;
-
-                /*
-                DebugLog.Write( string.Format(
-                    "Fallout4.WorkshopScript.GetBorderMarkerLinkKeyword() :: 0x{0} \"{1}\"",
-                    kywd.FormID.ToString( "X8" ),
-                    kywd.EditorID ) );
-                */
-                // *
-                DebugLog.WriteLine( new string[] {
-                    this.GetType().ToString(),
-                    "GetBorderMarkerLinkKeyword()",
-                    kywd.ToStringNullSafe() } );
-                // * /
-
-
-                _BorderMarkerLinkKeyword = kywd;
-                break;
-            }
-            return _BorderMarkerLinkKeyword;
-        }
-        
-        List<Engine.Plugin.Forms.ObjectReference> GetBorderMarkers( Engine.Plugin.Forms.ObjectReference firstMarker, Engine.Plugin.Forms.Keyword linkKeyword )
-        {
-            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "GetBorderMarkers()", "workshop = " + this.ToStringNullSafe(), "linkKeyword = " + linkKeyword.ToStringNullSafe(), "firstMarker = " + firstMarker.ToStringNullSafe() } );
-            
-            var list = (List<Engine.Plugin.Forms.ObjectReference>)null;
-            
-            if( ( linkKeyword == null )||( firstMarker == null )||( Form == null ) )
-                goto localAbort;
-            
-            var node = firstMarker.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, linkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
-            if( node == null )
-                goto localAbort;
-            
-            list = new List<Engine.Plugin.Forms.ObjectReference>();
-            
-            var closedLoop = false;
-            list.Add( firstMarker );
-            list.Add( node );
-            while( true )
-            {
-                node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, linkKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ) );
-                if( node == null )
-                    break;
-                list.Add( node );
-                closedLoop = ( node == firstMarker );
-                if( closedLoop )
-                    break;
-            }
-            
-            if( !closedLoop )
-            {
-                var efCount = list.Count;
-                DebugLog.WriteWarning( this.GetType().ToString(), "GetBorderMarkers()", string.Format( "Workshop border markers do not form a complete loop.\n\tWorkshop = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.ToString(), efCount, list[ 0 ].ToString(), list[ efCount - 1 ].ToString() ) );
-            }
-            /*
-            DebugLog.Write( string.Format(
-                "Fallout4.WorkshopScript.GetBorderMarkers() :: Total count: {0}",
-                list.Count ) );
-            */
-
-        localAbort:
-            DebugLog.CloseIndentLevel( "nodes", list );
-            return list;
-        }
-        
-        public List<GUIBuilder.FormImport.ImportBase> CreateBorderNIFs(
-            float gradientHeight,
-            float groundOffset,
-            float groundSink,
-            string targetPath,
-            string targetSuffix,
-            string meshSuffix,
-            string meshSubPath,
-            string filePrefix,
-            string fileSuffix,
-            bool createImportData )
-        {
-            DebugLog.OpenIndentLevel( string.Format( "{0} :: CreateBorderNIFs() :: workshop 0x{1} - \"{2}\"", this.GetType().ToString(), this.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-            
-            List<GUIBuilder.FormImport.ImportBase> result = null;
-            
-            //DebugLog.WriteList( "_nodes", _nodes );
-            
-            if( _nodes.NullOrEmpty() )
-                goto localReturnResult;
-            
-            var volumes = BuildVolumes;
-            var volumeCeiling = float.MinValue;
-            if( !volumes.NullOrEmpty() )
-            {
-                foreach( var volume in volumes )
-                {
-                    var vPos = volume.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    var vBounds = volume.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    var ceiling = vPos.Z + vBounds.Z * 0.5f;
-                    if( ceiling > volumeCeiling )
-                        volumeCeiling = ceiling;
-                }
-            }
-            
-            var originalForms = createImportData ? new List<Engine.Plugin.Form>() : null;
-            
-            var keyword = _BorderGeneratorKeyword;
-            var worldspace = Reference.Worldspace;
-            var workshopFID = this.GetFormID( Engine.Plugin.TargetHandle.Master );
-            var workshopName = this.NameFromEditorID;
-            var border = BorderReference;
-            if( ( createImportData )&&( border != null ) )
-                originalForms.Add( border );
-            var offsetMesh = ( border != null )&&( ( !border.IsInWorkingFile() )||( !Form.IsInWorkingFile() ) );
-            string forcedNIFFile = null;
-            string forcedNIFPath = null;
-            var stat = BorderStatic;
-            if( stat != null )
-            {
-                if( createImportData )
-                    originalForms.Add( stat );
-                if( offsetMesh )
-                {
-                    var statFilePath = stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    forcedNIFFile = GenFilePath.FilenameFromPathname( statFilePath, out forcedNIFPath );
-                }
-            }
-            
-            result = NIFBuilder.CreateNIFs(
-                createImportData,
-                _nodes,
-                worldspace,
-                null,
-                Reference,
-                GodObject.CoreForms.WorkshopLinkedBuildAreaEdge,
-                GodObject.CoreForms.WorkshopBorderArt,
-                targetPath,
-                targetSuffix,
-                meshSuffix,
-                meshSubPath,
-                filePrefix,
-                workshopName,
-                fileSuffix,
-                "", 1,
-                forcedNIFPath,
-                forcedNIFFile,
-                volumeCeiling,
-                gradientHeight,
-                groundOffset,
-                groundSink,
-                false,
-                offsetMesh,
-                offsetMesh
-                    ? border.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
-                    : Vector3f.Zero,
-                NIFBuilder.Colours.InsideBorder,
-                NIFBuilder.Colours.OutsideBorder,
-                originalForms,
-                true
-                );
-            
-        localReturnResult:
-            DebugLog.CloseIndentLevel();
+            localAbort:
             return result;
         }
         
-        public void ClearKeywordAndEdgeMarkers( bool sendchangedevent )
+        public List<Engine.Plugin.Forms.ObjectReference> GetBorderMarkers()
         {
-            _BorderGeneratorKeyword = null;
+            if( _BorderMarkers.NullOrEmpty() )
+            {
+                var list = (List<Engine.Plugin.Forms.ObjectReference>)null;
+
+                DebugLog.OpenIndentLevel( new string[] {
+                    "workshop = " + this.IDString,
+                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator + " = " + GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.IDString,
+                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink + " = " + GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.IDString
+                    }, true, true, false );
+                
+                var abort = false;
+                if( GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword == null )
+                {
+                    DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator ) );
+                    abort = true;
+                }
+                if( GUIBuilder.CustomForms.WorkshopBorderLinkKeyword == null )
+                {
+                    DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink ) );
+                    abort = true;
+                }
+                if( abort ) goto localAbort;
+
+                var firstMarker = GetFirstBorderMarker( true );
+                if( firstMarker == null )
+                {
+                    //GetFirstBorderMarker() will throw a warning to the log, no need to write a reundant error here
+                    //DebugLog.WriteError( "GetFirstBorderNode() returned null!" );
+                    goto localAbort;
+                }
+
+                var kywdWBL = GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.GetFormID( TargetHandle.Master );
+
+                var node = firstMarker.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBL );
+                if( node == null )
+                    goto localAbort;
+
+                list = new List<Engine.Plugin.Forms.ObjectReference>();
+
+                var closedLoop = false;
+                list.Add( firstMarker );
+                list.Add( node );
+                while( true )
+                {
+                    node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBL );
+                    if( node == null )
+                        break;
+                    list.Add( node );
+                    closedLoop = ( node == firstMarker );
+                    if( closedLoop )
+                        break;
+                }
+
+                if( !closedLoop )
+                {
+                    var efCount = list.Count;
+                    DebugLog.WriteWarning( string.Format( "Workshop border markers do not form a complete loop.\n\tWorkshop = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.IDString, efCount, list[ 0 ].IDString, list[ efCount - 1 ].IDString ) );
+                }
+                
+                _BorderMarkers = list;
+        localAbort:
+                DebugLog.CloseIndentList( "nodes", list, true, true );
+            }
+
+            return _BorderMarkers;
+        }
+        
+
+        public void ClearBorderMarkersAndNodes( bool sendchangedevent )
+        {
             _BorderMarkers = null;
-            _nodes = null;
+            BorderNodes = null;
             if( sendchangedevent )
                 SendObjectDataChangedEvent( this );
         }

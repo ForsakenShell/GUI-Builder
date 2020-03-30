@@ -36,7 +36,7 @@ namespace GUIBuilder.FormImport
             return;
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}{2}{3}{4}{5}",
-                this.GetType()  .ToString(),
+                this.TypeFullName(),
                 Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
                 string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID ),
                 string.Format( "\n\tMinBounds = {0}", MinBounds.ToString() ),
@@ -53,10 +53,10 @@ namespace GUIBuilder.FormImport
             : base(  IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.Static ), originalForm )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
             
             if( string.IsNullOrEmpty( nifFilePath ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: nifFilePath cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: nifFilePath cannot be null!", this.TypeFullName() ) );
             
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
@@ -169,7 +169,7 @@ namespace GUIBuilder.FormImport
         {
             try
             {
-                var cStatics = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Static>( true, false );
+                var cStatics = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Static>( true, false, false );
                 if( cStatics == null )
                 {
                     AddErrorMessage( ErrorTypes.Import, "Unable to get root container for Static Objects" );

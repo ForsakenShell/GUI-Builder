@@ -28,7 +28,9 @@ namespace Engine.Plugin.Interface
         
         int                             GetHashCode();
         string                          ToString();
-        
+
+        string                          IDString                    { get; }
+
         #region Required Properties
         
         string                          Signature                   { get; }
@@ -37,7 +39,8 @@ namespace Engine.Plugin.Interface
         
         Plugin.File[]                   Files                       { get; }
         string[]                        Filenames                   { get; }
-        
+        string                          GetFilename( Engine.Plugin.TargetHandle target );
+
         uint                            LoadOrder                   { get; }
         
         //uint                            FormID                      { get; }
@@ -103,19 +106,19 @@ namespace Engine.Plugin.Interface
         
         #region Parent container collection
         
-        ICollection                     Collection                 { get; set; }
+        Collection                      ParentCollection            { get; set; }
         
         #endregion
         
         #region Child collections
         
-        void                            AddICollection( ICollection collection );
+        void                            AddCollection( Collection collection );
         
-        ICollection                     CollectionFor( string signature );
-        ICollection                     CollectionFor<TSync>() where TSync : class, IXHandle;
-        ICollection                     CollectionFor( Attributes.ClassAssociation association );
+        Collection                      CollectionFor( string signature );
+        Collection                      CollectionFor<TSync>() where TSync : class, IXHandle;
+        Collection                      CollectionFor( Attributes.ClassAssociation association );
         
-        List<ICollection>               ChildCollections           { get; }
+        List<Collection>                ChildCollections           { get; }
         
         #endregion
         

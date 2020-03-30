@@ -59,9 +59,9 @@ namespace Engine.Plugin.Forms
         public Worldspace( string filename, uint formID ) : base( filename, formID ) {}
         
         //public Worldspace( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Worldspace( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle )
+        public Worldspace( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "cTor()", this.ToStringNullSafe() } );
+            //DebugLog.OpenIndentLevel( this.IDString, true );
             //DebugDump( TargetHandle.Master );
             //DebugLog.CloseIndentLevel();
         }

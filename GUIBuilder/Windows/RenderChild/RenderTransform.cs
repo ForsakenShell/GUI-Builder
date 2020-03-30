@@ -69,7 +69,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         List<ObjectReference> _WorkshopAssociatedEdgeFlags;
         List<ObjectReference> _WorkshopUnassociatedEdgeFlags;
-        List<EdgeLine> _WorkshopEdgeLines;
+        //List<EdgeLine> _WorkshopEdgeLines;
         
         // Clipper inputs held for reference
         Maths.Vector2i _cellNW;
@@ -224,7 +224,7 @@ namespace GUIBuilder.Windows.RenderChild
             _workshops = null;
             _WorkshopAssociatedEdgeFlags = null;
             _WorkshopUnassociatedEdgeFlags = null;
-            _WorkshopEdgeLines = null;
+            //_WorkshopEdgeLines = null;
             hlWorkshops = null;
             hlWorkshopBuildVolumes = null;
             
@@ -304,7 +304,7 @@ namespace GUIBuilder.Windows.RenderChild
                 }
             }
             if( trace > 0 )
-                DebugLog.WriteLine( "GUIBuilder.RenderTransform :: SyncSceneUpdate() :: start = " + start + " :: _sceneUpdate = " + _sceneUpdate + " :: _sceneRender = " + _sceneRender + "\n" + ( trace < 2 ? "" : Environment.StackTrace + "\n" ) );
+                DebugLog.WriteLine( "start = " + start + " :: _sceneUpdate = " + _sceneUpdate + " :: _sceneRender = " + _sceneRender + "\n" + ( trace < 2 ? "" : Environment.StackTrace + "\n" ), true );
         }
         
         public void SyncRenderScene( bool start, int trace = 0 )
@@ -327,7 +327,7 @@ namespace GUIBuilder.Windows.RenderChild
                 }
             }
             if( trace > 0 )
-                DebugLog.WriteLine( "GUIBuilder.RenderTransform :: SyncRenderScene() :: start = " + start + " :: _sceneUpdate = " + _sceneUpdate + " :: _sceneRender = " + _sceneRender + "\n" + ( trace < 2 ? "" : Environment.StackTrace + "\n" ) );
+                DebugLog.WriteLine( "start = " + start + " :: _sceneUpdate = " + _sceneUpdate + " :: _sceneRender = " + _sceneRender + "\n" + ( trace < 2 ? "" : Environment.StackTrace + "\n" ), true );
         }
         
         #endregion
@@ -641,7 +641,7 @@ namespace GUIBuilder.Windows.RenderChild
                 _workshops = value;
                 _WorkshopAssociatedEdgeFlags = null;
                 _WorkshopUnassociatedEdgeFlags = null;
-                _WorkshopEdgeLines = null;
+                //_WorkshopEdgeLines = null;
                 SyncSceneUpdate( false );
             }
         }
@@ -892,7 +892,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void ReloadWorldspaceTextures( bool forceReload )
         {
-            //DebugLog.Write( string.Format( "\n----->\n{0} :: ReloadWorldspaceTextures() :: Start :: forceReload = {1}\n{2}", this.GetType().ToString(), forceReload, System.Environment.StackTrace ) );
+            //DebugLog.Write( string.Format( "\n----->\n{0} :: ReloadWorldspaceTextures() :: Start :: forceReload = {1}\n{2}", this.FullTypeName(), forceReload, System.Environment.StackTrace ) );
             if( _poolEntry == null )
             {
                 //DebugLog.Write( "GUIBuilder.RenderTransform.ReloadWorldspaceTextures() :: Worldspace PoolEntry is null!\n<-----" );
@@ -915,7 +915,7 @@ namespace GUIBuilder.Windows.RenderChild
             ) {
                 _poolEntry.CreateHeightmapTextures( this );
             }
-            //DebugLog.Write( string.Format( "\n{0} :: ReloadWorldspaceTextures() :: Complete :: forceReload = {1}\n{2}\n<-----", this.GetType().ToString(), forceReload, System.Environment.StackTrace ) );
+            //DebugLog.Write( string.Format( "\n{0} :: ReloadWorldspaceTextures() :: Complete :: forceReload = {1}\n{2}\n<-----", this.FullTypeName(), forceReload, System.Environment.StackTrace ) );
         }
         
         #region Render Scene
@@ -1101,7 +1101,7 @@ namespace GUIBuilder.Windows.RenderChild
             DebugLog.Write(
                 string.Format(
                     "\n{0} :: UpdateScene()\n\tfastRender = {1}\n\trenderCellGrid = {2}\n\trenderLand = {3}\n\trenderWater = {4}\n\trenderWorkshops = {5}\n\trenderSettlements = {6}\n\trenderSubDivisions = {7}\n\trenderEdgeFlags = {8}\n\trenderEdgeFlagLinks = {9}\n\trenderBuildVolumes = {10}\n\trenderSandboxVolumes = {11}\n\trenderBorders = {12}",
-                    this.GetType().ToString(),
+                    this.FullTypeName(),
                     fastRender, renderCellGrid,
                     renderLand, renderWater,
                     renderWorkshops, renderSettlements, renderSubdivisions,
@@ -1134,7 +1134,7 @@ namespace GUIBuilder.Windows.RenderChild
         {
             if( renderer != sdlRenderer ) return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SDL_DrawScene()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "SDL_DrawScene()" } );
             
             SyncRenderScene( true );
             
@@ -1415,7 +1415,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawMouseOverInfo()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawMouseOverInfo()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawMouseOverInfo()" } );
             
             var mp = new Vector2i( _mousePos );
             var moi = new List<string>();
@@ -1478,7 +1478,7 @@ namespace GUIBuilder.Windows.RenderChild
         void DrawLandMap()
         {
             if( _poolEntry.LandHeight_Texture == null ) return;
-            //DebugLog.WriteLine( new [] { this.GetType().ToString(), "DrawLandMap()" } );
+            //DebugLog.WriteLine( new [] { this.FullTypeName(), "DrawLandMap()" } );
             var hmClipper = WorldspaceToHeightmapClipper( _viewCentre.X, _viewCentre.Y );
             var rect = hmClipper.ToSDLRect();
             sdlRenderer.Blit( rectTarget, _poolEntry.LandHeight_Texture, rect );
@@ -1487,7 +1487,7 @@ namespace GUIBuilder.Windows.RenderChild
         void DrawWaterMap()
         {
             if( _poolEntry.WaterHeight_Texture == null ) return;
-            //DebugLog.WriteLine( new [] { this.GetType().ToString(), "DrawWaterMap()" } );
+            //DebugLog.WriteLine( new [] { this.FullTypeName(), "DrawWaterMap()" } );
             var hmClipper = WorldspaceToHeightmapClipper( _viewCentre.X, _viewCentre.Y );
             var rect = hmClipper.ToSDLRect();
             sdlRenderer.Blit( rectTarget, _poolEntry.WaterHeight_Texture, rect );
@@ -1697,7 +1697,7 @@ namespace GUIBuilder.Windows.RenderChild
             if( _worldspace == null )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawBuildVolumes()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawBuildVolumes()" } );
             
             if( !_workshops.NullOrEmpty() )
             {
@@ -1807,7 +1807,7 @@ namespace GUIBuilder.Windows.RenderChild
             if( _worldspace == null )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawSandboxVolumes()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawSandboxVolumes()" } );
             
             if( !_workshops.NullOrEmpty() )
                 foreach( var workshop in _workshops )
@@ -1832,7 +1832,7 @@ namespace GUIBuilder.Windows.RenderChild
                 ( !_SubDivisionEdgeLines.NullOrEmpty() )
                ) return;
             
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "RebuildSubDivisionAssociatedEdgeFlags()" } );
+            DebugLog.OpenIndentLevel();
             
             try
             {
@@ -1890,7 +1890,7 @@ namespace GUIBuilder.Windows.RenderChild
                 ( !_WorkshopEdgeLines.NullOrEmpty() )
                ) return;
             
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "RebuildWorkshopAssociatedEdgeFlags()" } );
+            DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "RebuildWorkshopAssociatedEdgeFlags()" } );
             
             try
             {
@@ -1942,7 +1942,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawSubDivisionEdgeFlags()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawEdgeFlags()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawEdgeFlags()" } );
             
             RebuildSubDivisionAssociatedEdgeFlags();
             
@@ -1984,7 +1984,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawSubDivisionEdgeFlagLinks()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawEdgeFlagLinks()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawEdgeFlagLinks()" } );
             
             RebuildSubDivisionAssociatedEdgeFlags();
             
@@ -2021,7 +2021,7 @@ namespace GUIBuilder.Windows.RenderChild
             if( _workshops.NullOrEmpty() )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawWorkshops()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawWorkshops()" } );
             
             try
             {
@@ -2046,10 +2046,10 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawSubDivisions()
         {
-            if( ( !GodObject.Master.AnnexTheCommonwealth.Loaded )||( _subdivisions.NullOrEmpty() ) )
+            if( ( !GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )||( _subdivisions.NullOrEmpty() ) )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawSubDivisions()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawSubDivisions()" } );
             
             try
             {
@@ -2072,10 +2072,10 @@ namespace GUIBuilder.Windows.RenderChild
         
         void DrawSettlements()
         {
-            if( ( !GodObject.Master.AnnexTheCommonwealth.Loaded )||( _settlements.NullOrEmpty() ) )
+            if( ( !GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) ) ||( _settlements.NullOrEmpty() ) )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawSettlements()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawSettlements()" } );
             
             try
             {
@@ -2151,7 +2151,7 @@ namespace GUIBuilder.Windows.RenderChild
             if( ( _worldspace == null )||( _subdivisions.NullOrEmpty() ) )
                 return;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawBorders()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawBorders()" } );
             
             var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
             var c = Color.FromArgb( 255, 0, 255, 0 );
@@ -2169,7 +2169,7 @@ namespace GUIBuilder.Windows.RenderChild
                         var refr = enabler.Reference;
                         if( refr.Worldspace == null )
                         {
-                            DebugLog.WriteError( this.GetType().ToString(), "DrawBorders()", string.Format( "Worldspace == null\nCell = {0}\nBorderEnabler = {1}", refr.Cell.ToString(), enabler.ToString() ) );
+                            DebugLog.WriteError( string.Format( "Worldspace == null\nCell = {0}\nBorderEnabler = {1}", refr.Cell.ToString(), enabler.ToString() ) );
                             continue;
                         }
                         
@@ -2208,7 +2208,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         public void DrawCellGrid()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "DrawCellGrid()", "NW = "+ _cellNW.ToString(), "SE = " + _cellSE.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "DrawCellGrid()", "NW = "+ _cellNW.ToString(), "SE = " + _cellSE.ToString() } );
             
             var c0 = Color.FromArgb( 127, 63, 63, 191 );
             var c = Color.FromArgb( 127, 91, 91, 0 );

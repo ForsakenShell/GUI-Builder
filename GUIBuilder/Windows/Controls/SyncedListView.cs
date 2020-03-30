@@ -5,6 +5,8 @@
  *
  */
 using System;
+using System.Linq;
+
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -174,7 +176,7 @@ namespace GUIBuilder.Windows.Controls
                 /*
                 DebugLog.Write( string.Format(
                     "{0} :: cTor() :: {1} :: {2} :: {3}",
-                    this.GetType().ToString(),
+                    this.FullTypeName(),
                     parent,
                     o,
                     _InListView ) );
@@ -187,7 +189,7 @@ namespace GUIBuilder.Windows.Controls
             {
                 //DebugLog.Write( string.Format(
                 //    "{0} :: AddToListView() :: _InListView ? {1} :: O ? {2} :: I ? {3}",
-                //    this.GetType().ToString(),
+                //    this.FullTypeName(),
                 //    _InListView,
                 //    O,
                 //    I ) );
@@ -204,7 +206,7 @@ namespace GUIBuilder.Windows.Controls
                 {
                     //DebugLog.Write( string.Format(
                     //    "{0} :: AddToListView() :: Creating ListView item",
-                    //    this.GetType().ToString() ) );
+                    //    this.FullTypeName() ) );
                     
                     if( _Parent.ColumnCount < 1 ) return;
                     var row = RowData();
@@ -219,7 +221,7 @@ namespace GUIBuilder.Windows.Controls
                 }
                 //DebugLog.Write( string.Format(
                 //    "{0} :: AddToListView() :: Updating and adding ListView item",
-                //    this.GetType().ToString() ) );
+                //    this.FullTypeName() ) );
                 _ListItem.BackColor = _SyncObject.ConflictStatus.GetConflictStatusBackColor();
                 _Parent.AddToUpdateList( this );
                 UpdateEventHandlers( true );
@@ -240,7 +242,7 @@ namespace GUIBuilder.Windows.Controls
                 if( _Parent.ColumnCount < 1 ) return null;
                 //DebugLog.Write( string.Format(
                 //    "{0} :: RowData() :: Enter :: _Parent.ColumnCount = {1}",
-                //    this.GetType().ToString(),
+                //    this.FullTypeName(),
                 //    _Parent.ColumnCount ) );
                 var row = new string[ _Parent.ColumnCount ];
                 if( _Parent._CheckboxColumn  ) SetRowData( row, SyncedColumnID.Checkbox     , ""                                     );
@@ -252,7 +254,7 @@ namespace GUIBuilder.Windows.Controls
                 if( _Parent._ExtraInfoColumn ) SetRowData( row, SyncedColumnID.ExtraInfo    , _SyncObject.ExtraInfo                  );
                 //DebugLog.Write( string.Format(
                 //    "{0} :: RowData() :: Exit :: _Parent.ColumnCount = {1} :: row.Length = {2}",
-                //    this.GetType().ToString(),
+                //    this.FullTypeName(),
                 //    _Parent.ColumnCount,
                 //    row.Length ) );
                 return row;
@@ -263,7 +265,7 @@ namespace GUIBuilder.Windows.Controls
                 var index = _Parent.GetColumnItemIndex( id );
                 //DebugLog.Write( string.Format(
                 //    "{0} :: SetRowData() :: index = {1} :: ColumnID = {2} :: value = {3}",
-                //    this.GetType().ToString(),
+                //    this.FullTypeName(),
                 //    index,
                 //    id, value ) );
                 if( index < 0 ) return;
@@ -286,7 +288,7 @@ namespace GUIBuilder.Windows.Controls
             
             public void SyncListViewItemWithObject()
             {
-                //DebugLog.Write( string.Format( "{0} :: SyncListViewItemWithObject()", this.GetType().ToString() ) );
+                //DebugLog.Write( string.Format( "{0} :: SyncListViewItemWithObject()", this.FullTypeName() ) );
                 //if( ( O == null )||( !_InListView ) ) return;
                 if( _SyncObject == null ) return;
                 if( _Parent.InvokeRequired )
@@ -305,7 +307,7 @@ namespace GUIBuilder.Windows.Controls
             
             public void UpdateEventHandlers( bool register )
             {
-                //DebugLog.Write( string.Format( "\n{0} :: UpdateEventHandlers() :: register = {1}", this.GetType().ToString(), register ) );
+                //DebugLog.Write( string.Format( "\n{0} :: UpdateEventHandlers() :: register = {1}", this.FullTypeName(), register ) );
                 if( _SyncObject == null )
                     return;
                 if( register )
@@ -323,7 +325,7 @@ namespace GUIBuilder.Windows.Controls
             // Update the list view if the sync object changed
             void OnSyncObjectDataChanged( object sender, EventArgs e )
             {
-                //DebugLog.Write( string.Format( "{0} :: OnSyncObjectDataChanged", this.GetType().ToString() ) );
+                //DebugLog.Write( string.Format( "{0} :: OnSyncObjectDataChanged", this.FullTypeName() ) );
                 var syncobject = sender as TSync;
                 if( ( syncobject == null )||( syncobject != _SyncObject ) ) return;
                 SyncListViewItemWithObject();
@@ -366,7 +368,7 @@ namespace GUIBuilder.Windows.Controls
         
         void SyncedListViewLoad( object sender, EventArgs e )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: SyncedListViewLayout() :: Name = {1}", this.GetType().ToString(), this.Name ) );
+            //DebugLog.Write( string.Format( "\n{0} :: SyncedListViewLayout() :: Name = {1}", this.FullTypeName(), this.Name ) );
             this.Translate( true );
             
             RecreateColumns();
@@ -582,7 +584,7 @@ namespace GUIBuilder.Windows.Controls
                 while( _SyncSetObjects )
                     System.Threading.Thread.Sleep( 0 );
                 _SyncSetObjects = true;
-                //DebugLog.Write( string.Format( "\n{0} :: SyncObjects_set() :: value ? {1}", this.GetType().ToString(), value == null ? "false" : "true" ) );
+                //DebugLog.Write( string.Format( "\n{0} :: SyncObjects_set() :: value ? {1}", this.FullTypeName(), value == null ? "false" : "true" ) );
                 EnableListView( false );            // Repopulating will re-enable
                 AddRemoveSyncItemsToList( false );  // Remove all items, this will also de-register them for all events
                 if( value.NullOrEmpty() )
@@ -707,70 +709,86 @@ namespace GUIBuilder.Windows.Controls
             while( _SyncSetObjects )
                 System.Threading.Thread.Sleep( 0 );
             _SyncSetObjects = true;
-            //DebugLog.Write( string.Format( "\n{0} :: RepopulateListView() :: _SyncItems ? {1}", this.GetType().ToString(), _SyncItems == null ? "false" : "true" ) );
+            //DebugLog.Write( string.Format( "\n{0} :: RepopulateListView() :: _SyncItems ? {1}", this.FullTypeName(), _SyncItems == null ? "false" : "true" ) );
             RepopulateListViewInternal();
         }
         
         void RepopulateListViewInternal()
         {
-            //DebugLog.Write( string.Format( "\n{0} :: RepopulateListViewInternal() :: _SyncItems ? {1}", this.GetType().ToString(), _SyncItems == null ? "false" : "true" ) );
-            var wt = WorkerThreadPool.CreateWorker( RepopulateListViewThread, null );
+            //DebugLog.Write( string.Format( "\n{0} :: RepopulateListViewInternal() :: _SyncItems ? {1}", this.FullTypeName(), _SyncItems == null ? "false" : "true" ) );
+            var wt = WorkerThreadPool.CreateWorker( THREAD_RepopulateListView, null );
             if( wt != null )
                 wt.Start();
             else
                 throw new Exception( string.Format(
                     "{0} :: RepopulateListViewInternal() :: Unable to create worker thread to repopulate sync list",
-                    this.GetType().ToString()
+                    this.TypeFullName()
                    ) );
         }
         
-        void RepopulateListViewThread()
+        void THREAD_RepopulateListView()
         {
-            if( this.InvokeRequired )
+            /*
+                devnote:
+                
+                This method sometimes causes an exception and I don't know why
+
+                ======[ ERROR ] ======
+                WorkerThreadPool.WorkerThread.InvokeWorker()
+                An exception has occured while executing the thread
+                System.FormatException: Index( zero based ) must be greater than or equal to zero and less than the size of the argument list.
+                  at System.Windows.Forms.Control.MarshaledInvoke( Control caller, Delegate method, Object[] args, Boolean synchronous )
+                  at System.Windows.Forms.Control.Invoke( Delegate method, Object[] args )
+                  at GUIBuilder.Windows.Controls.SyncedListView`1.RepopulateListViewThread() in C: \Utils\dev\Projects\Fallout 4\Annex The Commonwealth\DevKit\GUIBuilder\Source\GUIBuilder\Windows\Controls\SyncedListView.cs:line 735
+                  at WorkerThreadPool.WorkerThread.InvokeWorker() in C: \Utils\dev\Projects\Fallout 4\Annex The Commonwealth\DevKit\GUIBuilder\Source\WorkerThreadPool.cs:line 245
+                ======
+            */
+
+            try
             {
-                //DebugLog.WriteLine( string.Format( "\n{0} :: RepopulateListViewThread() :: UI Thread Invoke\n", this.GetType().ToString() ) );
-                //try{
-                    this.Invoke( (Action)delegate() { RepopulateListViewThread(); }, null );
-                //} catch( Exception e ){
-                //    var m = string.Format( "An exception occured attempting UI Thread Invoke\n{0}\n{1}", e.ToString(), e.StackTrace );
-                //    Console.WriteLine( string.Format( "{0} :: {1} :: {2}", this.GetType().ToString(), "RepopulateListViewThread()", m ) );
-                //    DebugLog.WriteError( this.GetType().ToString(), "RepopulateListViewThread()", m );
-                //}
-                return;
-            }
-            if( !_SyncItems.NullOrEmpty() )
-            {
-                //DebugLog.Write( string.Format( "\n{0} :: RepopulateListViewThread() :: Start\n", this.GetType().ToString() ) );
-                _SyncSetObjects  = true;
-                EnableListView( false );
-                var hideUnecessaryImports = tsmiHideUnchanged.Checked;
-                
-                SortObjects();
-                
-                // First, remove them all
-                AddRemoveSyncItemsToList( false );
-                
-                // Now build a list of items to add
-                _ItemUpdateList = new List<ListViewItem>();
-                //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: Start", this.GetType().ToString() ) );
-                foreach( var syncitem in _SyncItems )
+                if( this.InvokeRequired )
                 {
-                    //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: ConflictStatus", this.GetType().ToString() ) );
-                    var conflictStatus = syncitem.GetSyncObject().ConflictStatus;
-                    
-                    //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: AddToListView", this.GetType().ToString() ) );
-                    if(
-                        ( !hideUnecessaryImports )||
-                        ( conflictStatus == Engine.Plugin.ConflictStatus.NewForm )||
-                        ( conflictStatus == Engine.Plugin.ConflictStatus.RequiresOverride )
-                    )
-                        syncitem.AddToListView();
+                    this.Invoke( (Action)delegate () { THREAD_RepopulateListView(); }, null );
+                    return;
                 }
-                //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: Complete", this.GetType().ToString() ) );
-                AddRemoveList( true );  // And add them
-                _ItemUpdateList = null; // Done with the list
-                
-                //DebugLog.Write( string.Format( "\n{0} :: RepopulateListViewThread() :: Complete", this.GetType().ToString() ) );
+                if( !_SyncItems.NullOrEmpty() )
+                {
+                    //DebugLog.Write( string.Format( "\n{0} :: RepopulateListViewThread() :: Start\n", this.FullTypeName() ) );
+                    _SyncSetObjects = true;
+                    EnableListView( false );
+                    var hideUnecessaryImports = tsmiHideUnchanged.Checked;
+
+                    SortObjects();
+
+                    // First, remove them all
+                    AddRemoveSyncItemsToList( false );
+
+                    // Now build a list of items to add
+                    _ItemUpdateList = new List<ListViewItem>();
+                    //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: Start", this.FullTypeName() ) );
+                    foreach( var syncitem in _SyncItems )
+                    {
+                        //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: ConflictStatus", this.FullTypeName() ) );
+                        var conflictStatus = syncitem.GetSyncObject().ConflictStatus;
+
+                        //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: AddToListView", this.FullTypeName() ) );
+                        if(
+                            ( !hideUnecessaryImports ) ||
+                            ( conflictStatus == Engine.Plugin.ConflictStatus.NewForm ) ||
+                            ( conflictStatus == Engine.Plugin.ConflictStatus.RequiresOverride )
+                        )
+                            syncitem.AddToListView();
+                    }
+                    //DebugLog.Write( string.Format( "{0} :: RepopulateListViewThread() :: List :: Complete", this.FullTypeName() ) );
+                    AddRemoveList( true );  // And add them
+                    _ItemUpdateList = null; // Done with the list
+
+                    //DebugLog.Write( string.Format( "\n{0} :: RepopulateListViewThread() :: Complete", this.FullTypeName() ) );
+                }
+            }
+            catch( Exception e )
+            {
+                DebugLog.WriteException( e );
             }
             EnableListView( true );
             _SyncSetObjects = false;
@@ -778,7 +796,7 @@ namespace GUIBuilder.Windows.Controls
         
         void RegisterListViewForEvents( bool register )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: RegisterListViewForEvents() :: register = {1}\n{2}", this.GetType().ToString(), register, System.Environment.StackTrace ) );
+            //DebugLog.Write( string.Format( "\n{0} :: RegisterListViewForEvents() :: register = {1}\n{2}", this.FullTypeName(), register, System.Environment.StackTrace ) );
             if( register )
             {
                 lvSyncObjects.ColumnClick           += lvSyncObjectsColumnClick;
@@ -804,7 +822,7 @@ namespace GUIBuilder.Windows.Controls
                 this.Invoke( (Action)delegate() { EnableListView( enable ); }, null );
                 return;
             }
-            //DebugLog.Write( string.Format( "\n{0} :: EnableListView() :: enable = {1}", this.GetType().ToString(), enable ) );
+            //DebugLog.Write( string.Format( "\n{0} :: EnableListView() :: enable = {1}", this.FullTypeName(), enable ) );
             RegisterListViewForEvents( enable );
             //lvSyncObjects.Enabled = enable;
         }
@@ -961,10 +979,43 @@ namespace GUIBuilder.Windows.Controls
                 }
             }
         }
-        
+
+        public void UpdateListViewCheckSelection( List<TSync> stateObjects, bool checkState, bool othersFalse = false )
+        {
+            if( stateObjects.NullOrEmpty() )
+                return;
+
+            //DebugLog.OpenIndentLevel();
+            //DebugLog.WriteList( "stateObjects", stateObjects, true, true );
+
+            //DebugLog.OpenIndentLevel( "ListViewItems", false );
+            foreach( var item in lvSyncObjects.Items )
+            {
+                var lvi = (ListViewItem)item;
+                if( lvi == null ) continue;
+                var syncitem = SyncItemFromListViewItem( lvi );
+                if( syncitem == null ) continue;
+
+                var syncObject = syncitem.GetSyncObject();
+                if( stateObjects.Any( x => x.GetHashCode() == syncObject.GetHashCode() ) )
+                {
+                    UpdateCheckSelectionForSyncItem( syncitem, checkState );
+                    //DebugLog.WriteStrings( null, new string[] { "checkState = " + checkState.ToString(), "syncObject = " + syncObject.ToStringNullSafe() }, false, true, false, false );
+                }
+                else if( othersFalse )
+                {
+                    UpdateCheckSelectionForSyncItem( syncitem, false );
+                    //DebugLog.WriteStrings( null, new string[] { "checkState = false", "syncObject = " + syncObject.ToStringNullSafe() }, false, true, false, false );
+                }
+            }
+            //DebugLog.CloseIndentLevel();
+
+            //DebugLog.CloseIndentLevel();
+        }
+
         protected void AddToUpdateList( SyncItem syncitem )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: AddToUpdateList() :: syncitem = {1}", this.GetType().ToString(), syncitem ) );
+            //DebugLog.Write( string.Format( "\n{0} :: AddToUpdateList() :: syncitem = {1}", this.FullTypeName(), syncitem ) );
             if( _ItemUpdateList == null ) return;
             //if( _ItemUpdateList.IndexOf( syncitem.GetListItem() ) >= 0 ) return;
             _ItemUpdateList.AddOnce( syncitem.GetListItem() );
@@ -972,7 +1023,7 @@ namespace GUIBuilder.Windows.Controls
         
         void AddRemoveSyncItemsToList( bool addremove )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: AddRemoveSyncItemsToList() :: addremove = {1}", this.GetType().ToString(), addremove ) );
+            //DebugLog.Write( string.Format( "\n{0} :: AddRemoveSyncItemsToList() :: addremove = {1}", this.FullTypeName(), addremove ) );
             if( _SyncItems.NullOrEmpty() ) return;
             
             // null for remove to just unregister, will clear as a whole after
@@ -994,7 +1045,7 @@ namespace GUIBuilder.Windows.Controls
                 this.Invoke( (Action)delegate() { AddRemoveList( addremove ); }, null );
                 return;
             }
-            //DebugLog.Write( string.Format( "\n{0} :: AddRemoveList() :: list ? {1} :: addremove = {2}", this.GetType().ToString(), _ItemUpdateList == null ? "false" : "true", addremove ) );
+            //DebugLog.Write( string.Format( "\n{0} :: AddRemoveList() :: list ? {1} :: addremove = {2}", this.FullTypeName(), _ItemUpdateList == null ? "false" : "true", addremove ) );
             if( addremove )
             {
                 if( !_ItemUpdateList.NullOrEmpty() )
@@ -1157,7 +1208,7 @@ namespace GUIBuilder.Windows.Controls
             if( _SyncItems.NullOrEmpty() ) return;
             if( lvSyncObjects.Items.Count == 0 ) return;
             _SyncSetObjects = true;
-            //DebugLog.Write( string.Format( "\n{0} :: ShowEditorForm() :: SyncedEditorFormType = {1}", this.GetType().ToString(), SyncedEditorFormType.ToString() ) );
+            //DebugLog.Write( string.Format( "\n{0} :: ShowEditorForm() :: SyncedEditorFormType = {1}", this.FullTypeName(), SyncedEditorFormType.ToString() ) );
             
             foreach( var syncitem in _SyncItems )
             {

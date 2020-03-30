@@ -72,7 +72,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SubDivision" } );
+                //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "SubDivision" } );
                 
                 var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
                 var reference = Reference;
@@ -109,7 +109,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Keyword" } );
+                //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "Keyword" } );
                 
                 var subdivision = SubDivision;
                 var result = subdivision != null
@@ -135,7 +135,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "Neighbour" } );
+                //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "Neighbour" } );
                 
                 var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
                 var reference = Reference;
@@ -217,7 +217,7 @@ namespace AnnexTheCommonwealth
             float volumeCeiling,
             bool createImportData )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: CreateBorderNIFs() :: enabler 0x{1} \"{2}\"", this.GetType().ToString(), this.FormID.ToString( "X8" ), this.EditorID ) );
+            //DebugLog.Write( string.Format( "\n{0} :: CreateBorderNIFs() :: enabler 0x{1} \"{2}\"", this.FullTypeName(), this.FormID.ToString( "X8" ), this.EditorID ) );
             if( _segments.NullOrEmpty() )
                 return null;
             
@@ -233,7 +233,7 @@ namespace AnnexTheCommonwealth
             
             var neighbour = Neighbour;
             var worldspace = Reference.Worldspace;
-            var subFID = subdivision.GetFormID( Engine.Plugin.TargetHandle.Master );
+            //var subFID = subdivision.GetFormID( Engine.Plugin.TargetHandle.Master );
             var subName = subdivision.NameFromEditorID;
             var nsubName = neighbour == null
                 ? "Main"
@@ -294,7 +294,8 @@ namespace AnnexTheCommonwealth
                     NIFBuilder.Colours.InsideBorder,
                     NIFBuilder.Colours.OutsideBorder,
                     originalForms,
-                    false
+                    false,
+                    NIFBuilder.ExportInfo
                     );
                 
                 if( ( createImportData )&&( !subList.NullOrEmpty() ) )
@@ -317,7 +318,7 @@ namespace AnnexTheCommonwealth
         
         public void BuildSegmentsFromSubDivisionEdgeFlags( float approximateNodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromSubDivisionEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "approximateNodeLength = " + approximateNodeLength, "angleAllowance = " + angleAllowance, "slopeAllowance = " + slopeAllowance, "updateMapUIData = " + updateMapUIData, this.ToString() } );
+            DebugLog.OpenIndentLevel( new [] { this.IDString, "approximateNodeLength = " + approximateNodeLength, "angleAllowance = " + angleAllowance, "slopeAllowance = " + slopeAllowance, "updateMapUIData = " + updateMapUIData }, false, true, false );
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -386,15 +387,14 @@ namespace AnnexTheCommonwealth
             SendObjectDataChangedEvent(this);
             
         localReturnResult:
-            var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
-            m.StopSyncTimer( string.Format( "{0} :: {1} :: {2} : {3}", this.GetType().ToString(), "BuildSegmentsFromSubDivisionEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "Completed in {0}" ), tStart.Ticks );
+            var elapsed = m.StopSyncTimer( tStart, this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel( tEnd );
+            DebugLog.CloseIndentLevel( elapsed );
         }
         
         List<EdgeFlag> GenerateSegment( List<EdgeFlag> subFlags, uint subFID, bool closedLoop )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GenerateSegment()", "subFlags.Count = " + subFlags.Count.ToString(), "subFID = 0x" + subFID.ToString( "X8" ), "closedLoop = " + closedLoop.ToString(), this.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.IDString, "subFlags.Count = " + subFlags.Count.ToString(), "subFID = 0x" + subFID.ToString( "X8" ), "closedLoop = " + closedLoop.ToString() }, true );
             
             List<EdgeFlag> resultList = null;
             
@@ -498,20 +498,23 @@ namespace AnnexTheCommonwealth
             
             var stats = new Dictionary<uint,nifBucket<Engine.Plugin.Forms.Static>>();
             var refrs = new Dictionary<uint,nifBucket<Engine.Plugin.Forms.ObjectReference>>();
-            
+
+            var beFID = this.GetFormID( Engine.Plugin.TargetHandle.Master );
+
             foreach( var refRef in refRefs )
             {
                 var refr = refRef as Engine.Plugin.Forms.ObjectReference;
                 if( refr != null )
                 {
-                    if( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == this.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                    if( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == beFID )
                     {
                         
                         nifBucket<Engine.Plugin.Forms.ObjectReference> refrBucket;
-                        if( !refrs.TryGetValue( refr.GetFormID( Engine.Plugin.TargetHandle.Master ), out refrBucket ) )
+                        var refrFID = refr.GetFormID( Engine.Plugin.TargetHandle.Master );
+                        if( !refrs.TryGetValue( refrFID, out refrBucket ) )
                         {
                             refrBucket = new nifBucket<Engine.Plugin.Forms.ObjectReference>( refr, false, false );
-                            refrs[ refr.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = refrBucket;
+                            refrs[ refrFID ] = refrBucket;
                         }
                         
                         var statFID = refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
@@ -554,13 +557,15 @@ namespace AnnexTheCommonwealth
             
             if( _NIFs == null )
                 _NIFs = new Dictionary<uint, nifBucket<Engine.Plugin.Forms.Static>>();
-            
+
+            var baseFID = baseform.GetFormID( Engine.Plugin.TargetHandle.Master );
+
             nifBucket<Engine.Plugin.Forms.Static> statBucket;
-            if( _NIFs.TryGetValue( baseform.GetFormID( Engine.Plugin.TargetHandle.Master ), out statBucket ) )
+            if( _NIFs.TryGetValue( baseFID, out statBucket ) )
                 return true;
             
             statBucket = new nifBucket<Engine.Plugin.Forms.Static>( baseform, true, true );
-            _NIFs[ baseform.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = statBucket;
+            _NIFs[ baseFID ] = statBucket;
             
             return true;
         }
@@ -585,13 +590,15 @@ namespace AnnexTheCommonwealth
             
             if( _placedNIFs == null )
                 _placedNIFs = new Dictionary<uint, nifBucket<Engine.Plugin.Forms.ObjectReference>>();
-            
+
+            var refrFID = refr.GetFormID( Engine.Plugin.TargetHandle.Master );
+
             nifBucket<Engine.Plugin.Forms.ObjectReference> refrBucket;
-            if( _placedNIFs.TryGetValue( refr.GetFormID( Engine.Plugin.TargetHandle.Master ), out refrBucket ) )
+            if( _placedNIFs.TryGetValue( refrFID, out refrBucket ) )
                 return true;
             
             refrBucket = new nifBucket<Engine.Plugin.Forms.ObjectReference>( refr, true, true );
-            _placedNIFs[ refr.GetFormID( Engine.Plugin.TargetHandle.Master ) ] = refrBucket;
+            _placedNIFs[ refrFID ] = refrBucket;
             
             return true;
         }
@@ -614,25 +621,13 @@ namespace AnnexTheCommonwealth
                 
                 if( subdivision != null )
                 {
-                    moel.Add(
-                        string.Format(
-                            "Sub-Division: 0x{0} - \"{1}\"",
-                            subdivision.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                            subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    moel.Add(  string.Format( "Sub-Division: {0}", subdivision.IDString ) );
                     if( keyword != null )
-                        moel.Add(
-                            string.Format(
-                                "Keyword: 0x{0} - \"{1}\"",
-                                keyword.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                                keyword.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                        moel.Add( string.Format( "Keyword: {0}", keyword.IDString ) );
                 }
                 if( neighbour != null )
                 {
-                    moel.Add(
-                        string.Format(
-                            "Neighbour: 0x{0} - \"{1}\"",
-                            neighbour.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                            neighbour.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    moel.Add( string.Format( "Neighbour: {0}", neighbour.IDString ) );
                 }
                 if( segs != null )
                 {
@@ -647,11 +642,7 @@ namespace AnnexTheCommonwealth
                         for( int i = 0; i < seg.Flags.Count; i++ )
                         {
                             var flag = seg.Flags[ i ];
-                            moel.Add(
-                                string.Format(
-                                    "\t\t\t\t{0} - 0x{1}",
-                                    i,
-                                    flag.Reference.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
+                            moel.Add( string.Format( "\t\t\t\t{0} - {1}", i, flag.Reference.IDString ) );
                             var flmoel = flag.MouseOverExtra;
                             if( !flmoel.NullOrEmpty() )
                                 foreach( var flmoe in flmoel )
@@ -673,10 +664,9 @@ namespace AnnexTheCommonwealth
                         var sn = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( pn.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                         moel.Add(
                             string.Format(
-                                "\tMesh: 0x{0} (0x{1} - \"{2}\") at {3}",
+                                "\tMesh: 0x{0} ({1}) at {2}",
                                 pn.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                                ( sn == null ? 0 : sn.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
-                                ( sn == null ? "null" : sn.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ),
+                                ( sn == null ? "[null]" : sn.IDString ),
                                 pn.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString() ) );
                         
                     }

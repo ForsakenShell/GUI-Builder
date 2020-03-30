@@ -32,7 +32,7 @@ namespace Engine.Plugin.Forms
         public Layer( string filename, uint formID ) : base( filename, formID ) {}
         
         //public Layer( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Layer( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle ) {}
+        public Layer( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
         
         public override void CreateChildFields()
         {

@@ -23,6 +23,7 @@
     <ApplicationIcon>Images\GuiBuilder.ico</ApplicationIcon>
     <NoWarn>0162;0429</NoWarn>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <SourceAnalysisOverrideSettingsFile>C:\Users\Eric Cowles\AppData\Roaming\ICSharpCode\SharpDevelop5\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -33,17 +34,17 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>15</ApplicationRevision>
-    <ApplicationVersion>1.0.4.15</ApplicationVersion>
+    <ApplicationRevision>17</ApplicationRevision>
+    <ApplicationVersion>1.0.5.17</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
     <BaseAddress>4194304</BaseAddress>
     <RegisterForComInterop>False</RegisterForComInterop>
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
     <FileAlignment>4096</FileAlignment>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>..\bin\Debug\</OutputPath>
@@ -65,11 +66,9 @@
     <BaseIntermediateOutputPath>..\obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <Prefer32Bit>false</Prefer32Bit>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <Prefer32Bit>false</Prefer32Bit>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
@@ -94,8 +93,10 @@
     <Compile Include="CachedProperty.cs" />
     <Compile Include="DebugLog\DebugLog.cs" />
     <Compile Include="DirectX\DDS_Header.cs" />
+    <Compile Include="Engine\Plugin\Attributes\AssociationExtensions.cs" />
     <Compile Include="Engine\Plugin\Attributes\ClassAssociation.cs" />
     <Compile Include="Engine\Plugin\Attributes\FormAssociation.cs" />
+    <Compile Include="Engine\Plugin\Attributes\Reflection.cs" />
     <Compile Include="Engine\Plugin\Attributes\ScriptAssociation.cs" />
     <Compile Include="Engine\Plugin\ConflictStatus.cs" />
     <Compile Include="Engine\Plugin\Extensions\CachedGetSetIXHandle.cs" />
@@ -111,6 +112,9 @@
     <Compile Include="Engine\Plugin\Forms\Fields\CachedVector3iField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Cell\Flags.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Cell\WaterHeight.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Landscape\Heightmap.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\LocationRef\Color.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\LocationRefTypes.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\ValueField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\LocationReference.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\PersistentLocation.cs" />
@@ -121,6 +125,8 @@
     <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\LandData.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\Location.cs" />
     <Compile Include="Engine\Plugin\Forms\Formlist.cs" />
+    <Compile Include="Engine\Plugin\Forms\Landscape.cs" />
+    <Compile Include="Engine\Plugin\Forms\LocationRef.cs" />
     <Compile Include="Engine\Plugin\Interface\ICollection.cs" />
     <Compile Include="Engine\Plugin\Interface\ISyncedGUIList.cs" />
     <Compile Include="Engine\Plugin\Interface\ISyncedGUIObject.cs" />
@@ -133,6 +139,13 @@
     <Compile Include="Extensions\GenRenderTransform.cs" />
     <Compile Include="Extensions\GenStream.cs" />
     <Compile Include="Extensions\GenString.cs" />
+    <Compile Include="GUIBuilder\CustomForms.cs" />
+    <Compile Include="GUIBuilder\Windows\CustomForms.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\CustomForms.Designer.cs">
+      <DependentUpon>CustomForms.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUIBuilder\Windows\IEnableControlForm.cs" />
     <Compile Include="GUIBuilder\Windows\PluginSelector.cs">
       <SubType>Form</SubType>
@@ -140,13 +153,21 @@
     <Compile Include="GUIBuilder\Windows\PluginSelector.Designer.cs">
       <DependentUpon>PluginSelector.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUIBuilder\Windows\WindowBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUIBuilder\Windows\WindowBase.Designer.cs">
+      <DependentUpon>WindowBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUIBuilder\Windows\WorkspaceSelector.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GUIBuilder\Windows\WorkspaceSelector.Designer.cs">
       <DependentUpon>WorkspaceSelector.cs</DependentUpon>
     </Compile>
+    <Compile Include="GUIBuilder\WorkshopBatch.cs" />
     <Compile Include="XmlBase.cs" />
+    <None Include=".editorconfig" />
     <None Include="BorderBuilder\Lang\English %28UK%29\Translate.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
@@ -155,7 +176,6 @@
     <Compile Include="GodObject\Plugin\Data\Data.cs" />
     <Compile Include="GodObject\Plugin\Data\Files.cs" />
     <Compile Include="GodObject\XmlConfig.cs" />
-    <Compile Include="GUIBuilder\BorderBatch.cs" />
     <Compile Include="GUIBuilder\BorderNode.cs" />
     <Compile Include="GUIBuilder\BorderSegment.cs" />
     <Compile Include="GUIBuilder\ConflictStatusHelpers.cs" />
@@ -390,6 +410,8 @@
     <None Include="Images\RenderWindow\Toolstrip\Unchecked.png" />
     <None Include="Images\RenderWindow\Toolstrip\WaterHeight.png" />
     <None Include="Images\RenderWindow\Toolstrip\Workshop.png" />
+    <None Include="Snippets\GodObject.XmlConfig.IXmlConfiguration.snippet" />
+    <None Include="Snippets\GUIBuilder.Windows.IEnableControlForm.snippet" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -406,6 +428,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\Controls\SyncedListView.resx">
       <DependentUpon>SyncedListView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\CustomForms.resx">
+      <DependentUpon>CustomForms.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\FormEditor\SubDivision.resx">
       <DependentUpon>SubDivision.cs</DependentUpon>
@@ -435,6 +460,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\SubDivisionBatch.resx">
       <DependentUpon>SubDivisionBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\WindowBase.resx">
+      <DependentUpon>WindowBase.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\WorkspaceSelector.resx">
       <DependentUpon>WorkspaceSelector.cs</DependentUpon>
@@ -488,6 +516,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>zlib1.dll</TargetPath>
     </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Snippets\GodObject.CoreForms.StaticFormProperty.snippet" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="BorderBuilder\How_To_Make_A_Workshop_Border.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

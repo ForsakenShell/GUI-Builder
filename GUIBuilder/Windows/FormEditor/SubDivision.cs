@@ -59,7 +59,7 @@ namespace GUIBuilder.Windows.FormEditor
             cbLocation.Items.Clear();
             cbLocation.Items.Add( string.Format( " [{0}] ", "DropdownSelectNone".Translate() ) );
             var selectedIndex = 0;
-            var cLocations = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Location>( true, true );
+            var cLocations = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Location>( true, true, true );
             if( cLocations != null )
             {
                 

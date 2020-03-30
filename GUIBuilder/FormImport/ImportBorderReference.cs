@@ -51,7 +51,7 @@ namespace GUIBuilder.FormImport
             return;
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}",
-                this.GetType()  .ToString(),
+                this.TypeFullName(),
                 Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
                 ftBaseStat      .DisplayIDInfo( "\n\tBaseStat = {0}" ),
                 ftWorldspace    .DisplayIDInfo( "\n\tWorldspace = {0}" ),
@@ -232,11 +232,11 @@ namespace GUIBuilder.FormImport
                     var border = baseFormReferences.FirstOrDefault( (x) => ( x is Engine.Plugin.Forms.ObjectReference ) );
                     if( baseFormReferences.Count > 1 )
                         DebugLog.WriteLine( string.Format(
-                            "\n{0} :: ResolveForm() :: Multiple references of 0x{1} \"{2}\"! :: Using first reference found - 0x{3}",
-                            this.GetType().ToString(),
+                            "\n{0} :: ResolveForm() :: Multiple references of 0x{1} - \"{2}\"! :: Using first reference found - {3}",
+                            this.TypeFullName(),
                             ftBaseStat.FormID.ToString( "X8" ),
                             ftBaseStat.EditorID,
-                            border.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
+                            border.IDString ) );
                     SetTarget( border );
                 }
             }

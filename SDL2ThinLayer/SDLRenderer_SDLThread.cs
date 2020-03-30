@@ -240,10 +240,12 @@ namespace SDL2ThinLayer
         // All code here should be running in it's own thread created in INTERNAL_Init_SDLThread()
         // and should never be called outside of the thread itself.
         
-        void INTERNAL_SDLThread_Main()
+        void THREAD_INTERNAL_SDL_Main()
         {
-            System.Threading.Thread.CurrentThread.Name = "SDLThread_Main";
-            DebugLog.OpenIndentLevel();
+            WorkerThreadPool.StartMethodBase = System.Reflection.MethodInfo.GetCurrentMethod();
+            WorkerThreadPool.SetName( WorkerThreadPool.StartMethodBaseNameFriendly( true ) );
+
+            DebugLog.Open();
             
             //Console.WriteLine( "INTERNAL_SDLThread_Main()" );
             
@@ -276,14 +278,14 @@ namespace SDL2ThinLayer
             // Clean up after the thread
             INTERNAL_SDLThread_Cleanup( SDLThreadState.Inactive );
             
-            DebugLog.CloseIndentLevel();
+            DebugLog.Close();
             
         }
         
         void INTERNAL_SDLThread_MainLoop()
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "SDLThread_MainLoop()" } );
-            //Console.WriteLine( "INTERNAL_SDLThread_MainLoop()" );
+            DebugLog.OpenIndentLevel();
+            //Console.WriteCaller();
             
             TimeSpan loopTime = TimeSpan.FromTicks( 0 );
             long loopStartTick = 0;

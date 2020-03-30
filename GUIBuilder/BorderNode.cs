@@ -69,9 +69,20 @@ namespace GUIBuilder
             //DebugLog.Write( string.Format( "GUIBuilder.BorderNodeGroup.cTor() :: {0} :: {1} :: {2}", cell.ToString(), nodes.Count, NIFFilePath ) );
         }
         
+        public bool                 HasBottom
+        {
+            get
+            {
+                if( Nodes.NullOrEmpty() ) return false;
+                foreach( var node in Nodes )
+                    if( node.HasBottom ) return true;
+                return false;
+            }
+        }
+
         public void CentreAndPlaceNodes()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "CentreAndPlaceNodes()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "CentreAndPlaceNodes()" } );
             //DumpGroupNodes( Nodes, "Pre-process nodes" );
             Placement = BorderNode.Centre( Nodes, true );
             BorderNode.CentreNodes( Nodes, Placement );
@@ -90,7 +101,7 @@ namespace GUIBuilder
         
         public bool BuildMesh( float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours )
         {
-            DebugLog.OpenIndentLevel( new string[] { this.GetType().ToString(), "BuildMesh()", string.Format( "{0}:{1}:{2}", gradientHeight, groundOffset, groundSink ) } );
+            DebugLog.OpenIndentLevel( new[] { "gradientHeight = " + gradientHeight.ToString(), "groundOffset = " + groundOffset.ToString(), "groundSink = " + groundSink.ToString() }, false, false, false, false, true );
             Mesh = new NIFBuilder.Mesh( this, gradientHeight, groundOffset, groundSink, insideColours, outsideColours );
             DebugLog.CloseIndentLevel();
             return Mesh != null;
@@ -133,7 +144,7 @@ namespace GUIBuilder
                     var injectStartNode = GetCellEdgeIntersectNode( currentCell, clonedNodeList[ splitIndex - 1 ], clonedNodeList[ splitIndex ] );
                     
                     // Clone the new start node as an end node in the current cell
-                    var injectEndNode = new BorderNode( currentCell, injectStartNode.P, injectStartNode.Floor, BorderNode.NodeType.EndPoint );
+                    var injectEndNode = new BorderNode( currentCell, injectStartNode.P, injectStartNode.Floor, BorderNode.NodeType.EndPoint, false );
                     
                     // Inject the new nodes into the node list at the cell boundary
                     clonedNodeList.Insert( splitIndex    , injectEndNode   );
@@ -214,14 +225,14 @@ namespace GUIBuilder
         static void DumpOriginalFormsAndKeys( string callerName, List<Engine.Plugin.Form> originalForms, List<string> keys )
         {
             return;
-            DebugLog.WriteLine( string.Format( "\nGUIBuilder.BorderNodeGroup :: {0}", callerName ) );
+            DebugLog.WriteLine( string.Format( "GUIBuilder.BorderNodeGroup :: {0}", callerName ) );
             if( !originalForms.NullOrEmpty() )
             {
                 DebugLog.WriteLine( string.Format( "\toriginalForms: {0}", originalForms.Count ) );
                 for( int i = 0; i < originalForms.Count; i++  )
                 {
                     var form = originalForms[ i ];
-                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] = \"{1}\" - 0x{2} - \"{3}\"", i, form.Signature, form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] = \"{1}\" - {2}", i, form.Signature, form.IDString ) );
                 }
             }
             if( !keys.NullOrEmpty() )
@@ -239,11 +250,14 @@ namespace GUIBuilder
         {
             return;
             DebugLog.WriteLine( string.Format(
-                "\tmatch result:\n\t\tindex = {0}\n\t\tform = \"{1}\" - 0x{2} - \"{3}\"\n\t\tscore = {4}",
+                "\tmatch result:\n\t\tindex = {0}\n\t\tform = \"{1}\" - {2}\n\t\tscore = {3}",
                 bestMatchIndex,
                 ( match == null ? null : match.Signature ),
-                ( match == null ? Engine.Plugin.Constant.FormID_Invalid : match.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
-                ( match == null ? "unresolved" : match.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ),
+                (
+                    match == null
+                    ? "[null]"
+                    : match.IDString
+                ),
                 bestMatchCount ) );
         }
         
@@ -307,7 +321,7 @@ namespace GUIBuilder
         
         public static void DumpGroupNodes( List<BorderNode> nodes, string s )
         {
-            DebugLog.OpenIndentLevel( s );
+            DebugLog.OpenIndentLevel( s, false );
             if( !nodes.NullOrEmpty() )
             {
                 for( int i = 0; i < nodes.Count; i++ )
@@ -494,7 +508,7 @@ namespace GUIBuilder
                 start.P.ToString(), start.CellGrid.ToString(),
                 end.P.ToString(), end.CellGrid.ToString() ) );
             */
-            return new BorderNode( cellI, intersectPos, intersectFloor, BorderNode.NodeType.EndPoint );
+            return new BorderNode( cellI, intersectPos, intersectFloor, BorderNode.NodeType.EndPoint, false );
         }
         
         public override string ToString()
@@ -514,7 +528,11 @@ namespace GUIBuilder
     /// </summary>
     public class BorderNode
     {
-        
+
+        public const float DEFAULT_NODE_LENGTH = 128.0f;
+        public const float DEFAULT_ANGLE_ALLOWANCE = 2.5f;
+        public const float DEFAULT_SLOPE_ALLOWANCE = 0.01f;
+
         public const float MIN_NODE_LENGTH = 4.0f;
         public const float MIN_ANGLE_ALLOWANCE = 1.5f;
         public const float MIN_SLOPE_ALLOWANCE = 0.001f;
@@ -533,30 +551,33 @@ namespace GUIBuilder
         
         public NodeType             Type;
         
-        public int                  verts;
+        public int                  Vertex_Count;
         
-        public int[]                iVerts;
-        public int[]                oVerts;
-        
-        public bool                 FloorVertexMatchesGroundVertex( float gOffset, float gSink )
-        { return ( Floor + gSink ).ApproximatelyEquals( P.Z + gOffset ); }
+        public int[]                Vertexes_Inside;
+        public int[]                Vertexes_Outside;
+
+        public bool                 HasBottom;
+
+        public bool                 FloorVertexMatchesGroundVertex( float groundOffset, float groundSink )
+        { return ( Floor + groundSink ).ApproximatelyEquals( P.Z + groundOffset ); }
         
         public Vector2i             CellGrid;
         
         public Vector2f             P2
         { get { return new Vector2f( P.X, P.Y ); } }
         
-        public BorderNode( Vector2i cellGrid, Vector3f p, float floor, NodeType type )
+        public BorderNode( Vector2i cellGrid, Vector3f p, float floor, NodeType type, bool hasBottom )
         {
             CellGrid                = new Vector2i( cellGrid );
             P                       = new Vector3f( p );
             Floor                   = floor;
             Type                    = type;
+            HasBottom               = hasBottom;
         }
         
         public BorderNode Clone()
         {
-            return new BorderNode( CellGrid, P, Floor, Type );
+            return new BorderNode( CellGrid, P, Floor, Type, HasBottom );
         }
         
         public override string ToString()
@@ -573,37 +594,49 @@ namespace GUIBuilder
         {
             if( ( worldspace == null )||( flags.NullOrEmpty() ) )
                 return null;
+            var forcedZFID = forcedZ?.GetFormID( Engine.Plugin.TargetHandle.Master );
             var refPoints = new List<Vector3f>();
             foreach( var flag in flags )
             {
                 var p = new Vector3f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null )||( forcedZ.GetFormID( Engine.Plugin.TargetHandle.Master ) != flag.Reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( ( forcedZ == null )||( forcedZFID != flag.Reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                     p.Z = float.MinValue;
                 
                 refPoints.Add( p );
             }
-            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance );
+            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance, float.MinValue );
         }
         
-        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<Engine.Plugin.Forms.ObjectReference> references, float approximateNodeLength, double angleAllowance, double slopeAllowance, Engine.Plugin.Forms.Static forcedZ )
+        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<Engine.Plugin.Forms.ObjectReference> references, float approximateNodeLength, double angleAllowance, double slopeAllowance, Engine.Plugin.Forms.Static forcedZ, Engine.Plugin.Forms.LocationRef borderWithBottomRef )
         {
-            if( ( worldspace == null )||( references.NullOrEmpty() ) )
+            if( references.NullOrEmpty() )
                 return null;
+            var anyNonForcedZMarkers = false;
+            var statWFZ = forcedZ?.GetFormID( Engine.Plugin.TargetHandle.Master );
+            var bottomZ = float.MaxValue;
             var refPoints = new List<Vector3f>();
             foreach( var reference in references )
             {
                 var p = new Vector3f( reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null )||( forcedZ.GetFormID( Engine.Plugin.TargetHandle.Master ) != reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( ( forcedZ == null ) || ( statWFZ != reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                {
                     p.Z = float.MinValue;
-                
+                    anyNonForcedZMarkers = true;
+                    bottomZ = float.MinValue;
+                }
+                else if( ( !anyNonForcedZMarkers )&&( borderWithBottomRef != null ) && ( reference.LocationRefTypes.HasLocationRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, borderWithBottomRef ) ) )
+                    if( p.Z < bottomZ ) bottomZ = p.Z;
+
                 refPoints.Add( p );
             }
-            return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance );
+            if( ( worldspace == null )&&( anyNonForcedZMarkers ) )
+                return null;
+            return GenerateBorderNodes( worldspace?.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance, bottomZ );
         }
 
         static void DumpReferencePoints( IList<Vector3f> refPoints, string extra )
         {
-            DebugLog.OpenIndentLevel( extra );
+            DebugLog.OpenIndentLevel( extra, false );
             if( !refPoints.NullOrEmpty() )
             {
                 for( int i = 0; i < refPoints.Count; i++ )
@@ -628,27 +661,32 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
         
-        static List<BorderNode> GenerateBorderNodes( GodObject.WorldspaceDataPool.PoolEntry wpEntry, IList<Vector3f> refPoints, float nodeLength, double angleAllowance, double slopeAllowance )
+        static List<BorderNode> GenerateBorderNodes( GodObject.WorldspaceDataPool.PoolEntry wpEntry, IList<Vector3f> refPoints, float nodeLength, double angleAllowance, double slopeAllowance, float bottomZ )
         {
-            DebugLog.OpenIndentLevel( "GUIBuilder.BorderNode :: GenerateBorderNodes()" );
+            DebugLog.OpenIndentLevel();
             List<BorderNode> nodes = null;
-            
+
+            var borderWithBottom = bottomZ > float.MinValue;
+
             if( refPoints.NullOrEmpty() )
             {
                 DebugLog.WriteLine( "refPoints is NULL or EMPTY!" );
                 goto localAbort;
             }
-            
-            if( wpEntry == null )
+
+            if( !borderWithBottom )
             {
-                DebugLog.WriteLine( "wpEntry is NULL!" );
-                goto localAbort;
-            }
-            
-            if( !wpEntry.LoadHeightMapData() )
-            {
-                DebugLog.WriteLine( "LoadHeightMapData() returned false" );
-                goto localAbort;
+                if( wpEntry == null )
+                {
+                    DebugLog.WriteLine( "wpEntry is NULL!" );
+                    goto localAbort;
+                }
+
+                if( !wpEntry.LoadHeightMapData() )
+                {
+                    DebugLog.WriteLine( "LoadHeightMapData() returned false" );
+                    goto localAbort;
+                }
             }
             
             nodeLength     = nodeLength     < BorderNode.MIN_NODE_LENGTH     ? BorderNode.MIN_NODE_LENGTH     : nodeLength;
@@ -659,81 +697,109 @@ namespace GUIBuilder
 
             // Generate all nodes first
 
-            DebugLog.OpenIndentLevel( "Calculating nodes from reference objects and terrain" );
+            DebugLog.OpenIndentLevel( "Calculating nodes from reference objects", false );
 
-            var lowestFloor = float.MaxValue;
-            var rCount = refPoints.Count - 1;
-            nodes = new List<BorderNode>();
-            for( int i = 0; i < rCount; i++ )
+            if( borderWithBottom )
             {
-                DebugLog.OpenIndentLevel( string.Format( "Starting scan of ref marker {0} -> {1}", i, i + 1 ) );
-
-                // Reference points
-                var rp0 = new Vector3f( refPoints[ i     ] );
-                var rp1 = new Vector3f( refPoints[ i + 1 ] );
-                
-                // Does this segment have forced Z?
-                var forcedZRef = ( rp0.Z > float.MinValue );
-                var forcedZStride = ( forcedZRef )&&( rp1.Z > float.MinValue );
-                
-                // Position delta & length
-                var rpd = ( rp1 - rp0 );
-                var rd2d = rpd.Length2D;
-                
-                // Number of chunks for approximate stride
-                var chunks = (int)Math.Round( rd2d / nodeLength );
-                if( chunks < 1 ) chunks = 1;
-                
-                // Actual stride for reference points
-                var stride = rpd / chunks;
-                if( !forcedZStride ) stride.Z = 0.0f; // Not between forced Z markers, follow terrain
-                
-                // Initial position is current reference point
-                var lastPos = new Vector3f( rp0 );
-                float lh = wpEntry.LandHeightAtWorldPos( lastPos.X, lastPos.Y );
-                if( lh < lowestFloor ) lowestFloor = lh;
-                float wh;
-                if( !forcedZRef )
-                {   // Not forced Z reference, use terrain
-                    wh = wpEntry.WaterHeightAtWorldPos( lastPos.X, lastPos.Y );
-                    lastPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
-                }
-
-                // Add node from current position
-                var debugStartNodeCount = nodes.Count;
-                nodes.Add( new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.StartPoint ) );
-                
-                // Stride to next reference point
-                for( int j = 0; j < chunks; j++ )
+                var rCount = refPoints.Count;
+                nodes = new List<BorderNode>();
+                for( int i = 0; i < rCount; i++ )
                 {
-                    // Next position and reference point
-                    var newPos = lastPos + stride;
-                    lh = wpEntry.LandHeightAtWorldPos( newPos.X, newPos.Y );
+                    // Reference point
+                    var rp0 = new Vector3f( refPoints[ i ] );
+
+                    // Set the bottom Z
+                    rp0.Z = bottomZ;
+
+                    // Add the node
+                    nodes.Add( new BorderNode( rp0.WorldspaceToCellGrid(), rp0, bottomZ, NodeType.MidPoint, true ) );
+                }
+            }
+            else
+            {
+                var lowestFloor = float.MaxValue;
+                var rCount = refPoints.Count - 1;
+                nodes = new List<BorderNode>();
+                for( int i = 0; i < rCount; i++ )
+                {
+                    DebugLog.OpenIndentLevel( string.Format( "Starting scan of ref marker {0} -> {1}", i, i + 1 ), false );
+
+                    // Reference points
+                    var rp0 = new Vector3f( refPoints[ i     ] );
+                    var rp1 = new Vector3f( refPoints[ i + 1 ] );
+
+                    // Does this segment have forced Z?
+                    var forcedZRef = ( rp0.Z > float.MinValue );
+                    var forcedZStride = ( forcedZRef )&&( rp1.Z > float.MinValue );
+
+                    // Position delta & length
+                    var rpd = ( rp1 - rp0 );
+                    var rd2d = rpd.Length2D;
+
+                    // Number of chunks for approximate stride
+                    var chunks = (int)Math.Round( rd2d / nodeLength );
+                    if( chunks < 1 ) chunks = 1;
+
+                    // Actual stride for reference points
+                    var stride = rpd / chunks;
+                    if( !forcedZStride ) stride.Z = 0.0f; // Not between forced Z markers, follow terrain
+
+                    // Initial position is current reference point
+                    var lastPos = new Vector3f( rp0 );
+                    float lh = wpEntry.LandHeightAtWorldPos( lastPos.X, lastPos.Y );
                     if( lh < lowestFloor ) lowestFloor = lh;
-                    if( !forcedZStride )
-                    {   // Not between forced Z markers, follow terrain
-                        wh = wpEntry.WaterHeightAtWorldPos( newPos.X, newPos.Y );
-                        newPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
+                    float wh;
+                    if( !forcedZRef )
+                    {   // Not forced Z reference, use terrain
+                        wh = wpEntry.WaterHeightAtWorldPos( lastPos.X, lastPos.Y );
+                        lastPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
                     }
 
-                    nodes.Add( new BorderNode( newPos.WorldspaceToCellGrid(), newPos, lh,
-                        j == chunks - 1
-                        ? NodeType.EndPoint
-                        : NodeType.MidPoint ) );
-                    
-                    // Current position = Next position
-                    lastPos = newPos;
+                    var debugStartNodeCount = nodes.Count;
+
+                    // Add node from current position
+                    nodes.Add( new BorderNode( lastPos.WorldspaceToCellGrid(), lastPos, lh, NodeType.StartPoint, false ) );
+
+                    // Stride to next reference point
+                    for( int j = 0; j < chunks; j++ )
+                    {
+                        // Next position and reference point
+                        var newPos = lastPos + stride;
+                        lh = wpEntry.LandHeightAtWorldPos( newPos.X, newPos.Y );
+                        if( lh < lowestFloor ) lowestFloor = lh;
+                        if( !forcedZStride )
+                        {   // Not between forced Z markers, follow terrain
+                            wh = wpEntry.WaterHeightAtWorldPos( newPos.X, newPos.Y );
+                            newPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
+                        }
+                        else if( newPos.Z < bottomZ ) bottomZ = newPos.Z;
+
+                        nodes.Add( new BorderNode( newPos.WorldspaceToCellGrid(), newPos, lh,
+                            (
+                                j == chunks - 1
+                                ? NodeType.EndPoint
+                                : NodeType.MidPoint
+                            ),
+                            false ) );
+
+                        // Current position = Next position
+                        lastPos = newPos;
+                    }
+
+                    var debugEndNodeCount = nodes.Count;
+                    DebugLog.WriteLine( string.Format( "Added {0} nodes = {1} - {2}", ( debugEndNodeCount - debugStartNodeCount ), debugStartNodeCount, ( debugEndNodeCount - 1 ) ) );
+                    DebugLog.CloseIndentLevel();
                 }
-                
-                var debugEndNodeCount = nodes.Count;
-                DebugLog.WriteLine( string.Format( "Added {0} nodes = {1} - {2}", ( debugEndNodeCount - debugStartNodeCount ), debugStartNodeCount, ( debugEndNodeCount - 1 ) ) );
-                DebugLog.CloseIndentLevel();
+
+                // Update all the node floors with the lowest value for the entire set
+                foreach( var node in nodes )
+                    node.Floor = lowestFloor;
             }
-            
-            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Generated Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2}", nodeLength, angleAllowance, slopeAllowance ) );
+
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Generated Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2} :: borderWithBottom = {3}", nodeLength, angleAllowance, slopeAllowance, borderWithBottom ) );
             DebugLog.CloseIndentLevel();
 
-            DebugLog.OpenIndentLevel( "Optimizing nodes from position, angle and slope" );
+            DebugLog.OpenIndentLevel( "Optimizing nodes from position, angle and slope", false );
 
             // Merge any nodes that have the same 2D position
             for( int i = 0; i < nodes.Count; )
@@ -758,19 +824,15 @@ namespace GUIBuilder
                     i++;
             }
 
-            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Optimized Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2}", nodeLength, angleAllowance, slopeAllowance ) );
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Optimized Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2} :: borderWithBottom = {3}", nodeLength, angleAllowance, slopeAllowance, borderWithBottom ) );
             DebugLog.CloseIndentLevel();
 
             //BorderNodeGroup.DumpGroupNodes( nodes, "Merged list from generated nodes from linked refs" );
             // If there's not enough nodes to generate a mesh with, return nothing
             if( nodes.Count < 2 ) return null;
             
-            // Update all the node floors with the lowest value for the entire mesh
-            foreach( var node in nodes )
-                node.Floor = lowestFloor;
-
-            localAbort:
-            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Final Node Set :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2}", nodeLength, angleAllowance, slopeAllowance ) );
+        localAbort:
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Final Node Set :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2} :: borderWithBottom = {3}", nodeLength, angleAllowance, slopeAllowance, borderWithBottom ) );
             //DebugLog.CloseIndentLevel( "nodes", nodes );
             DebugLog.CloseIndentLevel();
             return nodes;

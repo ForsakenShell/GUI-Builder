@@ -17,59 +17,67 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of BorderBatchImportWindow.
     /// </summary>
-    public partial class BatchImport : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
+    public partial class BatchImport : WindowBase
     {
+
+
+        /// <summary>
+        /// Use GodObject.Windows.GetWindow<BatchImport>() to create this Window
+        /// </summary>
+        public BatchImport() : base( true )
+        {
+            InitializeComponent();
+            
+            this.SuspendLayout();
+            
+            lvImportForms.CustomAscendingSort = PrioritySortAsc;
+            lvImportForms.CustomDescendingSort = PrioritySortDes;
+
+            this.ResumeLayout( false );
+        }
+
+
+
+        #region GodObject.XmlConfig.IXmlConfiguration
+
+
+        public override string XmlNodeName      { get { return "BatchImportWindow"; } }
         
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
-        public string XmlNodeName { get{ return "BatchImportWindow"; } }
-        
-        bool onLoadComplete = false;
+        const string XmlKey_SplitterOffset = "SplitterOffset";
+
+
+        #endregion
+
         
         public bool AllImportsMatchTarget = false;
         public bool EnableControlsOnClose = true;
         public List<FormImport.ImportBase> ImportForms = null;
 
-        public BatchImport()
+
+
+        #region Window management
+
+
+        void BatchImport_OnLoad( object sender, EventArgs e )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: cTor() :: Start", this.GetType().ToString() ) );
-            //
-            // The InitializeComponent() call is required for Windows Forms designer support.
-            //
-            InitializeComponent();
-            
-            //
-            // TODO: Add constructor code after the InitializeComponent() call.
-            //
-            lvImportForms.CustomAscendingSort = PrioritySortAsc;
-            lvImportForms.CustomDescendingSort = PrioritySortDes;
-            
-            //DebugLog.Write( string.Format( "\n{0} :: cTor() :: Complete", this.GetType().ToString() ) );
-        }
-        
-        #region Windows.Forms Events
-        
-        void OnFormLoad( object sender, EventArgs e )
-        {
-            //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Start", this.GetType().ToString() ) );
-            
+            //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Start", this.FullTypeName() ) );
+
+            scImports.SplitterDistance = GodObject.XmlConfig.ReadValue<int>( null, XmlNodeName, XmlKey_SplitterOffset, scImports.SplitterDistance );
+
             // This is a modal window which is created, data added, then displayed
             // At this point we just need to sort the data and populate the form
-            this.Translate( true );
-            
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
-            
+
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             
             this.BringToFront();
             
             /*
-            DebugLog.Write( string.Format( "ImportForms = {0}", ImportForms.NullOrEmpty() ? 0 : ImportForms.Count ) );
+            DebugLog.WriteLine( string.Format( "ImportForms = {0}", ImportForms.NullOrEmpty() ? 0 : ImportForms.Count ) );
             if( !ImportForms.NullOrEmpty() )
             {
                 foreach( var i in ImportForms )
-                    DebugLog.Write( string.Format( "\t{0} : 0x{1} - \"{2}\"", i.Signature, i.FormID.ToString( "X8" ), i.EditorID ) );
+                    DebugLog.WriteLine( string.Format( "\t{0} : 0x{1} - \"{2}\"", i.Signature, i.FormID.ToString( "X8" ), i.EditorID ) );
             }
             */
             
@@ -79,13 +87,11 @@ namespace GUIBuilder.Windows
             //RepopulateImportListView( false );
             
             m.PopStatusMessage();
-            pnMain.Enabled = true;
-            onLoadComplete = true;
             
-            //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Complete", this.GetType().ToString() ) );
+            //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Complete", this.FullTypeName() ) );
         }
-        
-        void OnFormClosed( object sender, FormClosedEventArgs e )
+
+        void OnFormClosing( object sender, FormClosingEventArgs e )
         {
             AllImportsMatchTarget =
                 ( ImportForms.NullOrEmpty() )||
@@ -94,33 +100,9 @@ namespace GUIBuilder.Windows
             //m.PopStatusMessage();
             if( EnableControlsOnClose )
                 GodObject.Windows.SetEnableState( true );
-            GodObject.Windows.SetWindow<BatchImport>( null, false );
         }
         
-        void OnFormMove( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteSize( this );
-        }
-
-        public void SetEnableState( bool enabled )
-        {
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate () { SetEnableState( enabled ); }, null );
-                return;
-            }
-
-            pnMain.Enabled = enabled;
-        }
-
+        
         void btnCloseClick( object sender, EventArgs e )
         {
             this.DialogResult = DialogResult.None;
@@ -132,6 +114,12 @@ namespace GUIBuilder.Windows
             var thread = WorkerThreadPool.CreateWorker( THREAD_ImportSelectedListViewItems, null );
             if( thread != null )
                 thread.Start();
+        }
+        
+        void scImportsSplitterMoved( object sender, SplitterEventArgs e )
+        {
+            if( !OnLoadComplete ) return;
+            GodObject.XmlConfig.WriteValue<int>( XmlNodeName, XmlKey_SplitterOffset, e.SplitY, true );
         }
         
         #endregion
@@ -174,7 +162,7 @@ namespace GUIBuilder.Windows
         
         void SortImportForms( List<FormImport.ImportBase> list, bool ascending )
         {
-            DebugLog.WriteLine( "SortImportForms()" );
+            DebugLog.WriteCaller( false );
             if( ascending )
                 list.Sort( PrioritySortImportAsc );
             else
@@ -210,7 +198,7 @@ namespace GUIBuilder.Windows
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
-            //DebugLog.Write( string.Format( "\n{0} :: ImportSelectedListViewItems() :: Start", this.GetType().ToString() ) );
+            //DebugLog.Write( string.Format( "\n{0} :: ImportSelectedListViewItems() :: Start", this.FullTypeName() ) );
             
             #region Apply Imports
             
@@ -225,7 +213,7 @@ namespace GUIBuilder.Windows
                 SortImportForms( selectedImportForms, true );
                 foreach( var importForm in selectedImportForms )
                 {
-                    msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), importForm.Signature, importForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), importForm.Signature, string.Format( "IXHandle.IDString".Translate(), importForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                     m.SetCurrentStatusMessage( msg );
                     AddImportMessage( msg );
                     importForm.Apply( this );
@@ -251,9 +239,7 @@ namespace GUIBuilder.Windows
             
             #endregion
             
-            m.StopSyncTimer(
-                "GUIBuilder.BatchImportWindow :: ImportSelectedListViewItems() :: Completed in {0}",
-                tStart.Ticks );
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             SetEnableState( true );
         }
@@ -274,6 +260,7 @@ namespace GUIBuilder.Windows
                 return mdiCp;
             }
         }
+        
         #endregion
 
     }

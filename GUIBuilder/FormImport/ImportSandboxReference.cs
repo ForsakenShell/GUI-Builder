@@ -65,7 +65,7 @@ namespace GUIBuilder.FormImport
             return;
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}",
-                this.GetType()  .ToString(),
+                this.TypeFullName(),
                 Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
                 string.IsNullOrEmpty( NewEditorID ) ? null : string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID ),
                 ftBaseActi      .DisplayIDInfo( "\n\tBaseActi = {0}" ),
@@ -83,7 +83,7 @@ namespace GUIBuilder.FormImport
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.Volume ), originalScript )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
             
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;

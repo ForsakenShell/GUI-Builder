@@ -94,7 +94,7 @@ namespace AnnexTheCommonwealth
             if( ( !_EdgeFlags.NullOrEmpty() )&&( !forceReset ) )
                 return true;
             
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", "forceReset = " + forceReset.ToString() + "\n", "forceStopAt = " + forceStopAt.ToStringNullSafe() + "\n", this.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.IDString, "forceReset = " + forceReset.ToString() + "\n", "forceStopAt = " + ( forceStopAt == null ? "[null]" : forceStopAt.IDString ) }, true );
             var result = false;
             
             if( forceReset )
@@ -141,7 +141,7 @@ namespace AnnexTheCommonwealth
                     : fkFID != Engine.Plugin.Constant.FormID_None
                     ? "Invalid Keyword FormID 0x" + fkFID.ToString( "X8" )
                     : "[null]";
-                DebugLog.WriteWarning( this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", "An edge flag is linked with the wrong keyword!\nkeyword = " + ks );
+                DebugLog.WriteWarning( "An edge flag is linked with the wrong keyword!\nkeyword = " + ks );
                 goto localReturnResult;
             }
             
@@ -166,11 +166,11 @@ namespace AnnexTheCommonwealth
                         var flagIndex = _EdgeFlags.FindIndex( f => f == flag );
                         if( flagIndex >= 0 )
                         {
-                            DebugLog.WriteWarning( this.GetType().ToString(), "INTERNAL_FetchEdgeFlags()", string.Format(
-                                "Sub-division has an edge flag that points to the middle of the chain!\n\tSubDivision: 0x{0} - \"{1}\"\n\tEdgeFlag: 0x{2}\n\tKeyword: 0x{3} - \"{4}\"",
-                                GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                                prevFlag.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                                keyword.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), keyword.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                            DebugLog.WriteWarning( string.Format(
+                                "Sub-division has an edge flag that points to the middle of the chain!\n\tSubDivision: {0}\n\tEdgeFlag: {1}\n\tKeyword: {2}",
+                                this.IDString,
+                                prevFlag.IDString,
+                                keyword.IDString ) );
                             
                             // Bad linking, truncate the list to this flags element
                             _EdgeFlags.RemoveRange( flagIndex + 1, _EdgeFlags.Count - flagIndex - 1 );
@@ -193,7 +193,7 @@ namespace AnnexTheCommonwealth
             if( !_EdgeFlagsClosedLoop )
             {
                 var efCount = _EdgeFlags.Count;
-                DebugLog.Write( string.Format( "\nWarning: Sub-Division EdgeFlags do not form a complete loop.\n\tSub-Division = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.ToString(), efCount, _EdgeFlags[ 0 ].ToString(), _EdgeFlags[ efCount - 1 ].ToString() ) );
+                DebugLog.Write( string.Format( "\nWarning: Sub-Division EdgeFlags do not form a complete loop.\n\tSub-Division = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.IDString, efCount, _EdgeFlags[ 0 ].IDString, _EdgeFlags[ efCount - 1 ].IDString ) );
             }
             */
             result = true;
@@ -247,7 +247,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "EdgeFlags", this.ToString() } );
+                //DebugLog.OpenIndentLevel( new [] { this.IDString, "EdgeFlags" }, true );
                 var resFunc = INTERNAL_FetchEdgeFlags();
             //localReturnResult:
                 //DebugLog.CloseIndentLevel<EdgeFlag>( _EdgeFlags );
@@ -311,7 +311,7 @@ namespace AnnexTheCommonwealth
                 /*
                 DebugLog.Write( string.Format(
                     "{0} :: 0x{1} - \"{2}\" :: GetBorderEnablers() :: count = {3}",
-                    this.GetType().ToString(),
+                    this.FullTypeName(),
                     this.FormID.ToString( "X8" ),
                     this.EditorID,
                     ( _BorderEnablers.NullOrEmpty() ? 0 : _BorderEnablers.Count ) ) );
@@ -430,7 +430,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_myLocation );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetMyLocation() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_myLocation ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_myLocation ) );
                 goto localAbort;
             }
             
@@ -450,7 +450,7 @@ namespace AnnexTheCommonwealth
             if( !ph.IsValid() )
                 //ph = this.
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: SetMyLocation() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_myLocation ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_myLocation ), true );
                 return;
             }
             ph.SetUIntValue( value );
@@ -469,7 +469,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAnyAll );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetRelationshipsAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ), true );
                 goto localAbort;
             }
             
@@ -483,7 +483,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAnyAll );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: SetRelationshipsAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ), true );
                 return;
             }
             ph.SetIntValue( value );
@@ -502,7 +502,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_QuestsAnyAll );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetQuestStagesAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ), true );
                 goto localAbort;
             }
             
@@ -516,7 +516,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_QuestsAnyAll );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetQuestStagesAnyAll() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ), true );
                 return;
             }
             ph.SetIntValue( value );
@@ -535,7 +535,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAndQuests );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetRelationshipsAndQuests() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ), true );
                 goto localAbort;
             }
             
@@ -549,7 +549,7 @@ namespace AnnexTheCommonwealth
             var ph = this.ScriptPropertyHandleFromTarget( target, PS_RelationshipsAndQuests );
             if( !ph.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "AnnexTheCommonwealth.SubDivision :: GetRelationshipsAndQuests() :: ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ) );
+                DebugLog.WriteLine( string.Format( "ScriptPropertyHandleFromTarget() returned null!  Target = {0} :: Property = \"{1}\"", target.ToString(), PS_RelationshipsAnyAll ), true );
                 return;
             }
             ph.SetIntValue( value );
@@ -596,17 +596,17 @@ namespace AnnexTheCommonwealth
             var edgeFlags = EdgeFlags;
             if( edgeFlags.NullOrEmpty() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "GetOptimalSandboxVolume()", "No edge flags for sub-division" );
+                DebugLog.WriteError( "No edge flags for sub-division" );
                 return null;
             }
             if( fSandboxCylinderTop <= 0.0f )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "GetOptimalSandboxVolume()", "fSandboxCylinderTop must be greater than 0" );
+                DebugLog.WriteError( "fSandboxCylinderTop must be greater than 0" );
                 return null;
             }
             if( fSandboxCylinderBottom >= 0.0f )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "GetOptimalSandboxVolume()", "fSandboxCylinderBottom must be less than 0" );
+                DebugLog.WriteError( "fSandboxCylinderBottom must be less than 0" );
                 return null;
             }
             
@@ -633,7 +633,7 @@ namespace AnnexTheCommonwealth
                     float minZ, maxZ, avgZ, avgWaterZ;
                     if( !wsdp.ComputeZHeightsFromVolumes( volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
                     {
-                        DebugLog.WriteError( this.GetType().ToString(), "GetOptimalSandboxVolume()", "Could not compute Z coords from worldspace heightmap" );
+                        DebugLog.WriteError( "Could not compute Z coords from worldspace heightmap" );
                         return null;
                     }
                     var zUse = avgZ;                                        // Start with the average land height
@@ -658,29 +658,29 @@ namespace AnnexTheCommonwealth
             var edgeFlags = EdgeFlags;
             if( edgeFlags.NullOrEmpty() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "No edge flags for sub-division" );
+                DebugLog.WriteError( "No edge flags for sub-division" );
                 return false;
             }
             var volumes   = BuildVolumes;
             if( volumes.NullOrEmpty() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "No build volumes for sub-division" );
+                DebugLog.WriteError( "No build volumes for sub-division" );
                 return false;
             }
             if( topAbovePeak <= 0.0f )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "topAbovePeak must be greater than 0" );
+                DebugLog.WriteError( "topAbovePeak must be greater than 0" );
                 return false;
             }
             if( groundSink >= 0.0f )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "groundSink must be less than 0" );
+                DebugLog.WriteError( "groundSink must be less than 0" );
                 return false;
             }
             var wsdp = Reference.Worldspace.PoolEntry;
             if( wsdp == null )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "Worldspace data pool could not be resolved" );
+                DebugLog.WriteError( "Worldspace data pool could not be resolved" );
                 return false;
             }
             
@@ -695,7 +695,7 @@ namespace AnnexTheCommonwealth
             float minZ, maxZ, avgZ, avgWaterZ;
             if( !wsdp.ComputeZHeightsFromVolumes( volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "NormalizeBuildVolumes()", "Could not compute Z coords from worldspace heightmap" );
+                DebugLog.WriteError( "Could not compute Z coords from worldspace heightmap" );
                 return false;
             }
             
@@ -704,10 +704,17 @@ namespace AnnexTheCommonwealth
             var volH = topZ - bottomZ;
             var posZ = bottomZ + ( volH * 0.5f );
             
-            DebugLog.WriteLine( string.Format(
-                "AnnexTheCommonwealth.SubDivision :: NormalizeBuildVolumes()\n{{ComputeZHeightsFromVolumes()\n\t\tminZ = {0}\n\t\tmaxZ = {1}\n\t\tavgZ = {2}\n\t\tAvgWaterZ = {3}\n\t\tbottomZ = {4}\n\t\ttopZ = {5}\n\t\tvolH = {6}\n\t\tposZ = {7}\n}}",
-                minZ, maxZ, avgZ, avgWaterZ,
-                bottomZ, topZ, volH, posZ ) );
+            DebugLog.WriteStrings( null, new[]{
+                "ComputeZHeightsFromVolumes()",
+                "minZ = " + minZ.ToString(),
+                "maxZ = " + maxZ.ToString(),
+                "avgZ = " + avgZ.ToString(),
+                "avgWaterZ = " + avgWaterZ.ToString(),
+                "bottomZ = " + bottomZ.ToString(),
+                "topZ = " + topZ.ToString(),
+                "volH = " + volH.ToString(),
+                "posZ = " + posZ.ToString() },
+                false, true, false, false );
             
             #region Find layer for volumes
             
@@ -846,7 +853,7 @@ namespace AnnexTheCommonwealth
         
         public List<GUIBuilder.FormImport.ImportBase> GenerateMissingBorderEnablersFromEdgeFlags()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "GenerateMissingBorderEnablersFromEdgeFlags()", this.ToString() } );
+            //DebugLog.OpenIndentLevel( this.IDString, true );
             
             List<GUIBuilder.FormImport.ImportBase> result = null;
             
@@ -928,7 +935,7 @@ namespace AnnexTheCommonwealth
                     //DebugLog.CloseIndentLevel();
                     if( e != null )
                     {
-                        //DebugLog.WriteLine( "Found existing enabler by neighbour " + e.ToString() );
+                        //DebugLog.WriteLine( "Found existing enabler by neighbour " + e.IDString );
                         continue;
                     }
                     
@@ -948,7 +955,7 @@ namespace AnnexTheCommonwealth
                     e = _BorderEnablers.Find( (b) => ( b.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == newEditorID ) );
                     if( e != null )
                     {
-                        //DebugLog.WriteLine( "Found existing enabler by EditorID " + e.ToString() );
+                        //DebugLog.WriteLine( "Found existing enabler by EditorID " + e.IDString );
                         continue;
                     }
                     
@@ -956,7 +963,7 @@ namespace AnnexTheCommonwealth
                     e = GodObject.Plugin.Data.BorderEnablers.Find( newEditorID );
                     if( e != null )
                     {
-                        //DebugLog.WriteLine( "Found existing enabler in global table " + e.ToString() );
+                        //DebugLog.WriteLine( "Found existing enabler in global table " + e.IDString );
                         continue;
                     }
                     
@@ -1023,7 +1030,7 @@ namespace AnnexTheCommonwealth
         
         public void BuildSegmentsFromEdgeFlags( float approximateNodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) } );
+            DebugLog.OpenIndentLevel( this.IDString );
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -1038,17 +1045,16 @@ namespace AnnexTheCommonwealth
             
             foreach( var enabler in _BorderEnablers )
             {
-                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), enabler.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                m.SetCurrentStatusMessage( string.Format( "BorderBatch.CalculatingBordersFor".Translate(), enabler.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 enabler.BuildSegmentsFromSubDivisionEdgeFlags( approximateNodeLength, angleAllowance, slopeAllowance, updateMapUIData );
             }
             
             SendObjectDataChangedEvent( this );
             
         localReturnResult:
-            var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
-            m.StopSyncTimer( string.Format( "{0} :: {1} :: {2} :: {3}", this.GetType().ToString(), "BuildSegmentsFromEdgeFlags()", this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), "Completed in {0}" ), tStart.Ticks );
+            var elapsed = m.StopSyncTimer( tStart, this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel( tEnd );
+            DebugLog.CloseIndentLevel( elapsed );
         }
         
         public List<GUIBuilder.FormImport.ImportBase> CreateBorderNIFs(
@@ -1063,7 +1069,7 @@ namespace AnnexTheCommonwealth
             string fileSuffix,
             bool createImportData )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: CreateBorderNIFs() :: sub-division 0x{1} \"{2}\"", this.GetType().ToString(), this.FormID.ToString( "X8" ), this.EditorID ) );
+            //DebugLog.Write( string.Format( "\n{0} :: CreateBorderNIFs() :: sub-division 0x{1} \"{2}\"", this.FullTypeName(), this.FormID.ToString( "X8" ), this.EditorID ) );
             if( _BorderEnablers.NullOrEmpty() )
                 return null;
             
@@ -1119,10 +1125,7 @@ namespace AnnexTheCommonwealth
                     moel.Add( "BorderEnablers:" );
                     foreach( var enabler in _BorderEnablers )
                     {
-                        moel.Add(
-                            string.Format( "\t0x{0} - \"{1}\"",
-                                enabler.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                                enabler.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                        moel.Add( string.Format( "\t{0}", enabler.IDString ) );
                         var emoel = enabler.MouseOverExtra;
                         if( !emoel.NullOrEmpty() )
                             foreach( var emoe in emoel )
@@ -1132,19 +1135,11 @@ namespace AnnexTheCommonwealth
                 if( _EdgeFlagKeyword != null )
                 {
                     moel.Add( "EdgeFlags:" );
-                    moel.Add(
-                        string.Format( "\tKeyword: 0x{0} - \"{1}\"",
-                            _EdgeFlagKeyword.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                            _EdgeFlagKeyword.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                    moel.Add(
-                        string.Format( "\tClosed Loop: {0}",
-                            _EdgeFlagsClosedLoop ) );
+                    moel.Add( string.Format( "\tKeyword: {0}", _EdgeFlagKeyword.IDString ) );
+                    moel.Add( string.Format( "\tClosed Loop: {0}", _EdgeFlagsClosedLoop ) );
                     foreach( var flag in _EdgeFlags )
                     {
-                        moel.Add(
-                            string.Format( "\t\t0x{0} - \"{1}\"",
-                                flag.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                                flag.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                        moel.Add( string.Format( "\t\t{0}", flag.IDString ) );
                         var fmoel = flag.MouseOverExtra;
                         if( !fmoel.NullOrEmpty() )
                             foreach( var fmoe in fmoel )

@@ -36,7 +36,7 @@ namespace AnnexTheCommonwealth
         
         public bool AssociatedWithSubDivision( uint formid )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "AssociatedWithSubDivision()", "formid = 0x" + formid.ToString( "X8" ), this.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.IDString, "formid = 0x" + formid.ToString( "X8" ) }, true );
             
             var result = true;
             
@@ -59,7 +59,7 @@ namespace AnnexTheCommonwealth
         
         public bool HasAnySharedAssociations( EdgeFlag otherFlag, uint excludeSubDivision = Engine.Plugin.Constant.FormID_None )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "HasAnySharedAssociations()", "excludeSubDivision = 0x" + excludeSubDivision.ToString( "X8" ) + "\n", "otherFlag = " + otherFlag.ToString() + "\n", this.ToString() } );
+            //DebugLog.OpenIndentLevel( new [] { this.IDString, "excludeSubDivision = 0x" + excludeSubDivision.ToString( "X8" ) + "\n", "otherFlag = " + otherFlag.IDString }, true );
             
             var result = true;
             
@@ -98,9 +98,9 @@ namespace AnnexTheCommonwealth
                         var k = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Keyword>( ks.Key );
                         moel.Add(
                             string.Format(
-                                "\tSub-Division: 0x{0} - \"{1}\" :: Keyword: 0x{2} - \"{3}\"",
-                                ks.Value.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), ks.Value.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                                ks.Key.ToString( "X8" ), k.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                                "\tSub-Division: {0} :: Keyword: {1}",
+                                ks.Value.IDString,
+                                k == null ? "[null]" : k.IDString ) );
                     }
                 }
                 
@@ -109,14 +109,14 @@ namespace AnnexTheCommonwealth
                     moel.Add( "Linked Flags:" );
                     for( int i = 0; i < lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ); i++ )
                     {
-                        var rID = lrs.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
+                        var r = lrs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                         var k = lrs.GetKeyword( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
                         moel.Add(
                             string.Format(
-                                "\tEdgeFlag: 0x{0} :: Keyword: 0x{1} - \"{2}\"",
-                                rID.ToString( "X8" ),
-                                ( k == null ? 0 : k.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
-                                ( k == null ? "" : k.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) ) );
+                                "\tEdgeFlag: {0} :: Keyword: {1}",
+                                r.IDString,
+                                ( k == null ? "[null]" : k.IDString )
+                                ) );
                     }
                 }
                 

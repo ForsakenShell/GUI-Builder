@@ -207,7 +207,7 @@ namespace GUIBuilder.Windows
                         if( lastSelectedWorking == null )
                             lastSelectedWorking = node.Text;
                         
-                        if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+                        if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
                         {
                             // Prefer an ATC dependant file
                             var p = LoadOrder.Find( f => f.Filename.InsensitiveInvariantMatch( CutOffString( node.Text, NodeFilenameTail ) ) );
@@ -267,7 +267,7 @@ namespace GUIBuilder.Windows
         string CutOffString( string s, int charsToCutOff )
         {
             var r = s.Substring( 0, s.Length - charsToCutOff );
-            //DebugLog.WriteLine( new [] { this.GetType().ToString(), "CutOffString()", "\"" + s + "\"", "\"" + r + "\"" } );
+            //DebugLog.WriteLine( new [] { this.FullTypeName(), "CutOffString()", "\"" + s + "\"", "\"" + r + "\"" } );
             return r;
         }
         

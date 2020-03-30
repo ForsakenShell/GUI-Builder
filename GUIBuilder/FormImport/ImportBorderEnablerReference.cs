@@ -50,7 +50,7 @@ namespace GUIBuilder.FormImport
             var s7 = stNeighbour     .DisplayIDInfo( "\n\tNeighbour = {0}" );
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}{2}{3}{4}{5}{6}{7}",
-                this.GetType()  .ToString(),
+                this.TypeFullName(),
                 s1,
                 s2,
                 s3,
@@ -65,7 +65,7 @@ namespace GUIBuilder.FormImport
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.BorderEnabler ), originalScript )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
             
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
@@ -288,13 +288,13 @@ namespace GUIBuilder.FormImport
         
         protected override bool         ApplyImport()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "ApplyImport()" } );
+            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "ApplyImport()" } );
             var result = false;
             
             var enabler = TargetScript as AnnexTheCommonwealth.BorderEnabler;
             if( enabler == null )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "ApplyImport()", "TargetScript is not Script \"BorderEnabler\"" );
+                DebugLog.WriteError( "TargetScript is not Script \"BorderEnabler\"" );
                 goto localReturnResult;
             }
             var refr = enabler.Reference;

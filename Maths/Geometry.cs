@@ -59,6 +59,11 @@ namespace Maths
             return ( 360.0f + (float)( Math.Atan2( dy, dx ) * Maths.Constant.RAD_TO_DEG ) ) % 360.0f;
         }
 
+        public static float Angle( Vector2f p1, Vector2f p2 )
+        {
+            return Angle( p1.X, p1.Y, p2.X, p2.Y );
+        }
+
         public static void Slope( float x1, float y1, float x2, float y2, out float A, out float B, out float C )
         {
             double tmpA, tmpB, tmpC;
@@ -600,8 +605,8 @@ namespace Maths
             
             public static OptimalBoundingBox MinBoundingBox( List<Vector2f> hull )
             {
-                DebugLog.OpenIndentLevel( new [] { "Maths.Geometry.ConvexHull", "MinBoundingBox()" } );
-                DebugLog.WriteList<Vector2f>( "hull", hull );
+                //DebugLog.OpenIndentLevel();
+                //DebugLog.WriteList<Vector2f>( "hull", hull, false, true );
                 
                 var numPoints = hull.Count;
                 //var hull = hull.ToArray();
@@ -781,7 +786,7 @@ namespace Maths
                     result = new OptimalBoundingBox( size, pos, AngleValue( bestRect[ 1 ].X, bestRect[ 1 ].Y, bestRect[ 2 ].X, bestRect[ 2 ].Y ) );
                 }
                 
-                DebugLog.CloseIndentLevel( "result", result.ToStringNullSafe() );
+                //DebugLog.CloseIndentLevel( "result", result.ToStringNullSafe() );
                 return result;
             }
             
@@ -813,8 +818,8 @@ namespace Maths
             
             public static List<Vector2f> MakeConvexHull( List<Vector2f> points )
             {
-                DebugLog.OpenIndentLevel( new [] { "Maths.Geometry.ConvexHull", "MakeConvexHull()" } );
-                DebugLog.WriteList( "points", points );
+                //DebugLog.OpenIndentLevel();
+                //DebugLog.WriteList( "points", points, false, true );
                 
                 // Cull points inside an inner bounding box
                 var culled = CullPoints( points );
@@ -875,8 +880,8 @@ namespace Maths
                     
                 }
                 
-                DebugLog.WriteList( "hull", hull );
-                DebugLog.CloseIndentLevel();
+                //DebugLog.WriteList( "hull", hull, false, true );
+                //DebugLog.CloseIndentLevel();
                 return hull;
             }
             

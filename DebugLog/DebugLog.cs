@@ -8,6 +8,7 @@
  * Time: 11:15 AM
  * 
  */
+//#define TRACE_INDENT_EVENTS // <-- Only here to find mismatched open/close
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -18,21 +19,34 @@ using System.Collections.Generic;
 
 public static class DebugLog
 {
-    
-    const string LogRootPath = "GUIBuilder.log";
+
+    #region Constants
+
+    //const string LogRootPath = "GUIBuilder.log";
     
     public const string FormatNewLineChar = "\n";
+    public const string FormatLineFeedChar = "\r";
     public const string FormatTabChar = "\t";
+    public const char FormatTabAsChar = '\t';
+    public const char FormatConsoleTabReplacement = ' ';
     public const string FormatSeparator = " :: ";
     public const string OpenIndentChar = "{";
     public const string CloseIndentChar = "}";
     
     const string DateTimeFormat = "yyyy'_'MM'_'dd_HH'_'mm'_'ss";
-    
+
+    #endregion
+
+    #region Global Fields
+
     static string instanceTime = null;
     
     static string _logPath = null;
-    
+
+    #endregion
+
+    #region Thread Local Storage Fields
+
     [ThreadStatic]
     static string _logFile = null;
     
@@ -47,7 +61,14 @@ public static class DebugLog
     
     [ThreadStatic]
     static bool _logClosed = false;
-    
+
+    [ThreadStatic]
+    static bool _logToConsole = false;
+
+    #endregion
+
+    #region Global Methods
+
     public static void ZipLogs( bool deleteFiles )
     {
         if( string.IsNullOrEmpty( _logPath ) ) return; // No logs created, nothing to zip
@@ -80,30 +101,13 @@ public static class DebugLog
             _logPath = null;
         }
     }
-    
-    public static string ThreadID
-    {
-        get
-        {
-            return "0x" + Thread.CurrentThread.ManagedThreadId.ToString( "X8" );
-        }
-    }
-    
-    public static string ThreadName
-    {
-        get
-        {
-            var name = Thread.CurrentThread.Name;
-            return string.Format(
-                "Thread_{0}{1}",
-                ThreadID,
-                string.IsNullOrEmpty( name )
-                    ? null
-                    : string.Format( "_{0}", name )
-            );
-        }
-    }
-    
+
+    #endregion
+
+    #region Thread Local Methods
+
+    #region Log Management
+
     public static string Filename
     {
         get
@@ -114,12 +118,13 @@ public static class DebugLog
                 if( string.IsNullOrEmpty( instanceTime ) )
                 {
                     instanceTime = rightNow;
-                    _logPath = string.Format( "{0}\\{1}", LogRootPath, instanceTime );
-                    LogRootPath.DeleteFile();   // Force removal of the old global log file
+                    //_logPath = string.Format( "{0}\\{1}", LogRootPath, instanceTime );
+                    _logPath = string.Format( "{0}\\{1}", GodObject.Paths.DebugLog, instanceTime );
+                    //LogRootPath.DeleteFile();   // Force removal of the old global log file
                     _logPath.CreatePath();
                 }
-                var name = ThreadName;
-                _logFile = string.Format( "{0}\\{1}_{2}.log", _logPath, name, rightNow );
+                var fullThreadId = WorkerThreadPool.FriendlyThreadIdName();
+                _logFile = string.Format( "{0}\\{1}_{2}.log", _logPath, fullThreadId, rightNow );
             }
             return _logFile;
         }
@@ -137,7 +142,7 @@ public static class DebugLog
     {
         if( ( _logInitialized )&&( !_logClosed ) )
         {
-            _WriteLines( string.Format( "{2}{1}Log closed at {0}", DateTime.Now.ToString(), FormatNewLineChar, CloseIndentChar ) );
+            _WriteLine( string.Format( "{2}{1}Log closed at {0}", DateTime.Now.ToString(), FormatNewLineChar, CloseIndentChar ) );
             _logStream.Flush();
             _logStream.Close();
             _logClosed = true;
@@ -146,293 +151,623 @@ public static class DebugLog
         }
     }
     
-    public static string Open()
+    public static string Open( bool logToConsole = false )
     {
         if( ( !_logClosed )&&( !_logInitialized ) )
         {
+            _logToConsole = logToConsole;
             _logStream = File.Open( Filename, FileMode.Create, FileAccess.Write, FileShare.Read );
             _logInitialized = true;
-            _WriteLines( string.Format(
-                "GUIBuilder {0} log for thread \"{1}\" with ID {2} opened at {3}{4}{5}",
+            _WriteLine( string.Format(
+                "GUIBuilder {0} log for \"{1}\" opened at {2}{3}{4}{3}{5}",
                 Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-                ThreadName,
-                ThreadID,
+                WorkerThreadPool.FriendlyThreadIdName(),
                 DateTime.Now.ToString(),
-                FormatNewLineChar, OpenIndentChar
+                FormatNewLineChar,
+                WorkerThreadPool.StartMethodBaseName( false ),
+                OpenIndentChar
             ) );
             _logStream.Flush();
         }
         return Filename;
     }
-    
-    public static void WriteLine( string message )
-    {
-        if( _logClosed ) return;
-        if( string.IsNullOrEmpty( message ) ) return;
-        if( !_logInitialized ) Open();
-        
-        _WriteLines( message );
-        _logStream.Flush();
-    }
-    
-    public static void WriteLine( string[] values )
-    {
-        if( _logClosed ) return;
-        if( values.NullOrEmpty() ) return;
-        if( !_logInitialized ) Open();
-        
-        var result = _FormatLine( values );
-        _WriteLines( result );
-        
-        _logStream.Flush();
-    }
-    
-    public static void WriteError( string namespaceClassName, string functionName, string message )
-    {
-        if( _logClosed ) return;
-        if( string.IsNullOrEmpty( namespaceClassName) ) return;
-        if( string.IsNullOrEmpty( functionName ) ) return;
-        if( string.IsNullOrEmpty( message ) ) return;
-        if( !_logInitialized ) Open();
-        
-        _WriteAlertMessage( "ERROR", "======", namespaceClassName, functionName, message, true );
-    }
-    
-    public static void WriteWarning( string namespaceClassName, string functionName, string message )
-    {
-        if( _logClosed ) return;
-        if( string.IsNullOrEmpty( message ) ) return;
-        if( !_logInitialized ) Open();
-        
-        _WriteAlertMessage( "Warning", "------", namespaceClassName, functionName, message, false );
-    }
-    
-    public static void OpenIndentLevel( string[] values )
-    {
-        if( _logClosed ) return;
-        if( values.NullOrEmpty() ) return;
-        if( !_logInitialized ) Open();
-        
-        var result = _FormatLine( values );
-        _WriteLines( result );
-        _WriteLines( OpenIndentChar );
-        
-        _logStream.Flush();
-    }
-    
-    public static void OpenIndentLevel( string message )
-    {
-        if( _logClosed ) return;
-        if( string.IsNullOrEmpty( message ) ) return;
-        if( !_logInitialized ) Open();
-        
-        _WriteLines( message );
-        _WriteLines( OpenIndentChar );
-        
-        _logStream.Flush();
-    }
-    
-    public static void OpenIndentLevel()
+
+    #endregion
+
+    #region Indent Levels
+
+    #region Open
+
+    public static void OpenIndentLevel( string[] values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = false, bool indentElements = true, bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        _WriteLines( OpenIndentChar );
-        
-        _logStream.Flush();
-    }
-    
-    public static void WriteList<TList>( string listName, IList<TList> list )
-    {
-        if( _logClosed ) return;
-        if( !_logInitialized ) Open();
-        
-        if( list.NullOrEmpty() )
-            _WriteLines( string.Format( "{0} = [null]", listName ) );
+
+        var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, true, false, true ) : null;
+
+        if( singleLinePerItem )
+        {
+            _WriteLine( callerId );
+            WriteStrings( null, values, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
+        }
         else
         {
-            var c = list.Count;
-            _WriteLines( string.Format( "{0}: Contains {1} elements{2}{3}", listName, c, FormatNewLineChar, OpenIndentChar ) );
-            for( int i = 0; i < c ; i++ )
-                _WriteLines( "[ " + i + " ] = " + list[ i ].ToString() );
-            _WriteLines( CloseIndentChar );
+            var vals = _BuildStringsLine( values, includeNulls );
+            _WriteLine( _BuildStringsLine( new[] { callerId, vals }, false ) );
         }
         
+        _WriteLine( OpenIndentChar );
+
         _logStream.Flush();
     }
-    
-    public static void WriteArray<TArray>( string arrayName, TArray[] array )
+
+    public static void OpenIndentLevel<TIXHandle>( List<TIXHandle> values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = false, bool indentElements = true, bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null ) where TIXHandle : Engine.Plugin.Interface.IXHandle
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        if( array.NullOrEmpty() )
-            _WriteLines( string.Format( "{0} = [null]", arrayName ) );
+
+        var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, true, false, true ) : null;
+
+        if( singleLinePerItem )
+        {
+            _WriteLine( callerId );
+            WriteIDStrings( null, values, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
+        }
         else
         {
-            var c = array.Length;
-            _WriteLines( string.Format( "{0}: Contains {1} elements{2}{3}", arrayName, c, FormatNewLineChar, OpenIndentChar ) );
-            for( int i = 0; i < c ; i++ )
-                _WriteLines( "[ " + i + " ] = " + array[ i ].ToString() );
-            _WriteLines( CloseIndentChar );
+            var vals = _BuildIDStringsLine( values, includeNulls );
+            _WriteLine( _BuildStringsLine( new[] { callerId, vals }, false ) );
         }
-        
+
+        _WriteLine( OpenIndentChar );
+
         _logStream.Flush();
     }
-    
-    public static void CloseIndentLevel<TList>( string listName, List<TList> list )
+
+    public static void OpenIndentLevel( string message, bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        WriteList( listName, list );
-        _WriteLines( CloseIndentChar );
-        
+
+        string result = _BuildStringsLine( new [] { ( prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null ), message }, false );
+        _WriteLine( result );
+        _WriteLine( OpenIndentChar );
+
         _logStream.Flush();
     }
-    
-    public static void CloseIndentLevel<TArray>( string arrayName, TArray[] array )
+
+    public static void OpenIndentLevel( bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        WriteArray( arrayName, array );
-        _WriteLines( CloseIndentChar );
-        
+
+        if( prefixCallerId ) _WriteLine( GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) );
+        _WriteLine( OpenIndentChar );
+
         _logStream.Flush();
     }
-    
+
+    #endregion
+
+    #region Close
+
+    public static void CloseIndentIDStrings<TIXHandle>( string listName, List<TIXHandle> list, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true ) where TIXHandle : Engine.Plugin.Interface.IXHandle
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        WriteIDStrings( listName, list, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
+        _WriteLine( CloseIndentChar );
+
+        _logStream.Flush();
+    }
+
+    public static void CloseIndentList<TList>( string listName, List<TList> list, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        WriteList( listName, list, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
+        _WriteLine( CloseIndentChar );
+
+        _logStream.Flush();
+    }
+
+    public static void CloseIndentArray<TArray>( string arrayName, TArray[] array, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        WriteArray( arrayName, array, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
+        _WriteLine( CloseIndentChar );
+
+        _logStream.Flush();
+    }
+
     public static void CloseIndentLevel( string resultName, string result )
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        _WriteLines( string.Format( "{0} = {1}", resultName, result ) );
-        _WriteLines( CloseIndentChar );
-        
+
+        _WriteLine( string.Format( "{0} = {1}", resultName, result ) );
+        _WriteLine( CloseIndentChar );
+
         _logStream.Flush();
     }
-    
+
     public static void CloseIndentLevel<TResult>( string resultName, TResult result ) where TResult : class
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        _WriteLines( string.Format( "{0} = {1}", resultName, result.ToStringNullSafe() ) );
-        _WriteLines( CloseIndentChar );
-        
+
+        _WriteLine( string.Format( "{0} = {1}", resultName, result.ToStringNullSafe() ) );
+        _WriteLine( CloseIndentChar );
+
         _logStream.Flush();
     }
-    
+
     public static void CloseIndentLevel( long elapsed, string resultName, string result )
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        var tmp = new TimeSpan( elapsed );
-        _WriteLines( string.Format( "Completed in {0}{3}{1} = {2}", tmp.ToString(), resultName, result, FormatNewLineChar ) );
-        _WriteLines( CloseIndentChar );
-        
+
+        if( elapsed >= 0 )
+        {
+            var tmp = new TimeSpan( elapsed );
+            _WriteLine( string.Format( "Completed in {0}", tmp.ToString() ) );
+        }
+
+        _WriteLine( string.Format( "{0} = {1}", resultName, result ) );
+        _WriteLine( CloseIndentChar );
+
         _logStream.Flush();
     }
-    
+
     public static void CloseIndentLevel( long elapsed )
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
+
         var tmp = new TimeSpan( elapsed );
-        _WriteLines( string.Format( "Completed in {0}{1}", tmp.ToString(), FormatNewLineChar ) );
-        _WriteLines( CloseIndentChar );
-        
+        _WriteLine( string.Format( "Completed in {0}", tmp.ToString() ) );
+        _WriteLine( CloseIndentChar );
+
         _logStream.Flush();
     }
-    
+
     public static void CloseIndentLevel()
     {
         if( _logClosed ) return;
         if( !_logInitialized ) Open();
-        
-        _WriteLines( CloseIndentChar );
+
+        _WriteLine( CloseIndentChar );
+
+        _logStream.Flush();
+    }
+
+    #endregion
+
+    #endregion
+
+    #region Errors and Warnings
+
+    static void _WriteAlertMessage( string alertName, string alertCap, string message, bool stackTrace )
+    {
+        _WriteLine(
+            string.Format(
+                "{0}[ {1} ]{0}",
+                alertCap,
+                alertName
+                ) );
+        _WriteLine( GenString.GetCallerId( 2, null, false, false, true ) );
+        if( !string.IsNullOrEmpty( message ) ) _WriteLine( message );
+        if( stackTrace ) _WriteLine( Environment.StackTrace );
+        _WriteLine( alertCap );
+        _logStream.Flush();
+    }
+
+    public static void WriteException( Exception e, string message = null )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        _WriteAlertMessage( "EXCEPTION", "======",
+            string.Format(
+                "{0}{1}{2}",
+                message,
+                ( message == null ? null : FormatNewLineChar ),
+                e.ToString()
+            ), false );
+    }
+
+    public static void WriteError( string message )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        _WriteAlertMessage( "ERROR", "======", message, true );
+    }
+
+    public static void WriteWarning( string message )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        _WriteAlertMessage( "Warning", "------", message, false );
+    }
+
+    #endregion
+
+    #region Single Line Write
+
+    public static void WriteCaller( bool includeParams = false, string[] reportParams = null )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        _WriteLine( GenString.GetCallerId( 1, reportParams, includeParams, false, true ) );
+        _logStream.Flush();
+    }
+
+    public static void WriteLine( string message, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        string result = _BuildStringsLine( new [] { ( prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null ), message }, false );
+        _WriteLine( result );
+        _logStream.Flush();
+    }
+
+    #endregion
+
+    #region Multi-Line Write
+
+    public static void WriteStrings( string name, string[] values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
+        var nameData = _FormatNameElementCount( "Strings", name, ( values.NullOrEmpty() ? 0 : values.Length ), singleLinePerItem, includeElementCount );
+
+        if( singleLinePerItem )
+        {
+            _WriteLine( callerId );
+            _WriteLine( nameData );
+            if( !values.NullOrEmpty() )
+            {
+                if( indentElements ) _WriteLine( OpenIndentChar );
+                for( int i = 0; i < values.Length; i++ )
+                {
+                    var isNull = string.IsNullOrEmpty( values[ i ] );
+                    if( ( includeNulls ) || ( !isNull ) )
+                    {
+                        if( includeIndicies )
+                            _WriteLine( string.Format( "[ {0} ] = {1}", i, isNull ? "[null]" : values[ i ] ) );
+                        else
+                            _WriteLine( isNull ? "[null]" : values[ i ] );
+                    }
+                }
+                if( indentElements ) _WriteLine( CloseIndentChar );
+            }
+        }
+        else
+        {
+            var vals = _BuildStringsLine( values, includeNulls );
+            var result = _BuildStringsLine( new [] { callerId, nameData, vals }, false );
+            _WriteLine( result );
+        }
         
         _logStream.Flush();
     }
-    
-    static string _FormatLine( string[] values )
+
+    public static void WriteArray<TArray>( string name, TArray[] values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
+        var nameData = _FormatNameElementCount( "Array", name, ( values.NullOrEmpty() ? 0 : values.Length ), singleLinePerItem, includeElementCount );
+
+        if( singleLinePerItem )
+        {
+            _WriteLine( callerId );
+            _WriteLine( nameData );
+            if( !values.NullOrEmpty() )
+            {
+                if( indentElements ) _WriteLine( OpenIndentChar );
+                for( int i = 0; i < values.Length; i++ )
+                {
+                    var isNull = values[ i ] == null;
+                    if( ( includeNulls ) || ( !isNull ) )
+                    {
+                        if( includeIndicies )
+                            _WriteLine( string.Format( "[ {0} ] = {1}", i, isNull ? "[null]" : values[ i ].ToString() ) );
+                        else
+                            _WriteLine( isNull ? "[null]" : values[ i ].ToString() );
+                    }
+                }
+                if( indentElements ) _WriteLine( CloseIndentChar );
+            }
+        }
+        else
+        {
+            var vals = _BuildArrayLine( values, includeNulls );
+            var result = _BuildStringsLine( new [] { callerId, nameData, vals }, false );
+            _WriteLine( result );
+        }
+
+        _logStream.Flush();
+    }
+
+    public static void WriteList<TList>( string name, IList<TList> values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
+        var nameData = _FormatNameElementCount( "List", name, ( values.NullOrEmpty() ? 0 : values.Count ), singleLinePerItem, includeElementCount ); 
+
+        if( singleLinePerItem )
+        {
+            _WriteLine( callerId );
+            _WriteLine( nameData );
+            if( !values.NullOrEmpty() )
+            {
+                if( indentElements ) _WriteLine( OpenIndentChar );
+                for( int i = 0; i < values.Count; i++ )
+                {
+                    var isNull = values[ i ] == null;
+                    if( ( includeNulls ) || ( !isNull ) )
+                    {
+                        if( includeIndicies )
+                            _WriteLine( string.Format( "[ {0} ] = {1}", i, isNull ? "[null]" : values[ i ].ToString() ) );
+                        else
+                            _WriteLine( isNull ? "[null]" : values[ i ].ToString() );
+                    }
+                }
+                if( indentElements ) _WriteLine( CloseIndentChar );
+            }
+        }
+        else
+        {
+            var vals = _BuildListLine( values, includeNulls );
+            var result = _BuildStringsLine( new [] { callerId, nameData, vals }, false );
+            _WriteLine( result );
+        }
+
+        _logStream.Flush();
+    }
+
+    public static void WriteIDStrings<TIXHandle>( string name, IList<TIXHandle> values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null ) where TIXHandle : Engine.Plugin.Interface.IXHandle
+    {
+        if( _logClosed ) return;
+        if( !_logInitialized ) Open();
+
+        var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
+        var nameData = _FormatNameElementCount( "IDStrings", name, ( values.NullOrEmpty() ? 0 : values.Count ), singleLinePerItem, includeElementCount );
+
+        if( singleLinePerItem )
+        {
+            _WriteLine( callerId );
+            _WriteLine( nameData );
+            if( !values.NullOrEmpty() )
+            {
+                if( indentElements ) _WriteLine( OpenIndentChar );
+                for( int i = 0; i < values.Count; i++ )
+                {
+                    var isNull = values[ i ] == null;
+                    if( ( includeNulls ) || ( !isNull ) )
+                    {
+                        if( includeIndicies )
+                            _WriteLine( string.Format( "[ {0} ] = {1}", i, isNull ? "[null]" : values[ i ].IDString ) );
+                        else
+                            _WriteLine( isNull ? "[null]" : values[ i ].IDString );
+                    }
+                }
+                if( indentElements ) _WriteLine( CloseIndentChar );
+            }
+        }
+        else
+        {
+            var vals = _BuildIDStringsLine( values, includeNulls );
+            var result = _BuildStringsLine( new [] { callerId, nameData, vals }, false );
+            _WriteLine( result );
+        }
+
+        _logStream.Flush();
+    }
+
+    #endregion
+
+    #region Internal Multi->Single Line Builders
+
+    static string _FormatNameElementCount( string type, string name, int count, bool singleLinePerItem, bool includeElementCount )
+    {
+        var nameIsNull = string.IsNullOrEmpty( name );
+        return ( ( nameIsNull && !singleLinePerItem ) || ( !includeElementCount ) )
+            ? null
+            : string.Format(
+                "{0} contains {1} elements",
+                (
+                    nameIsNull
+                    ? type
+                    : name
+                ),
+                count );
+    }
+
+    static string _BuildStringsLine( string[] values, bool includeNulls )
     {
         if( values.NullOrEmpty() ) return null;
-        
+
+        var addedTo = false;
         var result = new StringBuilder();
         for( int i = 0; i < values.Length; i++ )
         {
-            if( i > 0 )
-                result.Append( FormatSeparator );
-            result.Append( values[ i ] );
+            var isNull = string.IsNullOrEmpty( values[ i ] );
+            if( ( includeNulls )||( !isNull ) )
+            {
+                if( addedTo )
+                    result.Append( FormatSeparator );
+                if( isNull )
+                    result.Append( "[null]" );
+                else
+                    result.Append( values[ i ] );
+                addedTo = true;
+            }
         }
         
         return result.ToString();
     }
-    
-    static void _WriteAlertMessage( string alertName, string alertCap, string namespaceClassName, string functionName, string message, bool stackTrace )
+
+    static string _BuildArrayLine<TArray>( TArray[] values, bool includeNulls )
     {
-        var stack = stackTrace
-            ? Environment.StackTrace + FormatNewLineChar
-            : null;
-        _WriteLines(
-            string.Format(
-                "{0}[ {1} ]{0}{2}{4} :: {5}{2}{6}{2}{7}{0}",
-                alertCap,
-                alertName,
-                FormatNewLineChar,
-                FormatTabChar,
-                namespaceClassName,
-                functionName,
-                message,
-                stack ) );
-        _logStream.Flush();
-    }
-    
-    static void _WriteLines( string messageLines )
-    {
-        if( !string.IsNullOrEmpty( messageLines ) )
+        if( values.NullOrEmpty() ) return null;
+
+        var addedTo = false;
+        var result = new StringBuilder();
+        for( int i = 0; i < values.Length; i++ )
         {
-            string[] lines = messageLines.Split( new string [] { FormatNewLineChar }, StringSplitOptions.RemoveEmptyEntries );
-            string[] array = lines;
-            for( int j = 0; j < array.Length; j++ )
+            var isNull = values[ i ] == null;
+            if( ( includeNulls ) || ( !isNull ) )
             {
-                string line = array[j];
-                if( !string.IsNullOrEmpty( line ) )
-                {
-                    if(
-                        ( ( line.Length == 1 )&&( line.StartsWith( CloseIndentChar ) ) )||
-                        ( ( line.Length >  1 )&&( line.EndsWith  ( CloseIndentChar ) ) )
-                    ){
-                        _logIndent--;
-                        if( _logIndent < 0 )
-                            _logIndent = 0;
-                    }
-                    
-                    string writeLine = "";
-                    for( int i = 0; i < _logIndent; i++ )
-                        writeLine += FormatTabChar;
-                    writeLine += line;
-                    writeLine += FormatNewLineChar;
-                    byte[] bytes = Encoding.ASCII.GetBytes( writeLine );
-                    if( !bytes.NullOrEmpty() )
-                    {
-                        _logStream.Write( bytes, 0, bytes.Length );
-                        //Console.Write( writeLine );
-                    }
-                    
-                    if(
-                        ( ( line.Length == 1 )&&( line.StartsWith( OpenIndentChar ) ) )||
-                        ( ( line.Length >  1 )&&( line.EndsWith  ( OpenIndentChar ) ) )
-                    ){
-                        _logIndent++;
-                    }
-                }
+                if( addedTo )
+                    result.Append( FormatSeparator );
+                if( isNull )
+                    result.Append( "[null]" );
+                else
+                    result.Append( values[ i ].ToString() );
+                addedTo = true;
             }
         }
+
+        return result.ToString();
     }
-    
+
+    static string _BuildListLine<TList>( IList<TList> values, bool includeNulls )
+    {
+        if( values.NullOrEmpty() ) return null;
+
+        var addedTo = false;
+        var result = new StringBuilder();
+        for( int i = 0; i < values.Count; i++ )
+        {
+            var isNull = values[ i ] == null;
+            if( ( includeNulls ) || ( !isNull ) )
+            {
+                if( addedTo )
+                    result.Append( FormatSeparator );
+                if( isNull )
+                    result.Append( "[null]" );
+                else
+                    result.Append( values[ i ].ToString() );
+                addedTo = true;
+            }
+        }
+
+        return result.ToString();
+    }
+
+    static string _BuildIDStringsLine<TIXHandle>( IList<TIXHandle> values, bool includeNulls ) where TIXHandle : Engine.Plugin.Interface.IXHandle
+    {
+        if( values.NullOrEmpty() ) return null;
+
+        var addedTo = false;
+        var result = new StringBuilder();
+        for( int i = 0; i < values.Count; i++ )
+        {
+            var isNull = values[ i ] == null;
+            if( ( includeNulls ) || ( !isNull ) )
+            {
+                if( addedTo )
+                    result.Append( FormatSeparator );
+                if( isNull )
+                    result.Append( "[null]" );
+                else
+                    result.Append( values[ i ].IDString );
+                addedTo = true;
+            }
+        }
+
+        return result.ToString();
+    }
+
+    #endregion
+
+    #region Internal Writers
+
+    static void _WriteLine( string line )
+    {
+        if( string.IsNullOrEmpty( line ) ) return;
+        
+        if( ( line.Contains( FormatNewLineChar ) )||( line.Contains( FormatLineFeedChar ) ) )
+        {
+            _WriteConcatenatedLines( line );
+            return;
+        }
+
+        if(
+            ( ( line.Length == 1 ) && ( line.StartsWith( CloseIndentChar ) ) ) ||
+            ( ( line.Length > 1 ) && ( line.EndsWith( CloseIndentChar ) ) )
+        )
+        {
+            #if TRACE_INDENT_EVENTS
+            _WriteLines( Environment.StackTrace ); // <-- Only here to find mismatched open/close
+            #endif
+            _logIndent--;
+            if( _logIndent < 0 )
+                _logIndent = 0;
+        }
+
+        string writeLine = "";
+        for( int i = 0; i < _logIndent; i++ )
+            writeLine += FormatTabChar;
+        
+        writeLine += line;
+
+        if( _logToConsole )
+        {
+            var consoleLine = writeLine.Replace( FormatTabAsChar, FormatConsoleTabReplacement );
+            Console.WriteLine( consoleLine );
+        }
+
+        writeLine += FormatNewLineChar;
+        byte[] bytes = Encoding.ASCII.GetBytes( writeLine );
+        if( !bytes.NullOrEmpty() )
+            _logStream.Write( bytes, 0, bytes.Length );
+
+        if(
+            ( ( line.Length == 1 ) && ( line.StartsWith( OpenIndentChar ) ) ) ||
+            ( ( line.Length > 1 ) && ( line.EndsWith( OpenIndentChar ) ) )
+        )
+        {
+            #if TRACE_INDENT_EVENTS
+            _WriteLines( Environment.StackTrace ); // <-- Only here to find mismatched open/close
+            #endif
+            _logIndent++;
+        }
+    }
+
+    static void _WriteConcatenatedLines( string messageLines )
+    {
+        if( string.IsNullOrEmpty( messageLines ) ) return;
+
+        string[] lines = messageLines.Split( new string [] { FormatNewLineChar, FormatLineFeedChar }, StringSplitOptions.RemoveEmptyEntries );
+        _WriteLines( lines );
+    }
+
+    static void _WriteLines( string[] lines )
+    {
+        if( lines.NullOrEmpty() ) return;
+
+        foreach( var line in lines )
+            _WriteLine( line );
+    }
+
+    #endregion
+
+    #endregion
+
 }

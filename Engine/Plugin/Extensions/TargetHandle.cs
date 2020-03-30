@@ -27,7 +27,7 @@ namespace Engine.Plugin.Extensions
         public static ElementHandle     HandleFromTarget<T>( this T source, TargetHandle target ) where T : class, IXHandle
         {
             if( !source.IsValid() )
-                throw new ArgumentException( string.Format( "Source is null or does not have any XHandles associated with it! :: Source = {0}", source.ToStringNullSafe() ) );
+                throw new ArgumentException( string.Format( "Source is null or does not have any XHandles associated with it! :: Source = {0}", source.TypeFullName() ) );
             ElementHandle h = null;
             switch( target )
             {
@@ -62,7 +62,7 @@ namespace Engine.Plugin.Extensions
                     
             }
             if( !h.IsValid() )
-                throw new ArgumentException( string.Format( "Source did not yield a valid Handle for Target :: Source = {0} :: Target = {1}", source.ToStringNullSafe(), target.ToString() ) );
+                throw new ArgumentException( string.Format( "Source did not yield a valid Handle for Target :: Source = {0} :: Target = {1}", source.TypeFullName(), target.ToString() ) );
             return h;
         }
         

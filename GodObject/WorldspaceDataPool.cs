@@ -54,8 +54,8 @@ namespace GodObject
             // Height map data (extracted from DDS)
             public int HeightMap_Width = 0;
             public int HeightMap_Height = 0;
-            public Single[,] LandHeightMap = null;
-            public Single[,] WaterHeightMap = null;
+            public float[,] LandHeightMap = null;
+            public float[,] WaterHeightMap = null;
             
             // Surfaces and Textures for rendering
             SDLRenderer.Surface LandHeight_Surface;
@@ -229,13 +229,13 @@ namespace GodObject
                 return value;
             }
             
-            public float HeightAtPos( int x, int y, Single[,] heightMap )
+            public float HeightAtPos( int x, int y, float[,] heightMap )
             {
                 if( ( x < 0 )||( y < 0 )||( x >= HeightMap_Width )||( y >= HeightMap_Height ) ) return float.MinValue;
                 return MinHeight + ( heightMap[ y, x ] * ( MaxHeight - MinHeight ) );
             }
             
-            public float HeightAtWorldPos( float x, float y, Single[,] heightMap )
+            public float HeightAtWorldPos( float x, float y, float[,] heightMap )
             {
                 // Does some slow lerps and averages to interpolate the height
                 // of the ground at a given world point, this is not a perfect value
@@ -312,13 +312,13 @@ namespace GodObject
                 averageZ = 0f;
                 if( volumes.NullOrEmpty() )
                 {
-                    DebugLog.WriteError( "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()", "volumes is null or empty" );
+                    DebugLog.WriteError( "volumes is null or empty" );
                     result = false;
                     goto localAbort;
                 }
                 if( !LoadLandHeightMap() )
                 {
-                    DebugLog.WriteError( "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()", "Cannot load land heightmap" );
+                    DebugLog.WriteError( "Cannot load land heightmap" );
                     result = false;
                     goto localAbort;
                 }
@@ -365,7 +365,7 @@ namespace GodObject
                 
                 if( landPoints < 1 )    // No land points means nothing was found inside the volumes
                 {
-                    DebugLog.WriteError( "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()", "No points on heightmap found in volume[s]" );
+                    DebugLog.WriteError( "No points on heightmap found in volume[s]" );
                     result = false;       // This should never happen unless the heightmap bounding or heightmap <-> worldspace conversions failed
                     goto localAbort;
                 }
@@ -466,7 +466,7 @@ namespace GodObject
             
             void THREAD_LoadAndCreateHeightmapTextures( SDLRenderer renderer )
             {
-                //DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "THREAD_LoadAndCreateHeightmapTextures()" } );
+                //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "THREAD_LoadAndCreateHeightmapTextures()" } );
                 
                 var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
@@ -503,7 +503,7 @@ namespace GodObject
                 _textureLoadQueued = false;
                 _texturesReady = ( LandHeight_Texture != null )&&( WaterHeight_Texture != null );
                 
-                m.StopSyncTimer( "WorldspaceDataPool.PoolEntry :: THREAD_LoadAndCreateHeightmapTextures() :: Completed in {0}", tStart.Ticks );
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
                 GodObject.Windows.SetEnableState( true );   // Temp fix until the async bug with this function is resolved
                 //DebugLog.CloseIndentLevel();
@@ -511,7 +511,7 @@ namespace GodObject
             
             public void CreateHeightmapTextures( GUIBuilder.Windows.RenderChild.RenderTransform transform )
             {
-                DebugLog.WriteLine( new [] { this.GetType().ToString(), "CreateHeightmapTextures()" } );
+                DebugLog.WriteLine( "CreateHeightmapTextures()", true );
                 
                 if( !transform.ReadyForUse() )
                     return;
@@ -570,8 +570,9 @@ namespace GodObject
                         return false;
                     }
                 }
-                catch ( Exception e)
+                catch ( Exception e )
                 {
+                    DebugLog.WriteException( e );
                     System.Windows.Forms.MessageBox.Show( string.Format( "File.Open()\n{1}\nUnable to access \"{0}\"!", ddsFile, e.ToString() ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
                     return false;
                 }
@@ -602,7 +603,7 @@ namespace GodObject
                 return thingsOk;
             }
             
-            unsafe bool LoadHeightMapDDS( string ddsFile, ref Single[,] target )
+            unsafe bool LoadHeightMapDDS( string ddsFile, ref float[,] target )
             {
                 if( ( target != null )||( !System.IO.File.Exists( ddsFile ) ) )
                     return false;
@@ -622,6 +623,7 @@ namespace GodObject
                 }
                 catch ( Exception e)
                 {
+                    DebugLog.WriteException( e );
                     System.Windows.Forms.MessageBox.Show( string.Format( "File.Open()\n{1}\nUnable to access \"{0}\"!", ddsFile, e.ToString() ), "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error );
                     return false;
                 }
@@ -651,7 +653,7 @@ namespace GodObject
                         HeightMap_Width = (int)ddsHeader.dwWidth;
                         HeightMap_Height = (int)ddsHeader.dwHeight;
                         
-                        target = new Single[ HeightMap_Height, HeightMap_Width ];
+                        target = new float[ HeightMap_Height, HeightMap_Width ];
                         
                         for( int y = 0; y < HeightMap_Height; y++ )
                         {
@@ -668,7 +670,7 @@ namespace GodObject
                 }
                 ddsStream.Close();
                 
-                m.StopSyncTimer( "WorldspaceDataPool.PoolEntry :: LoadHeightMapDDS() :: Completed in {0}", tStart.Ticks );
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
                 return thingsOk;
             }
@@ -705,9 +707,10 @@ namespace GodObject
         
         public static PoolEntry GetPoolEntry( Worldspace worldspace )
         {
-            if( !_Pool.ContainsKey( worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) ) )
+            var wFID = worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
+            if( !_Pool.ContainsKey( wFID ) )
                 CreateEntryFor( worldspace );
-            return _Pool[ worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) ];
+            return _Pool[ wFID ];
         }
         
         public static void DestroyWorldspaceTextures( bool destroySurfaces )

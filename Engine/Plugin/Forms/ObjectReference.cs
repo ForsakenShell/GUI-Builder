@@ -29,6 +29,8 @@ namespace Engine.Plugin.Forms
         Fields.ObjectReference.Position _Position;
         Fields.ObjectReference.Rotation _Rotation;
         Fields.ObjectReference.LocationReference _LocationReference;
+        Fields.ObjectReference.LocationRefTypes _locationRefTypes;
+
         
         Fields.ObjectReference.LinkedRefs _LinkedRefs;
         
@@ -50,7 +52,7 @@ namespace Engine.Plugin.Forms
         public ObjectReference( string filename, uint formID ) : base( filename, formID ) {}
         
         //public ObjectReference( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public ObjectReference( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle ) {}
+        public ObjectReference( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
         
         public override void CreateChildFields()
         {
@@ -61,7 +63,8 @@ namespace Engine.Plugin.Forms
             _Position = new Fields.ObjectReference.Position( this );
             _Rotation = new Fields.ObjectReference.Rotation( this );
             _LinkedRefs = new Fields.ObjectReference.LinkedRefs( this );
-            _LocationReference = new Engine.Plugin.Forms.Fields.ObjectReference.LocationReference( this );
+            _LocationReference = new Fields.ObjectReference.LocationReference( this );
+            _locationRefTypes = new Fields.ObjectReference.LocationRefTypes( this );
         }
         
         #endregion
@@ -106,11 +109,11 @@ namespace Engine.Plugin.Forms
         
         bool UpdateContainerCellHandle( Cell cell )
         {
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "UpdateContainerCellHandle()" } );
+            DebugLog.OpenIndentLevel();
             
             var result = false;
             
-            // Technically the same as cell.IsInWorkingFile() but this is more clear as to our intent
+            // Technically the same as cell.IsInWorkingFile() but this is clearer as to our intent
             if( cell.HandleFor( GodObject.Plugin.Data.Files.Working ).IsValid() )
             {
                 result = true;
@@ -125,7 +128,7 @@ namespace Engine.Plugin.Forms
                 {
                     if( coH.Filename.InsensitiveInvariantMatch( GodObject.Plugin.Data.Files.Working.Filename ) )
                     {
-                        DebugLog.WriteLine( new [] { "AddNewHandle()", cell.ToStringNullSafe(), coH.ToStringNullSafe() } );
+                        DebugLog.WriteStrings( null, new [] { "cell = " + cell.ToStringNullSafe(), "handle = " + coH.ToStringNullSafe() }, false, true, false, false );
                         cell.AddNewHandle( coH );
                         result = true;
                     }
@@ -144,7 +147,7 @@ namespace Engine.Plugin.Forms
             if( ObjectDataChangedEventsSupressed )
                 return;
 
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "CheckForBackgroundCellChange()", this.ToStringNullSafe() } );
+            DebugLog.OpenIndentLevel( this.IDString );
             
             // Changing position and some record flags will trigger XeLib to update the cell container,
             // We need to match those changes in GUIBuilder too
@@ -163,7 +166,7 @@ namespace Engine.Plugin.Forms
             
             if( !UpdateContainerCellHandle( newCell ) )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", "Unable to copy new CELL to working file!" );
+                DebugLog.WriteError( "Unable to copy new CELL to working file!" );
                 goto localAbort;
             }
             
@@ -174,22 +177,23 @@ namespace Engine.Plugin.Forms
                 //oH.SetCell( ncOH );
                 //var newHandle = oH.CopyMoveToCell( ncOH, true );
                 //if( !newHandle.IsValid() )
-                //    DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", "Unable to move object reference to new cell!" );
+                //    DebugLog.WriteError( this.FullTypeName(), "CheckForBackgroundCellChange()", "Unable to move object reference to new cell!" );
                 //else
                 //    this.AddNewHandle( newHandle );
             }
             catch( Exception e )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "CheckForBackgroundCellChange()", e.ToString() );
+                DebugLog.WriteException( e );
+                //DebugLog.WriteError( this.FullTypeName(), "CheckForBackgroundCellChange()", e.ToString() );
             }
             */
             
-            DebugLog.WriteLine( new [] { "Cell.ObjectReferences.Remove()", oldCell.ToStringNullSafe() } );
+            DebugLog.WriteStrings( null, new [] { "Cell.ObjectReferences.Remove()", oldCell.IDString }, false, false, false, false, false );
             oldCell.ObjectReferences.Remove( this );
-            DebugLog.WriteLine( new [] { "Cell.ObjectReferences.Add()", newCell.ToStringNullSafe() } );
+            DebugLog.WriteStrings( null, new [] { "Cell.ObjectReferences.Add()", newCell.IDString }, false, false, false, false, false );
             newCell.ObjectReferences.Add( this );
             
-            DebugLog.WriteLine( string.Format( "sendObjectDataChangedEvent = {0}", sendObjectDataChangedEvent ) );
+            DebugLog.WriteLine( string.Format( "sendObjectDataChangedEvent = {0}", sendObjectDataChangedEvent.ToString() ) );
             if( sendObjectDataChangedEvent )
             {
                 oldCell.SendObjectDataChangedEvent( null );
@@ -238,6 +242,15 @@ namespace Engine.Plugin.Forms
             }
         }
         
+        public Fields.ObjectReference.LocationRefTypes LocationRefTypes
+        {
+            get
+            {
+                //DebugLog.Write( string.Format( "ObjectReference.LocationRefTypes :: 0x{0}", FormID.ToString( "X8" ) ) );
+                return _locationRefTypes;
+            }
+        }
+
         public Forms.Cell Cell
         {
             get

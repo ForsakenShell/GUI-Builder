@@ -27,7 +27,7 @@ namespace GUIBuilder.FormImport
             return;
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}",
-                this.GetType()  .ToString(),
+                this.TypeFullName(),
                 Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" )
             ) );
         }

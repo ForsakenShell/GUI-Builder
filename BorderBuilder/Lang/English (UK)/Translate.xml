@@ -3,6 +3,7 @@
     <Form.FormID>FormID</Form.FormID>
     <Form.EditorID>EditorID</Form.EditorID>
     <Form.Filename>Filename</Form.Filename>
+    <IXHandle.IDString>0x{0} - "{1}"</IXHandle.IDString>
     <Conflict.Error>Error State</Conflict.Error>
     <Conflict.Uneditable>Uneditable Form</Conflict.Uneditable>
     <Conflict.NewForm>New Form</Conflict.NewForm>
@@ -27,6 +28,9 @@
     <MainWindow.ToolMenu.Render>Render Window</MainWindow.ToolMenu.Render>
     <MainWindow.ToolMenu.About>About</MainWindow.ToolMenu.About>
     <MainWindow.ToolMenu.Options>Options</MainWindow.ToolMenu.Options>
+    <MainWindow.ToolMenu.CustomForms>Custom Forms</MainWindow.ToolMenu.CustomForms>
+    <MainWindow.Shutdown>Shutting down...</MainWindow.Shutdown>
+    <MainWindow.AlreadyShutdown>Already shutting down...</MainWindow.AlreadyShutdown>
     <OptionsWindow.Title>GUIBuilder Options</OptionsWindow.Title>
     <OptionsWindow.Masters>Always Select Masters</OptionsWindow.Masters>
     <OptionsWindow.ConflictStatus>Conflict Status</OptionsWindow.ConflictStatus>
@@ -35,7 +39,10 @@
     <OptionsWindow.SDLHint>SDL Hints</OptionsWindow.SDLHint>
     <OptionsWindow.SDLHint.Warning>GUIBuilder will create very large textures that are "non-power-of-two" depending on the worldspace.  The Commonwealth (for example) is 6145x6145, if your hardware cannot support this you should override the below setting with "{0}".</OptionsWindow.SDLHint.Warning>
     <OptionsWindow.SDLHint.VideoDriver>Video Driver</OptionsWindow.SDLHint.VideoDriver>
+    <OptionsWindow.LogMainToConsole>Mirror main thread log to console (Requires restart)</OptionsWindow.LogMainToConsole>
     <OptionsWindow.ZipLogFiles>Zip log files on exit</OptionsWindow.ZipLogFiles>
+    <OptionsWindow.Logs>Logs</OptionsWindow.Logs>
+    <OptionsWindow.NIFExportInfo>NIF ExportInfo</OptionsWindow.NIFExportInfo>
     <AboutWindow.Title>About GUIBuilder</AboutWindow.Title>
     <AboutWindow.ComicTitle>GUIBuilder</AboutWindow.ComicTitle>
     <AboutWindow.Author>by 1000101</AboutWindow.Author>
@@ -124,15 +131,14 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.NIF.FilePrefix>File Prefix</BorderBatchWindow.NIF.FilePrefix>
     <BorderBatchWindow.NIF.FileSuffix>File Suffix</BorderBatchWindow.NIF.FileSuffix>
     <BorderBatchWindow.NodeDetection>Node Detection</BorderBatchWindow.NodeDetection>
-    <BorderBatchWindow.NodeDetection.Restrict>Restrict to</BorderBatchWindow.NodeDetection.Restrict>
     <BorderBatchWindow.NodeDetection.Keywords>Keywords</BorderBatchWindow.NodeDetection.Keywords>
     <BorderBatchWindow.NodeDetection.StaticMarkers>Static Markers</BorderBatchWindow.NodeDetection.StaticMarkers>
     <BorderBatchWindow.NodeDetection.WorkshopBorderGenerator>Workshop Border Generator</BorderBatchWindow.NodeDetection.WorkshopBorderGenerator>
     <BorderBatchWindow.NodeDetection.WorkshopMarkerLink>Workshop Marker Link</BorderBatchWindow.NodeDetection.WorkshopMarkerLink>
     <BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing>Terrain Following</BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing>
     <BorderBatchWindow.NodeDetection.BorderMarkerForcedZ>Forced Z</BorderBatchWindow.NodeDetection.BorderMarkerForcedZ>
-    <BorderBatchWindow.SearchingForKeyword>Searching for default keyword...</BorderBatchWindow.SearchingForKeyword>
-    <BorderBatchWindow.SearchingForStatic>Searching for default static object...</BorderBatchWindow.SearchingForStatic>
+    <BorderBatchWindow.NodeDetection.LocationRefs>Location References</BorderBatchWindow.NodeDetection.LocationRefs>
+    <BorderBatchWindow.NodeDetection.WorkshopBorderWithBottom>Border With Bottom</BorderBatchWindow.NodeDetection.WorkshopBorderWithBottom>
     <BorderBatchWindow.BuildingWorkshopBorders>Building workhop borders...</BorderBatchWindow.BuildingWorkshopBorders>
     <BorderBatchWindow.BuildingSubDivisionBorders>Building sub-division borders...</BorderBatchWindow.BuildingSubDivisionBorders>
     <BorderBatchWindow.ImportNIFsTitle>Select NIFBuilder export file to import</BorderBatchWindow.ImportNIFsTitle>
@@ -144,13 +150,15 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BatchImportWindow.Analyzing>Analyzing import data...</BatchImportWindow.Analyzing>
     <BatchImportWindow.ImportingForms>Importing selected forms...</BatchImportWindow.ImportingForms>
     <BatchImportWindow.Sorting>Sorting imports...</BatchImportWindow.Sorting>
-    <BatchImportWindow.ImportingForm>Importing {0}: 0x{1} - "{2}"...</BatchImportWindow.ImportingForm>
+    <BatchImportWindow.ImportingForm>Importing {0}: {1}...</BatchImportWindow.ImportingForm>
     <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
     <BatchImportWindow.UpdatingReferences>Updating reference information for "{0}"...</BatchImportWindow.UpdatingReferences>
     <BatchImportWindow.UnableToUpdateReferencesFor>Unable to update references for "{0}"</BatchImportWindow.UnableToUpdateReferencesFor>
     <WorkspaceSelectorWindow.Title>Select Workspace</WorkspaceSelectorWindow.Title>
     <WorkspaceSelector.PluginsNode>Plugins</WorkspaceSelector.PluginsNode>
     <WorkspaceSelector.WorkingFileNode>Working File</WorkspaceSelector.WorkingFileNode>
+    <WorkspaceSelector.WorkshopWorkbenches>Workshop Workbenches</WorkspaceSelector.WorkshopWorkbenches>
+    <WorkspaceSelector.Container>Container</WorkspaceSelector.Container>
     <PluginSelectorWindow.Title>Select Plugin[s]</PluginSelectorWindow.Title>
     <PluginSelectorWindow.WorkingFile>Working File</PluginSelectorWindow.WorkingFile>
     <PluginSelectorWindow.OpenRenderWindow>Open Render Window On Load</PluginSelectorWindow.OpenRenderWindow>
@@ -193,10 +201,10 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <FormEditor.SubDivision.Requirements.RelationshipsAndQuests>And - Relationships and Quest requirements must be met</FormEditor.SubDivision.Requirements.RelationshipsAndQuests>
     <FormEditor.SubDivision.Requirements.RelationshipsOrQuests>Or - Relationships or Quest requirements must be met</FormEditor.SubDivision.Requirements.RelationshipsOrQuests>
     <BorderBatch.ParsingImportFile>Parsing border import file...</BorderBatch.ParsingImportFile>
-    <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for 0x{1} - "{2}"...</BorderBatch.CreateNIFsFor>
+    <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for {1}...</BorderBatch.CreateNIFsFor>
+    <BorderBatch.CalculatingBordersFor>Calculating borders for "{0}"...</BorderBatch.CalculatingBordersFor>
+    <BorderBatch.CalculatingBordersForWith>Calculating borders for "{0}" - "{1}"</BorderBatch.CalculatingBordersForWith>
     <SubDivisionBatch.ClearingBordersFor>Clearing borders for "{0}"...</SubDivisionBatch.ClearingBordersFor>
-    <SubDivisionBatch.CalculatingBordersFor>Calculating borders for "{0}"...</SubDivisionBatch.CalculatingBordersFor>
-    <SubDivisionBatch.CalculatingBordersForWith>Calculating borders for "{0}" - "{1}"</SubDivisionBatch.CalculatingBordersForWith>
     <SubDivisionBatch.WarnMissingEnablers.Title>Cannot generate border segments</SubDivisionBatch.WarnMissingEnablers.Title>
     <SubDivisionBatch.WarnMissingEnablers.Body>Must automatically generate or manually create missing border enablers before calculating border segments from edge flags.</SubDivisionBatch.WarnMissingEnablers.Body>
     <SubDivisionBatch.CheckingElements>Checking for missing sub-division elements...</SubDivisionBatch.CheckingElements>
@@ -213,6 +221,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <NIFBuilder.Preset.VanillaWorkshopGS>Vanilla Workshop w/GS</NIFBuilder.Preset.VanillaWorkshopGS>
     <NIFBuilder.Preset.VanillaWorkshopLP>Vanilla Workshop Low Poly</NIFBuilder.Preset.VanillaWorkshopLP>
     <NIFBuilder.Preset.VanillaWorkshopGSLP>Vanilla Workshop w/GS Low Poly</NIFBuilder.Preset.VanillaWorkshopGSLP>
+    <NIFBuilder.Preset.Floating>Floating / Bottom</NIFBuilder.Preset.Floating>
     <NIFBuilder.Preset.ATCTall>Tall</NIFBuilder.Preset.ATCTall>
     <NIFBuilder.Preset.ATCMedium>Medium</NIFBuilder.Preset.ATCMedium>
     <NIFBuilder.Preset.ATCSmall>Vanilla Workshop</NIFBuilder.Preset.ATCSmall>
@@ -230,8 +239,8 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <Plugin.Plugin>Plugin</Plugin.Plugin>
     <Plugin.LightPlugin>Light Plugin</Plugin.LightPlugin>
     <Plugin.Unknown>Unknown</Plugin.Unknown>
-    <Plugin.LoadingReferencesOf>Loading all references of 0x{0} - "{1}"...</Plugin.LoadingReferencesOf>
-    <Plugin.PostLoadReferencesOf>PostLoad() for all references of 0x{0} - "{1}"...</Plugin.PostLoadReferencesOf>
+    <Plugin.LoadingReferencesOf>Loading all references of {0}...</Plugin.LoadingReferencesOf>
+    <Plugin.PostLoadReferencesOf>PostLoad() for all references of {0}...</Plugin.PostLoadReferencesOf>
     <Plugin.PostLoadReferenceOfSig>Post load of {0} Forms...</Plugin.PostLoadReferenceOfSig>
     <Plugin.LoadingSigFormsFromAncestor>Loading {0} forms from {1}...</Plugin.LoadingSigFormsFromAncestor>
     <Cells.LoadingRange>Loading Cells from {0} {1} in {2}...</Cells.LoadingRange>
@@ -239,4 +248,15 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <WorkspaceCreateWait.Title>Hold yer horses, eh?</WorkspaceCreateWait.Title>
     <WorkspaceCreateAlreadyLoaded.Body>There is already a workspace created for the working file.</WorkspaceCreateAlreadyLoaded.Body>
     <WorkspaceCreateAlreadyLoaded.Title>Been there, done that.</WorkspaceCreateAlreadyLoaded.Title>
+    <CustomFormsWindow.Title>Custom Forms</CustomFormsWindow.Title>
+    <CustomFormsWindow.Restrict>Restrict to</CustomFormsWindow.Restrict>
+    <CustomFormsWindow.Tab.Workshop>Workshop</CustomFormsWindow.Tab.Workshop>
+    <CustomFormsWindow.Tab.Containers>Containers</CustomFormsWindow.Tab.Containers>
+    <CustomFormsWindow.Tab.Container.Filter>Filter</CustomFormsWindow.Tab.Container.Filter>
+    <CustomFormsWindow.Tab.Container.Filter.Apply>Apply Filter</CustomFormsWindow.Tab.Container.Filter.Apply>
+    <CustomFormsWindow.SearchingForForms>Searching for forms...</CustomFormsWindow.SearchingForForms>
+    <CustomForms.SearchingForKeyword>Searching for default keyword...</CustomForms.SearchingForKeyword>
+    <CustomForms.SearchingForStatic>Searching for default static object...</CustomForms.SearchingForStatic>
+    <CustomForms.SearchingForLocationRef>Searching for default location ref...</CustomForms.SearchingForLocationRef>
+    <CustomForms.SearchingForContainer>Searching for default container...</CustomForms.SearchingForContainer>
 </GUIBuilder>

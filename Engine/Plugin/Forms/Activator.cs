@@ -35,7 +35,7 @@ namespace Engine.Plugin.Forms
         public Activator( string filename, uint formID ) : base( filename, formID ) {}
         
         //public Activator( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Activator( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle ) {}
+        public Activator( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
         
         public override void CreateChildFields()
         {

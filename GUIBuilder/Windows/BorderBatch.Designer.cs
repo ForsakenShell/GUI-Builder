@@ -12,7 +12,6 @@ namespace GUIBuilder.Windows
         /// Designer variable used to keep track of non-visual components.
         /// </summary>
         System.ComponentModel.IContainer components = null;
-        System.Windows.Forms.Panel pnWindow;
         System.Windows.Forms.Label lbSubDivisionNodeLength;
         System.Windows.Forms.Button btnGenNodes;
         System.Windows.Forms.TextBox tbSubDivisionNodeLength;
@@ -39,9 +38,6 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.TabPage tpWorkshops;
         GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript> lvWorkshops;
         System.Windows.Forms.TabPage tpSubDivisions;
-        System.Windows.Forms.ComboBox cbWorkshopKeywordBorderGenerator;
-        System.Windows.Forms.Label lblWorkshopMarkerLink;
-        System.Windows.Forms.CheckBox cbRestrictWorkshopBorderKeywords;
         System.Windows.Forms.Label lbSubDivisionNodeSlopeAllowance;
         System.Windows.Forms.TextBox tbSubDivisionNodeSlopeAllowance;
         System.Windows.Forms.GroupBox gbSubDivisionNIFParameters;
@@ -76,16 +72,7 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.Label lblWorkshopNIFFileSuffix;
         System.Windows.Forms.TextBox tbWorkshopNIFTargetSubDirectory;
         System.Windows.Forms.Label lblWorkshopNIFTargetSubDirectory;
-        System.Windows.Forms.ComboBox cbWorkshopBorderMarkerForcedZ;
-        System.Windows.Forms.Label lblWorkshopForcedZStatic;
-        System.Windows.Forms.GroupBox gbWorkshopNodeDetection;
         System.Windows.Forms.CheckBox cbWorkshopNIFCreateImportData;
-        private System.Windows.Forms.Label lbWorkshopBorderGenerator;
-        private System.Windows.Forms.ComboBox cbWorkshopKeywordBorderLink;
-        private System.Windows.Forms.ComboBox cbWorkshopBorderMarkerTerrainFollowing;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.GroupBox gbWorkshopNodeDetectionKeywords;
-        private System.Windows.Forms.GroupBox gbWorkshopNodeDetectionStaticMarkers;
         private System.Windows.Forms.GroupBox gbSubDivisionNodeParameters;
         private System.Windows.Forms.GroupBox gbWorkshopNodeParameters;
         private System.Windows.Forms.TextBox tbSubDivisionNodeAngleAllowance;
@@ -114,7 +101,6 @@ namespace GUIBuilder.Windows
         /// </summary>
         void InitializeComponent()
         {
-            this.pnWindow = new System.Windows.Forms.Panel();
             this.gbTargetFolder = new System.Windows.Forms.GroupBox();
             this.tbMeshDirectory = new System.Windows.Forms.TextBox();
             this.tbTargetFolder = new System.Windows.Forms.TextBox();
@@ -123,6 +109,8 @@ namespace GUIBuilder.Windows
             this.tpSubDivisions = new System.Windows.Forms.TabPage();
             this.gbSubDivisionNodeParameters = new System.Windows.Forms.GroupBox();
             this.tbSubDivisionNodeLength = new System.Windows.Forms.TextBox();
+            this.tbSubDivisionNodeAngleAllowance = new System.Windows.Forms.TextBox();
+            this.lbSubDivisionNodeAngleAllowance = new System.Windows.Forms.Label();
             this.tbSubDivisionNodeSlopeAllowance = new System.Windows.Forms.TextBox();
             this.lbSubDivisionNodeLength = new System.Windows.Forms.Label();
             this.lbSubDivisionNodeSlopeAllowance = new System.Windows.Forms.Label();
@@ -149,22 +137,12 @@ namespace GUIBuilder.Windows
             this.tpWorkshops = new System.Windows.Forms.TabPage();
             this.gbWorkshopNodeParameters = new System.Windows.Forms.GroupBox();
             this.tbWorkshopNodeLength = new System.Windows.Forms.TextBox();
+            this.tbWorkshopNodeAngleAllowance = new System.Windows.Forms.TextBox();
+            this.lblWorkshopNodeAngleAllowance = new System.Windows.Forms.Label();
             this.lblWorkshopNodeLength = new System.Windows.Forms.Label();
             this.tbWorkshopNodeSlopeAllowance = new System.Windows.Forms.TextBox();
             this.lblWorkshopNodeSlopeAllowance = new System.Windows.Forms.Label();
             this.cbWorkshopPresets = new System.Windows.Forms.ComboBox();
-            this.gbWorkshopNodeDetection = new System.Windows.Forms.GroupBox();
-            this.gbWorkshopNodeDetectionStaticMarkers = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lblWorkshopForcedZStatic = new System.Windows.Forms.Label();
-            this.cbWorkshopBorderMarkerTerrainFollowing = new System.Windows.Forms.ComboBox();
-            this.cbWorkshopBorderMarkerForcedZ = new System.Windows.Forms.ComboBox();
-            this.gbWorkshopNodeDetectionKeywords = new System.Windows.Forms.GroupBox();
-            this.lbWorkshopBorderGenerator = new System.Windows.Forms.Label();
-            this.cbWorkshopKeywordBorderGenerator = new System.Windows.Forms.ComboBox();
-            this.lblWorkshopMarkerLink = new System.Windows.Forms.Label();
-            this.cbWorkshopKeywordBorderLink = new System.Windows.Forms.ComboBox();
-            this.cbRestrictWorkshopBorderKeywords = new System.Windows.Forms.CheckBox();
             this.gbWorkshopNIFParameters = new System.Windows.Forms.GroupBox();
             this.cbWorkshopNIFCreateImportData = new System.Windows.Forms.CheckBox();
             this.tbWorkshopNIFGroundSink = new System.Windows.Forms.TextBox();
@@ -189,11 +167,7 @@ namespace GUIBuilder.Windows
             this.btnClear = new System.Windows.Forms.Button();
             this.btnGenNodes = new System.Windows.Forms.Button();
             this.btnBuildNIFs = new System.Windows.Forms.Button();
-            this.tbSubDivisionNodeAngleAllowance = new System.Windows.Forms.TextBox();
-            this.lbSubDivisionNodeAngleAllowance = new System.Windows.Forms.Label();
-            this.tbWorkshopNodeAngleAllowance = new System.Windows.Forms.TextBox();
-            this.lblWorkshopNodeAngleAllowance = new System.Windows.Forms.Label();
-            this.pnWindow.SuspendLayout();
+            this.WindowPanel.SuspendLayout();
             this.gbTargetFolder.SuspendLayout();
             this.tcObjectSelect.SuspendLayout();
             this.tpSubDivisions.SuspendLayout();
@@ -201,25 +175,16 @@ namespace GUIBuilder.Windows
             this.gbSubDivisionNIFParameters.SuspendLayout();
             this.tpWorkshops.SuspendLayout();
             this.gbWorkshopNodeParameters.SuspendLayout();
-            this.gbWorkshopNodeDetection.SuspendLayout();
-            this.gbWorkshopNodeDetectionStaticMarkers.SuspendLayout();
-            this.gbWorkshopNodeDetectionKeywords.SuspendLayout();
             this.gbWorkshopNIFParameters.SuspendLayout();
             this.gbBorderFunctions.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pnWindow
+            // WindowPanel
             // 
-            this.pnWindow.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnWindow.Controls.Add(this.gbTargetFolder);
-            this.pnWindow.Controls.Add(this.tcObjectSelect);
-            this.pnWindow.Controls.Add(this.gbBorderFunctions);
-            this.pnWindow.Location = new System.Drawing.Point(0, 0);
-            this.pnWindow.Name = "pnWindow";
-            this.pnWindow.Size = new System.Drawing.Size(672, 707);
-            this.pnWindow.TabIndex = 0;
+            this.WindowPanel.Controls.Add(this.gbTargetFolder);
+            this.WindowPanel.Controls.Add(this.tcObjectSelect);
+            this.WindowPanel.Controls.Add(this.gbBorderFunctions);
+            this.WindowPanel.Size = new System.Drawing.Size(672, 430);
             // 
             // gbTargetFolder
             // 
@@ -275,7 +240,7 @@ namespace GUIBuilder.Windows
             this.tcObjectSelect.Location = new System.Drawing.Point(0, 80);
             this.tcObjectSelect.Name = "tcObjectSelect";
             this.tcObjectSelect.SelectedIndex = 0;
-            this.tcObjectSelect.Size = new System.Drawing.Size(672, 627);
+            this.tcObjectSelect.Size = new System.Drawing.Size(672, 349);
             this.tcObjectSelect.TabIndex = 0;
             this.tcObjectSelect.SelectedIndexChanged += new System.EventHandler(this.tcObjectSelectSelectedIndexChanged);
             // 
@@ -289,7 +254,7 @@ namespace GUIBuilder.Windows
             this.tpSubDivisions.Location = new System.Drawing.Point(4, 22);
             this.tpSubDivisions.Name = "tpSubDivisions";
             this.tpSubDivisions.Padding = new System.Windows.Forms.Padding(3);
-            this.tpSubDivisions.Size = new System.Drawing.Size(664, 601);
+            this.tpSubDivisions.Size = new System.Drawing.Size(664, 323);
             this.tpSubDivisions.TabIndex = 1;
             this.tpSubDivisions.Tag = "BorderBatchWindow.Tab.SubDivisions";
             this.tpSubDivisions.Text = "Sub-Divisions";
@@ -320,6 +285,25 @@ namespace GUIBuilder.Windows
             this.tbSubDivisionNodeLength.TabIndex = 4;
             this.tbSubDivisionNodeLength.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tbSubDivisionNodeLength.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // tbSubDivisionNodeAngleAllowance
+            // 
+            this.tbSubDivisionNodeAngleAllowance.Location = new System.Drawing.Point(264, 13);
+            this.tbSubDivisionNodeAngleAllowance.Name = "tbSubDivisionNodeAngleAllowance";
+            this.tbSubDivisionNodeAngleAllowance.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.tbSubDivisionNodeAngleAllowance.Size = new System.Drawing.Size(60, 20);
+            this.tbSubDivisionNodeAngleAllowance.TabIndex = 9;
+            this.tbSubDivisionNodeAngleAllowance.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbSubDivisionNodeAngleAllowance.TextChanged += new System.EventHandler(this.uiSubDivisionNIFBuilderChanged);
+            // 
+            // lbSubDivisionNodeAngleAllowance
+            // 
+            this.lbSubDivisionNodeAngleAllowance.Location = new System.Drawing.Point(167, 16);
+            this.lbSubDivisionNodeAngleAllowance.Name = "lbSubDivisionNodeAngleAllowance";
+            this.lbSubDivisionNodeAngleAllowance.Size = new System.Drawing.Size(101, 17);
+            this.lbSubDivisionNodeAngleAllowance.TabIndex = 8;
+            this.lbSubDivisionNodeAngleAllowance.Tag = "BorderBatchWindow.Node.AngleAllowance:";
+            this.lbSubDivisionNodeAngleAllowance.Text = "Angle Allowance:";
             // 
             // tbSubDivisionNodeSlopeAllowance
             // 
@@ -535,7 +519,7 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions.Location = new System.Drawing.Point(336, 0);
             this.lvSubDivisions.MultiSelect = true;
             this.lvSubDivisions.Name = "lvSubDivisions";
-            this.lvSubDivisions.Size = new System.Drawing.Size(328, 601);
+            this.lvSubDivisions.Size = new System.Drawing.Size(328, 323);
             this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
             this.lvSubDivisions.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvSubDivisions.SyncedEditorFormType = null;
@@ -565,14 +549,13 @@ namespace GUIBuilder.Windows
             // 
             this.tpWorkshops.Controls.Add(this.gbWorkshopNodeParameters);
             this.tpWorkshops.Controls.Add(this.cbWorkshopPresets);
-            this.tpWorkshops.Controls.Add(this.gbWorkshopNodeDetection);
             this.tpWorkshops.Controls.Add(this.gbWorkshopNIFParameters);
             this.tpWorkshops.Controls.Add(this.lvWorkshops);
             this.tpWorkshops.Controls.Add(this.lblWorkshopPresets);
             this.tpWorkshops.Location = new System.Drawing.Point(4, 22);
             this.tpWorkshops.Name = "tpWorkshops";
             this.tpWorkshops.Padding = new System.Windows.Forms.Padding(3);
-            this.tpWorkshops.Size = new System.Drawing.Size(664, 601);
+            this.tpWorkshops.Size = new System.Drawing.Size(664, 323);
             this.tpWorkshops.TabIndex = 0;
             this.tpWorkshops.Tag = "BorderBatchWindow.Tab.Workshops";
             this.tpWorkshops.Text = "Workshops";
@@ -603,6 +586,25 @@ namespace GUIBuilder.Windows
             this.tbWorkshopNodeLength.TabIndex = 16;
             this.tbWorkshopNodeLength.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tbWorkshopNodeLength.TextChanged += new System.EventHandler(this.uiWorkshopNIFBuilderChanged);
+            // 
+            // tbWorkshopNodeAngleAllowance
+            // 
+            this.tbWorkshopNodeAngleAllowance.Location = new System.Drawing.Point(264, 13);
+            this.tbWorkshopNodeAngleAllowance.Name = "tbWorkshopNodeAngleAllowance";
+            this.tbWorkshopNodeAngleAllowance.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.tbWorkshopNodeAngleAllowance.Size = new System.Drawing.Size(60, 20);
+            this.tbWorkshopNodeAngleAllowance.TabIndex = 20;
+            this.tbWorkshopNodeAngleAllowance.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbWorkshopNodeAngleAllowance.TextChanged += new System.EventHandler(this.uiWorkshopNIFBuilderChanged);
+            // 
+            // lblWorkshopNodeAngleAllowance
+            // 
+            this.lblWorkshopNodeAngleAllowance.Location = new System.Drawing.Point(167, 16);
+            this.lblWorkshopNodeAngleAllowance.Name = "lblWorkshopNodeAngleAllowance";
+            this.lblWorkshopNodeAngleAllowance.Size = new System.Drawing.Size(101, 17);
+            this.lblWorkshopNodeAngleAllowance.TabIndex = 19;
+            this.lblWorkshopNodeAngleAllowance.Tag = "BorderBatchWindow.Node.AngleAllowance:";
+            this.lblWorkshopNodeAngleAllowance.Text = "Angle Allowance:";
             // 
             // lblWorkshopNodeLength
             // 
@@ -640,131 +642,6 @@ namespace GUIBuilder.Windows
             this.cbWorkshopPresets.Size = new System.Drawing.Size(249, 21);
             this.cbWorkshopPresets.TabIndex = 14;
             this.cbWorkshopPresets.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopPresetsSelectedIndexChanged);
-            // 
-            // gbWorkshopNodeDetection
-            // 
-            this.gbWorkshopNodeDetection.Controls.Add(this.gbWorkshopNodeDetectionStaticMarkers);
-            this.gbWorkshopNodeDetection.Controls.Add(this.gbWorkshopNodeDetectionKeywords);
-            this.gbWorkshopNodeDetection.Controls.Add(this.cbRestrictWorkshopBorderKeywords);
-            this.gbWorkshopNodeDetection.Location = new System.Drawing.Point(0, 323);
-            this.gbWorkshopNodeDetection.Name = "gbWorkshopNodeDetection";
-            this.gbWorkshopNodeDetection.Size = new System.Drawing.Size(330, 278);
-            this.gbWorkshopNodeDetection.TabIndex = 17;
-            this.gbWorkshopNodeDetection.TabStop = false;
-            this.gbWorkshopNodeDetection.Tag = "BorderBatchWindow.NodeDetection";
-            this.gbWorkshopNodeDetection.Text = "Node Detection";
-            // 
-            // gbWorkshopNodeDetectionStaticMarkers
-            // 
-            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.label1);
-            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.lblWorkshopForcedZStatic);
-            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.cbWorkshopBorderMarkerTerrainFollowing);
-            this.gbWorkshopNodeDetectionStaticMarkers.Controls.Add(this.cbWorkshopBorderMarkerForcedZ);
-            this.gbWorkshopNodeDetectionStaticMarkers.Location = new System.Drawing.Point(6, 167);
-            this.gbWorkshopNodeDetectionStaticMarkers.Name = "gbWorkshopNodeDetectionStaticMarkers";
-            this.gbWorkshopNodeDetectionStaticMarkers.Size = new System.Drawing.Size(318, 106);
-            this.gbWorkshopNodeDetectionStaticMarkers.TabIndex = 22;
-            this.gbWorkshopNodeDetectionStaticMarkers.TabStop = false;
-            this.gbWorkshopNodeDetectionStaticMarkers.Tag = "BorderBatchWindow.NodeDetection.StaticMarkers";
-            this.gbWorkshopNodeDetectionStaticMarkers.Text = "StaticMarkers";
-            // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(6, 16);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(306, 17);
-            this.label1.TabIndex = 19;
-            this.label1.Tag = "BorderBatchWindow.NodeDetection.BorderMarkerTerrainFollowing:";
-            this.label1.Text = "BorderMarkerTerrainFollowing:";
-            // 
-            // lblWorkshopForcedZStatic
-            // 
-            this.lblWorkshopForcedZStatic.Location = new System.Drawing.Point(6, 60);
-            this.lblWorkshopForcedZStatic.Name = "lblWorkshopForcedZStatic";
-            this.lblWorkshopForcedZStatic.Size = new System.Drawing.Size(306, 17);
-            this.lblWorkshopForcedZStatic.TabIndex = 15;
-            this.lblWorkshopForcedZStatic.Tag = "BorderBatchWindow.NodeDetection.BorderMarkerForcedZ:";
-            this.lblWorkshopForcedZStatic.Text = "BorderMarkerForcedZ:";
-            // 
-            // cbWorkshopBorderMarkerTerrainFollowing
-            // 
-            this.cbWorkshopBorderMarkerTerrainFollowing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWorkshopBorderMarkerTerrainFollowing.Location = new System.Drawing.Point(6, 36);
-            this.cbWorkshopBorderMarkerTerrainFollowing.Name = "cbWorkshopBorderMarkerTerrainFollowing";
-            this.cbWorkshopBorderMarkerTerrainFollowing.Size = new System.Drawing.Size(306, 21);
-            this.cbWorkshopBorderMarkerTerrainFollowing.TabIndex = 20;
-            this.cbWorkshopBorderMarkerTerrainFollowing.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged);
-            // 
-            // cbWorkshopBorderMarkerForcedZ
-            // 
-            this.cbWorkshopBorderMarkerForcedZ.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWorkshopBorderMarkerForcedZ.Location = new System.Drawing.Point(6, 80);
-            this.cbWorkshopBorderMarkerForcedZ.Name = "cbWorkshopBorderMarkerForcedZ";
-            this.cbWorkshopBorderMarkerForcedZ.Size = new System.Drawing.Size(306, 21);
-            this.cbWorkshopBorderMarkerForcedZ.TabIndex = 16;
-            this.cbWorkshopBorderMarkerForcedZ.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopBorderMarkerForcedZSelectedIndexChanged);
-            // 
-            // gbWorkshopNodeDetectionKeywords
-            // 
-            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.lbWorkshopBorderGenerator);
-            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.cbWorkshopKeywordBorderGenerator);
-            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.lblWorkshopMarkerLink);
-            this.gbWorkshopNodeDetectionKeywords.Controls.Add(this.cbWorkshopKeywordBorderLink);
-            this.gbWorkshopNodeDetectionKeywords.Location = new System.Drawing.Point(6, 55);
-            this.gbWorkshopNodeDetectionKeywords.Name = "gbWorkshopNodeDetectionKeywords";
-            this.gbWorkshopNodeDetectionKeywords.Size = new System.Drawing.Size(318, 106);
-            this.gbWorkshopNodeDetectionKeywords.TabIndex = 21;
-            this.gbWorkshopNodeDetectionKeywords.TabStop = false;
-            this.gbWorkshopNodeDetectionKeywords.Tag = "BorderBatchWindow.NodeDetection.Keywords";
-            this.gbWorkshopNodeDetectionKeywords.Text = "Keywords";
-            // 
-            // lbWorkshopBorderGenerator
-            // 
-            this.lbWorkshopBorderGenerator.Location = new System.Drawing.Point(6, 16);
-            this.lbWorkshopBorderGenerator.Name = "lbWorkshopBorderGenerator";
-            this.lbWorkshopBorderGenerator.Size = new System.Drawing.Size(306, 17);
-            this.lbWorkshopBorderGenerator.TabIndex = 17;
-            this.lbWorkshopBorderGenerator.Tag = "BorderBatchWindow.NodeDetection.WorkshopBorderGenerator:";
-            this.lbWorkshopBorderGenerator.Text = "WorkshopBorderGenerator:";
-            // 
-            // cbWorkshopKeywordBorderGenerator
-            // 
-            this.cbWorkshopKeywordBorderGenerator.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWorkshopKeywordBorderGenerator.Location = new System.Drawing.Point(6, 36);
-            this.cbWorkshopKeywordBorderGenerator.Name = "cbWorkshopKeywordBorderGenerator";
-            this.cbWorkshopKeywordBorderGenerator.Size = new System.Drawing.Size(306, 21);
-            this.cbWorkshopKeywordBorderGenerator.TabIndex = 13;
-            this.cbWorkshopKeywordBorderGenerator.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopKeywordBorderGeneratorSelectedIndexChanged);
-            // 
-            // lblWorkshopMarkerLink
-            // 
-            this.lblWorkshopMarkerLink.Location = new System.Drawing.Point(6, 60);
-            this.lblWorkshopMarkerLink.Name = "lblWorkshopMarkerLink";
-            this.lblWorkshopMarkerLink.Size = new System.Drawing.Size(306, 17);
-            this.lblWorkshopMarkerLink.TabIndex = 12;
-            this.lblWorkshopMarkerLink.Tag = "BorderBatchWindow.NodeDetection.WorkshopMarkerLink:";
-            this.lblWorkshopMarkerLink.Text = "WorkshopMarkerLink:";
-            // 
-            // cbWorkshopKeywordBorderLink
-            // 
-            this.cbWorkshopKeywordBorderLink.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbWorkshopKeywordBorderLink.Location = new System.Drawing.Point(6, 80);
-            this.cbWorkshopKeywordBorderLink.Name = "cbWorkshopKeywordBorderLink";
-            this.cbWorkshopKeywordBorderLink.Size = new System.Drawing.Size(306, 21);
-            this.cbWorkshopKeywordBorderLink.TabIndex = 18;
-            this.cbWorkshopKeywordBorderLink.SelectedIndexChanged += new System.EventHandler(this.cbWorkshopKeywordBorderLinkSelectedIndexChanged);
-            // 
-            // cbRestrictWorkshopBorderKeywords
-            // 
-            this.cbRestrictWorkshopBorderKeywords.Checked = true;
-            this.cbRestrictWorkshopBorderKeywords.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbRestrictWorkshopBorderKeywords.Location = new System.Drawing.Point(6, 19);
-            this.cbRestrictWorkshopBorderKeywords.Name = "cbRestrictWorkshopBorderKeywords";
-            this.cbRestrictWorkshopBorderKeywords.Size = new System.Drawing.Size(318, 30);
-            this.cbRestrictWorkshopBorderKeywords.TabIndex = 14;
-            this.cbRestrictWorkshopBorderKeywords.Text = "Restrict to:\r\nYo momma";
-            this.cbRestrictWorkshopBorderKeywords.UseVisualStyleBackColor = true;
-            this.cbRestrictWorkshopBorderKeywords.CheckStateChanged += new System.EventHandler(this.cbRestrictWorkshopBorderKeywordsChanged);
             // 
             // gbWorkshopNIFParameters
             // 
@@ -953,7 +830,7 @@ namespace GUIBuilder.Windows
             this.lvWorkshops.Location = new System.Drawing.Point(336, 0);
             this.lvWorkshops.MultiSelect = true;
             this.lvWorkshops.Name = "lvWorkshops";
-            this.lvWorkshops.Size = new System.Drawing.Size(328, 601);
+            this.lvWorkshops.Size = new System.Drawing.Size(328, 323);
             this.lvWorkshops.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
             this.lvWorkshops.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvWorkshops.SyncedEditorFormType = null;
@@ -1028,63 +905,22 @@ namespace GUIBuilder.Windows
             this.btnBuildNIFs.UseVisualStyleBackColor = true;
             this.btnBuildNIFs.Click += new System.EventHandler(this.btnBuildNIFsClick);
             // 
-            // tbSubDivisionNodeAngleAllowance
-            // 
-            this.tbSubDivisionNodeAngleAllowance.Location = new System.Drawing.Point(264, 13);
-            this.tbSubDivisionNodeAngleAllowance.Name = "tbSubDivisionNodeAngleAllowance";
-            this.tbSubDivisionNodeAngleAllowance.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.tbSubDivisionNodeAngleAllowance.Size = new System.Drawing.Size(60, 20);
-            this.tbSubDivisionNodeAngleAllowance.TabIndex = 9;
-            this.tbSubDivisionNodeAngleAllowance.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbSubDivisionNodeAngleAllowance.TextChanged += new System.EventHandler( this.uiSubDivisionNIFBuilderChanged );
-            // 
-            // lbSubDivisionNodeAngleAllowance
-            // 
-            this.lbSubDivisionNodeAngleAllowance.Location = new System.Drawing.Point(167, 16);
-            this.lbSubDivisionNodeAngleAllowance.Name = "lbSubDivisionNodeAngleAllowance";
-            this.lbSubDivisionNodeAngleAllowance.Size = new System.Drawing.Size(101, 17);
-            this.lbSubDivisionNodeAngleAllowance.TabIndex = 8;
-            this.lbSubDivisionNodeAngleAllowance.Tag = "BorderBatchWindow.Node.AngleAllowance:";
-            this.lbSubDivisionNodeAngleAllowance.Text = "Angle Allowance:";
-            // 
-            // tbWorkshopNodeAngleAllowance
-            // 
-            this.tbWorkshopNodeAngleAllowance.Location = new System.Drawing.Point(264, 13);
-            this.tbWorkshopNodeAngleAllowance.Name = "tbWorkshopNodeAngleAllowance";
-            this.tbWorkshopNodeAngleAllowance.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.tbWorkshopNodeAngleAllowance.Size = new System.Drawing.Size(60, 20);
-            this.tbWorkshopNodeAngleAllowance.TabIndex = 20;
-            this.tbWorkshopNodeAngleAllowance.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.tbWorkshopNodeAngleAllowance.TextChanged += new System.EventHandler( this.uiWorkshopNIFBuilderChanged );
-            // 
-            // lblWorkshopNodeAngleAllowance
-            // 
-            this.lblWorkshopNodeAngleAllowance.Location = new System.Drawing.Point(167, 16);
-            this.lblWorkshopNodeAngleAllowance.Name = "lblWorkshopNodeAngleAllowance";
-            this.lblWorkshopNodeAngleAllowance.Size = new System.Drawing.Size(101, 17);
-            this.lblWorkshopNodeAngleAllowance.TabIndex = 19;
-            this.lblWorkshopNodeAngleAllowance.Tag = "BorderBatchWindow.Node.AngleAllowance:";
-            this.lblWorkshopNodeAngleAllowance.Text = "Angle Allowance:";
-            // 
             // BorderBatch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(672, 708);
-            this.Controls.Add(this.pnWindow);
+            this.ClientSize = new System.Drawing.Size(672, 430);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(680, 732);
+            this.MinimumSize = new System.Drawing.Size(680, 454);
             this.Name = "BorderBatch";
             this.ShowInTaskbar = false;
             this.Tag = "BorderBatchWindow.Title";
             this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
-            this.pnWindow.ResumeLayout(false);
+            this.ClientOnLoad += new System.EventHandler(this.BorderBatch_OnLoad);
+            this.WindowPanel.ResumeLayout(false);
             this.gbTargetFolder.ResumeLayout(false);
             this.gbTargetFolder.PerformLayout();
             this.tcObjectSelect.ResumeLayout(false);
@@ -1096,9 +932,6 @@ namespace GUIBuilder.Windows
             this.tpWorkshops.ResumeLayout(false);
             this.gbWorkshopNodeParameters.ResumeLayout(false);
             this.gbWorkshopNodeParameters.PerformLayout();
-            this.gbWorkshopNodeDetection.ResumeLayout(false);
-            this.gbWorkshopNodeDetectionStaticMarkers.ResumeLayout(false);
-            this.gbWorkshopNodeDetectionKeywords.ResumeLayout(false);
             this.gbWorkshopNIFParameters.ResumeLayout(false);
             this.gbWorkshopNIFParameters.PerformLayout();
             this.gbBorderFunctions.ResumeLayout(false);

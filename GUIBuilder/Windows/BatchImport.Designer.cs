@@ -12,7 +12,6 @@ namespace GUIBuilder.Windows
         /// Designer variable used to keep track of non-visual components.
         /// </summary>
         System.ComponentModel.IContainer components = null;
-        System.Windows.Forms.Panel pnMain;
         GUIBuilder.Windows.Controls.SyncedListView<FormImport.ImportBase> lvImportForms;
         System.Windows.Forms.Button btnImportSelected;
         System.Windows.Forms.Button btnClose;
@@ -40,31 +39,24 @@ namespace GUIBuilder.Windows
         /// </summary>
         void InitializeComponent()
         {
-            this.pnMain = new System.Windows.Forms.Panel();
             this.scImports = new System.Windows.Forms.SplitContainer();
             this.lvImportForms = new GUIBuilder.Windows.Controls.SyncedListView<GUIBuilder.FormImport.ImportBase>();
             this.tbImportMessages = new System.Windows.Forms.TextBox();
             this.btnImportSelected = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
-            this.pnMain.SuspendLayout();
+            this.WindowPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scImports)).BeginInit();
             this.scImports.Panel1.SuspendLayout();
             this.scImports.Panel2.SuspendLayout();
             this.scImports.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pnMain
+            // WindowPanel
             // 
-            this.pnMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnMain.Controls.Add(this.scImports);
-            this.pnMain.Controls.Add(this.btnImportSelected);
-            this.pnMain.Controls.Add(this.btnClose);
-            this.pnMain.Location = new System.Drawing.Point(0, 0);
-            this.pnMain.Name = "pnMain";
-            this.pnMain.Size = new System.Drawing.Size(942, 548);
-            this.pnMain.TabIndex = 0;
+            this.WindowPanel.Controls.Add(this.scImports);
+            this.WindowPanel.Controls.Add(this.btnImportSelected);
+            this.WindowPanel.Controls.Add(this.btnClose);
+            this.WindowPanel.Size = new System.Drawing.Size(942, 552);
             // 
             // scImports
             // 
@@ -77,16 +69,17 @@ namespace GUIBuilder.Windows
             // 
             // scImports.Panel1
             // 
-            this.scImports.Panel1.AutoScroll = true;
             this.scImports.Panel1.Controls.Add(this.lvImportForms);
+            this.scImports.Panel1MinSize = 90;
             // 
             // scImports.Panel2
             // 
-            this.scImports.Panel2.AutoScroll = true;
             this.scImports.Panel2.Controls.Add(this.tbImportMessages);
-            this.scImports.Size = new System.Drawing.Size(942, 512);
-            this.scImports.SplitterDistance = 414;
+            this.scImports.Panel2MinSize = 65;
+            this.scImports.Size = new System.Drawing.Size(942, 516);
+            this.scImports.SplitterDistance = 446;
             this.scImports.TabIndex = 15;
+            this.scImports.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.scImportsSplitterMoved);
             // 
             // lvImportForms
             // 
@@ -105,8 +98,9 @@ namespace GUIBuilder.Windows
             this.lvImportForms.Location = new System.Drawing.Point(3, 3);
             this.lvImportForms.MultiSelect = true;
             this.lvImportForms.Name = "lvImportForms";
-            this.lvImportForms.Size = new System.Drawing.Size(936, 408);
+            this.lvImportForms.Size = new System.Drawing.Size(936, 440);
             this.lvImportForms.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.Custom;
+            this.lvImportForms.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvImportForms.SyncedEditorFormType = null;
             this.lvImportForms.SyncObjects = null;
             this.lvImportForms.TabIndex = 12;
@@ -123,13 +117,13 @@ namespace GUIBuilder.Windows
             this.tbImportMessages.Multiline = true;
             this.tbImportMessages.Name = "tbImportMessages";
             this.tbImportMessages.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbImportMessages.Size = new System.Drawing.Size(936, 88);
+            this.tbImportMessages.Size = new System.Drawing.Size(936, 60);
             this.tbImportMessages.TabIndex = 0;
             // 
             // btnImportSelected
             // 
             this.btnImportSelected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnImportSelected.Location = new System.Drawing.Point(783, 518);
+            this.btnImportSelected.Location = new System.Drawing.Point(779, 522);
             this.btnImportSelected.Name = "btnImportSelected";
             this.btnImportSelected.Size = new System.Drawing.Size(75, 23);
             this.btnImportSelected.TabIndex = 14;
@@ -141,7 +135,7 @@ namespace GUIBuilder.Windows
             // btnClose
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClose.Location = new System.Drawing.Point(864, 518);
+            this.btnClose.Location = new System.Drawing.Point(864, 522);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 13;
@@ -154,18 +148,15 @@ namespace GUIBuilder.Windows
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(942, 548);
-            this.Controls.Add(this.pnMain);
+            this.ClientSize = new System.Drawing.Size(942, 552);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MinimumSize = new System.Drawing.Size(950, 572);
+            this.MinimumSize = new System.Drawing.Size(640, 256);
             this.Name = "BatchImport";
             this.Tag = "BatchImportWindow.Title";
             this.Text = "title";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
-            this.pnMain.ResumeLayout(false);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
+            this.ClientOnLoad += new System.EventHandler(this.BatchImport_OnLoad);
+            this.WindowPanel.ResumeLayout(false);
             this.scImports.Panel1.ResumeLayout(false);
             this.scImports.Panel2.ResumeLayout(false);
             this.scImports.Panel2.PerformLayout();

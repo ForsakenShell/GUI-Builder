@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>GUIBuilder.Windows.IEnableControlForm</Title>
+            <Author>1000101</Author>
+            <Description>Core functionality for System.Windows.Forms.Form</Description>
+            <Shortcut>Snippet_IEnableControlForm</Shortcut>
+            <SnippetTypes>
+                <SnippetType>Expansion</SnippetType>
+            </SnippetTypes>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>FormType</ID>
+                    <ToolTip>System.Windows.Forms.Form or child class implementing GUIBuilder.Windows.IEnableControlForm.</ToolTip>
+                    <Default>FormType</Default>
+                </Literal>
+                <Object>
+                    <ID>PanelName</ID>
+                    <Type>System.Windows.Forms.Panel</Type>
+                    <ToolTip>System.Windows.Forms.Panel or child class that all the windows controls are on.</ToolTip>
+                    <Default>pnWindow</Default>
+                </Object>
+            </Declarations>
+            <Code Language="CSharp">
+                <![CDATA[
+        // Snippet_IEnableControlForm
+        // FormType = $FormType$
+        // PanelName = $PanelName$
+        
+        
+        /// <summary>
+        /// Use GodObject.Windows.GetWindow<$FormType$>() to create this Window
+        /// </summary>
+        public $FormType$()
+        {
+            InitializeComponent();
+            
+            this.SuspendLayout();
+            
+            this.Translate( true );
+            
+            this.FormClosing        += new System.Windows.Forms.FormClosingEventHandler( this.IEnableControlForm_OnFormClosing );
+            this.OnSetEnableState   += new SetEnableStateHandler( this.OnFormSetEnableState );
+            
+            this.ResumeLayout( false );
+        }
+        
+        
+        #region GUIBuilder.Windows.IEnableControlForm
+        
+        
+        #region Internal
+        
+        void IEnableControlForm_OnFormClosing( object sender, FormClosingEventArgs e )
+        {
+            GodObject.Windows.ClearWindow<$FormType$>();
+        }
+        
+        #endregion
+        
+        
+        #region Interface
+        
+        public event GUIBuilder.Windows.SetEnableStateHandler  OnSetEnableState;
+        
+        public delegate void OnSetEnableState( bool enabled );
+        
+        /// <summary>
+        /// Enable or disable this windows main panel.
+        /// </summary>
+        /// <param name="enabled">Enable state to set</param>
+        public void SetEnableState( bool enabled )
+        {
+            if( this.InvokeRequired )
+            {
+                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
+                return;
+            }
+            
+            // Enable the main panel
+            if( $PanelName$ != null )
+                $PanelName$.Enabled = enabled;
+            
+            if( OnSetEnableState != null )
+                OnSetEnableState( enabled );
+        }
+        
+        #endregion
+        
+        
+        #endregion
+        
+        
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enabled">Enable state to set</param>
+        void OnFormSetEnableState( bool enabled )
+        {
+            // TODO:  WRITE ME
+        }]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

@@ -102,14 +102,16 @@ namespace Engine.Plugin
             var str = string.Format(
                 "[{0} :: typeof( File ) = {1}{2}]",
                 _Filename,
-                this.GetType().ToString(),
+                this.TypeFullName(),
                 ( strH == null ? null : string.Format( " :: handle = {0}", strH ) )
             );
             return str;
         }
-        
+
+        public string                   IDString                    { get { return string.Format( "IXHandle.IDString".Translate(), LoadOrder.ToString( "X2" ), Filename ); } }
+
         #region Required Properties
-        
+
         public string                   Signature                   { get { return _Handle.Signature; } }
         
         public IXHandle                 Ancestor
@@ -121,7 +123,12 @@ namespace Engine.Plugin
         public File[]                   Files                       { get { return new []{ this }; } }
         
         public string[]                 Filenames                   { get { return new []{ _Filename }; } }
-        
+
+        public string                   GetFilename( TargetHandle target )
+        {
+            return _Filename;
+        }
+
         public uint                     LoadOrder                   { get { return _Handle.LoadOrder; } }
         
         /*
@@ -225,7 +232,7 @@ namespace Engine.Plugin
         
         #region Parent container collection
         
-        public ICollection              Collection
+        public Collection               ParentCollection
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -235,19 +242,19 @@ namespace Engine.Plugin
         
         #region Child collections
         
-        public void                     AddICollection( ICollection collection )
+        public void                     AddCollection( Collection collection )
         {   throw new NotImplementedException(); }
         
-        public ICollection              CollectionFor( string signature )
+        public Collection               CollectionFor( string signature )
         {   throw new NotImplementedException(); }
         
-        public ICollection              CollectionFor<TSync>() where TSync : class, IXHandle
+        public Collection               CollectionFor<TSync>() where TSync : class, IXHandle
         {   throw new NotImplementedException(); }
         
-        public ICollection              CollectionFor( ClassAssociation association )
+        public Collection               CollectionFor( ClassAssociation association )
         {   throw new NotImplementedException(); }
         
-        public List<ICollection>        ChildCollections
+        public List<Collection>         ChildCollections
         { get { throw new NotImplementedException(); } }
         
         #endregion
@@ -274,8 +281,6 @@ namespace Engine.Plugin
         #region ISyncedListViewObject
         
         /*
-        
-        public string                   IDString { get { return string.Format( "0x{0} - \"{1}\"", LoadOrder.ToString( "X2" ), Filename); } }
         
         public event EventHandler  ObjectDataChanged;
         

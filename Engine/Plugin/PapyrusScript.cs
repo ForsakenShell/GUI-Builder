@@ -87,10 +87,12 @@ namespace Engine.Plugin
         
         public override int             GetHashCode()               { return GetFormID( Engine.Plugin.TargetHandle.Master ).GetHashCode() ^ Signature.GetHashCode(); }
         
-        public override string          ToString()                  { return Form.ToString(); }
-        
+        public override string          ToString()                  { return string.Format( "{0} :: {1}", Signature, IDString ); }
+
+        public string                   IDString                    { get { return Ancestor.IDString; } }
+
         #region Required Properties
-        
+
         public string                   Signature                   { get { return Association.Signature; } }
         
         public IXHandle                 Ancestor                    { get { return _Ancestor; } }
@@ -98,7 +100,12 @@ namespace Engine.Plugin
         public File[]                   Files                       { get { return _Ancestor.Files; } }
         
         public string[]                 Filenames                   { get { return _Ancestor.Filenames; } }
-        
+
+        public string                   GetFilename( TargetHandle target )
+        {
+            return _Ancestor.GetFilename( target );
+        }
+
         public uint                     LoadOrder                   { get { return _Ancestor.LoadOrder; } }
         
         /*
@@ -185,12 +192,12 @@ namespace Engine.Plugin
         {
             if( !newHandle.IsValid() )
             {
-                DebugLog.WriteLine( string.Format( "{0} :: AddNewHandle() :: newHandle is invalid!", this.GetType().ToString() ) );
+                DebugLog.WriteError( "newHandle is invalid!" );
                 return false;
             }
             if( ( newHandle as ScriptHandle ) == null )
             {
-                DebugLog.WriteLine( string.Format( "{0} :: AddNewHandle() :: newHandle is not a ScriptHandle!", this.GetType().ToString() ) );
+                DebugLog.WriteError( "newHandle is not a ScriptHandle!" );
                 return false;
             }
             
@@ -209,7 +216,7 @@ namespace Engine.Plugin
             insertAt = HandleExtensions.InsertHandleIndex( _Handles, newHandle );
             if( insertAt < 0 )
             {
-                DebugLog.WriteWarning( this.GetType().ToString(), "AddNewHandle()", string.Format( "Unable to get load order insertion index for newHandle {0}", newHandle.ToString() ) );
+                DebugLog.WriteWarning( string.Format( "Unable to get load order insertion index for newHandle {0}", newHandle.ToString() ) );
                 return false;
             }
             
@@ -299,23 +306,23 @@ namespace Engine.Plugin
         
         // Scripts don't have collections
         
-        public virtual ICollection      Collection
+        public virtual Collection       ParentCollection
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
         
-        public void                     AddICollection( ICollection collection )
+        public void                     AddCollection( Collection collection )
         {   throw new NotImplementedException(); }
         
-        public ICollection              CollectionFor( string signature )
+        public Collection               CollectionFor( string signature )
         {   throw new NotImplementedException(); }
-        public ICollection              CollectionFor<TSync>() where TSync : class, IXHandle
+        public Collection               CollectionFor<TSync>() where TSync : class, IXHandle
         {   throw new NotImplementedException(); }
-        public ICollection              CollectionFor( ClassAssociation association )
+        public Collection               CollectionFor( ClassAssociation association )
         {   throw new NotImplementedException(); }
         
-        public List<ICollection>        ChildCollections
+        public List<Collection>         ChildCollections
         { get { throw new NotImplementedException(); } }
         
         #endregion
@@ -329,8 +336,6 @@ namespace Engine.Plugin
         #endregion
         
         #region ISyncedListViewObject
-        
-        //public string                   IDString { get { return string.Format( "0x{0} - \"{1}\"", FormID.ToString( "X8" ), EditorID ); } }
         
         public virtual string           ExtraInfo                   { get { return Form.ExtraInfo; } }
         

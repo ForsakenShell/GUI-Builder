@@ -68,13 +68,13 @@ namespace XeLib
             get
             {
                 if( _Disposed )
-                    throw new ObjectDisposedException( this.GetType().ToString() );
+                    throw new ObjectDisposedException( this.TypeFullName() );
                 return CloneOf != null ? CloneOf.XHandle : _xHandle;
             }
             protected set
             {
                 if( _Disposed )
-                    throw new ObjectDisposedException( this.GetType().ToString() );
+                    throw new ObjectDisposedException( this.TypeFullName() );
                 if( CloneOf == null )
                 {
                     if( ( _xHandle != BaseXHandleValue )&&( _xHandle != value ) )
@@ -104,10 +104,10 @@ namespace XeLib
         {
             if( !this.IsValid() )
             {
-                DebugLog.WriteError( this.GetType().ToString(), "Dispose()", "Tried to dispose of an invalid handle!" );
+                DebugLog.WriteError( "Tried to dispose of an invalid handle! :: 0x" + _xHandle.ToString( "X8" ) );
                 return;
             }
-            //DebugLog.WriteLine( string.Format( "{0} :: Dispose() :: {1} :: _Disposed = {2}", this.GetType().ToString(), this.ToString(), _Disposed ) );
+            //DebugLog.WriteLine( string.Format( "{0} :: Dispose() :: {1} :: _Disposed = {2}", this.FullTypeName(), this.ToString(), _Disposed ) );
             Dispose( true );
             GC.SuppressFinalize( this );
         }
@@ -115,11 +115,11 @@ namespace XeLib
         void Dispose( bool disposing )
         {
             if( _Disposed ) return;
+            _Disposed = true;
             if( ( disposing )&&( CloneOf == null ) )
                 ReleaseXHandle( _xHandle );
             _xHandle = BaseXHandleValue;
             CloneOf = null;
-            _Disposed = true;
         }
         
         protected virtual void ReleaseXHandle( uint uHandle )
@@ -191,19 +191,31 @@ namespace XeLib
             if( Disposed )
                 return "[disposed]";
             var strXHandle = this.XHandle.ToString( "X8" );
-            var strType = this.GetType().ToString();
+            var strType = this.TypeFullName();
             var strFile = this.Filename;
             var strLO = string.Format( "Load Order = 0x{0}", LoadOrder.ToString( "X2" ) );
             var strExtra = ToStringExtra();
             var strCloned = ( CloneOf == null ? null : " :: Cloned Handle" );
+            var strDups = (string)null;
+            var hDups = Meta.GetDuplicateXHandlesEx( this.XHandle );
+            if( ( hDups != null ) && ( hDups.Length > 0 ) )
+            {
+                foreach( var hDup in hDups )
+                {
+                    if( !string.IsNullOrEmpty( strDups ) ) strDups += ", ";
+                    strDups += "0x" + hDup.ToString( "X8" );
+                }
+                strDups = " :: Duplicate XHandles = [" + strDups + "]";
+            }
             var str = string.Format(
-                "[XHandle = 0x{0} :: {1} :: \"{2}\" :: {3}{4}{5}]",
+                "[XHandle = 0x{0} :: {1} :: \"{2}\" :: {3}{4}{5}{6}]",
                 strXHandle,
                 strType,
                 strFile,
                 strLO,
                 ( strExtra == null ? null : string.Format( " :: {0}", strExtra ) ),
-                strCloned
+                strCloned,
+                strDups
             );
             return str;
         }
@@ -362,7 +374,7 @@ namespace XeLib
             get
             {
                 var path = Path;
-                //DebugLog.Write( string.Format( "{0} :: Filename :: 0x{1} :: Path = \"{2}\"", this.GetType().ToString(), _xHandle.ToString( "X8" ), path ) );
+                //DebugLog.Write( string.Format( "{0} :: Filename :: 0x{1} :: Path = \"{2}\"", this.FullTypeName(), _xHandle.ToString( "X8" ), path ) );
                 var si = path.IndexOf( '\\' );
                 var fName = si > 0
                     ? path.Substring( 0, si )
@@ -376,7 +388,7 @@ namespace XeLib
             get
             {
                 var fHandle = Files.FileByName( Filename );
-                //DebugLog.Write( string.Format( this.GetType().ToString() + " :: FileHandle :: 0x{0} :: \"{1}\"", fHandle.ToString(), fName ) );
+                //DebugLog.Write( string.Format( this.FullTypeName() + " :: FileHandle :: 0x{0} :: \"{1}\"", fHandle.ToString(), fName ) );
                 return fHandle;
             }
         }
@@ -385,8 +397,10 @@ namespace XeLib
         {
             get
             {
-                var lo = Setup.GetLoadOrder( false ).FindIndex( loi => loi.Filename.InsensitiveInvariantMatch( Filename ) );
-                return lo < 0 ? 0xFFFFFFFF : ( uint )lo;
+                var lo = Setup.GetLoadOrder( false );
+                if( lo.NullOrEmpty() ) return 0xFFFFFFFF;
+                var loi = lo.FindIndex( file => file.Filename.InsensitiveInvariantMatch( Filename ) );
+                return loi < 0 ? 0xFFFFFFFF : ( uint )loi;
             }
         }
         
@@ -412,7 +426,7 @@ namespace XeLib
                     refTree.Insert( 0, rhContainer );
                 hContainer = hContainer.GetContainerRecord();
             }
-            //DebugLog.WriteList<FormHandle>( this.GetType().ToString() + " :: GetContainerRecordTree() :: result", refTree );
+            //DebugLog.WriteList<FormHandle>( this.FullTypeName() + " :: GetContainerRecordTree() :: result", refTree );
             return refTree.ToArray();
         }
         
@@ -551,11 +565,21 @@ namespace XeLib
         {
             return Elements.AddArrayItemEx<THandle>( this.XHandle, path, subpath, value );
         }
-        
+
         #region Element Values
-        
+
+        /// <summary>
+        /// DO NOT USE!  DOES NOT WORK AS THE UNDERLYING FUNCTION DOES NOT WORK FOR ANYTHING BEYOND RESOURCE FILES!
+        /// </summary>
+        /// <returns></returns>
+        public virtual byte[] GetRawBytes()
+        {
+            return ElementValues.GetRawBytesEx( this.XHandle, "" );
+        }
+
+
         #region String Values
-        
+
         public virtual string GetValue()
         {
             return ElementValues.GetValueEx( this.XHandle, "" );
@@ -599,11 +623,55 @@ namespace XeLib
         {
             return ElementValues.SetBoolValueEx( this.XHandle, path, value );
         }
-        
+
         #endregion
-        
+
+        #region Byte Values
+
+        public virtual sbyte GetSByteValue()
+        {
+            return ElementValues.GetSByteValueEx( this.XHandle, "" );
+        }
+
+        public virtual sbyte GetSByteValueEx( string path )
+        {
+            return ElementValues.GetSByteValueEx( this.XHandle, path );
+        }
+
+        public virtual bool SetSByteValue( sbyte value )
+        {
+            return ElementValues.SetSByteValueEx( this.XHandle, "", value );
+        }
+
+        public virtual bool SetSByteValueEx( string path, sbyte value )
+        {
+            return ElementValues.SetSByteValueEx( this.XHandle, path, value );
+        }
+
+        public virtual byte GetUByteValue()
+        {
+            return ElementValues.GetUByteValueEx( this.XHandle, "" );
+        }
+
+        public virtual byte GetUByteValueEx( string path )
+        {
+            return ElementValues.GetUByteValueEx( this.XHandle, path );
+        }
+
+        public virtual bool SetUByteValue( byte value )
+        {
+            return ElementValues.SetUByteValueEx( this.XHandle, "", value );
+        }
+
+        public virtual bool SetUByteValueEx( string path, byte value )
+        {
+            return ElementValues.SetUByteValueEx( this.XHandle, path, value );
+        }
+
+        #endregion
+
         #region Integer Values
-        
+
         public virtual int GetIntValue()
         {
             return ElementValues.GetIntValueEx( this.XHandle, "" );

@@ -146,7 +146,7 @@ public abstract class XmlBase
     {
         if( pnode == null )
             pnode = RootNode;
-        return pnode == null ? null : pnode.SelectNodes( xpath );
+        return pnode?.SelectNodes( xpath );
     }
     
     public XmlNodeList              GetNodes( string xpath )
@@ -158,21 +158,34 @@ public abstract class XmlBase
     {
         if( pnode == null )
             pnode = RootNode;
-        return pnode == null ? null : pnode.SelectSingleNode( xpath );
+        return pnode?.SelectSingleNode( xpath );
     }
     
     public XmlNode                  GetNode( string xpath )
     {
-        return GetNode( RootNode, xpath );
+        return GetNode( null, xpath );
     }
-    
+
+    public void                     RemoveNode( XmlNode pnode, string xpath )
+    {
+        if( pnode == null )
+            pnode = RootNode;
+        var child = GetNode( pnode, xpath );
+        if( child == null ) return;
+        pnode?.RemoveChild( child );
+    }
+
+    public void                     RemoveNode( string xpath )
+    {
+        RemoveNode( null, xpath );
+    }
+
+
     public XmlNode                  FindChildNode( XmlNode pnode, string xpath, string value )
     {
         if( pnode == null )
             pnode = RootNode;
-        if( pnode == null )
-            return null;
-        var cnodes = pnode.SelectNodes( xpath );
+        var cnodes = pnode?.SelectNodes( xpath );
         if( cnodes == null ) return null;
         foreach( XmlNode cnode in cnodes )
         {

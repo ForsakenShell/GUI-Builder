@@ -46,6 +46,33 @@ public static class GenReflection
         return result != null;
     }
     
+    public static bool IsClassOrSubClassOf( this Type type, Type otherType )
+    {
+        if( type == null ) return otherType == null;
+        if( otherType == null ) return false;
+        return ( type == otherType )||( type.IsSubclassOf( otherType ) );
+    }
+
+    public static MethodBase GetMethodBase( this Type t, string methodName )
+    {
+        return t == null
+            ? null
+            : t.GetMethod(
+                methodName,
+                (
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.Static
+                ) );
+
+    }
+
+    public static MethodBase GetMethodBase( this object o, string methodName )
+    {
+        return o == null ? null : o.GetType().GetMethodBase( methodName );
+    }
+
     #endregion
     
 }

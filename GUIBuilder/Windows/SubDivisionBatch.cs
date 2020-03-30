@@ -19,51 +19,37 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of SubDivisionBatch.
     /// </summary>
-    public partial class SubDivisionBatch : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
+    public partial class SubDivisionBatch : WindowBase
     {
-        
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
-        public string XmlNodeName { get{ return "SubDivisionBatchWindow"; } }
-        
-        bool onLoadComplete = false;
-        
-        public SubDivisionBatch()
+
+        /// <summary>
+        /// Use GodObject.Windows.GetWindow<SubDivisionBatch>() to create this Window
+        /// </summary>
+        public SubDivisionBatch() : base( true )
         {
             InitializeComponent();
         }
-        
-        void OnFormLoad( object sender, EventArgs e )
+
+
+        #region GodObject.XmlConfig.IXmlConfiguration
+
+
+        public override string XmlNodeName { get { return "SubDivisionBatchWindow"; } }
+
+
+        #endregion
+
+
+        void SubDivisionBatch_OnLoad( object sender, EventArgs e )
         {
-            this.Translate( true );
-            
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
-            
             lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
             UpdateSubDivisionList();
-            
-            onLoadComplete = true;
-            SetEnableState( true );
         }
-        
-        void OnFormClosed( object sender, FormClosedEventArgs e )
+
+        void OnFormClosing( object sender, FormClosingEventArgs e )
         {
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
-            GodObject.Windows.SetWindow<GUIBuilder.Windows.SubDivisionBatch>( null, false );
-        }
-        
-        void OnFormMove( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteSize( this );
         }
         
         #region Sync'd list monitoring
@@ -80,17 +66,6 @@ namespace GUIBuilder.Windows
         }
         
         #endregion
-        
-        public void SetEnableState( bool enabled )
-        {
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
-                return;
-            }
-            
-            pnWindow.Enabled = enabled;
-        }
         
         void btnCheckMissingElementsClick( object sender, EventArgs e )
         {
@@ -118,8 +93,8 @@ namespace GUIBuilder.Windows
                 subdivisions,
                 cbElementBorderEnablers.Checked,
                 cbElementSandboxVolumes.Checked );
-            
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatchWindow :: CheckMissingElements() :: Completed in {0}", tStart.Ticks );
+
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
         }
@@ -151,8 +126,8 @@ namespace GUIBuilder.Windows
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
-            
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatchWindow :: OptimizeSandboxVolumes() :: Completed in {0}", tStart.Ticks );
+
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
         }
@@ -184,8 +159,8 @@ namespace GUIBuilder.Windows
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
-            
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatchWindow :: NormalizeBuildVolumes() :: Completed in {0}", tStart.Ticks );
+
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
         }

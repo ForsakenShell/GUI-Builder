@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>GodObject.CoreForms.StaticFormProperty</Title>
+            <Author>1000101</Author>
+            <Description>Generate the private and dynamic static Form properties for CoreForms.</Description>
+            <Shortcut>Snippet_StaticCoreForm</Shortcut>
+            <SnippetTypes>
+                <SnippetType>Expansion</SnippetType>
+            </SnippetTypes>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>FormType</ID>
+                    <ToolTip>Engine.Plugin.Forms</ToolTip>
+                    <Default>Engine.Plugin.Forms.FORMTYPE</Default>
+                </Literal>
+                <Literal>
+                    <ID>FormName</ID>
+                    <ToolTip>Name of static, preferibly the EditorID of the Form</ToolTip>
+                    <Default>FormName</Default>
+                </Literal>
+                <Literal>
+                    <ID>Plugin</ID>
+                    <ToolTip>Filename of Form master record.</ToolTip>
+                    <Default>Master.Filename.Fallout4</Default>
+                </Literal>
+                <Literal>
+                    <ID>FormID</ID>
+                    <ToolTip>FormID of the Form</ToolTip>
+                    <Default>0x00000000</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="CSharp">
+                <![CDATA[
+                #region $FormType$ $FormID$ $FormName$ $Plugin$
+                private static $FormType$ _$FormName$ = null;
+                public static $FormType$ $FormName$
+                {
+                    get
+                    {
+                        if( _$FormName$ == null )
+                            _$FormName$ = new $FormType$( $Plugin$, $FormID$ );
+                        return _$FormName$;
+                    }
+                }
+                #endregion]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

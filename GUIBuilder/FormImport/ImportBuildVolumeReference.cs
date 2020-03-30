@@ -63,27 +63,26 @@ namespace GUIBuilder.FormImport
         protected override void         DumpImport()
         {
             //return;
-            DebugLog.WriteLine( string.Format(
-                "\n{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}",
-                this.GetType()  .ToString(),
-                Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
-                string.IsNullOrEmpty( NewEditorID ) ? null : string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID ),
-                ftBaseActi      .DisplayIDInfo( "\n\tBaseActi = {0}" ),
-                ftWorldspace    .DisplayIDInfo( "\n\tWorldspace = {0}" ),
-                string          .Format       ( "\n\tPosition = {0}", Position.ToString() ),
-                string          .Format       ( "\n\tRotation = {0}", Rotation.ToString() ),
-                string          .Format       ( "\n\tBounds = {0}", Bounds.ToString() ),
-                ftLinkRef       .DisplayIDInfo( "\n\tLinkRef = {0}" ),
-                ftLinkKeyword   .DisplayIDInfo( "\n\tLinkKeyword = {0}" ),
-                ftLayer         .DisplayIDInfo( "\n\tLayer = {0}" )
-            ) );
+            DebugLog.WriteStrings( null, new[]{
+                this.TypeFullName(),
+                Target          .DisplayIDInfo( "Target Form = {0}", "unresolved" ),
+                string.IsNullOrEmpty( NewEditorID ) ? null : string.Format( "NewEditorID = \"{0}\"", NewEditorID ),
+                ftBaseActi      .DisplayIDInfo( "BaseActi = {0}" ),
+                ftWorldspace    .DisplayIDInfo( "Worldspace = {0}" ),
+                string          .Format       ( "Position = {0}", Position.ToString() ),
+                string          .Format       ( "Rotation = {0}", Rotation.ToString() ),
+                string          .Format       ( "Bounds = {0}", Bounds.ToString() ),
+                ftLinkRef       .DisplayIDInfo( "LinkRef = {0}" ),
+                ftLinkKeyword   .DisplayIDInfo( "LinkKeyword = {0}" ),
+                ftLayer         .DisplayIDInfo( "Layer = {0}" ) },
+                false, true, false, false );
         }
         
         public                          ImportBuildVolumeReference( AnnexTheCommonwealth.Volume originalScript, string newEditorID, Engine.Plugin.Forms.Activator baseActi, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, Vector3f rotation, Vector3f bounds, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, Engine.Plugin.Forms.Layer layer )
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.Volume ), originalScript )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
             
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
@@ -104,7 +103,7 @@ namespace GUIBuilder.FormImport
             : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.BuildAreaVolume ), originalScript )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
-                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.GetType().ToString() ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
             
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;

@@ -18,34 +18,42 @@ namespace GodObject
     
     public static class Debug
     {
-        public static void DumpAncestralTree( Engine.Plugin.Interface.IXHandle o, Engine.Plugin.Interface.IXHandle s = null )
+        public static void DumpAncestralTree( Engine.Plugin.Interface.IXHandle obj, Engine.Plugin.Interface.IXHandle initialObj = null )
         {
-            if( ( s != null )&&( s == o ) )
+            if( ( initialObj != null )&&( initialObj == obj ) )
             {
                 DebugLog.WriteLine( "\tI'm my own grandpa!" );
                 return;
             }
-            if( s == null )
+            if( initialObj == null )
             {
-                DebugLog.WriteLine( "\nDumpAncestralTree" );
-                s = o;
+                DebugLog.WriteCaller( false );
+                initialObj = obj;
             }
             DebugLog.WriteLine( string.Format(
-                "\t{0} :: 0x{1} - \"{2}\"",
-                o.GetType().ToString(),
-                o.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                o.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ) );
-            if( o.Ancestor != null )
-                DumpAncestralTree( o.Ancestor, s );
+                "\t{0} :: {1}",
+                obj.TypeFullName(),
+                obj.IDString ) );
+            if( obj.Ancestor != null )
+                DumpAncestralTree( obj.Ancestor, initialObj );
         }
     }
-    
+
     public static partial class Plugin
     {
         
         #region Internal variables
         
-        public static GUIBuilder.Workspace Workspace = null;
+        
+        private static GUIBuilder.Workspace _Workspace = null;
+        public static GUIBuilder.Workspace Workspace {
+            get
+            {
+                //Console.WriteLine( "GodObject.Plugin.Workspace" );
+                return _Workspace;
+            }
+        }
+
         
         static List<string> _loadPlugins = null;
         static string _workingFile = null;
@@ -105,8 +113,9 @@ namespace GodObject
         public static bool Load( string workspace )
         {
             var result = false;
-            Workspace = new Workspace( workspace );
-            if( Workspace != null )
+            if( _Workspace != null ) return result;
+            _Workspace = new Workspace( workspace );
+            if( _Workspace != null )
             {
                 result = Load(
                     Workspace.WorkingFile,
@@ -120,19 +129,21 @@ namespace GodObject
         {
             if( string.IsNullOrEmpty( _workingFile ) )
             {
-                DebugLog.WriteError( "GUIBuilder.GodObject.Plugin", "CreateWorkspace()", "No working file!" );
+                DebugLog.WriteError( "No working file!" );
                 return false;
             }
-            Workspace = new Workspace( _workingFile );
-            if( Workspace == null )
+            if( _Workspace != null ) return false;
+            _Workspace = new Workspace( _workingFile );
+            if( _Workspace == null )
             {
-                DebugLog.WriteError( "GUIBuilder.GodObject.Plugin", "CreateWorkspace()", "Could not create Workspace!" );
+                DebugLog.WriteError( "Could not create Workspace!" );
                 return false;
             }
-            Workspace.PluginNames = _loadPlugins;
-            Workspace.WorkingFile = _workingFile;
-            Workspace.OpenRenderWindowOnLoad = _openRenderWindowOnLoad;
-            Workspace.Commit();
+            _Workspace.PluginNames = _loadPlugins;
+            _Workspace.WorkingFile = _workingFile;
+            _Workspace.OpenRenderWindowOnLoad = _openRenderWindowOnLoad;
+            _Workspace.Commit();
+            GUIBuilder.CustomForms.SaveToWorkspace();
             
             return true;
         }
@@ -176,23 +187,31 @@ namespace GodObject
             return result;
         }
         
-        public static void Unload()
+        public static bool Unload( WorkerThreadPool.ThreadOnFinish onFinished )
         {
-            INTERNAL_Unload( true, true, true, null );
+            var unloadThread = WorkerThreadPool.CreateWorker( THREAD_UnloadPlugins, onFinished );
+            return unloadThread == null
+                ? false
+                : unloadThread.Start();
         }
         
+        static void THREAD_UnloadPlugins()
+        {
+            INTERNAL_Unload( true, true, true, null, true );
+        }
+
         #endregion
         
         #region Internal functions
         
-        static bool SyncWithThread( WorkerThreadPool.ThreadStart start, WorkerThreadPool.WorkerThread syncWith, string prefix )
+        static bool SyncWithThread( WorkerThreadPool.ThreadStart start, WorkerThreadPool.WorkerThread syncWith )
         {
             var t = WorkerThreadPool.CreateWorker( start, null );
             if( t == null ) return false;
             
             //t.TimeThread = timeThread;
             t.Start();
-            return t.Sync( prefix, syncWith );
+            return t.Sync( GenString.FormatMethod( start.Method, null, false, true, true ), syncWith );
         }
         
         public static bool BuildAllPluginReferences( WorkerThreadPool.WorkerThread thread = null )
@@ -200,7 +219,7 @@ namespace GodObject
             Messages.ClearMessages();
             return 
                 Setup.BuildReferencesEx( ElementHandle.BaseXHandleValue, false ) &&
-                XeLibHelper.Thread.Sync( "GodObject.Plugin :: BuildAllPluginReferences()", thread );
+                XeLibHelper.Thread.Sync( "XeLib.API.Setup.BuildReferencesEx()", thread );
         }
         
         public static bool BuildReferencesFor( Engine.Plugin.File mod, WorkerThreadPool.WorkerThread thread = null )
@@ -208,12 +227,12 @@ namespace GodObject
             Messages.ClearMessages();
             return
                 mod.BuildReferences() &&
-                XeLibHelper.Thread.Sync( "GodObject.Plugin :: BuildReferencesFor()", thread );
+                XeLibHelper.Thread.Sync( "Engine.Plugin.File.BuildReferences() :: " + mod.Filename, thread );
         }
         
-        static void INTERNAL_Unload( bool dispose, bool stopThread, bool sync, string prefix )
+        static void INTERNAL_Unload( bool dispose, bool stopThread, bool sync, string prefix, bool enableUI )
         {
-            DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin", "INTERNAL_Unload()", "dispose = " + dispose.ToString(), "stopThread = " + stopThread.ToString(), "sync = " + sync.ToString(), "prefix = \"" + prefix + "\"" } );
+            DebugLog.OpenIndentLevel( new [] { "dispose = " + dispose.ToString(), "stopThread = " + stopThread.ToString(), "sync = " + sync.ToString(), "prefix = \"" + prefix + "\"" }, true, true, false );
             
             var isLoading = _isLoading;
             _isLoading = true;
@@ -229,21 +248,31 @@ namespace GodObject
             
             if( dispose )
             {
+                // Unload references to custom forms...
+                GUIBuilder.CustomForms.Dispose();
+
                 // Unload references to core forms...
                 Data.Clear();
-                
+
                 // ...then unload core forms
-                foreach( var form in CoreForms.Forms )
-                    form.Dispose();
+                CoreForms.Dispose();
+                //foreach( var form in CoreForms.Forms )
+                //    form.Dispose();
                 
             }
             
-            if( Workspace != null )
-                Workspace.Commit();
+            if( _Workspace != null )
+                _Workspace.Commit();
 
-            Workspace = null;
+            _Workspace = null;
             _workingFile = null;
             _isLoading = isLoading;
+
+            if( enableUI )
+            {
+                GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>( true ).Translate();
+                GodObject.Windows.SetEnableState( true );
+            }
 
             DebugLog.CloseIndentLevel();
         }
@@ -252,14 +281,34 @@ namespace GodObject
         
         #region Worker Threads
         
-        static void THREAD_SyncGodObjects()
+        static void THREAD_LoadCoreForms()
         {
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "Plugin.LoadBaseForms".Translate() );
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
-            
+
+            // Add Workspace custom Core Forms
+
+            var ws = Workspace;
+            if( ws != null )
+            {
+                var workshopIdentifiers = ws.WorkshopWorkbenches;
+                if( !workshopIdentifiers.NullOrEmpty() )
+                {
+                    foreach( var identifier in workshopIdentifiers )
+                    {
+                        if( Engine.Plugin.Constant.ValidFormID( identifier.FormID ) && identifier.Filename.InsensitiveInvariantMatch( _loadPlugins ) )
+                        {
+                            Engine.Plugin.Forms.Container customWorkshop;
+                            CoreForms.TryAddCustomWorkshopWorkbench( identifier.FormID, identifier.Filename, out customWorkshop );
+                        }
+                    }
+                }
+            }
+
+            DebugLog.OpenIndentLevel( "CoreForms", false );
             foreach( var form in CoreForms.Forms )
             {
                 //DebugLog.Write( string.Format( "\n{0} :: 0x{1} :: {2}", form.Signature, form._Forced_FormID.ToString( "X8" ), form._Forced_Filename ) );
@@ -267,24 +316,23 @@ namespace GodObject
                 {
                     var handle = form.MasterHandle;
                     if( !handle.IsValid() )
-                        throw new Exception( string.Format( "Unable to get handle for form 0x{0}", form.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ) ) );
-                    
+                        throw new Exception( string.Format( "Unable to get handle for form 0x{0}", form.ForcedFormID.ToString( "X8" ) ) );
+
+                    DebugLog.WriteLine( form.ToStringNullSafe() );
+
                     //form.DebugDump();
                 }
             }
+            DebugLog.CloseIndentLevel();
             
-            m.StopSyncTimer(
-                "GodObject.Plugin :: SyncGodObjects() :: Completed in {0}",
-                tStart.Ticks );
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
         }
         
-        static void THREAD_SyncGodObjectReferences()
+        static void THREAD_LoadCoreFormReferences()
         {
-            DebugLog.OpenIndentLevel();
             Data.Load();
             Data.PostLoad();
-            DebugLog.CloseIndentLevel();
         }
         
         static void THREAD_PluginLoader()
@@ -299,13 +347,13 @@ namespace GodObject
                 
                 #region Create string of plugins to load
                 
-                DebugLog.OpenIndentLevel( "Selected Plugins" );
-                DebugLog.WriteList( "Filenames", _loadPlugins );
-                DebugLog.WriteLine( new [] { "Working file", _workingFile } );
+                DebugLog.OpenIndentLevel( "Selected Plugins", false );
+                DebugLog.WriteList( "Filenames", _loadPlugins, false, true );
+                DebugLog.WriteLine( "Working file = " + _workingFile );
                 DebugLog.CloseIndentLevel();
                 
                 if( _thread.StopSignal )
-                    throw new Exception( "SignalStop" );
+                    goto signalStopAbort;
                 
                 #endregion
                 
@@ -315,10 +363,10 @@ namespace GodObject
                 Messages.ClearMessages();
                 Setup.LoadPlugins( _loadPlugins );
                 
-                if( ( !XeLibHelper.Thread.Sync( "XeLib.API.Setup :: LoadPlugins()", null ) )||( _thread.StopSignal ) )
+                if( ( !XeLibHelper.Thread.Sync( "XeLib.API.Setup.LoadPlugins()", null ) )||( _thread.StopSignal ) )
                 {
                     if( _thread.StopSignal )
-                        throw new Exception( "SignalStop" );
+                        goto signalStopAbort;
                     
                     throw new Exception( "XeLib Error" );
                 }
@@ -331,7 +379,7 @@ namespace GodObject
                     
                     #region Create list of mods from the loaded plugins
                     
-                    DebugLog.OpenIndentLevel( "GetPluginHandles()" );
+                    DebugLog.OpenIndentLevel( "Get Plugin File Handles", false );
                     
                     Data.Files.Loaded = new List<Engine.Plugin.File>();
                     
@@ -339,7 +387,9 @@ namespace GodObject
                     {
                         var newFile = new Engine.Plugin.File( fileHandle );
                         Data.Files.Loaded.Add( newFile );
-                        
+
+                        DebugLog.WriteLine( newFile.ToStringNullSafe() );
+
                         // Populate master references for specific functionality
                         var filename = fileHandle.Filename;
                         if( filename.InsensitiveInvariantMatch( Master.Filename.Fallout4 ) )
@@ -356,37 +406,45 @@ namespace GodObject
                     DebugLog.CloseIndentLevel();
                     
                     if( _thread.StopSignal )
-                        throw new Exception( "SignalStop" );
+                        goto signalStopAbort;
                     
                     #endregion
                     
                     #region Build references for the plugins
                     
-                    if( !BuildAllPluginReferences( _thread ) )
-                        throw new Exception( "Unable to BuildAllPluginReferences()" );
-                    if( _thread.StopSignal )
-                        throw new Exception( "SignalStop" );
-                    
+                    foreach( var file in Data.Files.Loaded )
+                    {
+                        Messages.ClearMessages();
+                        
+                        if( !file.BuildReferences() )
+                            throw new Exception( "Could not start thread fop XeLib.API.Setup.BuildReferencesEx()" );
+
+                        XeLibHelper.Thread.Sync( "XeLib.API.Setup.BuildReferencesEx()", _thread );
+                        
+                        if( _thread.StopSignal )
+                            goto signalStopAbort;
+                    }
+
                     #endregion
                     
-                    #region Get the God Objects needed from the required masters
+                    #region Get the Core Forms needed from the required masters
                     
-                    if( !SyncWithThread( THREAD_SyncGodObjects, _thread, "GodObject.Plugin :: SyncGodObjects()" ) )
+                    if( !SyncWithThread( THREAD_LoadCoreForms, _thread ) )
                     {
                         if( _thread.StopSignal )
-                            throw new Exception( "SignalStop" );
+                            goto signalStopAbort;
                         
                         throw new Exception( "Unable to sync plugin data!" );
                     }
                     
                     #endregion
                     
-                    #region Sync data in plugins
+                    #region Load the Core Form References
                     
-                    if( !SyncWithThread( THREAD_SyncGodObjectReferences, _thread, "GodObject.Plugin :: SyncGodObjectReferences()" ) )
+                    if( !SyncWithThread( THREAD_LoadCoreFormReferences, _thread ) )
                     {
                         if( _thread.StopSignal )
-                            throw new Exception( "SignalStop" );
+                            goto signalStopAbort;
                         
                         throw new Exception( "Unable to sync plugin data!" );
                     }
@@ -398,15 +456,17 @@ namespace GodObject
                     if( _openRenderWindowOnLoad )
                         GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( true );
                 }
+
                 #endregion
+
             }
             
             #region Sum Ting Wong
             
             catch( Exception e )
             {
-                DebugLog.WriteLine( "THREAD_PluginLoader() :: An exception has occured!" );
-                DebugLog.WriteLine( "THREAD_PluginLoader() :: Exception Data ::\n" + e.ToString() );
+                DebugLog.WriteException( e );
+                //DebugLog.WriteError( "An unexpected exception has occured!\n" + e.ToString() );
                 
                 System.Windows.Forms.MessageBox.Show(
                     e.ToString(),
@@ -414,16 +474,18 @@ namespace GodObject
                     System.Windows.Forms.MessageBoxButtons.OK,
                     System.Windows.Forms.MessageBoxIcon.Stop );
                 
-                INTERNAL_Unload( true, false, false, "THREAD_PluginLoader()" );
+                INTERNAL_Unload( true, false, false, "PluginLoader()", false );
             }
             
             #endregion
             
-            m.StopSyncTimer( "GodObject.Plugin :: PluginLoader() :: Thread finished in {0}", tStart.Ticks );
+        signalStopAbort:
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( true );
             //_workingFile = string.Empty;
             _isLoading = false;
+            _thread = null;
         }
         
         #endregion

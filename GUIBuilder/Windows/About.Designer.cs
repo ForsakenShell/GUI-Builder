@@ -15,10 +15,10 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.Label lblTitle;
         System.Windows.Forms.Label lblCredit;
         System.Windows.Forms.Label lblVersion;
-        System.Windows.Forms.LinkLabel llblLicense;
+        System.Windows.Forms.LinkLabel linkLicense;
         System.Windows.Forms.Label lblLicense;
         System.Windows.Forms.TextBox tbLicense;
-        System.Windows.Forms.LinkLabel lblAuthor;
+        System.Windows.Forms.LinkLabel linkAuthor;
         
         /// <summary>
         /// Disposes resources used by the form.
@@ -44,11 +44,23 @@ namespace GUIBuilder.Windows
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblCredit = new System.Windows.Forms.Label();
             this.lblVersion = new System.Windows.Forms.Label();
-            this.llblLicense = new System.Windows.Forms.LinkLabel();
+            this.linkLicense = new System.Windows.Forms.LinkLabel();
             this.lblLicense = new System.Windows.Forms.Label();
             this.tbLicense = new System.Windows.Forms.TextBox();
-            this.lblAuthor = new System.Windows.Forms.LinkLabel();
+            this.linkAuthor = new System.Windows.Forms.LinkLabel();
+            this.WindowPanel.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // WindowPanel
+            // 
+            this.WindowPanel.Controls.Add(this.lblTitle);
+            this.WindowPanel.Controls.Add(this.lblCredit);
+            this.WindowPanel.Controls.Add(this.linkAuthor);
+            this.WindowPanel.Controls.Add(this.lblVersion);
+            this.WindowPanel.Controls.Add(this.tbLicense);
+            this.WindowPanel.Controls.Add(this.linkLicense);
+            this.WindowPanel.Controls.Add(this.lblLicense);
+            this.WindowPanel.Size = new System.Drawing.Size(495, 352);
             // 
             // lblTitle
             // 
@@ -57,7 +69,7 @@ namespace GUIBuilder.Windows
             this.lblTitle.Font = new System.Drawing.Font("Comic Sans MS", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblTitle.Location = new System.Drawing.Point(0, 0);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(485, 68);
+            this.lblTitle.Size = new System.Drawing.Size(495, 68);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Tag = "AboutWindow.ComicTitle";
             this.lblTitle.Text = "Comic";
@@ -69,7 +81,7 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblCredit.Location = new System.Drawing.Point(0, 91);
             this.lblCredit.Name = "lblCredit";
-            this.lblCredit.Size = new System.Drawing.Size(485, 23);
+            this.lblCredit.Size = new System.Drawing.Size(495, 23);
             this.lblCredit.TabIndex = 1;
             this.lblCredit.Tag = "AboutWindow.Author";
             this.lblCredit.Text = "by 1000101";
@@ -81,23 +93,23 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblVersion.Location = new System.Drawing.Point(0, 68);
             this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(485, 23);
+            this.lblVersion.Size = new System.Drawing.Size(495, 23);
             this.lblVersion.TabIndex = 2;
             this.lblVersion.Text = "vM.m.r.b";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // llblLicense
+            // linkLicense
             // 
-            this.llblLicense.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.linkLicense.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.llblLicense.Location = new System.Drawing.Point(0, 160);
-            this.llblLicense.Name = "llblLicense";
-            this.llblLicense.Size = new System.Drawing.Size(485, 23);
-            this.llblLicense.TabIndex = 4;
-            this.llblLicense.TabStop = true;
-            this.llblLicense.Text = "http://unlicense.org/";
-            this.llblLicense.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.llblLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LlblLicenseLinkClicked);
+            this.linkLicense.Location = new System.Drawing.Point(0, 160);
+            this.linkLicense.Name = "linkLicense";
+            this.linkLicense.Size = new System.Drawing.Size(495, 23);
+            this.linkLicense.TabIndex = 4;
+            this.linkLicense.TabStop = true;
+            this.linkLicense.Text = "http://unlicense.org/";
+            this.linkLicense.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.linkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLicenseLinkClicked);
             // 
             // lblLicense
             // 
@@ -105,7 +117,7 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblLicense.Location = new System.Drawing.Point(0, 137);
             this.lblLicense.Name = "lblLicense";
-            this.lblLicense.Size = new System.Drawing.Size(485, 23);
+            this.lblLicense.Size = new System.Drawing.Size(495, 23);
             this.lblLicense.TabIndex = 5;
             this.lblLicense.Tag = "AboutWindow.ReleaseLicenseTitle";
             this.lblLicense.Text = "Release license title";
@@ -117,41 +129,34 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbLicense.Cursor = System.Windows.Forms.Cursors.Default;
-            this.tbLicense.Location = new System.Drawing.Point(6, 186);
+            this.tbLicense.Location = new System.Drawing.Point(0, 186);
             this.tbLicense.Multiline = true;
             this.tbLicense.Name = "tbLicense";
             this.tbLicense.ReadOnly = true;
             this.tbLicense.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbLicense.Size = new System.Drawing.Size(479, 154);
+            this.tbLicense.Size = new System.Drawing.Size(495, 166);
             this.tbLicense.TabIndex = 6;
             this.tbLicense.Tag = "AboutWindow.ReleaseLicenseBody";
             this.tbLicense.Text = "Release license body";
             // 
-            // lblAuthor
+            // linkAuthor
             // 
-            this.lblAuthor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.linkAuthor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblAuthor.Location = new System.Drawing.Point(0, 114);
-            this.lblAuthor.Name = "lblAuthor";
-            this.lblAuthor.Size = new System.Drawing.Size(485, 23);
-            this.lblAuthor.TabIndex = 7;
-            this.lblAuthor.TabStop = true;
-            this.lblAuthor.Text = "https://www.nexusmods.com/users/106891";
-            this.lblAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblAuthorLinkClicked);
+            this.linkAuthor.Location = new System.Drawing.Point(0, 114);
+            this.linkAuthor.Name = "linkAuthor";
+            this.linkAuthor.Size = new System.Drawing.Size(495, 23);
+            this.linkAuthor.TabIndex = 7;
+            this.linkAuthor.TabStop = true;
+            this.linkAuthor.Text = "https://www.nexusmods.com/users/106891";
+            this.linkAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.linkAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkAuthorLinkClicked);
             // 
             // About
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(495, 352);
-            this.Controls.Add(this.lblAuthor);
-            this.Controls.Add(this.tbLicense);
-            this.Controls.Add(this.lblLicense);
-            this.Controls.Add(this.llblLicense);
-            this.Controls.Add(this.lblVersion);
-            this.Controls.Add(this.lblCredit);
-            this.Controls.Add(this.lblTitle);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(503, 560);
@@ -161,12 +166,10 @@ namespace GUIBuilder.Windows
             this.ShowInTaskbar = false;
             this.Tag = "AboutWindow.Title";
             this.Text = "title";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
-            this.Load += new System.EventHandler(this.HelpAboutFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
+            this.ClientOnLoad += new System.EventHandler(this.About_OnLoad);
+            this.WindowPanel.ResumeLayout(false);
+            this.WindowPanel.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
     }

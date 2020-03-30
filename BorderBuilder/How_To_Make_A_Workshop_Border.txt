@@ -1,4 +1,4 @@
-GUIBuilder v1.0.4.15
+GUIBuilder v1.0.5.17
 
 How to create a custom terrain following workshop border for your custom
 settlement.
@@ -18,20 +18,29 @@ In the Creation Kit:
         need an EditorID at all you'll thank me later.
     b)  [Optional, as required] Create two new static object markers with the
         EditorID suffixes of "_TerrainFollowing" and "_ForcedZ" (again, no
-        quotes and again, you'll thank me later).
+        quotes and again, you'll thank me later).  In addition to this create
+        a new Location Ref Type (in "WorldData" in the CK Object Window) and
+        give it the EditorID suffix "_BorderWithBottom".
         Pro-tip:    Copy two different colour vanilla "flag" markers to use as
-                    your markers so you can easily differentiate them.
+                    your terrain following and forced z markers so you can
+                    easily differentiate them.
+                    eg: STAT:0003180F "xMarkerxFlagBlue"
     c)  Place markers at the outside corners and intersections of your build
         volumes and link them in a clockwise order with the
         "_WorkshopBorderLink" keyword you created in the first step (a).
         NOTE:       It is important that your markers are linked in clockwise
                     order, it is this order that correctly assigns the "inside"
                     (green) and "outside" (red) textures of the border.
-        Pro-tip:    Create a new layer for your border nodes and set it as the
-                    active layer, freeze all other layers to avoid accidental
-                    selection of references on those layers.  It may also be
-                    helpful to turn off the visibility of the layers other than
-                    the default layer and your custom layer.
+        NOTE:       To make a border with a solid bottom, use nothing but
+                    "_ForcedZ" markers for the entire border and give one of
+                    the placed marker references the "_BorderWithBottom"
+                    Location Ref Type.
+        Pro-tip:    Create a new layer for your border markers and set it as
+                    the active layer, freeze all other layers to avoid
+                    accidental selection of references on those layers.  It may
+                    also be helpful to turn off the visibility of the layers
+                    other than the layer your build volumes are on, the layer
+                    your markers will be on and, the default layer.
         Pro-tip:    Switching the render window between perspective and
                     orthographic view ("0" (zero) in the render window) and
                     top-down ("T" in the render window) can help you can get
@@ -47,10 +56,11 @@ In the Creation Kit:
         Pro-tip:    Use the duplicate function ("control-D" in the render
                     window) for the next marker in the sequence and select
                     local translation ("G" in the render window) so you can
-                    then use the axial move key ("Z"/"X"/"C" for Z/X/Y) to move
-                    the new marker into position, this is especially useful if
-                    you need to place "_ForcedZ" markers so that the border
-                    stays straight between actual corners of the border.
+                    then use the axial move keys ("Z"/"X"/"C" for Z/X/Y) to
+                    move the new marker into position, this is especially
+                    useful if you need to place "_ForcedZ" markers so that the
+                    border stays straight between actual corners of the border
+                    as you place markers to climb over objects in the scene.
         Pro-tip:    Place the all your markers, including the "_ForcedZ" on the
                     top of your build volumes so they are easier to find and
                     move; "_ForcedZ" markers need to be at the Z position you
@@ -58,9 +68,9 @@ In the Creation Kit:
                     placing and linking them on the top to start with is easier.
                     Once you have them all placed and linked, use the "F" key in
                     the render window with your "_ForcedZ" markers selected to
-                    them "fall" to the ground (or whatever static they may be
-                    over) then use the axial movement keys to fine-tune their
-                    positions.
+                    them "fall" to the ground (or on top of whatever static
+                    they may be over) then use the axial movement keys to fine-
+                    tune their positions.
         NOTE:       It takes at least two "_ForcedZ" markers linked in sequence
                     in a "start-stop" manner; "_ForcedZ" segments use the Z
                     position of the markers starting at the first marker
@@ -71,8 +81,8 @@ In the Creation Kit:
                     necessary.
     d)  Link one of your border markers to the workshop with the
         "_WorkshopBorderGenerator" keyword.  Linking to the workshop this way
-        allows mods can replace existing borders without touching the workshop
-        the border is for (ie, vanilla workshops).
+        allows mods to replace workshop borders in other mods without touching
+        the workshop or the original border (ie, vanilla workshops).
     e)  Save and exit
 
 
@@ -83,41 +93,50 @@ In GUIBuilder:
                     function for the future, this will record and use the same
                     settings everytime you want to work on your mod in
                     GUIBuilder.  This way instead of loading your plugin
-                    directly you can load the workspace instead.
-    b)  Open "Tools" > "Border Batch"
-    c)  Select your workshop[s] in the list of workshops.
-    d)  Select a target output folder, by default GUIBuilder tries to use
+                    directly and setting required parameters every time, you
+                    can use a workspace instead and all those settings will be
+                    saved to and loaded from the workspace.
+    b)  Open "Tools" > "Custom Forms"
+    c)  Select the "Workshop" tab and make sure the custom forms that you
+        created in CK are selected in the "Node Detection" area.  If you also
+        created your own Workshop containers, make sure they are selected in
+        the list on the right.  Minimally the Keywords for
+        "_WorkshopBorderGenerator" and "_WorkshopBorderLink" need to be created
+        and set.
+    d)  Open "Tools" > "Border Batch"
+    e)  Select your workshop[s] in the list of workshops.
+    f)  Select a target output folder, by default GUIBuilder tries to use
         "BorderBuilder\Output" but any folder can be used.  If you don't select
         an output folder, GUIBuilder will prompt you for one when you generate
         the NIF file[s].
-    e)  Select the preset you want to use or create your own, "/GS" means "with
+    g)  Select the preset you want to use or create your own, "/GS" means "with
         ground sink".  See the main notes section at the bottom of this
         document for a full explaination of all the parameters.
-    f)  Make sure your keywords and static markers that you created in steps
-        (a) and (b) in the CK are selected in the "Node Detection" area.
-        Really you only need to have the "_WorkshopBorderGenerator" selected
-        but it will help to insure your mod is "correct" if you gave all the
-        forms appropriate EditorIDs and GUIBuilder detects them.  If you only
-        created the one required keyword it's ok, everything else can be left
-        as "none".
-    g)  Click "Gen. Nodes" to generate all the points required for the NIF[s]
-        for the selected workshop[s].
-    h)  Click "Build NIFs" to create the NIF[s] from the points generated in
-        the previous step (g).
-        [Optional]: Check the "Create Import Data" option for the next steps.
-                    Without checking this GUIBuilder will not create any import
-                    data and you will have to guess the position to place your
-                    borders inside the CK/xEdit.
-    i)  Click "Import NIFs", this will open an import window.
+    h)  Click "Gen. Nodes" to generate all the points required for the NIF[s]
+        for the selected workshop[s] from the markers you placed and linked
+        together in the CK.
+    i)  Click "Build NIFs" to create the NIF[s] from the points generated in
+        the previous step (h).
+        NOTE:       When making a border with a bottom, set the "Ground Sink"
+                    to 0.  If your "bottom" is well below the typical area the
+                    player will be in the volumes, increase the "Ground Offset"
+                    to the "average height" (relative to the bottom of the
+                    border) the border would be seen from.
+        [Optional]: Make sure the "Create Import Data" option is checked for
+                    the next steps.  Without checking this GUIBuilder will not
+                    create any import data and you will have to guess the
+                    position to place your borders inside the CK/xEdit.
+    j)  Click "Import NIFs", this will open an import window.
         NOTE:       The "Import NIFs" button won't enable if the workshop[s]
-                    already have a border linked to them.  This is because the
-                    new NIF[s] for the workshop[s] will be created based on the
-                    original NIF[s] position.  This is done so that replacing
+                    already have a border linked to them and originate in a
+                    different plugin than the working file.  This is because
+                    the new NIF[s] for the workshop[s] will be created based on
+                    the original NIF[s] position and is done so that replacing
                     the border doesn't require any change to the plugin itself
                     (ie, if you are creating new NIFs for vanilla workshops
                     this means the static object and object reference do not
                     need any changes just the presence of the new NIF).
-    h)  Click "Import" OR, record the "Extra Info" which is what the import
+    k)  Click "Import" OR, record the "Extra Info" which is what the import
         process will do for a given form so that you can manually import the
         border NIF[s] in the CK or xEdit and perform those steps manually.
 
@@ -132,7 +151,7 @@ Provided sample:
 
 
 
-Node Generation Parameters:
+Node Generation Parameters (Border Batch Window):
 
     Node Length:
         This is the "step size" for each node generated between the border
@@ -149,7 +168,7 @@ Node Generation Parameters:
         look at the first and last nodes and, middle and last nodes.
         Slope is calculated as: delta Z / delta (X, Y) length
 
-NIF Creation Parameters:
+NIF Creation Parameters (Border Batch Window):
 
     Create Import Data:
         If checked, as the NIF[s] are created additional information will be
@@ -176,18 +195,18 @@ NIF Creation Parameters:
         OR
         [Target Folder]\[Target Sub-Folder]\Meshes\[Existing Border NIF file path name]
 
-Node Detection Parameters:
+Node Detection Parameters (Custom Forms Window):
 
     Restrict to:
         This restricts loading every form (of the appropriate type) into the
         dropdown control to only the working file.
 
-    Keywords & Static Markers:
-        These are the keywords in either all the loaded plugins or just the
-        working file.  These should be set to the forms you created in steps
+    Base Forms (Keywords, Containers, etc):
+        These are the Forms in either all the loaded plugins or just the
+        working file.  These should be set to the Forms you created in steps
         (a) and (b) of the Creation Kit portion of this document.
         
-        If a workspace has been created then only these forms are loaded when
+        If a workspace has been created then only these Forms are loaded when
         the workspace is loaded in the future.
         
         devnote: TODO: Toggling "Restrict To" will force all the appropriate forms to load.  [devnote: As it applies to workspaces, currently does not load forms]
@@ -195,21 +214,43 @@ Node Detection Parameters:
 
 HELP!  It didn't create any NIFs for me!
 
-    First check the GUIBuilder.log folder.  While the program is running logs
-    will be created in a date and time sub-folder with individual logs per
+    First check the BorderBuilder\Logs folder.  While the program is running
+    logs will be created in a date and time sub-folder with individual logs per
     thread.  By default, when the program terminates those logs will be zipped
     into a single file that has the same date and time as the sub-folder the
     zip file is created from.  Most log files are created with names that
     reflect their function.  Have a look at the log[s] and see if it's
-    something like just a bad link.
+    something simple like just a bad or missing link or an unintended reference
+    selection when group selecting a large set of references.
     
-    eg: "GetFirstBorderNode() returned null!" means that there were no markers
-        linked to the workshop with your "_WorkshopBorderGenerator" keyword.
-    
-    If it's not something you overlooked, an ERROR or WARNING is present or,
+    eg:
+    GUIBuilder.WorkshopBatch.GenerateBorderNodesFromMarkers() :: 0x0006F5C5 - "AbernathyFarmWorkshop"
+    {
+        Fallout4.WorkshopScript.GetBorderMarkers()
+        {
+            workshop = 0x0006F5C5 - "AbernathyFarmWorkshop"
+            WorkshopBorderGenerator = 0x01000800 - "MyMods_WorkshopBorderGenerator"
+            WorkshopBorderLink = 0x01000801 - "MyMods_WorkshopBorderLink"
+        }
+        {
+            ------[ Warning ]------
+            Fallout4.WorkshopScript.GetFirstBorderMarker()
+            Workshop 0x0006F5C5 - "AbernathyFarmWorkshop" does not have any references linked to it with keyword 0x01000800 - "MyMods_WorkshopBorderGenerator"
+            This warning "may" be safely ignored for this workshop "depending" on the context in which it was given.
+            eg, you didn't setup and link any border markers for it but accidentally selected the workshop when generating nodes.
+            ------
+            nodes contains 0 elements
+        }
+    }
+
+    If it's not something you overlooked, or a more severe "ERROR" or "Warning"
+    is present that is not a result of a simple misclick or the like or,
     GUIBuilder crashed on you then please submit a bug report in the github
     issue tracker with steps to reproduce the issue along with the zipped logs
-    with the date-time that show the error.
+    with the date-time that show the error.  In some cases a copy of your mod
+    may be required to diagnose or correct the issue.  You can simply add your
+    mod to the zipped log file before attaching the zip to the bug report as
+    need be to this end.
     
     Issue tracker:
     https://github.com/ForsakenShell/GUI-Builder/issues

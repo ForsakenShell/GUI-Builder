@@ -21,13 +21,13 @@ namespace Engine.Plugin.Forms.Fields.Record
             var cEDID = GetValue( target );
             if( cEDID == value ) return;
             
-            if( Form.Collection != null )
-                Form.Collection.Remove( Form );
+            if( Form.ParentCollection != null )
+                Form.ParentCollection.Remove( Form );
             
             base.SetValue( target, value );
             
-            if( Form.Collection != null )
-                Form.Collection.Add( Form );
+            if( Form.ParentCollection != null )
+                Form.ParentCollection.Add( Form );
             
             Form.SendObjectDataChangedEvent( null );
         }

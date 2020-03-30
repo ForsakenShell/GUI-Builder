@@ -25,14 +25,14 @@ namespace GUIBuilder
     public static class SubDivisionBatch
     {
         
-        #region Sub-division edge flag segments
+        #region Sub-Division Edge Flags -> Border Nodes
         
-        public static bool ClearEdgeFlagSegments( List<SubDivision> subdivisions )
+        public static bool ClearEdgeFlagNodes( List<SubDivision> subdivisions )
         {
             if( subdivisions.NullOrEmpty() )
                 return false;
             
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: ClearEdgeFlagSegments()" );
+            DebugLog.OpenIndentLevel();
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -48,41 +48,12 @@ namespace GUIBuilder
             return true;
         }
         
-        public static bool CalculateWorkshopEdgeFlagSegments(
-            List<WorkshopScript> workshops,
-            Engine.Plugin.Forms.Keyword workshopBorderGeneratorKeyword,
-            Engine.Plugin.Forms.Static forcedZ,
+        public static bool CalculateSubDivisionEdgeFlagNodes(
+            List<SubDivision> subdivisions,
             float nodeLength,
             double angleAllowance,
             double slopeAllowance,
             bool updateMapUIData )
-        {
-            DebugLog.OpenIndentLevel( new string[] { "GUIBuilder.SubDivisionBatch", "CalculateWorkshopEdgeFlagSegments()", "keyword = " + workshopBorderGeneratorKeyword.ToStringNullSafe(), "workshops = " + workshops.ToStringNullSafe() } );
-            
-            if(
-                ( workshops.NullOrEmpty() )||
-                ( workshopBorderGeneratorKeyword == null )
-            )
-                return false;
-            
-            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
-            m.PushStatusMessage();
-            m.StartSyncTimer();
-            var tStart = m.SyncTimerElapsed();
-            
-            foreach( var workshop in workshops )
-            {
-                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                workshop.BuildBorders( workshopBorderGeneratorKeyword, forcedZ, nodeLength, angleAllowance, slopeAllowance, updateMapUIData );
-            }
-            
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatch :: CalculateWorkshopEdgeFlagSegments() :: Completed in {0}", tStart.Ticks );
-            m.PopStatusMessage();
-            DebugLog.CloseIndentLevel();
-            return true;
-        }
-        
-        public static bool CalculateSubDivisionEdgeFlagSegments( List<SubDivision> subdivisions, float nodeLength, double angleAllowance, double slopeAllowance, bool updateMapUIData )
         {
             if(
                 subdivisions.NullOrEmpty() ||
@@ -90,7 +61,7 @@ namespace GUIBuilder
             )
                 return false;
             
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: CalculateSubDivisionEdgeFlagSegments()" );
+            DebugLog.OpenIndentLevel();
             
             var result = false;
             
@@ -130,17 +101,16 @@ namespace GUIBuilder
             
             foreach( var subdivision in subdivisions )
             {
-                m.SetCurrentStatusMessage( string.Format( "SubDivisionBatch.CalculatingBordersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                m.SetCurrentStatusMessage( string.Format( "BorderBatch.CalculatingBordersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
                 subdivision.BuildSegmentsFromEdgeFlags( nodeLength, angleAllowance, slopeAllowance, updateMapUIData );
             }
             
             result = true;
             
         localReturnResult:
-            var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatch :: CalculateSubDivisionEdgeFlagSegments() :: Completed in {0}", tStart.Ticks );
+            var elapsed = m.StopSyncTimer( tStart );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
+            DebugLog.CloseIndentLevel( elapsed, "result", result.ToString() );
             return result;
         }
         
@@ -148,7 +118,7 @@ namespace GUIBuilder
         
         public static void CheckMissingElements( List<AnnexTheCommonwealth.SubDivision> subdivisions, bool checkBorderEnablers, bool checkSandboxVolumes )
         {
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: CheckMissingElements()" );
+            DebugLog.OpenIndentLevel();
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -170,7 +140,7 @@ namespace GUIBuilder
         
         public static void GenerateMissingBorderEnablers( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m )
         {
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateMissingBorderEnablers()" );
+            DebugLog.OpenIndentLevel();
             
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingMissingBorderEnablers".Translate() );
@@ -185,7 +155,7 @@ namespace GUIBuilder
                 FormImport.ImportBase.AddToList( ref list, subdivision.GenerateMissingBorderEnablersFromEdgeFlags() );
             }
             
-            m.StopSyncTimer( "GUIBuilder.SubDivisionBatch :: GenerateMissingBorderEnablers() :: Completed in {0}", tStart.Ticks );
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             DebugLog.CloseIndentLevel();
         }
@@ -195,7 +165,7 @@ namespace GUIBuilder
             if( ( !createMissing )&&( ignoreExisting ) )
                 return; // So, uh...do nothing, der?
             
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: GenerateSandboxes()" );
+            DebugLog.OpenIndentLevel();
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatch.CalculatingSandboxes".Translate() );
             string msg;
@@ -220,7 +190,9 @@ namespace GUIBuilder
                     m.PopStatusMessage();
                     continue;
                 }
-                
+
+                DebugLog.OpenIndentLevel( subdivision.IDString, false );
+
                 msg = string.Format( "SubDivisionBatch.CalculatingSandboxFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
                 m.StartSyncTimer();
@@ -234,16 +206,20 @@ namespace GUIBuilder
                     DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", subdivision.ToString() ) );
                 else
                 {
-                    DebugLog.WriteLine( string.Format(
-                        "Sandbox :: {0} :: Size = {1} -> {4} :: Position = {2} -> {5} :: Z Rotation = {3} -> {6}",
-                        subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                        sandbox == null ? "[null]" : sandbox.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
-                        sandbox == null ? "[null]" : sandbox.Reference.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
-                        sandbox == null ? "[null]" : sandbox.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
-                        osv.Position.ToString(),
-                        osv.Size.ToString(),
-                        osv.Rotation.Z.ToString()
-                       ) );
+                    DebugLog.WriteStrings( null, new[] {
+                        string.Format(
+                            "Size = {0} -> {1}",
+                            sandbox == null ? "[null]" : sandbox.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            osv.Size.ToString() ),
+                        string.Format(
+                            "Position = {0} -> {1}",
+                            sandbox == null ? "[null]" : sandbox.Reference.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            osv.Position.ToString() ),
+                        string.Format(
+                            "Z Rotation = {0} -> {1}",
+                            sandbox == null ? "[null]" : sandbox.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
+                            osv.Rotation.Z.ToString() )
+                        }, false, true, false );
                     var w = subdivision.Reference.Worldspace;
                     var c = w == null
                         ? subdivision.Reference.Cell
@@ -267,20 +243,19 @@ namespace GUIBuilder
                             GodObject.CoreForms.ESM_ATC_LAYR_SandboxVolumes
                     ) );
                 }
-                msg = "GUIBuilder.SubDivisionBatch :: GenerateSandboxes() :: {0} :: " + subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                m.StopSyncTimer( msg, tStart.Ticks );
+                var elapsed =  m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
+                DebugLog.CloseIndentLevel( elapsed );
             }
             
-            msg = "GUIBuilder.SubDivisionBatch :: GenerateSandboxes() :: Completed in {0}";
-            m.StopSyncTimer( msg, fStart.Ticks );
+            m.StopSyncTimer( fStart );
             m.PopStatusMessage();
             DebugLog.CloseIndentLevel();
         }
         
         public static void NormalizeBuildVolumes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool missingOnly )
         {
-            DebugLog.OpenIndentLevel( "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes()" );
+            DebugLog.OpenIndentLevel();
             
             m.PushStatusMessage();
             m.SetCurrentStatusMessage( "SubDivisionBatch.CheckingBuildVolumes".Translate() );
@@ -304,8 +279,7 @@ namespace GUIBuilder
                 //if( ( volumes.NullOrEmpty() )&&( missingOnly ) )
                 if( volumes.NullOrEmpty() )
                 {
-                    msg = "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes() :: {0} :: " + subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    m.StopSyncTimer( msg, tStart.Ticks );
+                    m.StopSyncTimer( tStart, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                     m.PopStatusMessage();
                     continue;
                 }
@@ -316,18 +290,82 @@ namespace GUIBuilder
                 subdivision.NormalizeBuildVolumes(
                     ref list,
                     -1024.0f, 5120.0f );
-                
-                msg = "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes() :: {0} :: " + subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                m.StopSyncTimer( msg, tStart.Ticks );
+
+                m.StopSyncTimer( tStart, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.PopStatusMessage();
             }
-            
-            msg = "GUIBuilder.SubDivisionBatch :: NormalizeBuildVolumes() :: Completed in {0}";
-            m.StopSyncTimer( msg, fStart.Ticks );
+
+            m.StopSyncTimer( fStart );
             m.PopStatusMessage();
             DebugLog.CloseIndentLevel();
         }
-        
+
+        #region Sub-Division Border Nodes -> Border NIF
+
+        public static List<GUIBuilder.FormImport.ImportBase> BuildNIFs(
+            string borderSetName,
+            List<AnnexTheCommonwealth.SubDivision> subdivisions,
+            float gradientHeight,
+            float groundOffset,
+            float groundSink,
+            string targetPath,
+            string targetSuffix,
+            string meshSuffix,
+            string meshSubPath,
+            string filePrefix,
+            string fileSuffix,
+            bool createImportData )
+        {
+            if(
+                ( subdivisions.NullOrEmpty() ) ||
+                ( string.IsNullOrEmpty( targetPath ) )
+            )
+                return null;
+
+            DebugLog.OpenIndentLevel();
+
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
+            m.PushStatusMessage();
+            m.StartSyncTimer();
+            var tStart = m.SyncTimerElapsed();
+
+            List<FormImport.ImportBase> list = null;
+
+            try
+            {
+
+                foreach( var subdivision in subdivisions )
+                {
+                    m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, subdivision.IDString ) );
+                    var subList = subdivision.CreateBorderNIFs(
+                        gradientHeight, groundOffset, groundSink,
+                        targetPath, targetSuffix,
+                        meshSuffix, meshSubPath,
+                        filePrefix, fileSuffix,
+                        createImportData );
+                    if( ( createImportData ) && ( !subList.NullOrEmpty() ) )
+                    {
+                        if( list == null )
+                            list = subList;
+                        else
+                            list.AddAll( subList );
+                    }
+                }
+            }
+            catch( Exception e )
+            {
+                DebugLog.WriteException( e );
+            }
+
+            m.StopSyncTimer( tStart, borderSetName );
+            m.PopStatusMessage();
+            DebugLog.CloseIndentLevel();
+
+            return list;
+        }
+
+        #endregion
+
     }
-    
+
 }

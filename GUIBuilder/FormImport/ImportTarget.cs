@@ -61,7 +61,7 @@ namespace GUIBuilder.FormImport
         {
             Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
             if( Association == null )
-                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.GetType().ToString(), ( classType == null ? "null" : classType.ToString() ) ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
             Name = name;
             Parent = parent;
             FormID = formID;
@@ -72,7 +72,7 @@ namespace GUIBuilder.FormImport
         {
             Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
             if( Association == null )
-                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.GetType().ToString(), ( classType == null ? "null" : classType.ToString() ) ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
             Name = name;
             Parent = parent;
             Value = target;
@@ -82,7 +82,7 @@ namespace GUIBuilder.FormImport
         {
             Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
             if( Association == null )
-                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.GetType().ToString(), ( classType == null ? "null" : classType.ToString() ) ) );
+                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
             Name = name;
             Parent = parent;
         }
@@ -106,7 +106,7 @@ namespace GUIBuilder.FormImport
             if( !fe &&  ee ) result = fm;
             if(  fe && !ee ) result = em;
             if( !fe && !ee ) result = fm && em;
-            //DebugLog.WriteLine( new [] { this.GetType().ToString(), "Matches<T>()", "allowClearing = " + allowClearing.ToString(), "FormID ? " + fm.ToString(), "EditorID ? " + em.ToString(), "result = " + result.ToString() } );
+            //DebugLog.WriteLine( new [] { this.FullTypeName(), "Matches<T>()", "allowClearing = " + allowClearing.ToString(), "FormID ? " + fm.ToString(), "EditorID ? " + em.ToString(), "result = " + result.ToString() } );
             return result;
         }
         
@@ -166,17 +166,20 @@ namespace GUIBuilder.FormImport
             var tmp = !Resolveable()
                 ? string.IsNullOrEmpty( unresolveableSuffix )
                     ? string.Format(
-                        "0x{0} - \"{1}\"",
+                        "IXHandle.IDString".Translate(),
                         FormID.ToString( "X8" ),
                         EditorID )
                     : string.Format(
-                        "0x{0} - \"{1}\" {2}",
-                        FormID.ToString( "X8" ),
-                        EditorID,
+                        "{0} {2}",
+                        string.Format(
+                            "IXHandle.IDString".Translate(),
+                            FormID.ToString( "X8" ),
+                            EditorID
+                        ),
                         unresolveableSuffix )
                 : string.Format(
-                    "0x{0} - \"{1}\"",
-                    DisplayFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString( "X8" ),
+                    "IXHandle.IDString".Translate(),
+                    DisplayFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
                     DisplayEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
             return string.Format( format, tmp, Name );
         }

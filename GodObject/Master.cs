@@ -28,7 +28,14 @@ namespace GodObject
             public static readonly string AnnexTheCommonwealth      = "AnnexTheCommonwealth.esm";
             public static readonly string SimSettlements            = "SimSettlements.esm";
         }
-        
+
+        public static bool Loaded( this File file )
+        {
+            return
+                ( file != null ) &&
+                ( file.Mod != null );
+        }
+
         public class File : Engine.Plugin.Interface.ISyncedGUIObject
         {
             
@@ -58,11 +65,9 @@ namespace GodObject
                 }
             }
             
-            public bool                 Loaded                      { get { return Mod != null; } }
-            
             public                      File( string name, bool userDeleteable, bool userToggleable, bool alwaysSelect )
             {
-                //DebugLog.WriteLine( new [] { this.GetType().ToString(), "cTor()", name } );
+                //DebugLog.WriteLine( new [] { this.FullTypeName(), "cTor()", name } );
                 Name            = name;
                 _UserDeleteable = userDeleteable;
                 _UserToggleable = userToggleable;

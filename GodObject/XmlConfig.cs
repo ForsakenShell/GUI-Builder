@@ -21,12 +21,19 @@ namespace GodObject
         // XmlNodes for the program wide options, not the options window
         public const string                 XmlNode_Options                         = "Options";
         public const string                 XmlNode_AlwaysSelectMasters             = "AlwaysSelectMasters";
-        
+
+        // XmlKeys for debug log options
+        public const string                 XmlKey_MirrorToConsole                  = "MirrorToConsole";
+        public const string                 XmlKey_ZipLogs                          = "ZipLogs";
+
         // XmlKeys for System.Windows.Forms.Control
         public const string                 XmlKey_Location                         = "Location";
         public const string                 XmlKey_Size                             = "Size";
-        public const string                 XmlKey_ZipLogs                          = "ZipLogs";
-        
+
+        // XmlNode and XmlKey for NIF ExportInfo
+        public const string                 XmlNode_NIF_ExportInfo                  = "NIFExportInfo";
+        public const string                 XmlKey_NIF_ExportInfo                   = "Line_{0}";
+
         public interface IXmlConfiguration
         {
             
@@ -42,7 +49,7 @@ namespace GodObject
         class ConfigInterface : XmlBase
         {
             
-            public override bool            XmlForceCreateFile                      { get{ return false; } }
+            public override bool            XmlForceCreateFile                      { get{ return true; } }
             
             public override bool            XmlFileMustExist                        { get{ return false; } }
             
@@ -124,8 +131,18 @@ namespace GodObject
         
         #endregion
         
+        public static bool                  Commit()
+        {
+            return _ConfigInterface.Commit();
+        }
+
+        public static void                  RemoveNode( string xpath )
+        {
+            _ConfigInterface.RemoveNode( null, xpath );
+        }
+
         #region Values
-        
+
         public static string                ReadNode( IXmlConfiguration config, string key )
         {
             return _ConfigInterface.ReadNode( XmlPathTo( config ), key );

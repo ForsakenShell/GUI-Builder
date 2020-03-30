@@ -69,11 +69,14 @@ namespace Engine.Plugin.Extensions
             return string.Format(
                 format,
                 string.Format(
-                    "{2}0x{0} - \"{1}\"{3}",
-                    ( target == null ? formID : target.GetFormID( Engine.Plugin.TargetHandle.Master ) ).ToString( "X8" ),
-                    ( target == null ? editorID : target.GetEditorID( Engine.Plugin.TargetHandle.LastValid ) ),
+                    "{0}{1}{2}",
                     ( includeSignature ? string.Format( "\"{0}\" ", target.Signature ) : null ),
-                    ( includeFilename  ? string.Format( " {0}", fileNames ) : null )
+                    (
+                        target == null
+                        ? string.Format( "IXHandle.IDString".Translate(), formID, editorID )
+                        : target.IDString
+                    ),
+                    ( includeFilename  ? string.Format( " in {0}", fileNames ) : null )
                 ),
                 extra
             );

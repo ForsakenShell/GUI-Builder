@@ -158,7 +158,46 @@ namespace XeLib
         {
             return Masters.GetMastersEx( this.XHandle );
         }
-        
+
+        /// <summary>
+        /// Returns the index of the specified file in the plugin specific dependencies.
+        /// </summary>
+        /// <param name="filename">Filename of master file</param>
+        /// <returns>-1 on error, > -1 as an index with the plugin itself always being the last index</returns>
+        public int IndexInMasters( string filename )
+        {
+            if( string.IsNullOrEmpty( filename ) ) return -1;
+
+            var masters = Masters.GetMastersEx( this.XHandle );
+            var masterCount = masters.NullOrEmpty() ? 0 : masters.Length;
+            if( masterCount == 0 ) return -1;
+
+            int result = -1;
+
+            if( this.Filename.InsensitiveInvariantMatch( filename ) )
+                result = masterCount;
+
+            else
+            {
+                for( int i = 0; i < masterCount; i++ )
+                {
+                    if( ( masters[ i ].IsValid() ) && ( masters[ i ].Filename.InsensitiveInvariantMatch( filename ) ) )
+                    {
+                        result = i;
+                        break;
+                    }
+                }
+            }
+
+            for( int i = 0; i < masterCount; i++ )
+            {
+                DebugLog.WriteLine( "Disposing of :: " + masters[ i ].ToStringNullSafe() );
+                masters[ i ].Dispose();
+            }
+
+            return result;
+        }
+
         public static List<string> GetMastersOf( string filename )
         {
             List<string> masters = null;
@@ -185,7 +224,7 @@ namespace XeLib
                     }
                     fileHeader.Dispose();
                 }
-                fileHandle.Dispose();
+                //fileHandle.Dispose(); // <-- These seem to be shared internally by XeLib???  MOAR RESEARCH!
             }
             return masters;
         }

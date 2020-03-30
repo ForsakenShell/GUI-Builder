@@ -48,18 +48,18 @@ namespace GUIBuilder.FormImport
         protected string                ErrorMessasge               { get { return _ErrorMessage; } }
         
         private ImportTarget           _Target                      = null;
-        
+
         /*
         public string                   IDString
         {
             get
             {
                 var tvID = _Target.Value as Engine.Plugin.Interface.ISyncedGUIObject;
-                return tvID != null ? tvID.IDString : string.Format( "0x{0} - \"{1}\"", _Target.Value.FormID.ToString( "X8" ), _Target.Value.EditorID );
+                return tvID != null ? tvID.IDString : string.Format( "IXHandle.IDString".Translate(), _Target.Value.FormID.ToString( "X8" ), _Target.Value.EditorID );
             }
         }
         */
-        
+
         /// <summary>
         /// Base import constructor
         /// </summary>
@@ -68,7 +68,7 @@ namespace GUIBuilder.FormImport
         /// <param name="failOnApplyIfUnresolved">Throw an exception if the target cannot be resolved</param>
         /// <param name="classType">Target class type, cannot be null</param>
         /// <param name="targetForm">Target form to apply import to (may be null for injection)</param>
-        protected                       ImportBase( string signature, uint recordFlags, bool failOnApplyIfUnresolved, Type classType, Engine.Plugin.Form targetForm )
+        protected ImportBase( string signature, uint recordFlags, bool failOnApplyIfUnresolved, Type classType, Engine.Plugin.Form targetForm )
         {
             if( classType == null )
                 throw new NullReferenceException( "classType cannot be null" );
@@ -91,14 +91,14 @@ namespace GUIBuilder.FormImport
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
                         "{0} :: cTor :: Unable to resolve import target!\n{1}",
-                        this.GetType().ToString(),
+                        this.TypeFullName(),
                         _ErrorMessage ) );
             }
             catch( Exception e )
             {
                 throw new Exception( string.Format(
                     "{0} :: cTor :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.GetType().ToString(),
+                    this.TypeFullName(),
                     _ErrorMessage,
                     e.ToString() ) );
             }
@@ -136,14 +136,14 @@ namespace GUIBuilder.FormImport
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
                         "{0} :: cTor :: Unable to resolve import target!\n{1}",
-                        this.GetType().ToString(),
+                        this.TypeFullName(),
                         _ErrorMessage ) );
             }
             catch( Exception e )
             {
                 throw new Exception( string.Format(
                     "{0} :: cTor :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.GetType().ToString(),
+                    this.TypeFullName(),
                     _ErrorMessage,
                     e.ToString() ) );
             }
@@ -183,14 +183,14 @@ namespace GUIBuilder.FormImport
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
                         "{0} :: cTor :: Unable to resolve import target!\n{1}",
-                        this.GetType().ToString(),
+                        this.TypeFullName(),
                         _ErrorMessage ) );
             }
             catch( Exception e )
             {
                 throw new Exception( string.Format(
                     "{0} :: cTor :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.GetType().ToString(),
+                    this.TypeFullName(),
                     _ErrorMessage,
                     e.ToString() ) );
             }
@@ -220,14 +220,14 @@ namespace GUIBuilder.FormImport
                 if( ( failOnApplyIfUnresolved )&( !resolved ) )
                     throw new Exception( string.Format(
                         "{0} :: cTor :: Unable to parse importData\nParse Error:\n{1}",
-                        this.GetType().ToString(),
+                        this.TypeFullName(),
                         _ErrorMessage ) );
             }
             catch( Exception e )
             {
                 throw new Exception( string.Format(
                     "{0} :: cTor :: Exception parsing importData\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.GetType().ToString(),
+                    this.TypeFullName(),
                     _ErrorMessage,
                     e.ToString() ) );
             }
@@ -252,7 +252,7 @@ namespace GUIBuilder.FormImport
                 _BatchWindow.AddImportMessage( errorLine );
             DebugLog.WriteLine( errorLine );
             if( e != null )
-                DebugLog.WriteLine( new [] { e.ToString(), e.StackTrace } );
+                DebugLog.WriteStrings( null, new [] { e.ToString(), e.StackTrace }, false, true, false, false, false );
             _ErrorState = true;
         }
         
@@ -345,21 +345,19 @@ namespace GUIBuilder.FormImport
                 if( syncObject.CopyAsOverride() != null )
                     return true;
                 errorMessage = string.Format(
-                    "\n{0} :: CopyToWorkingFile<T>() :: Unable to copy override for {1}!",
-                    this.GetType().ToString(),
+                    "\nUnable to copy override for {0}!",
                     syncObject.ExtraInfoFor( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
                 );
             }
             catch( Exception e )
             {
                 errorMessage = string.Format(
-                    "\n{0} :: CopyToWorkingFile<T>() :: An exception occured when trying to copy override for {1}\nInner Exception:\n{2}",
-                    this.GetType().ToString(),
+                    "\nAn exception occured when trying to copy override for {0}\nInner Exception:\n{1}",
                     syncObject.ExtraInfoFor( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
                     e.ToString());
             }
             
-            DebugLog.WriteLine( errorMessage );
+            DebugLog.WriteLine( errorMessage, true );
             return false;
         }
         
@@ -379,7 +377,7 @@ namespace GUIBuilder.FormImport
                 return ( TargetForm != null )&&( TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == _RecordFlags );
                 //if( TargetForm == null ) return false;
                 //var rf = TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                //DebugLog.WriteLine( new string[] { this.GetType().ToString(), TargetForm.ExtraInfoFor(), string.Format( "Record Flags = 0x{0} ?= 0x{1}", rf.ToString( "X8" ), _RecordFlags.ToString( "X8" ) ) } );
+                //DebugLog.WriteLine( new string[] { this.FullTypeName(), TargetForm.ExtraInfoFor(), string.Format( "Record Flags = 0x{0} ?= 0x{1}", rf.ToString( "X8" ), _RecordFlags.ToString( "X8" ) ) } );
                 //return rf == _RecordFlags;
             }
         }
@@ -660,7 +658,7 @@ namespace GUIBuilder.FormImport
         
         public void                     ResumeObjectDataChangedEvents( bool sendevent )
         {
-            //DebugLog.Write( string.Format( "{0} :: ResumeObjectDataChangedEvents() :: sendevent = {1}", this.GetType().ToString(), sendevent ) );
+            //DebugLog.Write( string.Format( "{0} :: ResumeObjectDataChangedEvents() :: sendevent = {1}", this.FullTypeName(), sendevent ) );
             _SupressEvents = false;
             if( TargetForm != null )
                 TargetForm.ResumeObjectDataChangedEvents( sendevent );
@@ -669,7 +667,7 @@ namespace GUIBuilder.FormImport
         
         public void                     SendObjectDataChangedEvent( object sender )
         {
-            //DebugLog.Write( string.Format( "{0} :: SendObjectDataChangedEvent()", this.GetType().ToString() ) );
+            //DebugLog.Write( string.Format( "{0} :: SendObjectDataChangedEvent()", this.FullTypeName() ) );
             if( _SupressEvents ) return;
             EventHandler handler = ObjectDataChanged;
             if( handler != null )
@@ -735,7 +733,7 @@ namespace GUIBuilder.FormImport
         
         public bool                     Apply( GUIBuilder.Windows.BatchImport importWindow )
         {
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "Apply()", this.GetType().ToString(), Target.DisplayIDInfo() } );
+            DebugLog.OpenIndentLevel( Target.DisplayIDInfo() );
             var result = false;
             
             _BatchWindow = importWindow;
@@ -788,11 +786,11 @@ namespace GUIBuilder.FormImport
             
             try
             {
-                DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ApplyImport()", this.GetType().ToString() } );
+                DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "ApplyImport()" }, false, true, false, false, true, false );
                 result = ApplyImport();
                 DebugLog.CloseIndentLevel();
                 
-                DebugLog.OpenIndentLevel( new [] { "GUIBuilder.FormImport.ImportBase", "ApplyRecordFlagsToTarget()", this.GetType().ToString() } );
+                DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "ApplyRecordFlagsToTarget()" }, false, true, false, false, true, false );
                 result &= ApplyRecordFlagsToTarget();
                 DebugLog.CloseIndentLevel();
             }
@@ -809,7 +807,7 @@ namespace GUIBuilder.FormImport
                 if( refr != null ) refr.CheckForBackgroundCellChange( true );
             }
             else
-                DebugLog.WriteError( this.GetType().ToString(), "Apply()", "Unable to apply import to the target form!" );
+                DebugLog.WriteError( "Unable to apply import to the target form!" );
             
         localAbort:
             DebugLog.CloseIndentLevel( "result", result.ToString() );
@@ -829,14 +827,14 @@ namespace GUIBuilder.FormImport
             if( list == null ) list = new List<ImportBase>();
             if( !list.NullOrEmpty() )
             {
+                var iFID = i.GetFormID( Engine.Plugin.TargetHandle.Master );
+                var iFIDValid = Engine.Plugin.Constant.ValidFormID( iFID );
                 foreach( var li in list )
                 {
                     if( li.Signature.InsensitiveInvariantMatch( i.Signature ) )
                     {
-                        if(
-                            ( !Engine.Plugin.Constant.ValidFormID( li.GetFormID( Engine.Plugin.TargetHandle.Master ) ) )||
-                            ( !Engine.Plugin.Constant.ValidFormID( i .GetFormID( Engine.Plugin.TargetHandle.Master ) ) )
-                        )
+                        var liFID = li.GetFormID( Engine.Plugin.TargetHandle.Master );
+                        if( ( !iFIDValid )||( !Engine.Plugin.Constant.ValidFormID( liFID ) ) )
                         {
                             if( li.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( i.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                             {
@@ -844,7 +842,7 @@ namespace GUIBuilder.FormImport
                                 return;
                             }
                         }
-                        else if( li.GetFormID( Engine.Plugin.TargetHandle.Master ) == i.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                        else if( iFID == liFID )
                         {
                             //DebugLog.Write( string.Format( "\nReject :: 0x{0} :: 0x{1}", li.FormID.ToString( "X8" ), i.FormID.ToString( "X8" ) ) );
                             return;

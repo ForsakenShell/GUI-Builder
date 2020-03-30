@@ -31,14 +31,28 @@ namespace GUIBuilder.Windows
     /// <summary>
     /// Description of Render.
     /// </summary>
-    public partial class Render : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
+    public partial class Render : WindowBase
     {
-        
-        public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return null; } }
-        public string XmlNodeName { get{ return "RenderWindow"; } }
-        
-        bool onLoadComplete = false;
-        
+
+        /// <summary>
+        /// Use GodObject.Windows.GetWindow<About>() to create this Window
+            /// </summary>
+        public Render() : base( true )
+        {
+            InitializeComponent();
+            this.OnSetEnableState += new SetEnableStateHandler( this.OnFormSetEnableState );
+        }
+
+
+        #region GodObject.XmlConfig.IXmlConfiguration
+
+
+        public override string XmlNodeName { get { return "RenderWindow"; } }
+
+
+        #endregion
+
+
         // Tool windows for settlement objects
         Windows.RenderChild.WorldspaceTool twWorldspaces = null;
         Windows.RenderChild.SyncObjectTool<Fallout4.WorkshopScript> twWorkshops = null;
@@ -56,21 +70,9 @@ namespace GUIBuilder.Windows
         // Selected import mod
         //ImportMod _selectedImportMod = null;
         
-        public Render()
+        void Render_OnLoad( object sender, EventArgs e )
         {
-            InitializeComponent();
-        }
-        
-        void OnFormLoad( object sender, EventArgs e )
-        {
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "OnFormLoad()" } );
-            
-            //_SetEnableState( false );
-            
-            this.Translate( true );
-            
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
+            DebugLog.OpenIndentLevel();
             
             _cancelInitWindow = false;
             
@@ -84,7 +86,7 @@ namespace GUIBuilder.Windows
             twWorldspaces.Show();
             twWorkshops.Show();
             
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
                 twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "Settlements", "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
                 twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "SubDivisions", "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
@@ -101,7 +103,7 @@ namespace GUIBuilder.Windows
                 tsRenderSubDivisions.Visible = false;
             }
             
-            var cWorldspaces = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Worldspace>( true, true );
+            var cWorldspaces = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Worldspace>( true, true, false );
             if( cWorldspaces != null )
                 twWorldspaces.SyncObjects = cWorldspaces.ToList<Engine.Plugin.Forms.Worldspace>();
             
@@ -117,16 +119,14 @@ namespace GUIBuilder.Windows
                 hintValues.Add( GodObject.Windows.SDLVideoDriver );
             }
             var initParams = new SDL2ThinLayer.SDLRenderer.InitParams( GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>(), pnRenderTarget, showCursorOverControl: false, sdlHints: hints, sdlHintValues: hintValues );
-            WorkerThreadPool.CreateWorker( initParams, THREAD_RENDER_Init, null ).Start();
+            WorkerThreadPool.CreateWorker( initParams, THREAD_InitRenderTarget, null ).Start();
             
-            onLoadComplete = true;
             DebugLog.CloseIndentLevel();
         }
-        
-        void OnFormClosed( object sender, FormClosedEventArgs e )
+
+        void OnFormClosing( object sender, FormClosingEventArgs e )
         {
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "OnFormClosed()" } );
-            GodObject.Windows.SetWindow<Render>( null, false );
+            DebugLog.OpenIndentLevel();
             Shutdown();
             
             if( twWorldspaces != null ) twWorldspaces.Close();
@@ -141,27 +141,8 @@ namespace GUIBuilder.Windows
             DebugLog.CloseIndentLevel();
         }
         
-        void OnFormMove( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteSize( this );
-            if(
-                ( transform == null )||
-                ( !transform.Renderer.Anchored )
-            ) return;
-            transform.InvokeSetSDLWindowSize();
-        }
-        
         bool _cancelInitWindow = false;
-        void THREAD_RENDER_Init( object obj )
+        void THREAD_InitRenderTarget( object obj )
         {
             var initParams = obj as SDLRenderer.InitParams;
             if( initParams == null )
@@ -170,10 +151,10 @@ namespace GUIBuilder.Windows
             _UpdatingRenderer = true;
             _ResetViewportOnUpdate = true;
             
-            DebugLog.OpenIndentLevel( new [] { "GUIBuilder.RenderWindow", "THREAD_RENDER_Init()" } );
+            DebugLog.OpenIndentLevel();
             
             if( CreateTransform( initParams ) )
-                UpdateRenderWindowThread(); // Call the thread function directly from this thread
+                THREAD_UpdateRenderWindowThread(); // Call the thread function directly from this thread
             
             transform.SyncSceneUpdate( false );
             
@@ -184,34 +165,28 @@ namespace GUIBuilder.Windows
         
         public void UpdateSettlementObjectChildWindowContentsForWorldspace( Engine.Plugin.Forms.Worldspace worldspace )
         {
-            DebugLog.WriteLine( string.Format( "{0} :: UpdateSettlementObjectChildWindowContentsForWorldspace() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
+            DebugLog.WriteLine( string.Format( "worldspace ? {0}", worldspace == null ? "null" : worldspace.ToString() ), true );
             twWorkshops.Worldspace = worldspace;
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
                 twSettlements.Worldspace = worldspace;
                 twSubDivisions.Worldspace = worldspace;
             }
         }
-        
+
         #endregion
-        
+
         #region Global Form update
-        
+
         /// <summary>
         /// Long running functions should disable the main form so the user can't spam inputs.  Don't forget to enable the form again after the long-running function is complete so the user can continue to use the program.
         /// </summary>
         /// <param name="enabled">true to enable the form and it's controls, false to disable the form and it's controls.</param>
-        public void SetEnableState( bool enabled )
+        void OnFormSetEnableState( bool enabled )
         {
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
-                return;
-            }
-            pnWindow.Enabled = enabled;
             twWorldspaces.SetEnableState( enabled );
             twWorkshops.SetEnableState( enabled );
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
                 twSettlements.SetEnableState( enabled );
                 twSubDivisions.SetEnableState( enabled );
@@ -452,7 +427,7 @@ namespace GUIBuilder.Windows
             ) return;
             */
             
-            DebugLog.OpenIndentLevel( new [] { this.GetType().ToString(), "RenderWindow_MouseUp()" } );
+            DebugLog.OpenIndentLevel();
             
             _mouseWorldPos = transform.ScreenspaceToWorldspace( e.motion.x, e.motion.y );
             
@@ -584,13 +559,13 @@ namespace GUIBuilder.Windows
         bool _ResetViewportOnUpdate = false;
         public void TryUpdateRenderWindow( bool resetViewport )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: TryUpdateRenderWindow() :: resetViewport = {1} :: _UpdatingRenderer = {2}", this.GetType().ToString(), resetViewport, _UpdatingRenderer ) );
+            //DebugLog.Write( string.Format( "\n{0} :: TryUpdateRenderWindow() :: resetViewport = {1} :: _UpdatingRenderer = {2}", this.FullTypeName(), resetViewport, _UpdatingRenderer ) );
             if( ( _UpdatingRenderer )||( transform == null ) )
                 return;
             SetToolStripEnableState( false );
             _UpdatingRenderer = true;
             _ResetViewportOnUpdate = resetViewport;
-            WorkerThreadPool.CreateWorker( UpdateRenderWindowThread, null ).Start();
+            WorkerThreadPool.CreateWorker( THREAD_UpdateRenderWindowThread, null ).Start();
         }
         
         bool _suppressControlUpdate = false;
@@ -621,7 +596,7 @@ namespace GUIBuilder.Windows
             out bool renderSelectedOnly,
             out bool exportPNG )
         {
-            //DebugLog.Write( string.Format( "\n{0} :: GetRenderOptions()", this.GetType().ToString() ) );
+            //DebugLog.Write( string.Format( "\n{0} :: GetRenderOptions()", this.FullTypeName() ) );
             // Set all to false initially
             renderNonPlayable           = false;
             
@@ -783,9 +758,9 @@ namespace GUIBuilder.Windows
             return true;
         }
         
-        void UpdateRenderWindowThread()
+        void THREAD_UpdateRenderWindowThread()
         {
-            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Start", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Start", this.FullTypeName(), _ResetViewportOnUpdate ) );
             //var wasEnabled = this.Enabled;
             //this.Enabled = false;
             
@@ -821,14 +796,14 @@ namespace GUIBuilder.Windows
                     out renderSelectedOnly,
                     out exportPNG );
             
-            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Get Worldspace objects", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Get Worldspace objects", this.FullTypeName(), _ResetViewportOnUpdate ) );
             
             var selectedWorldspace      = !renderWorldspace ? null : twWorldspaces.SelectedWorldspace;
             var poolEntry               = !renderWorldspace ? null : selectedWorldspace.PoolEntry;
             //var selectedImportMod       = (ImportMod)null;//SelectedImportMod();
             var selectedWorkshops       = !renderWorldspace ? null : renderSelectedOnly ? twWorkshops.SelectedSyncObjects : twWorkshops.SyncObjects;
-            var selectedSettlements     = ( ( !renderWorldspace )||( !GodObject.Master.AnnexTheCommonwealth.Loaded ) ) ? null : renderSelectedOnly ? twSettlements.SelectedSyncObjects : twSettlements.SyncObjects;
-            var selectedSubdivisions    = ( ( !renderWorldspace )||( !GodObject.Master.AnnexTheCommonwealth.Loaded ) ) ? null : renderSelectedOnly ? twSubDivisions.SelectedSyncObjects : twSubDivisions.SyncObjects;
+            var selectedSettlements     = ( ( !renderWorldspace )||( !GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) ) ) ? null : renderSelectedOnly ? twSettlements.SelectedSyncObjects : twSettlements.SyncObjects;
+            var selectedSubdivisions    = ( ( !renderWorldspace )||( !GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) ) ) ? null : renderSelectedOnly ? twSubDivisions.SelectedSyncObjects : twSubDivisions.SyncObjects;
             var unassociatedEdgeFlags   = !renderWorldspace ? null : GodObject.Plugin.Data.EdgeFlags.ByAssociation( GodObject.Plugin.Data.EdgeFlags.FindAllInWorldspace( selectedWorldspace ), GodObject.Plugin.Data.EdgeFlags.Association.Unassociated );
             
             // Get cell range from [whole] map/selected volumes
@@ -837,7 +812,7 @@ namespace GUIBuilder.Windows
             
             if( _ResetViewportOnUpdate )
             {
-                //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Calculate viewport", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+                //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Calculate viewport", this.FullTypeName(), _ResetViewportOnUpdate ) );
                 
                 if( renderSelectedOnly )
                 {
@@ -884,17 +859,17 @@ namespace GUIBuilder.Windows
             transform.SyncSceneUpdate( true );
             
             // Update data references
-            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Update scene objects", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Update scene objects", this.FullTypeName(), _ResetViewportOnUpdate ) );
             transform.Worldspace    = selectedWorldspace;
             transform.Workshops     = selectedWorkshops;
-            if( GodObject.Master.AnnexTheCommonwealth.Loaded )
+            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
                 transform.Settlements   = selectedSettlements;
                 transform.SubDivisions  = selectedSubdivisions;
             }
             transform.SubDivisionUnassociatedEdgeFlags = unassociatedEdgeFlags;
             
-            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: transform :: UpdateScene()", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: transform :: UpdateScene()", this.FullTypeName(), _ResetViewportOnUpdate ) );
             
             transform.UpdateScene( //renderLand, renderWater, renderCellGrid, renderBuildVolumes, renderBorders, renderEdgeFlags, true );
                     true,
@@ -920,7 +895,7 @@ namespace GUIBuilder.Windows
             // Update physical transform (don't recompute until all the initial conditions are set)
             if( _ResetViewportOnUpdate )
             {
-                //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: transform :: Update viewport", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+                //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: transform :: Update viewport", this.FullTypeName(), _ResetViewportOnUpdate ) );
                 transform.UpdateCellClipper( cellNW, cellSE, false );
                 transform.SetScale( transform.CalculateScale( transform.GetClipperCellSize() ), false );
                 transform.SetViewCentre( transform.WorldspaceClipperCentre(), false );
@@ -938,7 +913,7 @@ namespace GUIBuilder.Windows
             // Recompute!
             transform.SyncSceneUpdate( false );
             //this.Enabled = true;
-            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Complete", this.GetType().ToString(), _ResetViewportOnUpdate ) );
+            //DebugLog.Write( string.Format( "\n{0} :: UpdateRenderWindowThread() :: resetViewport = {1} :: Complete", this.FullTypeName(), _ResetViewportOnUpdate ) );
             
             _ResetViewportOnUpdate = false;
             _UpdatingRenderer = false;

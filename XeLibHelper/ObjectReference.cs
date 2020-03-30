@@ -204,7 +204,7 @@ namespace XeLibHelper
                             nHandle = Elements.CopyElementEx<ElementHandle>( eHandle.XHandle, result.XHandle, true );
                             if( !nHandle.IsValid() )
                             {
-                                DebugLog.WriteError( "XeLibHelper.ObjectReference", "CopyMoveToCell()", "Unable to copy source element to new record!" );
+                                DebugLog.WriteError( "Unable to copy source element to new record!" );
                             }
                             nHandle.Dispose();
                         }

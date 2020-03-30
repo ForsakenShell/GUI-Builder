@@ -145,14 +145,14 @@ namespace GodObject
                         if( !IsValid )
                         {
                             DebugLog.Write( string.Format(
-                                "{0} :: _AddFromRecord() :: Container FormAttributes are incorrect!", this.GetType().ToString() ) );
+                                "{0} :: _AddFromRecord() :: Container FormAttributes are incorrect!", this.FullTypeName() ) );
                             return null;
                         }
                         
                         if( !handle.IsValid() )
                         {
                             DebugLog.Write( string.Format(
-                                "{0} :: _AddFromRecord() :: Invalid handle! :: 0x{1}", this.GetType().ToString(), handle.ToString() ) );
+                                "{0} :: _AddFromRecord() :: Invalid handle! :: 0x{1}", this.FullTypeName(), handle.ToString() ) );
                             return null;
                         }
                         
@@ -160,7 +160,7 @@ namespace GodObject
                         if( rSig != _FormAttributes.Signature )
                         {
                             DebugLog.Write( string.Format(
-                                "{0} :: _AddFromRecord() :: Invalid signature! :: Expected \"{1}\" got \"{2}\"!", this.GetType().ToString(), _FormAttributes.Signature, rSig ) );
+                                "{0} :: _AddFromRecord() :: Invalid signature! :: Expected \"{1}\" got \"{2}\"!", this.FullTypeName(), _FormAttributes.Signature, rSig ) );
                             return null;
                         }
                         
@@ -168,7 +168,7 @@ namespace GodObject
                         if( syncObject == null )
                         {
                             DebugLog.Write( string.Format(
-                                "{0} :: _AddFromRecord() ::  Unable to create new {1}!", this.GetType().ToString(), _FormAttributes.FormType.ToString() ) );
+                                "{0} :: _AddFromRecord() ::  Unable to create new {1}!", this.FullTypeName(), _FormAttributes.FormType.ToString() ) );
                             return null;
                         }
                         
@@ -178,7 +178,7 @@ namespace GodObject
                         {
                             DebugLog.Write( string.Format(
                                 "{0} :: _AddFromRecord() :: Form 0x{1} - \"{2}\" :: {3}.Load() returned false!",
-                                this.GetType().ToString(),
+                                this.FullTypeName(),
                                 syncObject.FormID.ToString( "X8" ), syncObject.EditorID,
                                 _FormAttributes.FormType.ToString()
                             ) );
@@ -196,7 +196,7 @@ namespace GodObject
                         {
                             DebugLog.Write( string.Format(
                                 "\n{0} :: _AddFromRecord()",
-                                this.GetType().ToString() ) );
+                                this.FullTypeName() ) );
                             form.DebugDump();
                         }
                         */
@@ -208,12 +208,12 @@ namespace GodObject
                     {
                         if( !IsValid )
                         {
-                            DebugLog.Write( string.Format( "{0} :: CreateNew<TSync>() :: Container FormAttributes are incorrect!", this.GetType().ToString() ) );
+                            DebugLog.Write( string.Format( "{0} :: CreateNew<TSync>() :: Container FormAttributes are incorrect!", this.FullTypeName() ) );
                             return null;
                         }
                         if( typeof( TSync ) != _FormAttributes.FormType )
                         {
-                            DebugLog.Write( string.Format( "{0} :: CreateNew<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.GetType().ToString(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
+                            DebugLog.Write( string.Format( "{0} :: CreateNew<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.FullTypeName(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
                             return null;
                         }
                         return CreateNew() as TSync;
@@ -223,7 +223,7 @@ namespace GodObject
                     {
                         if( !IsValid )
                         {
-                            DebugLog.Write( string.Format( "{0} :: CreateNew() :: Container FormAttributes are incorrect!", this.GetType().ToString() ) );
+                            DebugLog.Write( string.Format( "{0} :: CreateNew() :: Container FormAttributes are incorrect!", this.FullTypeName() ) );
                             return null;
                         }
                         
@@ -240,7 +240,7 @@ namespace GodObject
                         var wf = Files.Working;
                         if( wf == null )
                         {
-                            DebugLog.Write( string.Format( "\n{0} :: CreateNewRootForm() :: No working file loaded, unable to create/inject forms!", this.GetType().ToString() ) );
+                            DebugLog.Write( string.Format( "\n{0} :: CreateNewRootForm() :: No working file loaded, unable to create/inject forms!", this.FullTypeName() ) );
                             return null;
                         }
                         var wfch = Elements.GetElement( wf.OverrideHandle, _FormAttributes.Signature );
@@ -250,7 +250,7 @@ namespace GodObject
                         {
                             DebugLog.Write( string.Format(
                                 "\n{0} :: CreateNewRootForm()\n\t***** Unable to GetElement or AddElement() for form container! *****\n\tSignature = \"{1}\"\n\tWorkingFileName = \"{2}\"",
-                                this.GetType().ToString(),
+                                this.FullTypeName(),
                                 _FormAttributes.Signature,
                                 wf.Filename ) );
                             return null;
@@ -261,7 +261,7 @@ namespace GodObject
                         {
                             DebugLog.Write( string.Format(
                                 "\n{0} :: CreateNewRootForm()\n\t***** Unable to AddElement() for new form! *****\n\tSignature = \"{1}\"\n\tWorkingFileName = \"{2}\"",
-                                this.GetType().ToString(),
+                                this.FullTypeName(),
                                 _FormAttributes.Signature,
                                 wf.Filename ) );
                             return null;
@@ -272,7 +272,7 @@ namespace GodObject
                         var syncObject = Activator.CreateInstance( _FormAttributes.FormType, new Object[] { this, wf, handle } ) as IDataSync;
                         if( syncObject == null )
                         {
-                            DebugLog.Write( string.Format( "\n{0} :: CreateNewRootForm() :: Unable to create new {1}!", this.GetType().ToString(), _FormAttributes.FormType.ToString() ) );
+                            DebugLog.Write( string.Format( "\n{0} :: CreateNewRootForm() :: Unable to create new {1}!", this.FullTypeName(), _FormAttributes.FormType.ToString() ) );
                             return null;
                         }
                         
@@ -289,7 +289,7 @@ namespace GodObject
                         if( !_FormAttributes.FormType.IsInstanceOfType( syncObject ) )
                         {
                             DebugLog.Write( string.Format(
-                                "\n{0} :: AddForm() :: Invalid Form Type! :: \"{1}\"", this.GetType().ToString(), syncObject.GetType().ToString() ) );
+                                "\n{0} :: AddForm() :: Invalid Form Type! :: \"{1}\"", this.TypeFullName(), syncObject.TypeFullName() ) );
                             var st = new System.Diagnostics.StackTrace();
                             DebugLog.Write( "Stack Trace:\n" + st.ToString() );
                             return false;
@@ -365,7 +365,7 @@ namespace GodObject
                         if( !IsValid ) return null;
                         if( typeof( TSync ) != _FormAttributes.FormType )
                         {
-                            DebugLog.Write( string.Format( "{0} :: ToList<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.GetType().ToString(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
+                            DebugLog.Write( string.Format( "{0} :: ToList<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.FullTypeName(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
                             return null;
                         }
                         if( _AllForms.NullOrEmpty() ) return null;
@@ -395,20 +395,20 @@ namespace GodObject
                             var record = Handle.FindRecord( formid );
                             if( !record.IsValid() )
                             {
-                                DebugLog.Write( string.Format( "{0} :: Find() :: Unable to get record for FormID 0x{1}!", this.GetType().ToString(), formid.ToString( "X8" ) ) );
+                                DebugLog.Write( string.Format( "{0} :: Find() :: Unable to get record for FormID 0x{1}!", this.FullTypeName(), formid.ToString( "X8" ) ) );
                                 return null;
                             }
                             var hMaster = Handle.FindMasterRecord( ref record );
                             if( !hMaster.IsValid() )
                             {
-                                DebugLog.Write( string.Format( "{0} :: Find() :: Unable to get master record for FormID 0x{1}!", this.GetType().ToString(), formid.ToString( "X8" ) ) );
+                                DebugLog.Write( string.Format( "{0} :: Find() :: Unable to get master record for FormID 0x{1}!", this.FullTypeName(), formid.ToString( "X8" ) ) );
                                 return null;
                             }
                             
                             var file = Files.Find( hMaster );
                             if( file == null )
                             {
-                                DebugLog.Write( string.Format( "{0} :: GetByFormID() :: Unable to get file for FormID 0x{1} from record 0x{2}!", this.GetType().ToString(), formid.ToString( "X8" ), record.ToString() ) );
+                                DebugLog.Write( string.Format( "{0} :: GetByFormID() :: Unable to get file for FormID 0x{1} from record 0x{2}!", this.FullTypeName(), formid.ToString( "X8" ), record.ToString() ) );
                                 return null;
                             }
                             
@@ -416,7 +416,7 @@ namespace GodObject
                             result = _AddFromRecord( file, hMaster );
                             if( result == null )
                             {
-                                DebugLog.Write( string.Format( "{0} :: GetByFormID() :: Unable to create {1} for FormID 0x{2} from record 0x{2}!", this.GetType().ToString(), _FormAttributes.FormType.ToString(), formid.ToString( "X8" ), record.ToString() ) );
+                                DebugLog.Write( string.Format( "{0} :: GetByFormID() :: Unable to create {1} for FormID 0x{2} from record 0x{2}!", this.FullTypeName(), _FormAttributes.FormType.ToString(), formid.ToString( "X8" ), record.ToString() ) );
                                 return null;
                             }
                             
@@ -430,7 +430,7 @@ namespace GodObject
                         if( !IsValid ) return null;
                         if( typeof( TSync ) != _FormAttributes.FormType )
                         {
-                            DebugLog.Write( string.Format( "{0} :: Find<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.GetType().ToString(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
+                            DebugLog.Write( string.Format( "{0} :: Find<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.FullTypeName(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
                             return null;
                         }
                         var syncObject = Find( formid );
@@ -457,7 +457,7 @@ namespace GodObject
                         if( !IsValid ) return null;
                         if( typeof( TSync ) != _FormAttributes.FormType )
                         {
-                            DebugLog.Write( string.Format( "{0} :: Find<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.GetType().ToString(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
+                            DebugLog.Write( string.Format( "{0} :: Find<TSync>() :: TSync does not match Form Type :: {1} != {2}", this.FullTypeName(), typeof( TSync ).ToString(), _FormAttributes.FormType.ToString() ) );
                             return null;
                         }
                         var syncObject = Find( editorid );

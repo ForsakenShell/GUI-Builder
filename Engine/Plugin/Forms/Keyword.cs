@@ -34,7 +34,7 @@ namespace Engine.Plugin.Forms
         public Keyword( string filename, uint formID ) : base( filename, formID ) {}
         
         //public Keyword( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Keyword( Interface.ICollection container, Interface.IXHandle ancestor, FormHandle handle ) : base( container, ancestor, handle ) {}
+        public Keyword( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
         
         public override void CreateChildFields()
         {

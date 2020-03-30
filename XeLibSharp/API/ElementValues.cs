@@ -83,11 +83,19 @@ namespace XeLib.API
                 ? Helpers.GetResultString( len )
                 : null;
         }
-        
+
         #region Element Values
-        
+
+        public static byte[] GetRawBytesEx( uint uHandle, string path )
+        {
+            int len;
+            return ( Functions.GetValue( uHandle, path, out len ) ) && ( len > 0 )
+                ? Helpers.GetResultRawBytes( len )
+                : null;
+        }
+
         #region String Values
-        
+
         public static string GetValueEx( uint uHandle, string path )
         {
             int len;
@@ -116,11 +124,45 @@ namespace XeLib.API
         {
             return Functions.SetIntValue( uHandle, path, value ? 1 : 0 );
         }
-        
+
         #endregion
-        
+
+        #region Byte Values
+
+        public static sbyte GetSByteValueEx( uint uHandle, string path )
+        {
+            int len;
+            if( ( !Functions.GetValue( uHandle, path, out len ) ) || ( len != 1 ) ) return default;
+            var bytes = new byte[ 1 ];
+            if( !Functions.GetResultString( bytes, len ) ) return default;
+            return unchecked( (sbyte)bytes[ 0 ] );
+        }
+
+        public static bool SetSByteValueEx( uint uHandle, string path, sbyte value )
+        {
+            throw new NotImplementedException();
+            // TODO:  WRITE ME!
+        }
+
+        public static byte GetUByteValueEx( uint uHandle, string path )
+        {
+            int len;
+            if( ( !Functions.GetValue( uHandle, path, out len ) ) || ( len != 1 ) ) return default;
+            var bytes = new byte[ 1 ];
+            if( !Functions.GetResultString( bytes, len ) ) return default;
+            return bytes[ 0 ];
+        }
+
+        public static bool SetUByteValueEx( uint uHandle, string path, byte value )
+        {
+            throw new NotImplementedException();
+            // TODO:  WRITE ME!
+        }
+
+        #endregion
+
         #region Integer Values
-        
+
         public static int GetIntValueEx( uint uHandle, string path )
         {
             int resInt;

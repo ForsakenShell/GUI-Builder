@@ -26,7 +26,46 @@ public static partial class NIFBuilder
         public static uint[] InsideSandbox    = { 0x00000000, 0xFFFF00FF, 0xFFFF00FF };
         public static uint[] OutsideSandbox   = { 0x00000000, 0xFF007FFF, 0xFF007FFF };
     }
-    
+
+    static string[] DefaultExportInfo = new string[ 4 ]{
+        string.Format( "GUIBuilder {0} by 1000101", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() ),
+        "https://www.nexusmods.com/users/106891",
+        "NIFBuilder",
+        "STAHP LOOKING AT ME!"
+    };
+
+    static string[] _ExportInfo;
+    public static string[] ExportInfo
+    {
+        get
+        {
+            if( _ExportInfo == null )
+            {
+                _ExportInfo = new string[ 4 ];
+                for( int i = 0; i < 4; i++ )
+                    _ExportInfo[ i ] = GodObject.XmlConfig.ReadValue<String>(
+                        GodObject.XmlConfig.XmlNode_NIF_ExportInfo,
+                        string.Format( GodObject.XmlConfig.XmlKey_NIF_ExportInfo, i ),
+                        DefaultExportInfo[ i ] );
+            }
+            return _ExportInfo;
+        }
+        set
+        {
+            _ExportInfo = null;
+            if( value.NullOrEmpty() )
+                GodObject.XmlConfig.RemoveNode( GodObject.XmlConfig.XmlNode_NIF_ExportInfo );
+            else
+                for( int i = 0; i < 4; i++ )
+                    GodObject.XmlConfig.WriteValue<String>(
+                        GodObject.XmlConfig.XmlNode_NIF_ExportInfo,
+                        string.Format( GodObject.XmlConfig.XmlKey_NIF_ExportInfo, i ),
+                        value[ i ],
+                        false );
+            GodObject.XmlConfig.Commit();
+        }
+    }
+
     public static List<GUIBuilder.FormImport.ImportBase> CreateNIFs(
             bool createImportData,
             List<BorderNode> allNodes,
@@ -56,14 +95,20 @@ public static partial class NIFBuilder
             uint[] insideColours,
             uint[] outsideColours,
             List<Engine.Plugin.Form> originalForms,
-            bool workshopBorder )
+            bool workshopBorder,
+            string[] exportInfo )
     {
-        DebugLog.OpenIndentLevel( new string [] { "NIFBuilder", "CreateNIFs()",
-            Mesh.BuildTargetPath( targetPath, targetSuffix ),
-            gradientHeight.ToString(), groundOffset.ToString(), groundSink.ToString(),
-            location, neighbour,
-            createImportData.ToString()
-            } );
+        DebugLog.OpenIndentLevel(
+            new string [] {
+                "Target Path = \"" + Mesh.BuildTargetPath( targetPath, targetSuffix ) + "\"",
+                "gradientHeight = " + gradientHeight.ToString(),
+                "groundOffset = " + groundOffset.ToString(),
+                "groundSink = " + groundSink.ToString(),
+                "location = \"" + location + "\"",
+                "neighbour = \"" + neighbour + "\"",
+                "createImportData = " + createImportData.ToString()
+            },
+            true, true, false );
         
         List<GUIBuilder.FormImport.ImportBase> list = null;
 
@@ -112,7 +157,7 @@ public static partial class NIFBuilder
                 ( linkKeyword == null )
             )
         ){
-            DebugLog.WriteLine( "No enablerReference or linkRef and linkKeyword!" );
+            DebugLog.WriteLine( "No enablerReference or, linkRef and linkKeyword!" );
             goto localAbort;
         }
         
@@ -176,7 +221,7 @@ public static partial class NIFBuilder
             
             if( group.BuildMesh( gradientHeight, groundOffset, groundSink, insideColours, outsideColours ) )
             {
-                group.Mesh.Write( targetPath, targetSuffix );
+                group.Mesh.Write( targetPath, targetSuffix, exportInfo );
                 if( createImportData )
                 {
                     var keys = string.IsNullOrEmpty( forcedNIFFile )
@@ -211,12 +256,12 @@ public static partial class NIFBuilder
             }
             else
             {
-                DebugLog.WriteError( "NIFBuilder", "CreateNIFs()", "Could not build NIF for node group " + i );
+                DebugLog.WriteError( "Could not build NIF for node group " + i );
             }
         }
         
     localAbort:
-        DebugLog.CloseIndentLevel( "Imports", list );
+        DebugLog.CloseIndentList( "Imports", list, false, true, true );
         return list;
     }
     

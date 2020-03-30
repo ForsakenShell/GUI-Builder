@@ -108,7 +108,7 @@ namespace GUIBuilder.Windows.RenderChild
             var rw = GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( false );
             
             var worldspace = _SelectedWorldspace;
-            DebugLog.WriteLine( string.Format( "{0} :: UpdateGUIElements() :: worldspace ? {1}", this.GetType().ToString(), worldspace == null ? "null" : worldspace.ToString() ) );
+            DebugLog.WriteLine( string.Format( "worldspace ? {0}", worldspace == null ? "null" : worldspace.ToString() ), true );
             if( worldspace != null )
             {
                 var poolEntry = worldspace.PoolEntry;
@@ -149,7 +149,7 @@ namespace GUIBuilder.Windows.RenderChild
             var lie = e as ListViewItemSelectionChangedEventArgs;
             if( lie != null )
                 _SelectedWorldspace = lvWorldspaces.SyncObjectFromListViewItem( lie.Item );
-            DebugLog.WriteLine( string.Format( "{0} :: lvWorldspacesItemSelectionChanged() :: worldspace ? {1}", this.GetType().ToString(), _SelectedWorldspace == null ? "null" : _SelectedWorldspace.ToString() ) );
+            DebugLog.WriteLine( string.Format( "worldspace ? {0}", this.TypeFullName(), _SelectedWorldspace == null ? "null" : _SelectedWorldspace.ToString() ), true );
             UpdateGUIElements();
         }
         

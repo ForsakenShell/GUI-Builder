@@ -78,12 +78,14 @@ public static class GenCollection
         return true;
     }
     
-    public static void AddOnce<T>( this IList<T> list, IList<T> items )
+    public static bool AddOnce<T>( this IList<T> list, IList<T> items )
     {
-        if( list == null ) return;
-        if( items.NullOrEmpty() ) return;
+        bool result = false;
+        if( list == null ) return result;
+        if( items.NullOrEmpty() ) return result;
         foreach( var item in items )
-            list.AddOnce( item );
+            result |= list.AddOnce( item );
+        return result;
     }
     
     public static void AddAll<T>( this IList<T> list, IList<T> items )
