@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace GUIBuilder.Windows
 {
 
-    public delegate void SetEnableStateHandler( bool enabled );
+    public delegate bool SetEnableStateHandler( object sender, bool enable );
 
     public interface IEnableControlForm
     {
 
         event SetEnableStateHandler OnSetEnableState;
-
-        void                        SetEnableState( bool enabled );
+        
+        bool                        SetEnableState( object sender, bool enable );
 
         void                        Close();
         bool                        InvokeRequired { get; }

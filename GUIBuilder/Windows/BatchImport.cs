@@ -14,23 +14,24 @@ using AnnexTheCommonwealth;
 
 namespace GUIBuilder.Windows
 {
+
     /// <summary>
-    /// Description of BorderBatchImportWindow.
+    /// Use GodObject.Windows.GetWindow<BatchImport>() to create this Window
     /// </summary>
     public partial class BatchImport : WindowBase
     {
 
-
-        /// <summary>
-        /// Use GodObject.Windows.GetWindow<BatchImport>() to create this Window
-        /// </summary>
         public BatchImport() : base( true )
         {
             InitializeComponent();
-            
             this.SuspendLayout();
 
-            this.ClientLoad += new System.EventHandler( this.BatchImport_OnLoad );
+            this.ClientLoad += new System.EventHandler( this.OnClientLoad );
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            
+            this.scImports.SplitterMoved += new System.Windows.Forms.SplitterEventHandler( this.OnImportsSplitterMoved );
+            this.btnImportSelected.Click += new System.EventHandler( this.OnImportButtonClick );
+            this.btnClose.Click += new System.EventHandler( this.OnCloseButtonClick );
 
             lvImportForms.CustomAscendingSort = PrioritySortAsc;
             lvImportForms.CustomDescendingSort = PrioritySortDes;
@@ -39,18 +40,9 @@ namespace GUIBuilder.Windows
         }
 
 
-
-        #region GodObject.XmlConfig.IXmlConfiguration
-
-
-        public override string XmlNodeName      { get { return "BatchImportWindow"; } }
-        
         const string XmlKey_SplitterOffset = "SplitterOffset";
 
 
-        #endregion
-
-        
         public bool AllImportsMatchTarget = false;
         public bool EnableControlsOnClose = true;
         public List<FormImport.ImportBase> ImportForms = null;
@@ -60,7 +52,7 @@ namespace GUIBuilder.Windows
         #region Window management
 
 
-        void BatchImport_OnLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Start", this.FullTypeName() ) );
 
@@ -93,7 +85,7 @@ namespace GUIBuilder.Windows
             //DebugLog.Write( string.Format( "\n{0} :: OnFormLoad() :: Complete", this.FullTypeName() ) );
         }
 
-        void OnFormClosing( object sender, FormClosingEventArgs e )
+        void OnClientClosing( object sender, FormClosingEventArgs e )
         {
             AllImportsMatchTarget =
                 ( ImportForms.NullOrEmpty() )||
@@ -101,24 +93,24 @@ namespace GUIBuilder.Windows
             //var m = GodObject.Windows.GetMainWindow();
             //m.PopStatusMessage();
             if( EnableControlsOnClose )
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( sender, true );
         }
         
         
-        void btnCloseClick( object sender, EventArgs e )
+        void OnCloseButtonClick( object sender, EventArgs e )
         {
             this.DialogResult = DialogResult.None;
             this.Close();
         }
         
-        void btnImportSelectedClick( object sender, EventArgs e )
+        void OnImportButtonClick( object sender, EventArgs e )
         {
             var thread = WorkerThreadPool.CreateWorker( THREAD_ImportSelectedListViewItems, null );
             if( thread != null )
                 thread.Start();
         }
         
-        void scImportsSplitterMoved( object sender, SplitterEventArgs e )
+        void OnImportsSplitterMoved( object sender, SplitterEventArgs e )
         {
             if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteValue<int>( XmlNodeName, XmlKey_SplitterOffset, e.SplitY, true );
@@ -192,7 +184,7 @@ namespace GUIBuilder.Windows
 
         void THREAD_ImportSelectedListViewItems()
         {
-            SetEnableState( false );
+            SetEnableState( this, false );
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -243,7 +235,7 @@ namespace GUIBuilder.Windows
             
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
-            SetEnableState( true );
+            SetEnableState( this, true );
         }
 
         #endregion

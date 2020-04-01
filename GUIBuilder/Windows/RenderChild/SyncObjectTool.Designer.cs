@@ -115,12 +115,6 @@ namespace GUIBuilder.Windows.RenderChild
             this.Name = "RenderWindowSyncObjectToolWindow";
             this.ShowInTaskbar = false;
             this.TopMost = true;
-            this.Activated += new System.EventHandler(this.OnActivated);
-            this.Deactivate += new System.EventHandler(this.OnDeactivate);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
             this.pnWindow.ResumeLayout(false);
             this.ResumeLayout(false);
         }

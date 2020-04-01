@@ -17,6 +17,7 @@ namespace GUIBuilder.Windows
     {
 
         /// <summary>
+        /// Use Application.Run( new GUIBuilder.Windows.Min() ) to create this Window or,
         /// Use GodObject.Windows.GetWindow<Options>() to create this Window
         /// </summary>
 
@@ -25,27 +26,38 @@ namespace GUIBuilder.Windows
         public Options() : base( true )
         {
             InitializeComponent();
-            this.ClientLoad += new System.EventHandler( this.Options_OnLoad );
+            this.SuspendLayout();
+
+            this.ClientLoad += new System.EventHandler( this.OnClientLoad );
+            this.OnSetEnableState += OnClientSetEnableState;
+
+            this.cbLanguage.SelectedIndexChanged += new System.EventHandler( this.OnLanguageChanged );
+            this.cbSDLVideoDriver.SelectedIndexChanged += new System.EventHandler( this.OnSDLVideoDriverChanged );
+            this.cbZipLogFiles.CheckedChanged += new System.EventHandler( this.OnZipLogsChanged );
+            this.cbLogMainToConsole.CheckedChanged += new System.EventHandler( this.OnMirrorMainLogToConsoleChanged );
+            this.btnNIFExportInfoReset.Click += new System.EventHandler( this.OnNIFExportInfoResetButtonClick );
+
+            this.tbNIFExportInfo_3.TextChanged += new System.EventHandler( this.OnNIFExportInfoChanged );
+            this.tbNIFExportInfo_2.TextChanged += new System.EventHandler( this.OnNIFExportInfoChanged );
+            this.tbNIFExportInfo_1.TextChanged += new System.EventHandler( this.OnNIFExportInfoChanged );
+            this.tbNIFExportInfo_0.TextChanged += new System.EventHandler( this.OnNIFExportInfoChanged );
+
             tbNIFExportInfo = new System.Windows.Forms.TextBox[]{
                 tbNIFExportInfo_0,
                 tbNIFExportInfo_1,
                 tbNIFExportInfo_2,
                 tbNIFExportInfo_3
             };
+
+            this.lvAlwaysSelectMasters.OnSetSyncObjectsThreadComplete += OnSyncAlwaysSelectMastersThreadComplete;
+
+            this.ResumeLayout( false );
         }
         
         
-        #region GodObject.XmlConfig.IXmlConfiguration
-        
-        
-        public override string XmlNodeName { get { return "OptionsWindow"; } }
+        #region Client Window Events
 
-
-        #endregion
-
-        #region Options OnLoad
-
-        void Options_OnLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             tbSDLVideoRenderWarning.Text = string.Format( "OptionsWindow.SDLHint.Warning".Translate(), GodObject.Windows.SDLVideoDriverSoftware );
             
@@ -71,11 +83,32 @@ namespace GUIBuilder.Windows
             this.BringToFront();
         }
 
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enable">Enable state to set</param>
+        bool OnClientSetEnableState( object sender, bool enable )
+        {
+            var enabled =
+                enable &&
+                !lvAlwaysSelectMasters.IsSyncObjectsThreadRunning;
+            return enabled;
+        }
+
+        #endregion
+
+        #region Sync'd list monitoring
+
+        void OnSyncAlwaysSelectMastersThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<GodObject.Master.File> sender )
+        {
+            SetEnableState( sender, true );
+        }
+
         #endregion
 
         #region Language
 
-        void cbLanguageSelectedIndexChanged(object sender, EventArgs e)
+        void OnLanguageChanged(object sender, EventArgs e)
         {
             if( !OnLoadComplete ) return;
             GodObject.Paths.Language = cbLanguage.Text;
@@ -85,7 +118,7 @@ namespace GUIBuilder.Windows
 
         #region SDL Hints
 
-        void cbSDLVideoDriverSelectedIndexChanged( object sender, EventArgs e )
+        void OnSDLVideoDriverChanged( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
             GodObject.Windows.SDLVideoDriverIndex = cbSDLVideoDriver.SelectedIndex;
@@ -95,13 +128,13 @@ namespace GUIBuilder.Windows
 
         #region Log Files
 
-        void cbLogMainToConsoleCheckedChanged( object sender, EventArgs e )
+        void OnMirrorMainLogToConsoleChanged( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_MirrorToConsole, cbLogMainToConsole.Checked, true );
         }
         
-        void cbZipLogFilesCheckedChanged( object sender, EventArgs e )
+        void OnZipLogsChanged( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_ZipLogs, cbZipLogFiles.Checked, true );
@@ -113,7 +146,7 @@ namespace GUIBuilder.Windows
 
         bool blockExportInfoUI = false;
 
-        void tbNIFExportInfoTextChanged( object sender, EventArgs e )
+        void OnNIFExportInfoChanged( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
             if( blockExportInfoUI ) return;
@@ -125,7 +158,7 @@ namespace GUIBuilder.Windows
             NIFBuilder.ExportInfo = exportInfo;
         }
         
-        void btnNIFExportInfoResetClick( object sender, EventArgs e )
+        void OnNIFExportInfoResetButtonClick( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
             if( blockExportInfoUI ) return;

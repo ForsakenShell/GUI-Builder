@@ -120,6 +120,13 @@ namespace GUIBuilder.Windows.FormEditor
             this.gbLocationRequirements.SuspendLayout();
             this.SuspendLayout();
             // 
+            // WindowPanel
+            // 
+            this.WindowPanel.Controls.Add( this.tcRequirements );
+            this.WindowPanel.Controls.Add( this.gbRequirementConditions );
+            this.WindowPanel.Controls.Add( this.gbLocation );
+            this.WindowPanel.Size = new System.Drawing.Size( 616, 314 );
+            // 
             // gbLocation
             // 
             this.gbLocation.Controls.Add(this.pnLocation);
@@ -213,7 +220,6 @@ namespace GUIBuilder.Windows.FormEditor
             this.cbLocation.Name = "cbLocation";
             this.cbLocation.Size = new System.Drawing.Size(220, 21);
             this.cbLocation.TabIndex = 3;
-            this.cbLocation.SelectedIndexChanged += new System.EventHandler(this.cbLocationSelectedIndexChanged);
             // 
             // gbRequirementConditions
             // 
@@ -548,17 +554,10 @@ namespace GUIBuilder.Windows.FormEditor
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(616, 314);
-            this.Controls.Add(this.tcRequirements);
-            this.Controls.Add(this.gbRequirementConditions);
-            this.Controls.Add(this.gbLocation);
             this.MinimumSize = new System.Drawing.Size(624, 338);
             this.Name = "SubDivision";
             this.Tag = "FormEditor.SubDivision.Title";
             this.Text = "Sub-Division";
-            this.Load += new System.EventHandler(this.SubDivisionLoad);
-            this.Controls.SetChildIndex(this.gbLocation, 0);
-            this.Controls.SetChildIndex(this.gbRequirementConditions, 0);
-            this.Controls.SetChildIndex(this.tcRequirements, 0);
             this.gbLocation.ResumeLayout(false);
             this.pnLocation.ResumeLayout(false);
             this.pnLocation.PerformLayout();

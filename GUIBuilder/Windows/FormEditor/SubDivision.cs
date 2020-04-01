@@ -17,21 +17,21 @@ namespace GUIBuilder.Windows.FormEditor
     public partial class SubDivision : SyncedFormEditor<AnnexTheCommonwealth.SubDivision>
     {
         
-        bool onLoadComplete = false;
-        
-        protected override string XmlFormNodeName { get { return "SubDivision"; } }
-        
         List<Engine.Plugin.Forms.Location> _Locations;
         
         public SubDivision( AnnexTheCommonwealth.SubDivision syncobject ) : base( syncobject )
         {
             InitializeComponent();
+            this.SuspendLayout();
+
+            this.Load += new System.EventHandler( this.OnClientLoad );
+            this.cbLocation.SelectedIndexChanged += new System.EventHandler( this.OnLocationChanged );
+
+            this.ResumeLayout( false );
         }
-        
-        void SubDivisionLoad( object sender, EventArgs e )
+
+        void OnClientLoad( object sender, EventArgs e )
         {
-            this.Translate( true );
-            
             cbRequirementsRelationship.Items.Clear();
             cbRequirementsRelationship.Items.AddRange(
                 new string [] {
@@ -85,12 +85,11 @@ namespace GUIBuilder.Windows.FormEditor
             cbLocation.SelectedIndex = selectedIndex;
             
             UpdateLocationDisplayFields();
-            onLoadComplete  = true;
         }
         
-        void cbLocationSelectedIndexChanged( object sender, EventArgs e )
+        void OnLocationChanged( object sender, EventArgs e )
         {
-            if( !onLoadComplete ) return;
+            if( !OnLoadComplete ) return;
             UpdateLocationDisplayFields();
         }
         

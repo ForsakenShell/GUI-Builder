@@ -516,7 +516,7 @@ namespace GodObject
 
                 m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( renderer, true );
                 DebugLog.CloseIndentLevel();
             }
             
@@ -530,7 +530,7 @@ namespace GodObject
                 {
 
                     _textureLoadQueued = true;
-                    GodObject.Windows.SetEnableState( false );
+                    GodObject.Windows.SetEnableState( transform, false );
 
                     _texturesReady = false;
                     _textureLoadQueuetransform = transform;

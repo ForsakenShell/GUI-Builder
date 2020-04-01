@@ -183,7 +183,7 @@ namespace GodObject
             result = _isLoading || _isLoaded;
         localAbort:
             if( !result )
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( null, true );
             return result;
         }
         
@@ -271,7 +271,7 @@ namespace GodObject
             if( enableUI )
             {
                 GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>( true ).Translate();
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( null, true );
             }
 
             DebugLog.CloseIndentLevel();
@@ -482,7 +482,7 @@ namespace GodObject
         signalStopAbort:
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
-            GodObject.Windows.SetEnableState( true );
+            GodObject.Windows.SetEnableState( null, true );
             //_workingFile = string.Empty;
             _isLoading = false;
             _thread = null;

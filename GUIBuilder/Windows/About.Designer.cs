@@ -109,7 +109,6 @@ namespace GUIBuilder.Windows
             this.linkLicense.TabStop = true;
             this.linkLicense.Tag = "AboutWindow.License";
             this.linkLicense.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.linkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLicenseLinkClicked);
             // 
             // lblLicense
             // 
@@ -150,7 +149,6 @@ namespace GUIBuilder.Windows
             this.linkAuthor.TabStop = true;
             this.linkAuthor.Tag = "AboutWindow.AuthorLink";
             this.linkAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.linkAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkAuthorLinkClicked);
             // 
             // About
             // 

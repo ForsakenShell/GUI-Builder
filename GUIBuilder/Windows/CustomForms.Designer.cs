@@ -25,7 +25,7 @@ namespace GUIBuilder.Windows
         private System.Windows.Forms.ComboBox cbWorkshopKeywordBorderGenerator;
         private System.Windows.Forms.Label lblWorkshopMarkerLink;
         private System.Windows.Forms.ComboBox cbWorkshopKeywordBorderLink;
-        private System.Windows.Forms.CheckBox cbRestrictWorkshopBorderKeywords;
+        private System.Windows.Forms.CheckBox cbRestrictWorkshopForms;
         private System.Windows.Forms.GroupBox gbWorkshopContainerFilter;
         private GUIBuilder.Windows.Controls.SyncedListView<Engine.Plugin.Forms.Container> lvWorkshopContainers;
         private System.Windows.Forms.GroupBox gbWorkshopNodeDetectionLocationRefs;
@@ -77,7 +77,7 @@ namespace GUIBuilder.Windows
             this.cbWorkshopKeywordBorderGenerator = new System.Windows.Forms.ComboBox();
             this.lblWorkshopMarkerLink = new System.Windows.Forms.Label();
             this.cbWorkshopKeywordBorderLink = new System.Windows.Forms.ComboBox();
-            this.cbRestrictWorkshopBorderKeywords = new System.Windows.Forms.CheckBox();
+            this.cbRestrictWorkshopForms = new System.Windows.Forms.CheckBox();
             this.cbWorkshopContainerFilter = new System.Windows.Forms.ComboBox();
             this.WindowPanel.SuspendLayout();
             this.tcCustomForms.SuspendLayout();
@@ -93,7 +93,7 @@ namespace GUIBuilder.Windows
             // WindowPanel
             // 
             this.WindowPanel.Controls.Add(this.tcCustomForms);
-            this.WindowPanel.Controls.Add(this.cbRestrictWorkshopBorderKeywords);
+            this.WindowPanel.Controls.Add(this.cbRestrictWorkshopForms);
             this.WindowPanel.Size = new System.Drawing.Size(740, 375);
             // 
             // tcCustomForms
@@ -147,7 +147,6 @@ namespace GUIBuilder.Windows
             this.btnApplyWorkshopContainerSelection.Tag = "CustomFormsWindow.Tab.Container.Filter.Apply";
             this.btnApplyWorkshopContainerSelection.Text = "Update With Selection";
             this.btnApplyWorkshopContainerSelection.UseVisualStyleBackColor = true;
-            this.btnApplyWorkshopContainerSelection.Click += new System.EventHandler(this.btnApplyWorkshopContainerSelectionClick);
             // 
             // lvWorkshops
             // 
@@ -197,7 +196,6 @@ namespace GUIBuilder.Windows
             this.btnApplyWorkshopContainerFilter.Tag = "CustomFormsWindow.Tab.Container.Filter.Apply";
             this.btnApplyWorkshopContainerFilter.Text = "Apply Filter";
             this.btnApplyWorkshopContainerFilter.UseVisualStyleBackColor = true;
-            this.btnApplyWorkshopContainerFilter.Click += new System.EventHandler(this.btnApplyWorkshopContainerFilterClick);
             // 
             // gbWorkshopNodeDetection
             // 
@@ -339,16 +337,16 @@ namespace GUIBuilder.Windows
             // 
             // cbRestrictWorkshopBorderKeywords
             // 
-            this.cbRestrictWorkshopBorderKeywords.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.cbRestrictWorkshopForms.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbRestrictWorkshopBorderKeywords.Checked = true;
-            this.cbRestrictWorkshopBorderKeywords.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbRestrictWorkshopBorderKeywords.Location = new System.Drawing.Point(0, 0);
-            this.cbRestrictWorkshopBorderKeywords.Name = "cbRestrictWorkshopBorderKeywords";
-            this.cbRestrictWorkshopBorderKeywords.Size = new System.Drawing.Size(740, 30);
-            this.cbRestrictWorkshopBorderKeywords.TabIndex = 14;
-            this.cbRestrictWorkshopBorderKeywords.Text = "Restrict to:\nYo momma";
-            this.cbRestrictWorkshopBorderKeywords.UseVisualStyleBackColor = true;
+            this.cbRestrictWorkshopForms.Checked = true;
+            this.cbRestrictWorkshopForms.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbRestrictWorkshopForms.Location = new System.Drawing.Point(0, 0);
+            this.cbRestrictWorkshopForms.Name = "cbRestrictWorkshopBorderKeywords";
+            this.cbRestrictWorkshopForms.Size = new System.Drawing.Size(740, 30);
+            this.cbRestrictWorkshopForms.TabIndex = 14;
+            this.cbRestrictWorkshopForms.Text = "Restrict to:\nYo momma";
+            this.cbRestrictWorkshopForms.UseVisualStyleBackColor = true;
             // 
             // cbWorkshopContainerFilter
             // 

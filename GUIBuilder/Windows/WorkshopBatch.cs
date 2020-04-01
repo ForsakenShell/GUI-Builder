@@ -1,11 +1,11 @@
 ﻿/*
- * SubDivisionBatchWindow.cs
+ * WorkshopBatchWindow.cs
  *
  * Insert description here.
  *
  * User: 1000101
- * Date: 23/11/2018
- * Time: 1:51 PM
+ * Date: 30/03/2020
+ * Time: 7:34 PM
  * 
  */
 using System;
@@ -17,25 +17,25 @@ namespace GUIBuilder.Windows
 {
 
     /// <summary>
-    /// Use GodObject.Windows.GetWindow<SubDivisionBatch>() to create this Window
+    /// Use GodObject.Windows.GetWindow<WorkshopBatch>() to create this Window
     /// </summary>
-    public partial class SubDivisionBatch : WindowBase
+    public partial class WorkshopBatch : WindowBase
     {
 
-        public SubDivisionBatch() : base( true )
+        public WorkshopBatch() : base( true )
         {
             InitializeComponent();
             this.SuspendLayout();
-            
+
             this.ClientLoad += new System.EventHandler( this.OnClientLoad );
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            this.OnSetEnableState += OnClientSetEnableState;
 
             this.btnCheckMissingElements.Click += new System.EventHandler( this.OnCheckMissingElementsClick );
             this.btnNormalizeBuildVolumes.Click += new System.EventHandler( this.OnNormalizeBuildVolumesClick );
             this.btnOptimizeSandboxVolumes.Click += new System.EventHandler( this.OnOptimizeSandboxVolumesClick );
 
-            this.OnSetEnableState += OnClientSetEnableState;
-            this.lvSubDivisions.OnSetSyncObjectsThreadComplete += OnSyncSubDivisionsThreadComplete;
+            this.lvWorkshops.OnSetSyncObjectsThreadComplete += OnSyncWorkshopsThreadComplete;
 
             this.ResumeLayout( false );
         }
@@ -43,14 +43,14 @@ namespace GUIBuilder.Windows
 
         void OnClientLoad( object sender, EventArgs e )
         {
-            lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
-            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
-            UpdateSubDivisionList();
+            //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.Workshop );
+            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnWorkshopListChanged;
+            UpdateWorkshopList();
         }
 
         void OnClientClosing( object sender, FormClosingEventArgs e )
         {
-            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
+            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnWorkshopListChanged;
         }
 
         /// <summary>
@@ -60,28 +60,27 @@ namespace GUIBuilder.Windows
         bool OnClientSetEnableState( object sender, bool enable )
         {
             var enabled =
-                OnLoadComplete &&
                 enable &&
-                !lvSubDivisions.IsSyncObjectsThreadRunning;
+                !lvWorkshops.IsSyncObjectsThreadRunning;
             return enabled;
         }
 
         #region Sync'd list monitoring
 
-        void OnSyncSubDivisionsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision> sender )
+        void OnSyncWorkshopsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript> sender )
         {
             SetEnableState( sender, true );
         }
 
-        void UpdateSubDivisionList()
+        void UpdateWorkshopList()
         {
-            var subdivisions = GodObject.Plugin.Data.SubDivisions.ToList( false );
-            lvSubDivisions.SyncObjects = subdivisions;
+            var workshops = GodObject.Plugin.Data.Workshops.SyncedGUIList.ToList( false );
+            lvWorkshops.SyncObjects = workshops;
         }
         
-        void OnSubDivisionListChanged( object sender, EventArgs e )
+        void OnWorkshopListChanged( object sender, EventArgs e )
         {
-            UpdateSubDivisionList();
+            UpdateWorkshopList();
         }
         
         #endregion
@@ -94,9 +93,9 @@ namespace GUIBuilder.Windows
         
         void THREAD_CheckMissingElements()
         {
-            var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
+            var workshops = lvWorkshops.GetSelectedSyncObjects();
             
-            if( subdivisions.NullOrEmpty() )
+            if( workshops.NullOrEmpty() )
             {
                 GodObject.Windows.SetEnableState( this, true );
                 return;
@@ -108,10 +107,12 @@ namespace GUIBuilder.Windows
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
-            GUIBuilder.SubDivisionBatch.CheckMissingElements(
-                subdivisions,
-                cbElementBorderEnablers.Checked,
+            /* TODO: Write me!
+            GUIBuilder.WorkshopBatch.CheckMissingElements(
+                workshops,
+                cbElementBorderMarkers.Checked,
                 cbElementSandboxVolumes.Checked );
+            */
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
@@ -126,9 +127,9 @@ namespace GUIBuilder.Windows
         
         void THREAD_OptimizeSandboxVolumes()
         {
-            var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
+            var workshops = lvWorkshops.GetSelectedSyncObjects();
             
-            if( subdivisions.NullOrEmpty() )
+            if( workshops.NullOrEmpty() )
             {
                 GodObject.Windows.SetEnableState( this, true );
                 return;
@@ -140,8 +141,9 @@ namespace GUIBuilder.Windows
             var tStart = m.SyncTimerElapsed();
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
-            
-            GUIBuilder.SubDivisionBatch.GenerateSandboxes( ref list, subdivisions, m, false, false );
+
+            // TODO: Write me!
+            //GUIBuilder.WorkshopBatch.GenerateSandboxes( ref list, workshops, m, false, false );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
@@ -151,17 +153,17 @@ namespace GUIBuilder.Windows
             GodObject.Windows.SetEnableState( this, true );
         }
         
-        void OnNormalizeBuildVolumesClick( object sender, EventArgs e)
+        void OnNormalizeBuildVolumesClick(object sender, EventArgs e)
         {
-            GodObject.Windows.SetEnableState( sender, false );
+            GodObject.Windows.SetEnableState( this, false );
             WorkerThreadPool.CreateWorker( THREAD_NormalizeBuildVolumes, null ).Start();
         }
         
         void THREAD_NormalizeBuildVolumes()
         {
-            var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
+            var workshops = lvWorkshops.GetSelectedSyncObjects();
             
-            if( subdivisions.NullOrEmpty() )
+            if( workshops.NullOrEmpty() )
             {
                 GodObject.Windows.SetEnableState( this, true );
                 return;
@@ -174,7 +176,8 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            GUIBuilder.SubDivisionBatch.NormalizeBuildVolumes( ref list, subdivisions, m, false );
+            // TODO: Write me!
+            //GUIBuilder.WorkshopBatch.NormalizeBuildVolumes( ref list, workshops, m, false );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );

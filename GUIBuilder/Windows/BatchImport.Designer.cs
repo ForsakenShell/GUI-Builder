@@ -79,7 +79,6 @@ namespace GUIBuilder.Windows
             this.scImports.Size = new System.Drawing.Size(942, 516);
             this.scImports.SplitterDistance = 446;
             this.scImports.TabIndex = 15;
-            this.scImports.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.scImportsSplitterMoved);
             // 
             // lvImportForms
             // 
@@ -130,7 +129,6 @@ namespace GUIBuilder.Windows
             this.btnImportSelected.Tag = "BatchImportWindow.Import";
             this.btnImportSelected.Text = "Import";
             this.btnImportSelected.UseVisualStyleBackColor = true;
-            this.btnImportSelected.Click += new System.EventHandler(this.btnImportSelectedClick);
             // 
             // btnClose
             // 
@@ -142,7 +140,6 @@ namespace GUIBuilder.Windows
             this.btnClose.Tag = "BatchImportWindow.Close";
             this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = true;
-            this.btnClose.Click += new System.EventHandler(this.btnCloseClick);
             // 
             // BatchImport
             // 
@@ -154,7 +151,6 @@ namespace GUIBuilder.Windows
             this.Name = "BatchImport";
             this.Tag = "BatchImportWindow.Title";
             this.Text = "title";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
             this.WindowPanel.ResumeLayout(false);
             this.scImports.Panel1.ResumeLayout(false);
             this.scImports.Panel2.ResumeLayout(false);
@@ -162,7 +158,6 @@ namespace GUIBuilder.Windows
             ((System.ComponentModel.ISupportInitialize)(this.scImports)).EndInit();
             this.scImports.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
     }
 }

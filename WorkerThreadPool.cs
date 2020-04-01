@@ -272,7 +272,7 @@ public static class WorkerThreadPool
             }
             catch( Exception e )
             {
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( null, true );
                 DebugLog.WriteException( e );
             }
 
@@ -285,7 +285,7 @@ public static class WorkerThreadPool
             }
             catch( Exception e )
             {
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( null, true );
                 DebugLog.WriteError( "An exception has occured while executing the thread OnFinish handler\n" + e.ToString() );
             }
 

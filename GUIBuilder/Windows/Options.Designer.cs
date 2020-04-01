@@ -280,7 +280,6 @@ namespace GUIBuilder.Windows
             this.cbLanguage.Name = "cbLanguage";
             this.cbLanguage.Size = new System.Drawing.Size(297, 21);
             this.cbLanguage.TabIndex = 2;
-            this.cbLanguage.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSelectedIndexChanged);
             // 
             // tbLanguageRestart
             // 
@@ -330,7 +329,6 @@ namespace GUIBuilder.Windows
             this.cbSDLVideoDriver.Name = "cbSDLVideoDriver";
             this.cbSDLVideoDriver.Size = new System.Drawing.Size(193, 21);
             this.cbSDLVideoDriver.TabIndex = 1;
-            this.cbSDLVideoDriver.SelectedIndexChanged += new System.EventHandler(this.cbSDLVideoDriverSelectedIndexChanged);
             // 
             // tbSDLVideoRenderWarning
             // 
@@ -374,7 +372,6 @@ namespace GUIBuilder.Windows
             this.cbZipLogFiles.Tag = "OptionsWindow.ZipLogFiles";
             this.cbZipLogFiles.Text = "Zippity-do-da";
             this.cbZipLogFiles.UseVisualStyleBackColor = true;
-            this.cbZipLogFiles.CheckedChanged += new System.EventHandler(this.cbZipLogFilesCheckedChanged);
             // 
             // cbLogMainToConsole
             // 
@@ -385,7 +382,6 @@ namespace GUIBuilder.Windows
             this.cbLogMainToConsole.Tag = "OptionsWindow.LogMainToConsole";
             this.cbLogMainToConsole.Text = "Console me";
             this.cbLogMainToConsole.UseVisualStyleBackColor = true;
-            this.cbLogMainToConsole.CheckedChanged += new System.EventHandler(this.cbLogMainToConsoleCheckedChanged);
             // 
             // gbLogs
             // 
@@ -425,7 +421,6 @@ namespace GUIBuilder.Windows
             this.btnNIFExportInfoReset.Size = new System.Drawing.Size(18, 18);
             this.btnNIFExportInfoReset.TabIndex = 4;
             this.btnNIFExportInfoReset.UseVisualStyleBackColor = true;
-            this.btnNIFExportInfoReset.Click += new System.EventHandler(this.btnNIFExportInfoResetClick);
             // 
             // tbNIFExportInfo_3
             // 
@@ -436,7 +431,6 @@ namespace GUIBuilder.Windows
             this.tbNIFExportInfo_3.Name = "tbNIFExportInfo_3";
             this.tbNIFExportInfo_3.Size = new System.Drawing.Size(297, 20);
             this.tbNIFExportInfo_3.TabIndex = 3;
-            this.tbNIFExportInfo_3.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
             // 
             // tbNIFExportInfo_2
             // 
@@ -447,7 +441,6 @@ namespace GUIBuilder.Windows
             this.tbNIFExportInfo_2.Name = "tbNIFExportInfo_2";
             this.tbNIFExportInfo_2.Size = new System.Drawing.Size(297, 20);
             this.tbNIFExportInfo_2.TabIndex = 2;
-            this.tbNIFExportInfo_2.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
             // 
             // tbNIFExportInfo_1
             // 
@@ -458,7 +451,6 @@ namespace GUIBuilder.Windows
             this.tbNIFExportInfo_1.Name = "tbNIFExportInfo_1";
             this.tbNIFExportInfo_1.Size = new System.Drawing.Size(297, 20);
             this.tbNIFExportInfo_1.TabIndex = 1;
-            this.tbNIFExportInfo_1.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
             // 
             // tbNIFExportInfo_0
             // 
@@ -469,7 +461,6 @@ namespace GUIBuilder.Windows
             this.tbNIFExportInfo_0.Name = "tbNIFExportInfo_0";
             this.tbNIFExportInfo_0.Size = new System.Drawing.Size(297, 20);
             this.tbNIFExportInfo_0.TabIndex = 0;
-            this.tbNIFExportInfo_0.TextChanged += new System.EventHandler(this.tbNIFExportInfoTextChanged);
             // 
             // Options
             // 

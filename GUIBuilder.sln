@@ -1,6 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
+# Visual Studio 2012
+# SharpDevelop 5.1
 VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUIBuilder", "GUIBuilder.csproj", "{71DB0BAB-5FAE-48C5-8C0E-4481ED75F9DB}"

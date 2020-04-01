@@ -15,8 +15,10 @@ using XeLib.API;
 
 namespace GUIBuilder.Windows
 {
+
     /// <summary>
-    /// Description of PluginSelector.
+    /// Use new PluginSelector() to create this Window
+    /// Use ShowDialog() to show it
     /// </summary>
     public partial class PluginSelector : Form, GodObject.XmlConfig.IXmlConfiguration
     {
@@ -39,18 +41,24 @@ namespace GUIBuilder.Windows
         
         public PluginSelector()
         {
-            //
-            // The InitializeComponent() call is required for Windows Forms designer support.
-            //
             InitializeComponent();
-            
-            //
-            // TODO: Add constructor code after the InitializeComponent() call.
-            //
-            
+            this.SuspendLayout();
+
+            this.Load += new System.EventHandler( this.OnClientLoad );
+            this.ResizeEnd += new System.EventHandler( this.OnClientResizeEnd );
+            this.Move += new System.EventHandler( this.OnClientMove );
+
+            this.tvPlugins.BeforeCheck += new System.Windows.Forms.TreeViewCancelEventHandler( this.OnPluginBeforeCheckOrSelect );
+            this.tvPlugins.AfterCheck += new System.Windows.Forms.TreeViewEventHandler( this.OnPluginAfterCheck );
+            this.tvPlugins.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler( this.OnPluginBeforeCheckOrSelect );
+            this.btnLoad.Click += new System.EventHandler( this.OnLoadClick );
+            this.btnCancel.Click += new System.EventHandler( this.OnCancelClick );
+            this.cbWorkingFile.SelectedIndexChanged += new System.EventHandler( this.OnWorkingFileChanged );
+
+            this.ResumeLayout();
         }
         
-        void PluginSelector_OnLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             this.Translate( true );
             
@@ -98,21 +106,21 @@ namespace GUIBuilder.Windows
             onLoadComplete = true;
         }
         
-        void OnFormMove( object sender, EventArgs e )
+        void OnClientMove( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
             GodObject.XmlConfig.WriteLocation( this );
         }
         
-        void OnFormResizeEnd( object sender, EventArgs e )
+        void OnClientResizeEnd( object sender, EventArgs e )
         {
             if( !onLoadComplete )
                 return;
             GodObject.XmlConfig.WriteSize( this );
         }
         
-        void btnLoadClick( object sender, EventArgs e )
+        void OnLoadClick( object sender, EventArgs e )
         {
             SelectedPlugins = new List<string>();
             foreach( TreeNode node in tvPlugins.Nodes )
@@ -124,7 +132,7 @@ namespace GUIBuilder.Windows
             this.Close();
         }
         
-        void btnCancelClick( object sender, EventArgs e )
+        void OnCancelClick( object sender, EventArgs e )
         {
             WorkingFile = null;
             SelectedPlugins = null;
@@ -132,25 +140,13 @@ namespace GUIBuilder.Windows
             this.Close();
         }
         
-        void tvPluginsBeforeCheckOrSelect( object sender, TreeViewCancelEventArgs e )
+        void OnPluginBeforeCheckOrSelect( object sender, TreeViewCancelEventArgs e )
         {
             if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             if( e.Node.ForeColor == NodeDisabledColor ) e.Cancel = true;
         }
         
-        void UpdateRootCheckState( string key, bool state )
-        {
-            foreach( TreeNode node in tvPlugins.Nodes )
-            {
-                if( key.InsensitiveInvariantMatch( node.Text ) )
-                {
-                    node.Checked = state;
-                    UpdateChildCheckState( key, state );
-                }
-            }
-        }
-        
-        void tvPluginsAfterCheck( object sender, TreeViewEventArgs e )
+        void OnPluginAfterCheck( object sender, TreeViewEventArgs e )
         {
             if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             OverrideCheckedCheck = true;
@@ -250,12 +246,24 @@ namespace GUIBuilder.Windows
             }
         }
         
-        void CbWorkingFileSelectedIndexChanged( object sender, EventArgs e )
+        void OnWorkingFileChanged( object sender, EventArgs e )
         {
             if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             btnLoad.Enabled = cbWorkingFile.SelectedIndex > 0;
         }
-        
+
+        void UpdateRootCheckState( string key, bool state )
+        {
+            foreach( TreeNode node in tvPlugins.Nodes )
+            {
+                if( key.InsensitiveInvariantMatch( node.Text ) )
+                {
+                    node.Checked = state;
+                    UpdateChildCheckState( key, state );
+                }
+            }
+        }
+
         void UpdateChildCheckState( string key, bool state )
         {
             foreach( TreeNode node in tvPlugins.Nodes )

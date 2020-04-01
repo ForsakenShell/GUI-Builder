@@ -267,7 +267,7 @@ public static class GenString
             i = m.LastIndexOf( '.', i );
         else
             i = m.LastIndexOf( '.' );
-        return i > 0 ? m.Substring( i ) : m;
+        return i > -1 ? m.Substring( i + 1 ) : m;
     }
 
     public static string FullName<T>( this T t ) where T : Type

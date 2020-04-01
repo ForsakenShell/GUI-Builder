@@ -15,8 +15,10 @@ using XeLib.API;
 
 namespace GUIBuilder.Windows
 {
+
     /// <summary>
-    /// Description of WorkspaceSelector.
+    /// Use new WorkspaceSelector() to create this Window
+    /// Use ShowDialog() to show it
     /// </summary>
     public partial class WorkspaceSelector : Form, GodObject.XmlConfig.IXmlConfiguration
     {
@@ -37,9 +39,19 @@ namespace GUIBuilder.Windows
         public WorkspaceSelector()
         {
             InitializeComponent();
+            this.SuspendLayout();
+
+            this.Load += new System.EventHandler( this.OnClientLoad );
+            this.ResizeEnd += new System.EventHandler( this.OnClientResizeEnd );
+            this.Move += new System.EventHandler( this.OnClientMove );
+
+            this.btnCancel.Click += new System.EventHandler( this.OnCancelClick );
+            this.btnLoad.Click += new System.EventHandler( this.OnLoadClick );
+
+            this.ResumeLayout( false );
         }
-        
-        void WorkspaceSelector_OnLoad( object sender, EventArgs e )
+
+        void OnClientLoad( object sender, EventArgs e )
         {
             this.Translate( true );
             
@@ -125,6 +137,35 @@ namespace GUIBuilder.Windows
             onLoadComplete = true;
         }
 
+        void OnClientMove( object sender, EventArgs e )
+        {
+            if( !onLoadComplete )
+                return;
+            GodObject.XmlConfig.WriteLocation( this );
+        }
+
+        void OnClientResizeEnd( object sender, EventArgs e )
+        {
+            if( !onLoadComplete )
+                return;
+            GodObject.XmlConfig.WriteSize( this );
+        }
+
+        void OnCancelClick( object sender, EventArgs e )
+        {
+            SelectedWorkspace = null;
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+
+        void OnLoadClick( object sender, EventArgs e )
+        {
+            var selected = RootNode( tvWorkspaces.SelectedNode );
+            SelectedWorkspace = selected == null ? null : selected.Text;
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
         void AddFormIdentifier( Workspace workspace, TreeNode parentNode, string identifierKey, string translationKey )
         {
             AddFormIdentifier( workspace.GetFormIdentifier( identifierKey, false ), parentNode, translationKey );
@@ -151,20 +192,6 @@ namespace GUIBuilder.Windows
             parentNode.Nodes.Add( identifierNode );
         }
 
-        void OnFormMove( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteLocation( this );
-        }
-        
-        void OnFormResizeEnd( object sender, EventArgs e )
-        {
-            if( !onLoadComplete )
-                return;
-            GodObject.XmlConfig.WriteSize( this );
-        }
-        
         TreeNode RootNode( TreeNode n )
         {
             return n == null
@@ -172,21 +199,6 @@ namespace GUIBuilder.Windows
                 : n.Parent == null
                 ? n
                 : RootNode( n.Parent );
-        }
-        
-        void btnCancelClick( object sender, EventArgs e )
-        {
-            SelectedWorkspace = null;
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
-        
-        void btnLoadClick( object sender, EventArgs e )
-        {
-            var selected = RootNode( tvWorkspaces.SelectedNode );
-            SelectedWorkspace = selected == null ? null : selected.Text;
-            this.DialogResult = DialogResult.OK;
-            this.Close();
         }
         
         #region Override (Ignore) Close Button

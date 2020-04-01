@@ -15,7 +15,7 @@ namespace GUIBuilder.Windows.RenderChild
     /// <summary>
     /// Description of SyncObjectTool.
     /// </summary>
-    public partial class SyncObjectTool<TSync> : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class SyncObjectTool<TSync> : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
         where TSync : class, Engine.Plugin.Interface.ISyncedGUIObject
     {
         
@@ -25,36 +25,57 @@ namespace GUIBuilder.Windows.RenderChild
         public string XmlNodeName { get{ return _XmlNodeName; } }
         
         bool onLoadComplete = false;
+        public bool OnLoadComplete { get { return onLoadComplete; } }
+
         Size _ExpandedSize;
         
         Engine.Plugin.Interface.ISyncedGUIList<TSync> _ISyncedList = null;
         Engine.Plugin.Forms.Worldspace _Worldspace;
-        
-        public SyncObjectTool( string xmlNodeName, string titleTranslationKey, Engine.Plugin.Interface.ISyncedGUIList<TSync> ISyncedList = null, Type syncedEditorFormType = null )
+
+        IEnableControlForm _parent;
+
+        public SyncObjectTool( IEnableControlForm parent, string xmlNodeName, string titleTranslationKey, Engine.Plugin.Interface.ISyncedGUIList<TSync> ISyncedList = null, Type syncedEditorFormType = null )
         {
+            _parent = parent;
             InitializeComponent();
+            this.SuspendLayout();
+
             _XmlNodeName = xmlNodeName;
             this.Tag = titleTranslationKey;
             _ISyncedList = ISyncedList;
-            lvSyncObjects.SyncedEditorFormType = syncedEditorFormType;
+            
+            lvSyncObjects.SyncedEditorFormType              = syncedEditorFormType;
+            lvSyncObjects.OnSetSyncObjectsThreadComplete    += OnSyncObjectsThreadComplete;
+
+            this.Load       += new System.EventHandler( this.OnClientLoad );
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            this.OnSetEnableState += OnClientSetEnableState;
+
+            this.Activated  += new System.EventHandler( this.OnClientActivated );
+            this.Deactivate += new System.EventHandler( this.OnClientDeactivate );
+
+            this.ResumeLayout( false );
         }
         
-        void OnFormLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormLoad() :: Start" );
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
-            _ExpandedSize = this.Size;
-            
+            this.Location   = GodObject.XmlConfig.ReadLocation( this );
+            this.Size       = GodObject.XmlConfig.ReadSize( this );
+            _ExpandedSize   = this.Size;
+
             if( _ISyncedList != null )
                 _ISyncedList.ObjectDataChanged += OnSyncedListChanged;
             
+            this.ResizeEnd  += new System.EventHandler( this.OnClientResizeEnd );
+            this.Move       += new System.EventHandler( this.OnClientMove );
+
             onLoadComplete = true;
         }
         
-        void OnFormClosing( object sender, EventArgs e )
+        void OnClientClosing( object sender, EventArgs e )
         {
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormClosing() :: Start" );
             onLoadComplete = false;
@@ -64,54 +85,75 @@ namespace GUIBuilder.Windows.RenderChild
             
         }
         
-        public void SetEnableState( bool enabled )
+        public bool SetEnableState( object sender, bool enable )
         {
             if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
-                return;
-            }
+                return (bool)this.Invoke( (Func<bool>)delegate() { return SetEnableState( sender, enable ); }, null );
+            bool tryEnable = OnLoadComplete && enable;
+            bool enabled = OnSetEnableState != null
+                ? OnSetEnableState( sender, tryEnable )
+                : tryEnable;
+            if( sender != _parent )
+                enabled = _parent.SetEnableState( this, enabled );
             pnWindow.Enabled = enabled;
+            return enabled;
         }
-        
+
+        public event GUIBuilder.Windows.SetEnableStateHandler  OnSetEnableState;
+
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enable">Enable state to set</param>
+        bool OnClientSetEnableState( object sender, bool enable )
+        {
+            var enabled =
+                enable &&
+                !lvSyncObjects.IsSyncObjectsThreadRunning;
+            return enabled;
+        }
+
         #region Common Form Xml Events
-        
+
         void OverrideSize( Size size )
         {
-            this.ResizeEnd -= OnFormResizeEnd;
+            this.ResizeEnd -= OnClientResizeEnd;
             this.Size = size;
-            this.ResizeEnd += OnFormResizeEnd;
+            this.ResizeEnd += OnClientResizeEnd;
         }
         
-        void OnActivated( object sender, EventArgs e )
+        void OnClientActivated( object sender, EventArgs e )
         {
             OverrideSize( _ExpandedSize );
         }
         
-        void OnDeactivate( object sender, EventArgs e )
+        void OnClientDeactivate( object sender, EventArgs e )
         {
             OverrideSize( this.MinimumSize );
         }
         
-        void OnFormMove( object sender, EventArgs e )
+        void OnClientMove( object sender, EventArgs e )
         {
-            if( !onLoadComplete )
-                return;
+            if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteLocation( this );
         }
         
-        void OnFormResizeEnd( object sender, EventArgs e )
+        void OnClientResizeEnd( object sender, EventArgs e )
         {
-            if( !onLoadComplete )
-                return;
+            if( !OnLoadComplete )  return;
             GodObject.XmlConfig.WriteSize( this );
             _ExpandedSize = this.Size;
         }
-        
+
         #endregion
-        
+
         #region Sync Objects
-        
+
+        void OnSyncObjectsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<TSync> sender )
+        {
+            SetEnableState( sender, true );
+        }
+
         void UpdateSyncedList( Engine.Plugin.Forms.Worldspace worldspace )
         {
             DebugLog.WriteLine( string.Format( "worldspace ? {0}", worldspace == null ? "null" : worldspace.ToString() ), true );
@@ -137,7 +179,6 @@ namespace GUIBuilder.Windows.RenderChild
             }
         }
         
-        //public List<Engine.Plugin.Form> SyncObjects
         public List<TSync> SyncObjects
         {
             get
@@ -152,7 +193,6 @@ namespace GUIBuilder.Windows.RenderChild
             }
         }
         
-        //public List<Engine.Plugin.Form> SelectedSyncObjects
         public List<TSync> SelectedSyncObjects
         {
             get
@@ -162,7 +202,6 @@ namespace GUIBuilder.Windows.RenderChild
             }
         }
         
-        //public List<Engine.Plugin.Form> VisibleSyncObjects
         public List<TSync> VisibleSyncObjects
         {
             get { return lvSyncObjects.GetVisibleSyncObjects(); }

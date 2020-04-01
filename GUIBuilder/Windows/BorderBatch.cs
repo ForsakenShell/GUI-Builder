@@ -15,31 +15,72 @@ using AnnexTheCommonwealth;
 
 namespace GUIBuilder.Windows
 {
+
     /// <summary>
-    /// Description of BorderBatch.
+    /// Use GodObject.Windows.GetWindow<BorderBatch>() to create this Window
     /// </summary>
     public partial class BorderBatch : WindowBase
     {
         
-        
-        /// <summary>
-        /// Use GodObject.Windows.GetWindow<BorderBatch>() to create this Window
-        /// </summary>
         public BorderBatch() : base( true )
         {
             InitializeComponent();
-            this.ClientLoad += new System.EventHandler( this.BorderBatch_OnLoad );
-            this.OnSetEnableState   += new SetEnableStateHandler( this.OnFormSetEnableState );
+            this.SuspendLayout();
+
+            this.ClientLoad += new System.EventHandler( this.OnClientLoad );
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            this.OnSetEnableState   += new SetEnableStateHandler( this.OnClientSetEnableState );
+
+            this.tbTargetFolder.MouseClick += new System.Windows.Forms.MouseEventHandler( this.tbNIFBuilderTargetFolderMouseClick );
+            this.tbMeshDirectory.TextChanged += new System.EventHandler( this.OnWorkshopNIFFilePathSampleElementChanged );
+            this.tbMeshDirectory.TextChanged += new System.EventHandler( this.OnSubDivisionNIFFilePathSampleElementChanged );
+
+            this.tbWorkshopNIFTargetSubDirectory.TextChanged += new System.EventHandler( this.OnWorkshopNIFFilePathSampleElementChanged );
+            this.tbWorkshopNIFMeshSubDirectory.TextChanged += new System.EventHandler( this.OnWorkshopNIFFilePathSampleElementChanged );
+            this.tbWorkshopNIFFilePrefix.TextChanged += new System.EventHandler( this.OnWorkshopNIFFilePathSampleElementChanged );
+            this.tbWorkshopNIFFileSuffix.TextChanged += new System.EventHandler( this.OnWorkshopNIFFilePathSampleElementChanged );
+
+            this.tbSubDivisionNIFTargetSubDirectory.TextChanged += new System.EventHandler( this.OnSubDivisionNIFFilePathSampleElementChanged );
+            this.tbSubDivisionNIFMeshSubDirectory.TextChanged += new System.EventHandler( this.OnSubDivisionNIFFilePathSampleElementChanged );
+            this.tbSubDivisionNIFFilePrefix.TextChanged += new System.EventHandler( this.OnSubDivisionNIFFilePathSampleElementChanged );
+            this.tbSubDivisionNIFFileSuffix.TextChanged += new System.EventHandler( this.OnSubDivisionNIFFilePathSampleElementChanged );
+
+            this.tcObjectSelect.SelectedIndexChanged += new System.EventHandler( this.OnObjectTypeTabControlIndexChanged );
+
+            this.cbSubDivisionPresets.SelectedIndexChanged += new System.EventHandler( this.OnSubDivisionPresetIndexChange );
+            this.tbSubDivisionNodeLength.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNodeAngleAllowance.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNodeSlopeAllowance.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNIFGroundSink.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.cbSubDivisionNIFCreateImportData.CheckedChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNIFGroundOffset.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNIFGradientHeight.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+
+            this.cbWorkshopPresets.SelectedIndexChanged += new System.EventHandler( this.OnWorkshopPresetIndexChange );
+            this.tbWorkshopNodeLength.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNodeAngleAllowance.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNodeSlopeAllowance.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.cbWorkshopNIFCreateImportData.CheckedChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNIFGroundSink.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNIFGroundOffset.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNIFGradientHeight.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+
+            this.tbWorkshopNIFSampleFilePath.MouseClick += new System.Windows.Forms.MouseEventHandler( this.OnNIFBuilderNIFFilePathSampleMouseClick );
+
+            this.lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
+            this.lvSubDivisions.OnSetSyncObjectsThreadComplete += OnSyncSubDivisionsThreadComplete;
+
+            //this.lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
+            this.lvWorkshops.OnSetSyncObjectsThreadComplete += OnSyncWorkshopsThreadComplete;
+
+            this.btnClearNodes.Click += new System.EventHandler( this.OnClearNodesButtonClick );
+            this.btnGenerateNodes.Click += new System.EventHandler( this.OnGenerateNodesButtonClick );
+            this.btnBuildNIFs.Click += new System.EventHandler( this.OnBuildNIFsButtonClick );
+            this.btnImportNIFs.Click += new System.EventHandler( this.OnImportNIFsButtonClick );
+
+            this.ResumeLayout( false );
         }
 
-
-        #region GodObject.XmlConfig.IXmlConfiguration
-
-
-        public override string XmlNodeName { get { return "BorderBatchWindow"; } }
-
-
-        #endregion
 
         bool _nodesBuilt = false;
         List<GUIBuilder.FormImport.ImportBase> _importData = null;
@@ -55,7 +96,7 @@ namespace GUIBuilder.Windows
         
         #region Window management
         
-        void BorderBatch_OnLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             tbTargetFolder.Text = GodObject.Paths.NIFBuilderOutput;
             
@@ -74,7 +115,7 @@ namespace GUIBuilder.Windows
                 RepopulatePresetComboBoxes( cbSubDivisionPresets, NIFBuilder.Preset.SubDivisionPresets, presetIndex );
                 
                 UpdateSubDivisionList( false );
-                lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
+
                 GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
 
                 EnablePage( tpSubDivisions, true );
@@ -91,7 +132,7 @@ namespace GUIBuilder.Windows
                 RepopulatePresetComboBoxes( cbWorkshopPresets, NIFBuilder.Preset.WorkshopPresets, presetIndex );
 
                 UpdateWorkshopList( false );
-                //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.WorkshopScript );
+                
                 GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged += OnWorkshopListChanged;
 
                 EnablePage( tpWorkshops, true );
@@ -99,8 +140,8 @@ namespace GUIBuilder.Windows
 
             UpdateNIFFilePathSampleInternal();
         }
-
-        void OnFormClosing( object sender, FormClosingEventArgs e )
+        
+        void OnClientClosing( object sender, FormClosingEventArgs e )
         {
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnSubDivisionListChanged;
             GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged -= OnWorkshopListChanged;
@@ -109,13 +150,18 @@ namespace GUIBuilder.Windows
         /// <summary>
         /// Handle window specific global enable/disable events.
         /// </summary>
-        /// <param name="enabled">Enable state to set</param>
-        void OnFormSetEnableState( bool enabled )
+        /// <param name="enable">Enable state to set</param>
+        bool OnClientSetEnableState( object sender, bool enable )
         {
-            btnClear.Enabled = _nodesBuilt;
-            btnGenNodes.Enabled = !_nodesBuilt;
-            btnBuildNIFs.Enabled = _nodesBuilt;
-            btnImportNIFs.Enabled = _importData != null;
+            var enabled =
+                enable &&
+                !lvSubDivisions.IsSyncObjectsThreadRunning &&
+                !lvWorkshops.IsSyncObjectsThreadRunning;
+            btnClearNodes.Enabled = enabled && _nodesBuilt;
+            btnGenerateNodes.Enabled = enabled && !_nodesBuilt;
+            btnBuildNIFs.Enabled = enabled && _nodesBuilt;
+            btnImportNIFs.Enabled = enabled &&( _importData != null );
+            return enabled;
         }
 
         void EnablePage( TabPage page, bool enable )
@@ -137,6 +183,16 @@ namespace GUIBuilder.Windows
         #endregion
 
         #region Sync'd list monitoring
+
+        void OnSyncSubDivisionsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<SubDivision> sender )
+        {
+            SetEnableState( sender, true );
+        }
+
+        void OnSyncWorkshopsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript> sender )
+        {
+            SetEnableState( sender, true );
+        }
 
         void UpdateWorkshopList( bool updateSampleDisplay )
         {
@@ -189,7 +245,7 @@ namespace GUIBuilder.Windows
         
         void THREAD_ClearEdgeFlagSegments()
         {
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( this, false );
             
             _nodesBuilt = false;
             _importData = null;
@@ -197,10 +253,10 @@ namespace GUIBuilder.Windows
             var subdivisions = lvSubDivisions.GetSelectedSyncObjects();
             GUIBuilder.SubDivisionBatch.ClearEdgeFlagNodes( subdivisions );
             
-            GodObject.Windows.SetEnableState( true );
+            GodObject.Windows.SetEnableState( this, true );
         }
         
-        void btnClearClick( object sender, EventArgs e )
+        void OnClearNodesButtonClick( object sender, EventArgs e )
         {
             WorkerThreadPool.CreateWorker( THREAD_ClearEdgeFlagSegments, null ).Start();
         }
@@ -278,12 +334,12 @@ namespace GUIBuilder.Windows
             }
 
             _nodesBuilt = nodesBuilt;
-            GodObject.Windows.SetEnableState( true );
+            GodObject.Windows.SetEnableState( this, true );
         }
         
-        void btnGenNodesClick( object sender, EventArgs e )
+        void OnGenerateNodesButtonClick( object sender, EventArgs e )
         {
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( sender, false );
 
             var workshops = lvWorkshops.GetSelectedSyncObjects();
             if( !workshops.NullOrEmpty() )
@@ -297,7 +353,7 @@ namespace GUIBuilder.Windows
                 )
                 {
                     GodObject.Windows.GetWindow<CustomForms>( true );
-                    SetEnableState( true );
+                    SetEnableState( sender, true );
                     return;
                 }
             }
@@ -307,7 +363,7 @@ namespace GUIBuilder.Windows
                     : null;
             if( ( workshops.NullOrEmpty() )&&( subDivisions.NullOrEmpty() ) )
             {
-                SetEnableState( true );
+                SetEnableState( sender, true );
                 return;
             }
 
@@ -317,7 +373,7 @@ namespace GUIBuilder.Windows
             var thread = WorkerThreadPool.CreateWorker( obj, THREAD_CalculateBorderNodes, null );
             if( thread == null )
             {
-                SetEnableState( true );
+                SetEnableState( sender, true );
                 return;
             }
             thread.Start();
@@ -385,7 +441,7 @@ namespace GUIBuilder.Windows
         
         void THREAD_BuildNIFs()
         {
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( this, false );
             
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
             m.PushStatusMessage();
@@ -500,7 +556,7 @@ namespace GUIBuilder.Windows
             _importData = list;
             m.StopSyncTimer( fStart );
             m.PopStatusMessage();
-            GodObject.Windows.SetEnableState( true );
+            GodObject.Windows.SetEnableState( this, true );
         }
         
         List<GUIBuilder.FormImport.ImportBase> CreatePresetWorkshopNIFs(
@@ -579,7 +635,7 @@ namespace GUIBuilder.Windows
                 preset.CreateImportData );
         }
         
-        void btnBuildNIFsClick( object sender, EventArgs e )
+        void OnBuildNIFsButtonClick( object sender, EventArgs e )
         {
             if( string.IsNullOrEmpty( tbTargetFolder.Text ) )
             {
@@ -614,7 +670,7 @@ namespace GUIBuilder.Windows
             fbd = null;
         }
         
-        void uiUpdateWorkshopNIFFilePathSample( object sender, EventArgs e )
+        void OnWorkshopNIFFilePathSampleElementChanged( object sender, EventArgs e )
         {
             if( UpdatingPresetUI ) return;
             UpdatingPresetUI = true;
@@ -624,7 +680,7 @@ namespace GUIBuilder.Windows
             UpdatingPresetUI = false;
         }
         
-        void uiUpdateSubDivisionNIFFilePathSample( object sender, EventArgs e )
+        void OnSubDivisionNIFFilePathSampleElementChanged( object sender, EventArgs e )
         {
             if( UpdatingPresetUI ) return;
             UpdatingPresetUI = true;
@@ -634,7 +690,7 @@ namespace GUIBuilder.Windows
             UpdatingPresetUI = false;
         }
         
-        void tbNIFBuilderNIFFilePathSampleMouseClick( object sender, MouseEventArgs e )
+        void OnNIFBuilderNIFFilePathSampleMouseClick( object sender, MouseEventArgs e )
         {
             // Supress user changes to the filepath sample textbox
             tbWorkshopNIFSampleFilePath.Parent.Focus();
@@ -644,13 +700,13 @@ namespace GUIBuilder.Windows
         
         #region Import NIFs
         
-        void btnImportNIFsClick( object sender, EventArgs e )
+        void OnImportNIFsButtonClick( object sender, EventArgs e )
         {
             if( _importData.NullOrEmpty() ) return;
             var t = WorkerThreadPool.CreateWorker( THREAD_ImportNIFs, null );
             if( t != null )
             {
-                GodObject.Windows.SetEnableState( false );
+                GodObject.Windows.SetEnableState( sender, false );
                 t.Start();
             }
         }
@@ -661,7 +717,7 @@ namespace GUIBuilder.Windows
                 return;
             bool tmp = false;
             if( !FormImport.ImportBase.ShowImportDialog( _importData, true, ref tmp ) )
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( this, true );
         }
         
         #endregion
@@ -900,28 +956,28 @@ namespace GUIBuilder.Windows
         
         #region Preset UI User Events
         
-        void cbWorkshopPresetsSelectedIndexChanged( object sender, EventArgs e )
+        void OnWorkshopPresetIndexChange( object sender, EventArgs e )
         {
             if( UpdatingPresetUI ) return;
             _SelectedWorkshopPreset = cbWorkshopPresets.SelectedIndex;
             UpdateWorkshopPresetUI( _SelectedWorkshopPreset );
         }
         
-        void cbSubDivisionPresetsSelectedIndexChanged( object sender, EventArgs e )
+        void OnSubDivisionPresetIndexChange( object sender, EventArgs e )
         {
             if( UpdatingPresetUI ) return;
             _SelectedSubDivisionPreset = cbSubDivisionPresets.SelectedIndex;
             UpdateSubDivisionPresetUI( _SelectedSubDivisionPreset );
         }
         
-        void uiWorkshopNIFBuilderChanged( object sender, EventArgs e )
+        void OnWorkshopPresetParameterChange( object sender, EventArgs e )
         {
             if( ( !OnLoadComplete )||( UpdatingPresetUI ) )return;
             _SelectedWorkshopPreset = 0;
             UpdateWorkshopPresetUI( _SelectedWorkshopPreset );
         }
         
-        void uiSubDivisionNIFBuilderChanged( object sender, EventArgs e )
+        void OnSubDivisionPresetParameterChange( object sender, EventArgs e )
         {
             if( ( !OnLoadComplete )||( UpdatingPresetUI ) ) return;
             _SelectedSubDivisionPreset = 0;
@@ -934,7 +990,7 @@ namespace GUIBuilder.Windows
         
         #region Tab Control
         
-        void tcObjectSelectSelectedIndexChanged( object sender, EventArgs e )
+        void OnObjectTypeTabControlIndexChanged( object sender, EventArgs e )
         {
             switch( tcObjectSelect.SelectedIndex )
             {

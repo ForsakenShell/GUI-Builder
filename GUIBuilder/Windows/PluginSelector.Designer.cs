@@ -59,9 +59,6 @@ namespace GUIBuilder.Windows
             this.tvPlugins.Name = "tvPlugins";
             this.tvPlugins.Size = new System.Drawing.Size(272, 317);
             this.tvPlugins.TabIndex = 1;
-            this.tvPlugins.BeforeCheck += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvPluginsBeforeCheckOrSelect);
-            this.tvPlugins.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.tvPluginsAfterCheck);
-            this.tvPlugins.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.tvPluginsBeforeCheckOrSelect);
             // 
             // cbOpenRenderWindowOnLoad
             // 
@@ -85,7 +82,6 @@ namespace GUIBuilder.Windows
             this.btnLoad.Tag = "SelectorWindow.Load";
             this.btnLoad.Text = "Load";
             this.btnLoad.UseVisualStyleBackColor = true;
-            this.btnLoad.Click += new System.EventHandler(this.btnLoadClick);
             // 
             // btnCancel
             // 
@@ -98,7 +94,6 @@ namespace GUIBuilder.Windows
             this.btnCancel.Tag = "SelectorWindow.Cancel";
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancelClick);
             // 
             // cbWorkingFile
             // 
@@ -110,7 +105,6 @@ namespace GUIBuilder.Windows
             this.cbWorkingFile.Name = "cbWorkingFile";
             this.cbWorkingFile.Size = new System.Drawing.Size(259, 21);
             this.cbWorkingFile.TabIndex = 5;
-            this.cbWorkingFile.SelectedIndexChanged += new System.EventHandler(this.CbWorkingFileSelectedIndexChanged);
             // 
             // gbWorkingFile
             // 
@@ -144,9 +138,6 @@ namespace GUIBuilder.Windows
             this.Tag = "PluginSelectorWindow.Title";
             this.Text = "title";
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.PluginSelector_OnLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
             this.gbWorkingFile.ResumeLayout(false);
             this.ResumeLayout(false);
 

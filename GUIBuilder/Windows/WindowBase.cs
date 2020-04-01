@@ -11,7 +11,7 @@ using System.ComponentModel;
 namespace GUIBuilder.Windows
 {
     /// <summary>
-    /// Description of WindowBase.
+    /// Base "Client Window" class centralizing common features (translating controls, saving/loading window position, size, global window enable states, etc)
     /// </summary>
     public partial class WindowBase : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
@@ -21,8 +21,7 @@ namespace GUIBuilder.Windows
         bool onLoadComplete = false;
         public bool OnLoadComplete {  get{ return onLoadComplete; } }
 
-        [Browsable(true)]
-        [Category("Client Events"), Description("Called at the end of WindowBase_OnLoad, set this instead of Form.Load")]
+        [Browsable(false)]
         public EventHandler     ClientLoad = null;
 
         public WindowBase()
@@ -37,40 +36,42 @@ namespace GUIBuilder.Windows
         
         void cTor( bool translate )
         {
+            onLoadComplete = false;
+
             InitializeComponent();
 
             this.SuspendLayout();
 
             translateForm       = translate;
 
-            this.Location       = GodObject.XmlConfig.ReadLocation( this );
-            this.Size           = GodObject.XmlConfig.ReadSize( this );
-
-            this.ResizeEnd      += new System.EventHandler( this.IXmlConfiguration_OnFormResizeEnd );
-            this.Move           += new System.EventHandler( this.IXmlConfiguration_OnFormMove );
-
-            this.FormClosing    += new System.Windows.Forms.FormClosingEventHandler( this.IEnableControlForm_OnFormClosing );
-
             this.Load           += new System.EventHandler( this.WindowBase_OnLoad );
+            this.FormClosing    += new System.Windows.Forms.FormClosingEventHandler( this.IEnableControlForm_OnFormClosing );
 
             this.ResumeLayout( false );
         }
 
 
-        #region WindowBase_OnFormLoad
+        #region WindowBase_OnLoad
 
 
         void WindowBase_OnLoad( object sender, EventArgs e )
         {
-            SetEnableState( false );
+            SetEnableState( sender, false );
+
+            this.Location       = GodObject.XmlConfig.ReadLocation( this );
+            this.Size           = GodObject.XmlConfig.ReadSize( this );
 
             if( translateForm )
                 this.Translate( true );
 
             ClientLoad?.Invoke( sender, e );
 
+            // Handle size and location events after OnLoad has finished resizing and moving
+            this.ResizeEnd      += new System.EventHandler( this.IXmlConfiguration_OnFormResizeEnd );
+            this.Move           += new System.EventHandler( this.IXmlConfiguration_OnFormMove );
+
             onLoadComplete = true;
-            SetEnableState( true );
+            SetEnableState( sender, true );
         }
 
 
@@ -93,27 +94,39 @@ namespace GUIBuilder.Windows
 
         #region Interface
 
-        [Browsable(true)]
-        [Category("Client Events"), Description("This event is fired when SetEnableState is called on the Form.")]
+        /// <summary>
+        /// Client SetEnableState handler - You must be prepared to enable the window when ready - or not!
+        /// When used properly, this will give the user windows that will show all the controls in their
+        /// default states.  WindowBase.WindowPanel (which all controls should be on) will be disabled which
+        /// will block the user access to the controls but they can move the window around and the UI thread
+        /// won't be blocked.  This means that long-running threads which are processing can still give
+        /// feedback through the Main Window status bar while they prepare the data for the UI.  When those
+        /// threads are complete, the UI must be enabled again for the user.  Make sure you handle multi-
+        /// threading with the power to destroy with respect!
+        /// Return false to force the UI to [continue to] be disabled, return the requested state otherwise.
+        /// </summary>
+        [Browsable(false)]
         public event GUIBuilder.Windows.SetEnableStateHandler  OnSetEnableState;
 
         /// <summary>
         /// Enable or disable this windows main panel.
         /// </summary>
-        /// <param name="enabled">Enable state to set</param>
-        public void SetEnableState( bool enabled )
+        /// <param name="enable">Enable state to set</param>
+        public bool SetEnableState( object sender, bool enable )
         {
             if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate () { SetEnableState( enabled ); }, null );
-                return;
-            }
+                return (bool)this.Invoke( (Func<bool>)delegate () { return SetEnableState( sender, enable ); }, null );
+
+            bool tryEnable = OnLoadComplete && enable;
+            bool enabled = OnSetEnableState != null
+                ? OnSetEnableState( sender, tryEnable )
+                : tryEnable;
 
             // Enable the main panel
             if( WindowPanel != null )
                 WindowPanel.Enabled = enabled;
 
-            OnSetEnableState?.Invoke( enabled );
+            return enabled;
         }
 
         #endregion
@@ -145,6 +158,8 @@ namespace GUIBuilder.Windows
 
         #region Interface
 
+        public const string XmlNode_WindowSuffix = "Window";
+
         public virtual GodObject.XmlConfig.IXmlConfiguration XmlParent
         {
             get { return null; }
@@ -152,7 +167,10 @@ namespace GUIBuilder.Windows
 
         public virtual string XmlNodeName
         {
-            get { return null; }
+            get
+            {
+                return this.GetType().Name() + XmlNode_WindowSuffix;
+            }
         }
 
         #endregion

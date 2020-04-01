@@ -12,6 +12,7 @@ namespace GUIBuilder.Windows.FormEditor
         /// Designer variable used to keep track of non-visual components.
         /// </summary>
         System.ComponentModel.IContainer components = null;
+        public System.Windows.Forms.Panel WindowPanel;
         System.Windows.Forms.GroupBox gbUIDs;
         System.Windows.Forms.TextBox tbEditorID;
         System.Windows.Forms.Label lblEditorID;
@@ -41,6 +42,7 @@ namespace GUIBuilder.Windows.FormEditor
         /// </summary>
         void InitializeComponent()
         {
+            this.WindowPanel = new System.Windows.Forms.Panel();
             this.gbUIDs = new System.Windows.Forms.GroupBox();
             this.tbEditorID = new System.Windows.Forms.TextBox();
             this.lblEditorID = new System.Windows.Forms.Label();
@@ -50,6 +52,22 @@ namespace GUIBuilder.Windows.FormEditor
             this.btnApply = new System.Windows.Forms.Button();
             this.gbUIDs.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // WindowPanel
+            // 
+            this.WindowPanel.Anchor = ( (System.Windows.Forms.AnchorStyles)( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+            | System.Windows.Forms.AnchorStyles.Left )
+            | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.WindowPanel.Location = new System.Drawing.Point( 0, 0 );
+            this.WindowPanel.Name = "WindowPanel";
+            this.WindowPanel.Size = new System.Drawing.Size( 302, 106 );
+            this.WindowPanel.TabIndex = 0;
+            // 
+            // WindowPanel
+            // 
+            this.WindowPanel.Controls.Add( this.gbUIDs );
+            this.WindowPanel.Controls.Add( this.btnCancel );
+            this.WindowPanel.Controls.Add( this.btnApply );
             // 
             // gbUIDs
             // 
@@ -114,7 +132,6 @@ namespace GUIBuilder.Windows.FormEditor
             this.btnCancel.Tag = "FormEditor.Cancel";
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancelClick);
             // 
             // btnApply
             // 
@@ -127,7 +144,6 @@ namespace GUIBuilder.Windows.FormEditor
             this.btnApply.Tag = "FormEditor.Apply";
             this.btnApply.Text = "Apply";
             this.btnApply.UseVisualStyleBackColor = true;
-            this.btnApply.Click += new System.EventHandler(this.btnApplyClick);
             // 
             // SyncedFormEditor
             // 
@@ -136,9 +152,7 @@ namespace GUIBuilder.Windows.FormEditor
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(302, 106);
-            this.Controls.Add(this.btnApply);
-            this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.gbUIDs);
+            this.Controls.Add( this.WindowPanel );
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -148,8 +162,6 @@ namespace GUIBuilder.Windows.FormEditor
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "SyncedFormEditor";
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.Move += new System.EventHandler(this.OnFormMove);
             this.gbUIDs.ResumeLayout(false);
             this.gbUIDs.PerformLayout();
             this.ResumeLayout(false);

@@ -9,35 +9,33 @@ using System.Windows.Forms;
 
 namespace GUIBuilder.Windows
 {
+
     /// <summary>
-    /// Description of CustomForms.
+    /// Use GodObject.Windows.GetWindow<CustomForms>() to create this Window
     /// </summary>
     public partial class CustomForms : WindowBase
     {
+
+        public CustomForms() : base( true )
+        {
+            InitializeComponent();
+            this.SuspendLayout();
+
+            this.ClientLoad += new System.EventHandler( this.OnClientLoad );
+            this.OnSetEnableState += new SetEnableStateHandler( this.OnClientSetEnableState );
+
+            this.btnApplyWorkshopContainerSelection.Click += new System.EventHandler( this.OnApplyWorkshopContainerSelectionButtonClick );
+            this.btnApplyWorkshopContainerFilter.Click += new System.EventHandler( this.OnApplyWorkshopContainerFilterButtonClick );
+
+            this.lvWorkshopContainers.OnSetSyncObjectsThreadComplete += OnSyncObjectsThreadComplete;
+
+            this.ResumeLayout( true );
+        }
 
 
         static readonly string[]   WSDS_KYWD_DetectionForms = new [] { GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator , GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink };
         static readonly string[]   WSDS_STAT_DetectionForms = new [] { GUIBuilder.WorkshopBatch.WSDS_STAT_TerrainFollowing, GUIBuilder.WorkshopBatch.WSDS_STAT_ForcedZ    };
         static readonly string[]   WSDS_LCRT_DetectionForms = new [] { GUIBuilder.WorkshopBatch.WSDS_LCRT_BorderWithBottom };
-
-        /// <summary>
-        /// Use GodObject.Windows.GetWindow<CustomForms>() to create this Window
-        /// </summary>
-        public CustomForms() : base( true )
-        {
-            InitializeComponent();
-            this.ClientLoad += new System.EventHandler( this.CustomForms_OnLoad );
-            this.OnSetEnableState += new SetEnableStateHandler( this.OnFormSetEnableState );
-        }
-
-
-        #region GodObject.XmlConfig.IXmlConfiguration
-
-
-        public override string XmlNodeName { get { return "CustomFormsWindow"; } }
-
-
-        #endregion
 
 
         #region Form Management
@@ -69,7 +67,7 @@ namespace GUIBuilder.Windows
                 if( _UI_ThreadLock_Counter == 1 )
                 {
                     if( disableForm )
-                        SetEnableState( false );
+                        SetEnableState( this, false );
 
                     if( pushStatusBar )
                     {
@@ -92,17 +90,26 @@ namespace GUIBuilder.Windows
                 DebugLog.WriteStrings( null, new string[] { "enableForm = " + enableForm.ToString(), "popStatusBar = " + popStatusBar.ToString() }, false, true, false, false );
                 if( _UI_ThreadLock_Counter > 0 )
                     _UI_ThreadLock_Counter--;
-                if( _UI_ThreadLock_Counter == 0 )
+                UI_ThreadLock_Release( enableForm, popStatusBar );
+            }
+        }
+
+
+        // MUST HOLD _UI_ThreadLock!
+        void UI_ThreadLock_Release( bool enableForm, bool popStatusBar )
+        {
+            if(
+                ( _UI_ThreadLock_Counter == 0 )&&
+                ( !lvWorkshopContainers.IsSyncObjectsThreadRunning )
+            ) {
+                if( popStatusBar )
                 {
-                    if( popStatusBar )
-                    {
-                        var m = GodObject.Windows.GetWindow<Main>();
-                        m.StopSyncTimer( _UI_ThreadTimer );
-                        m.PopStatusMessage();
-                    }
-                    if( enableForm )
-                        SetEnableState( true );
+                    var m = GodObject.Windows.GetWindow<Main>();
+                    m.StopSyncTimer( _UI_ThreadTimer );
+                    m.PopStatusMessage();
                 }
+                if( enableForm )
+                    SetEnableState( this, true );
             }
         }
 
@@ -111,7 +118,7 @@ namespace GUIBuilder.Windows
 
         #region UI Events
 
-        void CustomForms_OnLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
 
             // TODO:  Add an MRU style list in the combobox pulled from the Workspace
@@ -119,41 +126,54 @@ namespace GUIBuilder.Windows
             
             StartRepopulationThreads();
             
-            cbRestrictWorkshopBorderKeywords.Text = string.Format(
+            cbRestrictWorkshopForms.Text = string.Format(
                 "{0}:\n{1}",
                 "CustomFormsWindow.Restrict".Translate(),
                 GodObject.Plugin.Data.Files.Working.Filename );
         }
 
-        /// <summary>
-        /// Handle window specific global enable/disable events.
-        /// </summary>
-        /// <param name="enabled">Enable state to set</param>
-        void cbRestrictWorkshopBorderKeywordsChanged( object sender, EventArgs e )
+        void OnRestrictWorkshopFormsChanged( object sender, EventArgs e )
         {
             StartRepopulationThreads();
         }
 
-        void OnFormSetEnableState( bool enabled )
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enable">Enable state to set</param>
+        bool OnClientSetEnableState( object sender, bool enable )
         {
+            var enabled =
+                enable &&
+                !lvWorkshopContainers.IsSyncObjectsThreadRunning;
+
             // Only handle UI events when the Window is enabled so threads populating UI controls don't trigger the events
             if( enabled )
             {
-                cbRestrictWorkshopBorderKeywords.CheckStateChanged += cbRestrictWorkshopBorderKeywordsChanged;
-                cbWorkshopBordeRefBorderWithBottom.SelectedIndexChanged += cbWorkshopBordeRefBorderWithBottomSelectedIndexChanged;
-                cbWorkshopBorderMarkerTerrainFollowing.SelectedIndexChanged += cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged;
-                cbWorkshopBorderMarkerForcedZ.SelectedIndexChanged += cbWorkshopBorderMarkerForcedZSelectedIndexChanged;
-                cbWorkshopKeywordBorderGenerator.SelectedIndexChanged += cbWorkshopKeywordBorderGeneratorSelectedIndexChanged;
-                cbWorkshopKeywordBorderLink.SelectedIndexChanged += cbWorkshopKeywordBorderLinkSelectedIndexChanged;
+                cbRestrictWorkshopForms.CheckStateChanged += OnRestrictWorkshopFormsChanged;
+                cbWorkshopKeywordBorderGenerator.SelectedIndexChanged += OnBorderGeneratorChanged;
+                cbWorkshopKeywordBorderLink.SelectedIndexChanged += OnBorderLinkChanged;
+                cbWorkshopBorderMarkerTerrainFollowing.SelectedIndexChanged += OnTerrainFollowingChanged;
+                cbWorkshopBorderMarkerForcedZ.SelectedIndexChanged += OnForcedZChanged;
+                cbWorkshopBordeRefBorderWithBottom.SelectedIndexChanged += OnBorderWithBottomChanged;
             }
             else
             {
-                cbRestrictWorkshopBorderKeywords.CheckStateChanged -= cbRestrictWorkshopBorderKeywordsChanged;
-                cbWorkshopBordeRefBorderWithBottom.SelectedIndexChanged -= cbWorkshopBordeRefBorderWithBottomSelectedIndexChanged;
-                cbWorkshopBorderMarkerTerrainFollowing.SelectedIndexChanged -= cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged;
-                cbWorkshopBorderMarkerForcedZ.SelectedIndexChanged -= cbWorkshopBorderMarkerForcedZSelectedIndexChanged;
-                cbWorkshopKeywordBorderGenerator.SelectedIndexChanged -= cbWorkshopKeywordBorderGeneratorSelectedIndexChanged;
-                cbWorkshopKeywordBorderLink.SelectedIndexChanged -= cbWorkshopKeywordBorderLinkSelectedIndexChanged;
+                cbRestrictWorkshopForms.CheckStateChanged -= OnRestrictWorkshopFormsChanged;
+                cbWorkshopKeywordBorderGenerator.SelectedIndexChanged -= OnBorderGeneratorChanged;
+                cbWorkshopKeywordBorderLink.SelectedIndexChanged -= OnBorderLinkChanged;
+                cbWorkshopBorderMarkerTerrainFollowing.SelectedIndexChanged -= OnTerrainFollowingChanged;
+                cbWorkshopBorderMarkerForcedZ.SelectedIndexChanged -= OnForcedZChanged;
+                cbWorkshopBordeRefBorderWithBottom.SelectedIndexChanged -= OnBorderWithBottomChanged;
+            }
+            return enabled;
+        }
+
+        void OnSyncObjectsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<Engine.Plugin.Forms.Container> sender )
+        {
+            lock( _UI_ThreadLock )
+            {
+                UI_ThreadLock_Release( true, true );
             }
         }
 
@@ -190,34 +210,34 @@ namespace GUIBuilder.Windows
 
         #region Workshop Border Detection Forms
 
-        void cbWorkshopKeywordBorderGeneratorSelectedIndexChanged( object sender, EventArgs e )
+        void OnBorderGeneratorChanged( object sender, EventArgs e )
         {
             GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword = GUIBuilder.CustomForms.FormFromComboBox<Engine.Plugin.Forms.Keyword>( cbWorkshopKeywordBorderGenerator );
         }
         
-        void cbWorkshopKeywordBorderLinkSelectedIndexChanged( object sender, EventArgs e )
+        void OnBorderLinkChanged( object sender, EventArgs e )
         {
             GUIBuilder.CustomForms.WorkshopBorderLinkKeyword = GUIBuilder.CustomForms.FormFromComboBox<Engine.Plugin.Forms.Keyword>( cbWorkshopKeywordBorderLink );
         }
         
-        void cbWorkshopBorderMarkerTerrainFollowingSelectedIndexChanged( object sender, EventArgs e )
+        void OnTerrainFollowingChanged( object sender, EventArgs e )
         {
             GUIBuilder.CustomForms.WorkshopTerrainFollowingMarker = GUIBuilder.CustomForms.FormFromComboBox<Engine.Plugin.Forms.Static>( cbWorkshopBorderMarkerTerrainFollowing );
         }
         
-        void cbWorkshopBorderMarkerForcedZSelectedIndexChanged( object sender, EventArgs e )
+        void OnForcedZChanged( object sender, EventArgs e )
         {
             GUIBuilder.CustomForms.WorkshopTerrainFollowingMarker = GUIBuilder.CustomForms.FormFromComboBox<Engine.Plugin.Forms.Static>( cbWorkshopBorderMarkerForcedZ );
         }
         
-        void cbWorkshopBordeRefBorderWithBottomSelectedIndexChanged( object sender, EventArgs e )
+        void OnBorderWithBottomChanged( object sender, EventArgs e )
         {
             GUIBuilder.CustomForms.WorkshopBorderWithBottomRef = GUIBuilder.CustomForms.FormFromComboBox<Engine.Plugin.Forms.LocationRef>( cbWorkshopBordeRefBorderWithBottom );
         }
 
         bool StartThread_RepopulateWorkshopNodeDetectionForms()
         {
-            var filter = cbRestrictWorkshopBorderKeywords.Checked
+            var filter = cbRestrictWorkshopForms.Checked
                 ? (int)GodObject.Plugin.Data.Files.Working.LoadOrder
                 : -1;
 
@@ -261,18 +281,18 @@ namespace GUIBuilder.Windows
 
         #region Workshop Containers
 
-        void btnApplyWorkshopContainerFilterClick( object sender, EventArgs e )
+        void OnApplyWorkshopContainerFilterButtonClick( object sender, EventArgs e )
         {
             StartThread_RepopulateWorkshopContainers();
         }
         
-        void btnApplyWorkshopContainerSelectionClick( object sender, EventArgs e )
+        void OnApplyWorkshopContainerSelectionButtonClick( object sender, EventArgs e )
         {
-            SetEnableState( false );
+            SetEnableState( sender, false );
 
             GUIBuilder.CustomForms.WorkshopWorkbenches = lvWorkshopContainers.GetSelectedSyncObjects();
 
-            SetEnableState( true );
+            SetEnableState( sender, true );
         }
 
         bool StartThread_RepopulateWorkshopContainers()
@@ -282,7 +302,7 @@ namespace GUIBuilder.Windows
                 lvWorkshopContainers,
                 GUIBuilder.CustomForms.WorkshopWorkbenches,
                 cbWorkshopContainerFilter.Text,
-                cbRestrictWorkshopBorderKeywords.Checked
+                cbRestrictWorkshopForms.Checked
                     ? (int)GodObject.Plugin.Data.Files.Working.LoadOrder
                     : -1,
                 OnRepopulationThreadStarted,

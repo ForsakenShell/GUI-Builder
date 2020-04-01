@@ -165,9 +165,8 @@ namespace SDL2ThinLayer
         void INTERNAL_SDLThread_InvokeQueue_HandleInvoke( Invoke_RendererOnly ueInfo )
         {
             // Invoke the delegate
-            if( ueInfo.cbInvoke != null )
-                ueInfo.cbInvoke( this );
-            
+            ueInfo.cbInvoke?.Invoke( this );
+
             if( ueInfo.IsBlocking )
             {
                 // Signal the invoking thread that the delegate has been run.

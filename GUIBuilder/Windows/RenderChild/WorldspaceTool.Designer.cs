@@ -364,10 +364,6 @@ namespace GUIBuilder.Windows.RenderChild
             this.Text = "title";
             this.Tag = "RenderWindow.Worldspaces";
             this.TopMost = true;
-            this.Activated += new System.EventHandler(this.OnActivated);
-            this.Deactivate += new System.EventHandler(this.OnDeactivate);
-            this.Load += new System.EventHandler(this.OnFormLoad);
-            this.Move += new System.EventHandler(this.OnFormMove);
             this.gbWorldspace.ResumeLayout(false);
             this.gbWorldspace.PerformLayout();
             this.gbWorldspaceMapHeightRange.ResumeLayout(false);
@@ -376,8 +372,6 @@ namespace GUIBuilder.Windows.RenderChild
             this.gbWorldspaceTextures.PerformLayout();
             this.gbWorldspaceGridRange.ResumeLayout(false);
             this.gbWorldspaceGridRange.PerformLayout();
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
             this.pnWindow.ResumeLayout(false);
             this.ResumeLayout(false);
             

@@ -34,7 +34,7 @@ namespace GodObject
 
         static List<IEnableControlForm>_Forms = null;
 
-        static IEnableControlForm FindWindow( Type type )
+        static IEnableControlForm       FindWindow( Type type )
         {
             if( _Forms.NullOrEmpty() ) return null;
             for( int i = 0; i < _Forms.Count; i++ )
@@ -140,12 +140,12 @@ namespace GodObject
             _Forms = forms;  // Should now only be the main window
         }
 
-        public static void              SetEnableState( bool enabled )
+        public static void              SetEnableState( object sender, bool enable )
         {
             if( _Forms.NullOrEmpty() )
                 return;
             for( int i = 0; i < _Forms.Count; i++ )
-                _Forms[ i ].SetEnableState( enabled );
+                _Forms[ i ].SetEnableState( sender, enable );
         }
 
         #region TODO:  Move this somewhere more appropriate

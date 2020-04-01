@@ -17,9 +17,10 @@ using System.Windows.Forms;
 
 namespace GUIBuilder.Windows
 {
-    
+
     /// <summary>
-    /// Description of Main.
+    /// Use Application.Run( new GUIBuilder.Windows.Min() ) to create this Window
+    /// Use GodObject.Windows.GetWindow<Main>() to get this Window
     /// </summary>
     public partial class Main : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
@@ -28,9 +29,10 @@ namespace GUIBuilder.Windows
         readonly Size SIZE_ZERO = new Size( 0, 0 );
         readonly Size MIN_RENDER_SIZE = new Size( 700, 42 );
         readonly Size MAX_RENDER_SIZE = new Size( 65536, 42 );
-        
-        //bool onLoadComplete = false;
-        
+
+        bool onLoadComplete = false;
+        public bool OnLoadComplete { get { return onLoadComplete; } }
+
         const string TIME_FORMAT = @"mm\:ss";
 
         bool everythingUnloaded = true;
@@ -39,10 +41,9 @@ namespace GUIBuilder.Windows
         
         public Main()
         {
-            //Console.WriteLine( "GUIBuilder.Windows.Main.cTor()" );
-
-            //onLoadComplete = false;
             InitializeComponent();
+
+            this.SuspendLayout();
 
             // Calculate form size based on the current Windows theme
             var fbs = Maths.GenSize.Multiply( SystemInformation.FrameBorderSize, 2 );
@@ -55,6 +56,28 @@ namespace GUIBuilder.Windows
             var wfs = fbs + cs + rbt;
             this.MinimumSize = MIN_RENDER_SIZE + wfs;
             this.MaximumSize = MAX_RENDER_SIZE + wfs;
+
+            this.Load += new System.EventHandler( this.OnClientLoad );
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler( this.OnClientClosed );
+
+            this.mbiFileLoadWorkspace.Click += new System.EventHandler( this.OnLoadWorkspaceClick );
+            this.mbiFileCreateWorkspace.Click += new System.EventHandler( this.OnCreateWorkspaceClick );
+            
+            this.mbiFileLoadPlugin.Click += new System.EventHandler( this.OnLoadPluginClick );
+            this.mbiFileSavePlugin.Click += new System.EventHandler( this.OnSavePluginClick );
+            
+            this.mbiFileCloseFiles.Click += new System.EventHandler( this.OnCloseFilesClick );
+            this.mbiFileExit.Click += new System.EventHandler( this.OnMenuExitClick );
+            
+            this.mbiToolsSubDivisionBatch.Click += new System.EventHandler( this.OnSubDivisionBatchWindowClick );
+            this.mbiToolsBorderBatch.Click += new System.EventHandler( this.OnBorderBatchWindowClick );
+            this.mbiToolsRenderWindow.Click += new System.EventHandler( this.OnRenderWindowClick );
+            this.mbiToolsAbout.Click += new System.EventHandler( this.OnAboutWindowClick );
+            this.mbiToolsOptions.Click += new System.EventHandler( this.OnOptionsWindowClick );
+            this.mbiToolsCustomForms.Click += new System.EventHandler( this.OnCustomFormsWindowClick );
+            
+            this.ResumeLayout( false );
         }
         
         bool _already_shutdown = false;
@@ -64,7 +87,7 @@ namespace GUIBuilder.Windows
                 return;
             _already_shutdown = true;
 
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( this, false );
             
             DebugLog.OpenIndentLevel();
 
@@ -80,7 +103,7 @@ namespace GUIBuilder.Windows
             WorkerThreadPool.StartMethodBase = System.Reflection.MethodInfo.GetCurrentMethod();
             //Console.WriteLine( "GUIBuilder.Windows.Main.MainShutdown()" );
 
-            sbiCaption.Text = "MainWindow.Shutdown".Translate();
+            SetCurrentStatusMessageEx( "MainWindow.Shutdown".Translate() );
 
             /* Plugin loader is a worker thread which will get stopped below, this way means that we have to wait for the loader
             if( GodObject.Plugin.IsLoading )
@@ -132,9 +155,9 @@ namespace GUIBuilder.Windows
             DebugLog.CloseIndentLevel();
         }
 
-        void OnFormLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
-            SetEnableState( false );
+            SetEnableState( this, false );
 
             this.Location       = GodObject.XmlConfig.ReadLocation( this );
             this.Size           = GodObject.XmlConfig.ReadSize( this );
@@ -147,12 +170,11 @@ namespace GUIBuilder.Windows
             GodObject.Windows.SetWindow<Main>( this );
             
             ClearStatusBar();
-            SetEnableState( true );
-            //onLoadComplete = true;
-            
+            onLoadComplete = true;
+            SetEnableState( this, true );
         }
 
-        void OnFormClosing( object sender, FormClosingEventArgs e )
+        void OnClientClosing( object sender, FormClosingEventArgs e )
         {
             e.Cancel = !everythingUnloaded;
             if( e.Cancel )
@@ -160,14 +182,14 @@ namespace GUIBuilder.Windows
                 if( _already_shutdown )
                 {
                     nextShutdownMessageReminder = syncStopwatch.Elapsed.Seconds + 4;
-                    sbiCaption.Text = "MainWindow.AlreadyShutdown".Translate();
+                    SetCurrentStatusMessageEx( "MainWindow.AlreadyShutdown".Translate() );
                 }
                 else
                     MainShutdown();
             }
         }
 
-        void OnFormClosed( object sender, FormClosedEventArgs e )
+        void OnClientClosed( object sender, FormClosedEventArgs e )
         {
             GodObject.Windows.ClearWindow<Main>();
         }
@@ -175,6 +197,31 @@ namespace GUIBuilder.Windows
         void OnMenuExitClick( object sender, EventArgs e )
         {
             MainShutdown();
+        }
+
+        void OnCloseFilesClick( object sender, EventArgs e )
+        {
+            //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileCloseFilesClick()" } );
+            GodObject.Windows.SetEnableState( this, false );
+
+            var result = true;
+
+            if( ( GodObject.Plugin.IsLoading ) || ( !GodObject.Plugin.IsLoaded ) )
+                goto localReturnResult;
+
+            result = GodObject.Plugin.Unload( INTERNAL_SDL_SyncThread_OnPluginCloseComplete );
+
+        localReturnResult:
+            if( !result )
+                GodObject.Windows.SetEnableState( this, true );
+            //DebugLog.CloseIndentLevel();
+        }
+
+        void INTERNAL_SDL_SyncThread_OnPluginCloseComplete()
+        {
+            everythingUnloaded = true;
+            this.Translate();
+            GodObject.Windows.SetEnableState( this, true );
         }
 
 
@@ -188,16 +235,17 @@ namespace GUIBuilder.Windows
         /// <summary>
         /// Enable or disable this windows main panel.
         /// </summary>
-        /// <param name="enabled">Enable state to set</param>
-        public void SetEnableState( bool enabled )
+        /// <param name="enable">Enable state to set</param>
+        public bool SetEnableState( object sender, bool enable )
         {
             if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate () { SetEnableState( enabled ); }, null );
-                return;
-            }
+                return (bool)this.Invoke( (Func<bool>)delegate () { return SetEnableState( sender, enable ); }, null );
 
-            mbMain.Enabled = enabled;
+            bool tryEnable = OnLoadComplete && enable;
+            bool enabled = OnSetEnableState != null
+                ? OnSetEnableState( sender, tryEnable )
+                : tryEnable;
+
             if( GodObject.Plugin.IsLoaded )
             {
                 mbiFileCreateWorkspace.Enabled = ( enabled ) && ( GodObject.Plugin.Workspace == null );
@@ -207,7 +255,7 @@ namespace GUIBuilder.Windows
                 mbiFileCloseFiles.Enabled = enabled;
                 mbiToolsBorderBatch.Enabled = enabled;
                 mbiToolsSubDivisionBatch.Enabled = ( enabled ) && ( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) );
-                mbiToolsRendererWindow.Enabled = enabled;
+                mbiToolsRenderWindow.Enabled = enabled;
                 mbiToolsCustomForms.Enabled = enabled;
             }
             else
@@ -219,12 +267,13 @@ namespace GUIBuilder.Windows
                 mbiFileCloseFiles.Enabled = false;
                 mbiToolsBorderBatch.Enabled = false;
                 mbiToolsSubDivisionBatch.Enabled = false;
-                mbiToolsRendererWindow.Enabled = false;
+                mbiToolsRenderWindow.Enabled = false;
                 mbiToolsCustomForms.Enabled = false;
             }
 
-            if( OnSetEnableState != null )
-                OnSetEnableState( enabled );
+            mbMain.Enabled = enabled;
+            
+            return enabled;
         }
 
         #endregion
@@ -240,11 +289,13 @@ namespace GUIBuilder.Windows
 
         void IXmlConfiguration_OnFormMove( object sender, EventArgs e )
         {
+            if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteLocation( this );
         }
 
         void IXmlConfiguration_OnFormResizeEnd( object sender, EventArgs e )
         {
+            if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteSize( this );
         }
 
@@ -297,7 +348,7 @@ namespace GUIBuilder.Windows
                 this.Invoke( (Action)delegate() { PushStatusMessage(); }, null );
                 return;
             }
-            if( messageHistory.NullOrEmpty() ) messageHistory = new List<string>();
+            messageHistory = messageHistory ?? new List<string>();
             messageHistory.Add( sbiCaption.Text );
         }
         public void PopStatusMessage()
@@ -318,11 +369,6 @@ namespace GUIBuilder.Windows
         }
         public void SetCurrentStatusMessage( string message, bool logEcho = false )
         {
-            if( this.InvokeRequired )
-            {
-                this.BeginInvoke( (Action)delegate() { SetCurrentStatusMessage( message, logEcho ); }, null );
-                return;
-            }
             if( !string.IsNullOrEmpty( message ) )
             {
                 if( logEcho ) DebugLog.WriteLine( message );
@@ -339,6 +385,15 @@ namespace GUIBuilder.Windows
                     message = message.Substring( 0, lastCRLR - 1 );
                     lastCRLR = message.LastIndexOfAny( CRLF );
                 }
+            }
+        }
+
+        void SetCurrentStatusMessageEx( string message )
+        {
+            if( this.InvokeRequired )
+            {
+                this.BeginInvoke( (Action)delegate () { SetCurrentStatusMessageEx( message ); }, null );
+                return;
             }
             sbiCaption.Text = message;
         }
@@ -485,7 +540,7 @@ namespace GUIBuilder.Windows
                 if( syncStopwatch.Elapsed.Seconds > nextShutdownMessageReminder )
                 {
                     nextShutdownMessageReminder = syncStopwatch.Elapsed.Seconds + 4;
-                    sbiCaption.Text = "MainWindow.Shutdown".Translate();
+                    SetCurrentStatusMessageEx( "MainWindow.Shutdown".Translate() );
                 }
             }
         }
@@ -494,37 +549,12 @@ namespace GUIBuilder.Windows
         
         #endregion
         
-        void mbiFileCloseFilesClick( object sender, EventArgs e )
-        {
-            //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileCloseFilesClick()" } );
-            GodObject.Windows.SetEnableState( false );
-
-            var result = true;
-            
-            if( ( GodObject.Plugin.IsLoading )||( !GodObject.Plugin.IsLoaded ) )
-                goto localReturnResult;
-
-            result = GodObject.Plugin.Unload( OnPluginCloseComplete );
-            
-        localReturnResult:
-            if( !result )
-                GodObject.Windows.SetEnableState( true );
-            //DebugLog.CloseIndentLevel();
-        }
-
-        void OnPluginCloseComplete()
-        {
-            everythingUnloaded = true;
-            this.Translate();
-            GodObject.Windows.SetEnableState( true );
-        }
-
         #region Save/Load Plugin
 
-        void mbiFileSavePluginClick( object sender, EventArgs e )
+        void OnSavePluginClick( object sender, EventArgs e )
         {
             DebugLog.OpenIndentLevel();
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( this, false );
             
             if( !GodObject.Plugin.IsLoaded )
                 goto localReturnResult;
@@ -555,14 +585,14 @@ namespace GUIBuilder.Windows
             SetCurrentStatusMessage( saveMsg );
             
         localReturnResult:
-            GodObject.Windows.SetEnableState( true );
+            GodObject.Windows.SetEnableState( this, true );
             DebugLog.CloseIndentLevel();
         }
         
-        void mbiFileLoadPluginClick( object sender, EventArgs e )
+        void OnLoadPluginClick( object sender, EventArgs e )
         {
             //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileLoadPluginClick()" } );
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( this, false );
             var reEnableGUI = true;
             
             if( ( GodObject.Plugin.IsLoading )||( GodObject.Plugin.IsLoaded ) )
@@ -620,7 +650,7 @@ namespace GUIBuilder.Windows
             
         localReturnResult:
             if( reEnableGUI )
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( this, true );
             //DebugLog.CloseIndentLevel();
         }
         
@@ -628,7 +658,7 @@ namespace GUIBuilder.Windows
         
         #region Child Tool Windows
         
-        void mbiWindowsBorderBatchClick( object sender, EventArgs e )
+        void OnBorderBatchWindowClick( object sender, EventArgs e )
         {
             if(
                 ( !GodObject.Plugin.IsLoaded )||
@@ -644,7 +674,7 @@ namespace GUIBuilder.Windows
             GodObject.Windows.GetWindow<GUIBuilder.Windows.BorderBatch>( true );
         }
         
-        void mbiToolsSubDivisionBatchClick( object sender, EventArgs e )
+        void OnSubDivisionBatchWindowClick( object sender, EventArgs e )
         {
             if(
                 ( !GodObject.Plugin.IsLoaded )||
@@ -660,7 +690,7 @@ namespace GUIBuilder.Windows
             GodObject.Windows.GetWindow<GUIBuilder.Windows.SubDivisionBatch>( true );
         }
         
-        void mbiWindowsRendererClick( object sender, EventArgs e )
+        void OnRenderWindowClick( object sender, EventArgs e )
         {
             if( !GodObject.Plugin.IsLoaded ) return;
             GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( true );
@@ -670,28 +700,30 @@ namespace GUIBuilder.Windows
         
         #region Child Config Windows
         
-        void mbiWindowsAboutClick( object sender, EventArgs e )
+        void OnAboutWindowClick( object sender, EventArgs e )
         {
             GodObject.Windows.GetWindow<GUIBuilder.Windows.About>( true );
         }
         
-        void mbiToolsOptionsClick( object sender, EventArgs e )
+        void OnOptionsWindowClick( object sender, EventArgs e )
         {
             GodObject.Windows.GetWindow<GUIBuilder.Windows.Options>( true );
         }
         
-        void mbiToolsCustomFormsClick( object sender, EventArgs e )
+        void OnCustomFormsWindowClick( object sender, EventArgs e )
         {
             GodObject.Windows.GetWindow<GUIBuilder.Windows.CustomForms>( true );
         }
-        
+
         #endregion
-        
-        void mbiFileLoadWorkspaceClick( object sender, EventArgs e )
+
+        #region Load/Create Workspace
+
+        void OnLoadWorkspaceClick( object sender, EventArgs e )
         {
             //DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "mbiFileLoadWorkspaceClick()" } );
 
-            GodObject.Windows.SetEnableState( false );
+            GodObject.Windows.SetEnableState( this, false );
             var reEnableGUI = true;
             
             if( ( GodObject.Plugin.IsLoading )||( GodObject.Plugin.IsLoaded ) )
@@ -737,11 +769,11 @@ namespace GUIBuilder.Windows
             
         localReturnResult:
             if( reEnableGUI )
-                GodObject.Windows.SetEnableState( true );
+                GodObject.Windows.SetEnableState( this, true );
             //DebugLog.CloseIndentLevel();
         }
         
-        void mbiFileCreateWorkspaceClick( object sender, EventArgs e )
+        void OnCreateWorkspaceClick( object sender, EventArgs e )
         {
             if( ( !GodObject.Plugin.IsLoaded )||( GodObject.Plugin.IsLoading ) )
             {
@@ -763,6 +795,8 @@ namespace GUIBuilder.Windows
             }
             mbiFileCreateWorkspace.Enabled = !GodObject.Plugin.CreateWorkspace();
         }
-        
+
+        #endregion
+
     }
 }

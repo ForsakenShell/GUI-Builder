@@ -43,7 +43,7 @@
             this.Translate( true );
             
             this.FormClosing        += new System.Windows.Forms.FormClosingEventHandler( this.IEnableControlForm_OnFormClosing );
-            this.OnSetEnableState   += new SetEnableStateHandler( this.OnFormSetEnableState );
+            this.OnSetEnableState   += new SetEnableStateHandler( this.OnClientSetEnableState );
             
             this.ResumeLayout( false );
         }
@@ -66,26 +66,28 @@
         
         public event GUIBuilder.Windows.SetEnableStateHandler  OnSetEnableState;
         
-        public delegate void OnSetEnableState( bool enabled );
+        public delegate void OnSetEnableState( bool enable );
         
         /// <summary>
         /// Enable or disable this windows main panel.
         /// </summary>
-        /// <param name="enabled">Enable state to set</param>
-        public void SetEnableState( bool enabled )
+        /// <param name="enable">Enable state to set</param>
+        public void SetEnableState( bool enable )
         {
             if( this.InvokeRequired )
             {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
+                this.Invoke( (Action)delegate() { SetEnableState( enable ); }, null );
                 return;
             }
+            
+            var enabled = OnSetEnableState != null
+                ? OnSetEnableState( enable )
+                : enabled;
             
             // Enable the main panel
             if( $PanelName$ != null )
                 $PanelName$.Enabled = enabled;
             
-            if( OnSetEnableState != null )
-                OnSetEnableState( enabled );
         }
         
         #endregion
@@ -97,10 +99,16 @@
         /// <summary>
         /// Handle window specific global enable/disable events.
         /// </summary>
-        /// <param name="enabled">Enable state to set</param>
-        void OnFormSetEnableState( bool enabled )
+        /// <param name="enable">Enable state to set</param>
+        bool OnClientSetEnableState( bool enable )
         {
+            var enabled =
+                OnLoadComplete &&
+                enable;
+            
             // TODO:  WRITE ME
+            
+            return enabled;
         }]]>
             </Code>
         </Snippet>

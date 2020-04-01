@@ -6,20 +6,20 @@
  */
 namespace GUIBuilder.Windows
 {
-    partial class SubDivisionBatch
+    partial class WorkshopBatch
     {
         /// <summary>
         /// Designer variable used to keep track of non-visual components.
         /// </summary>
         System.ComponentModel.IContainer components = null;
-        System.Windows.Forms.GroupBox gbSubDivisionFunctions;
+        System.Windows.Forms.GroupBox gbWorkshopFunctions;
         System.Windows.Forms.Button btnOptimizeSandboxVolumes;
         System.Windows.Forms.Button btnCheckMissingElements;
         System.Windows.Forms.Button btnFinalizeElements;
-        GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision> lvSubDivisions;
+        GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript> lvWorkshops;
         System.Windows.Forms.Button btnNormalizeBuildVolumes;
         System.Windows.Forms.GroupBox gbElements;
-        System.Windows.Forms.CheckBox cbElementBorderEnablers;
+        System.Windows.Forms.CheckBox cbElementBorderMarkers;
         System.Windows.Forms.CheckBox cbElementSandboxVolumes;
         
         /// <summary>
@@ -43,68 +43,68 @@ namespace GUIBuilder.Windows
         /// </summary>
         void InitializeComponent()
         {
-            this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
-            this.gbSubDivisionFunctions = new System.Windows.Forms.GroupBox();
+            this.lvWorkshops = new GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript>();
+            this.gbWorkshopFunctions = new System.Windows.Forms.GroupBox();
             this.gbElements = new System.Windows.Forms.GroupBox();
             this.btnCheckMissingElements = new System.Windows.Forms.Button();
             this.cbElementSandboxVolumes = new System.Windows.Forms.CheckBox();
-            this.cbElementBorderEnablers = new System.Windows.Forms.CheckBox();
+            this.cbElementBorderMarkers = new System.Windows.Forms.CheckBox();
             this.btnNormalizeBuildVolumes = new System.Windows.Forms.Button();
             this.btnOptimizeSandboxVolumes = new System.Windows.Forms.Button();
             this.btnFinalizeElements = new System.Windows.Forms.Button();
             this.WindowPanel.SuspendLayout();
-            this.gbSubDivisionFunctions.SuspendLayout();
+            this.gbWorkshopFunctions.SuspendLayout();
             this.gbElements.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnWindow
             // 
-            this.WindowPanel.Controls.Add(this.lvSubDivisions);
-            this.WindowPanel.Controls.Add(this.gbSubDivisionFunctions);
+            this.WindowPanel.Controls.Add(this.lvWorkshops);
+            this.WindowPanel.Controls.Add(this.gbWorkshopFunctions);
             this.WindowPanel.Size = new System.Drawing.Size( 514, 404 );
             // 
             // lvSubDivisions
             // 
-            this.lvSubDivisions.AllowHidingItems = true;
-            this.lvSubDivisions.AllowOverrideColumnSorting = true;
-            this.lvSubDivisions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.lvWorkshops.AllowHidingItems = true;
+            this.lvWorkshops.AllowOverrideColumnSorting = true;
+            this.lvWorkshops.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvSubDivisions.CheckBoxes = true;
-            this.lvSubDivisions.EditorIDColumn = true;
-            this.lvSubDivisions.ExtraInfoColumn = false;
-            this.lvSubDivisions.FilenameColumn = false;
-            this.lvSubDivisions.FormIDColumn = true;
-            this.lvSubDivisions.LoadOrderColumn = false;
-            this.lvSubDivisions.Location = new System.Drawing.Point(189, 3);
-            this.lvSubDivisions.MultiSelect = true;
-            this.lvSubDivisions.Name = "lvSubDivisions";
-            this.lvSubDivisions.Size = new System.Drawing.Size(323, 399);
-            this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
-            this.lvSubDivisions.SyncedEditorFormType = null;
-            this.lvSubDivisions.SyncObjects = null;
-            this.lvSubDivisions.TabIndex = 11;
-            this.lvSubDivisions.TypeColumn = false;
+            this.lvWorkshops.CheckBoxes = true;
+            this.lvWorkshops.EditorIDColumn = true;
+            this.lvWorkshops.ExtraInfoColumn = false;
+            this.lvWorkshops.FilenameColumn = false;
+            this.lvWorkshops.FormIDColumn = true;
+            this.lvWorkshops.LoadOrderColumn = false;
+            this.lvWorkshops.Location = new System.Drawing.Point(189, 3);
+            this.lvWorkshops.MultiSelect = true;
+            this.lvWorkshops.Name = "lvWorkshops";
+            this.lvWorkshops.Size = new System.Drawing.Size(323, 399);
+            this.lvWorkshops.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
+            this.lvWorkshops.SyncedEditorFormType = null;
+            this.lvWorkshops.SyncObjects = null;
+            this.lvWorkshops.TabIndex = 11;
+            this.lvWorkshops.TypeColumn = false;
             // 
             // gbSubDivisionFunctions
             // 
-            this.gbSubDivisionFunctions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.gbWorkshopFunctions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.gbSubDivisionFunctions.Controls.Add(this.gbElements);
-            this.gbSubDivisionFunctions.Controls.Add(this.btnNormalizeBuildVolumes);
-            this.gbSubDivisionFunctions.Controls.Add(this.btnOptimizeSandboxVolumes);
-            this.gbSubDivisionFunctions.Controls.Add(this.btnFinalizeElements);
-            this.gbSubDivisionFunctions.Location = new System.Drawing.Point(0, 0);
-            this.gbSubDivisionFunctions.Name = "gbSubDivisionFunctions";
-            this.gbSubDivisionFunctions.Size = new System.Drawing.Size(180, 402);
-            this.gbSubDivisionFunctions.TabIndex = 12;
-            this.gbSubDivisionFunctions.TabStop = false;
+            this.gbWorkshopFunctions.Controls.Add(this.gbElements);
+            this.gbWorkshopFunctions.Controls.Add(this.btnNormalizeBuildVolumes);
+            this.gbWorkshopFunctions.Controls.Add(this.btnOptimizeSandboxVolumes);
+            this.gbWorkshopFunctions.Controls.Add(this.btnFinalizeElements);
+            this.gbWorkshopFunctions.Location = new System.Drawing.Point(0, 0);
+            this.gbWorkshopFunctions.Name = "gbWorkshopFunctions";
+            this.gbWorkshopFunctions.Size = new System.Drawing.Size(180, 402);
+            this.gbWorkshopFunctions.TabIndex = 12;
+            this.gbWorkshopFunctions.TabStop = false;
             // 
             // gbElements
             // 
             this.gbElements.Controls.Add(this.btnCheckMissingElements);
             this.gbElements.Controls.Add(this.cbElementSandboxVolumes);
-            this.gbElements.Controls.Add(this.cbElementBorderEnablers);
+            this.gbElements.Controls.Add(this.cbElementBorderMarkers);
             this.gbElements.Location = new System.Drawing.Point(6, 12);
             this.gbElements.Name = "gbElements";
             this.gbElements.Size = new System.Drawing.Size(168, 72);
@@ -134,14 +134,14 @@ namespace GUIBuilder.Windows
             // 
             // cbElementBorderEnablers
             // 
-            this.cbElementBorderEnablers.Checked = true;
-            this.cbElementBorderEnablers.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbElementBorderEnablers.Location = new System.Drawing.Point(6, 29);
-            this.cbElementBorderEnablers.Name = "cbElementBorderEnablers";
-            this.cbElementBorderEnablers.Size = new System.Drawing.Size(153, 17);
-            this.cbElementBorderEnablers.TabIndex = 0;
-            this.cbElementBorderEnablers.Tag = "SubDivisionBatchWindow.BorderEnablers";
-            this.cbElementBorderEnablers.UseVisualStyleBackColor = true;
+            this.cbElementBorderMarkers.Checked = true;
+            this.cbElementBorderMarkers.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbElementBorderMarkers.Location = new System.Drawing.Point(6, 29);
+            this.cbElementBorderMarkers.Name = "cbElementBorderMarkers";
+            this.cbElementBorderMarkers.Size = new System.Drawing.Size(153, 17);
+            this.cbElementBorderMarkers.TabIndex = 0;
+            this.cbElementBorderMarkers.Tag = "WorkshopBatchWindow.BorderMarkers";
+            this.cbElementBorderMarkers.UseVisualStyleBackColor = true;
             // 
             // btnNormalizeBuildVolumes
             // 
@@ -181,11 +181,11 @@ namespace GUIBuilder.Windows
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(520, 426);
-            this.Name = "SubDivisionBatch";
+            this.Name = "WorkshopBatch";
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Tag = "SubDivisionBatchWindow.Title";
-            this.gbSubDivisionFunctions.ResumeLayout(false);
+            this.Tag = "WorkshopBatchWindow.Title";
+            this.gbWorkshopFunctions.ResumeLayout(false);
             this.gbElements.ResumeLayout(false);
             this.WindowPanel.ResumeLayout( false );
             this.WindowPanel.PerformLayout();

@@ -28,30 +28,44 @@ using XeLib.API;
 
 namespace GUIBuilder.Windows
 {
+
     /// <summary>
-    /// Description of Render.
+    /// Use GodObject.Windows.GetWindow<Render>() to create this Window
     /// </summary>
     public partial class Render : WindowBase
     {
 
-        /// <summary>
-        /// Use GodObject.Windows.GetWindow<Render>() to create this Window
-        /// </summary>
         public Render() : base( true )
         {
             InitializeComponent();
-            this.ClientLoad += new System.EventHandler(this.Render_OnLoad);
-            this.OnSetEnableState += new SetEnableStateHandler( this.OnFormSetEnableState );
+            this.SuspendLayout();
+
+            this.ClientLoad += new System.EventHandler(this.OnClientLoad);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            this.OnSetEnableState += new SetEnableStateHandler( this.OnClientSetEnableState );
+
+            this.tsRenderOverRegion.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderLandHeight.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderWaterHeight.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderCellGrid.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderWorkshops.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderSettlements.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderSubDivisions.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderBorders.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderEdgeFlags.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderEdgeFlagLinks.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderBuildVolumes.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+            this.tsRenderSandboxVolumes.CheckedChanged += new System.EventHandler( this.OnRenderStateControlChanged );
+
+            this.tsMinSettlementObjectsRenderSize.KeyPress += new System.Windows.Forms.KeyPressEventHandler( this.OnMinSettlementObjectsRenderSizeKeyPress );
+            this.tsMinSettlementObjectsRenderSize.TextChanged += new System.EventHandler( this.OnMinSettlementObjectsRenderSizeTextChanged );
+            
+            this.tsRenderSelectedOnly.CheckStateChanged += new System.EventHandler( this.OnRenderSelectedOnlyChanged );
+            
+            this.tsRepaintAllObjects.Click += new System.EventHandler( this.OnRepaintAllObjectsButtonClick );
+
+            this.ResumeLayout( false );
         }
-
-
-        #region GodObject.XmlConfig.IXmlConfiguration
-
-
-        public override string XmlNodeName { get { return "RenderWindow"; } }
-
-
-        #endregion
 
 
         // Tool windows for settlement objects
@@ -71,7 +85,7 @@ namespace GUIBuilder.Windows
         // Selected import mod
         //ImportMod _selectedImportMod = null;
         
-        void Render_OnLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             DebugLog.OpenIndentLevel();
             
@@ -80,8 +94,8 @@ namespace GUIBuilder.Windows
             tslMouseToCellGrid.Text = "";
             tslMouseToWorldspace.Text = "";
             
-            twWorldspaces = new Windows.RenderChild.WorldspaceTool();
-            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( "Workshops", "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops.SyncedGUIList );
+            twWorldspaces = new Windows.RenderChild.WorldspaceTool( this );
+            twWorkshops = new Windows.RenderChild.SyncObjectTool<WorkshopScript>( this, "Workshops", "RenderWindow.Workshops", GodObject.Plugin.Data.Workshops.SyncedGUIList );
             AddOwnedForm( twWorldspaces );
             AddOwnedForm( twWorkshops );
             twWorldspaces.Show();
@@ -89,8 +103,8 @@ namespace GUIBuilder.Windows
             
             if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
-                twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( "Settlements", "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
-                twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( "SubDivisions", "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
+                twSettlements = new Windows.RenderChild.SyncObjectTool<Settlement>( this, "Settlements", "RenderWindow.Settlements", GodObject.Plugin.Data.Settlements );
+                twSubDivisions = new Windows.RenderChild.SyncObjectTool<AnnexTheCommonwealth.SubDivision>( this, "SubDivisions", "RenderWindow.SubDivisions", GodObject.Plugin.Data.SubDivisions, typeof( FormEditor.SubDivision ) );
                 AddOwnedForm( twSettlements );
                 AddOwnedForm( twSubDivisions );
                 twSettlements.Show();
@@ -125,7 +139,7 @@ namespace GUIBuilder.Windows
             DebugLog.CloseIndentLevel();
         }
 
-        void OnFormClosing( object sender, FormClosingEventArgs e )
+        void OnClientClosing( object sender, FormClosingEventArgs e )
         {
             DebugLog.OpenIndentLevel();
             Shutdown();
@@ -180,16 +194,19 @@ namespace GUIBuilder.Windows
         /// Long running functions should disable the main form so the user can't spam inputs.  Don't forget to enable the form again after the long-running function is complete so the user can continue to use the program.
         /// Note: This is called in WindowBase.WindowBase_OnFormLoad() before WindowBase.ClientOnLoad() is called
         /// </summary>
-        /// <param name="enabled">true to enable the form and it's controls, false to disable the form and it's controls.</param>
-        void OnFormSetEnableState( bool enabled )
+        /// <param name="enable">true to enable the form and it's controls, false to disable the form and it's controls.</param>
+        bool OnClientSetEnableState( object sender, bool enable )
         {
-            twWorldspaces?.SetEnableState( enabled );
-            twWorkshops?.SetEnableState( enabled );
-            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
-            {
-                twSettlements?.SetEnableState( enabled );
-                twSubDivisions?.SetEnableState( enabled );
-            }
+            var enabled =
+                transform.ReadyForUse() &&
+                enable;
+
+            twWorldspaces   ?.SetEnableState( this, enabled );
+            twWorkshops     ?.SetEnableState( this, enabled );
+            twSettlements   ?.SetEnableState( this, enabled );
+            twSubDivisions  ?.SetEnableState( this, enabled );
+
+            return enabled;
         }
         
         public void SetToolStripEnableState( bool enabled )
@@ -528,7 +545,7 @@ namespace GUIBuilder.Windows
         
         #region UI to adjust Min Settlement Object Render Size
         
-        void tsMinSettlementObjectsRenderSizeKeyPress( object sender, KeyPressEventArgs e )
+        void OnMinSettlementObjectsRenderSizeKeyPress( object sender, KeyPressEventArgs e )
         {
             if( ( !char.IsControl( e.KeyChar ) )&&( !char.IsDigit( e.KeyChar ) )&&( e.KeyChar != '.' ) )
             {
@@ -536,7 +553,7 @@ namespace GUIBuilder.Windows
             }
         }
         
-        void tsMinSettlementObjectsRenderSizeTextChanged( object sender, EventArgs e )
+        void OnMinSettlementObjectsRenderSizeTextChanged( object sender, EventArgs e )
         {
             if( transform == null )
                 return;
@@ -568,7 +585,7 @@ namespace GUIBuilder.Windows
         }
         
         bool _suppressControlUpdate = false;
-        void RenderStateControlChanged( object sender, EventArgs e )
+        void OnRenderStateControlChanged( object sender, EventArgs e )
         {
             if( _suppressControlUpdate )
                 return;
@@ -663,7 +680,7 @@ namespace GUIBuilder.Windows
         {
             //DebugLog.Write( "GUIBuilder.RenderWindow.DestroyTransform()" );
             
-            SetEnableState( false );
+            SetEnableState( this, false );
             
             _cancelInitWindow = true;
             
@@ -684,7 +701,7 @@ namespace GUIBuilder.Windows
                 transform.Dispose();
             transform = null;
             
-            SetEnableState( true );
+            SetEnableState( this, true );
         }
         
         bool CreateTransform( SDLRenderer.InitParams initParams )
@@ -920,12 +937,12 @@ namespace GUIBuilder.Windows
             m.PopStatusMessage();
         }
         
-        void tsRepaintAllObjectsClick( object sender, EventArgs e )
+        void OnRepaintAllObjectsButtonClick( object sender, EventArgs e )
         {
             TryUpdateRenderWindow( false );
         }
         
-        void tsRenderSelectedOnlyCheckStateChanged( object sender, EventArgs e )
+        void OnRenderSelectedOnlyChanged( object sender, EventArgs e )
         {
             tsRenderSelectedOnly.Image = tsRenderSelectedOnly.Checked
                 ? global::Properties.Resources.tsIconChecked

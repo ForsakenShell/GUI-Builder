@@ -15,73 +15,82 @@ namespace GUIBuilder.Windows.RenderChild
     /// <summary>
     /// Description of WorldspaceTool.
     /// </summary>
-    public partial class WorldspaceTool : Form, GodObject.XmlConfig.IXmlConfiguration
+    public partial class WorldspaceTool : Form, GodObject.XmlConfig.IXmlConfiguration, IEnableControlForm
     {
         
         public GodObject.XmlConfig.IXmlConfiguration XmlParent { get{ return GodObject.Windows.GetWindow<GUIBuilder.Windows.Render>( false ); } }
         public string XmlNodeName { get{ return "Worldspaces"; } }
-        
+
         bool onLoadComplete = false;
+        public bool OnLoadComplete { get { return onLoadComplete; } }
+
         Size _ExpandedSize;
         
         Engine.Plugin.Forms.Worldspace _SelectedWorldspace = null;
-        
-        public WorldspaceTool()
+
+        IEnableControlForm _parent;
+
+        public WorldspaceTool( IEnableControlForm parent )
         {
+            _parent = parent;
+
             InitializeComponent();
+            this.SuspendLayout();
+
+            this.lvWorldspaces.OnSetSyncObjectsThreadComplete += OnSyncWorldspacesThreadComplete;
+
+            this.Load       += new System.EventHandler( this.OnClientLoad );
+            this.OnSetEnableState += OnClientSetEnableState;
+
+            this.Activated  += new System.EventHandler( this.OnClientActivated );
+            this.Deactivate += new System.EventHandler( this.OnClientDeactivate );
+
             ResetGUIElements();
+
+            this.ResumeLayout();
         }
         
-        void OnFormLoad( object sender, EventArgs e )
+        void OnClientLoad( object sender, EventArgs e )
         {
             //DebugLog.Write( "GUIBuilder.RenderWindowForm.OnFormLoad() :: Start" );
             this.Translate( true );
             
-            this.Location = GodObject.XmlConfig.ReadLocation( this );
-            this.Size = GodObject.XmlConfig.ReadSize( this );
-            _ExpandedSize = this.Size;
-            
+            this.Location   = GodObject.XmlConfig.ReadLocation( this );
+            this.Size       = GodObject.XmlConfig.ReadSize( this );
+            _ExpandedSize   = this.Size;
+
+            this.Move       += new System.EventHandler( this.OnClientMove );
+            this.ResizeEnd  += new System.EventHandler( this.OnClientResizeEnd );
+
             onLoadComplete = true;
-        }
-        
-        public void SetEnableState( bool enabled )
-        {
-            if( this.InvokeRequired )
-            {
-                this.Invoke( (Action)delegate() { SetEnableState( enabled ); }, null );
-                return;
-            }
-            pnWindow.Enabled = enabled;
         }
         
         void OverrideSize( Size size )
         {
-            this.ResizeEnd -= OnFormResizeEnd;
+            this.ResizeEnd -= OnClientResizeEnd;
             this.Size = size;
-            this.ResizeEnd += OnFormResizeEnd;
+            this.ResizeEnd += OnClientResizeEnd;
         }
         
-        void OnActivated( object sender, EventArgs e )
+        void OnClientActivated( object sender, EventArgs e )
         {
             OverrideSize( _ExpandedSize );
         }
         
-        void OnDeactivate( object sender, EventArgs e )
+        void OnClientDeactivate( object sender, EventArgs e )
         {
             OverrideSize( this.MinimumSize );
         }
         
-        void OnFormMove( object sender, EventArgs e )
+        void OnClientMove( object sender, EventArgs e )
         {
-            if( !onLoadComplete )
-                return;
+            if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteLocation( this );
         }
         
-        void OnFormResizeEnd( object sender, EventArgs e )
+        void OnClientResizeEnd( object sender, EventArgs e )
         {
-            if( !onLoadComplete )
-                return;
+            if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteSize( this );
             _ExpandedSize = this.Size;
         }
@@ -129,9 +138,42 @@ namespace GUIBuilder.Windows.RenderChild
             rw.UpdateSettlementObjectChildWindowContentsForWorldspace( worldspace );
             rw.TryUpdateRenderWindow( true );
         }
-        
+
+        public bool SetEnableState( object sender, bool enable )
+        {
+            if( this.InvokeRequired )
+                return (bool)this.Invoke( (Func<bool>)delegate () { return SetEnableState( sender, enable ); }, null );
+            
+            bool tryEnable = OnLoadComplete && enable;
+            bool enabled = OnSetEnableState != null
+                ? OnSetEnableState( sender, tryEnable )
+                : tryEnable;
+            if( sender != _parent )
+                enabled = _parent.SetEnableState( this, enabled );
+            pnWindow.Enabled = enabled;
+            return enabled;
+        }
+
+        public event GUIBuilder.Windows.SetEnableStateHandler  OnSetEnableState;
+
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enable">Enable state to set</param>
+        bool OnClientSetEnableState( object sender, bool enable )
+        {
+            var enabled =
+                enable &&
+                !lvWorldspaces.IsSyncObjectsThreadRunning;
+            return enabled;
+        }
         #region Sync Objects
-        
+
+        void OnSyncWorldspacesThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<Engine.Plugin.Forms.Worldspace> sender )
+        {
+            SetEnableState( sender, true );
+        }
+
         public List<Engine.Plugin.Forms.Worldspace> SyncObjects
         {
             get { return lvWorldspaces.SyncObjects; }

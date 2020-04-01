@@ -26,7 +26,7 @@ namespace GUIBuilder.Windows
 		System.Windows.Forms.ToolStripSeparator mbiFileSeparator2;
 		System.Windows.Forms.ToolStripMenuItem mbiFileCloseFiles;
 		System.Windows.Forms.ToolStripStatusLabel sbiTimeElapsed;
-		System.Windows.Forms.ToolStripMenuItem mbiToolsRendererWindow;
+		System.Windows.Forms.ToolStripMenuItem mbiToolsRenderWindow;
 		System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		System.Windows.Forms.ToolStripMenuItem mbiToolsBorderBatch;
 		System.Windows.Forms.ToolStripMenuItem mbiFileSavePlugin;
@@ -82,7 +82,7 @@ namespace GUIBuilder.Windows
             this.mbiTools = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiToolsSubDivisionBatch = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiToolsBorderBatch = new System.Windows.Forms.ToolStripMenuItem();
-            this.mbiToolsRendererWindow = new System.Windows.Forms.ToolStripMenuItem();
+            this.mbiToolsRenderWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.mbiToolsAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiToolsOptions = new System.Windows.Forms.ToolStripMenuItem();
@@ -176,7 +176,6 @@ namespace GUIBuilder.Windows
             this.mbiFileLoadWorkspace.Size = new System.Drawing.Size(202, 22);
             this.mbiFileLoadWorkspace.Tag = "MainWindow.FileMenu.LoadWorkspace";
             this.mbiFileLoadWorkspace.Text = "Load Workspace";
-            this.mbiFileLoadWorkspace.Click += new System.EventHandler(this.mbiFileLoadWorkspaceClick);
             // 
             // mbiFileCreateWorkspace
             // 
@@ -186,7 +185,6 @@ namespace GUIBuilder.Windows
             this.mbiFileCreateWorkspace.Size = new System.Drawing.Size(202, 22);
             this.mbiFileCreateWorkspace.Tag = "MainWindow.FileMenu.CreateWorkspace";
             this.mbiFileCreateWorkspace.Text = "Create Workspace";
-            this.mbiFileCreateWorkspace.Click += new System.EventHandler(this.mbiFileCreateWorkspaceClick);
             // 
             // mbiFileSeparator1
             // 
@@ -200,7 +198,6 @@ namespace GUIBuilder.Windows
             this.mbiFileLoadPlugin.Size = new System.Drawing.Size(202, 22);
             this.mbiFileLoadPlugin.Tag = "MainWindow.FileMenu.LoadPlugin";
             this.mbiFileLoadPlugin.Text = "Load Plugin";
-            this.mbiFileLoadPlugin.Click += new System.EventHandler(this.mbiFileLoadPluginClick);
             // 
             // mbiFileSavePlugin
             // 
@@ -210,7 +207,6 @@ namespace GUIBuilder.Windows
             this.mbiFileSavePlugin.Size = new System.Drawing.Size(202, 22);
             this.mbiFileSavePlugin.Tag = "MainWindow.FileMenu.SavePlugin";
             this.mbiFileSavePlugin.Text = "Save Plugin";
-            this.mbiFileSavePlugin.Click += new System.EventHandler(this.mbiFileSavePluginClick);
             // 
             // mbiFileSeparator2
             // 
@@ -225,7 +221,6 @@ namespace GUIBuilder.Windows
             this.mbiFileCloseFiles.Size = new System.Drawing.Size(202, 22);
             this.mbiFileCloseFiles.Tag = "MainWindow.FileMenu.CloseAllFiles";
             this.mbiFileCloseFiles.Text = "Close";
-            this.mbiFileCloseFiles.Click += new System.EventHandler(this.mbiFileCloseFilesClick);
             // 
             // mbiFileSeparator3
             // 
@@ -239,14 +234,13 @@ namespace GUIBuilder.Windows
             this.mbiFileExit.Size = new System.Drawing.Size(202, 22);
             this.mbiFileExit.Tag = "MainWindow.FileMenu.Exit";
             this.mbiFileExit.Text = "Exit";
-            this.mbiFileExit.Click += new System.EventHandler(this.OnMenuExitClick);
             // 
             // mbiTools
             // 
             this.mbiTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mbiToolsSubDivisionBatch,
             this.mbiToolsBorderBatch,
-            this.mbiToolsRendererWindow,
+            this.mbiToolsRenderWindow,
             this.toolStripSeparator1,
             this.mbiToolsAbout,
             this.mbiToolsOptions,
@@ -263,7 +257,6 @@ namespace GUIBuilder.Windows
             this.mbiToolsSubDivisionBatch.Size = new System.Drawing.Size(142, 22);
             this.mbiToolsSubDivisionBatch.Tag = "MainWindow.ToolMenu.SubDivisions";
             this.mbiToolsSubDivisionBatch.Text = "SubDivisions";
-            this.mbiToolsSubDivisionBatch.Click += new System.EventHandler(this.mbiToolsSubDivisionBatchClick);
             // 
             // mbiToolsBorderBatch
             // 
@@ -272,16 +265,14 @@ namespace GUIBuilder.Windows
             this.mbiToolsBorderBatch.Size = new System.Drawing.Size(142, 22);
             this.mbiToolsBorderBatch.Tag = "MainWindow.ToolMenu.Borders";
             this.mbiToolsBorderBatch.Text = "Borders";
-            this.mbiToolsBorderBatch.Click += new System.EventHandler(this.mbiWindowsBorderBatchClick);
             // 
             // mbiToolsRendererWindow
             // 
-            this.mbiToolsRendererWindow.Enabled = false;
-            this.mbiToolsRendererWindow.Name = "mbiToolsRendererWindow";
-            this.mbiToolsRendererWindow.Size = new System.Drawing.Size(142, 22);
-            this.mbiToolsRendererWindow.Tag = "MainWindow.ToolMenu.Render";
-            this.mbiToolsRendererWindow.Text = "Render";
-            this.mbiToolsRendererWindow.Click += new System.EventHandler(this.mbiWindowsRendererClick);
+            this.mbiToolsRenderWindow.Enabled = false;
+            this.mbiToolsRenderWindow.Name = "mbiToolsRendererWindow";
+            this.mbiToolsRenderWindow.Size = new System.Drawing.Size(142, 22);
+            this.mbiToolsRenderWindow.Tag = "MainWindow.ToolMenu.Render";
+            this.mbiToolsRenderWindow.Text = "Render";
             // 
             // toolStripSeparator1
             // 
@@ -294,7 +285,6 @@ namespace GUIBuilder.Windows
             this.mbiToolsAbout.Size = new System.Drawing.Size(142, 22);
             this.mbiToolsAbout.Tag = "MainWindow.ToolMenu.About";
             this.mbiToolsAbout.Text = "About";
-            this.mbiToolsAbout.Click += new System.EventHandler(this.mbiWindowsAboutClick);
             // 
             // mbiToolsOptions
             // 
@@ -302,7 +292,6 @@ namespace GUIBuilder.Windows
             this.mbiToolsOptions.Size = new System.Drawing.Size(142, 22);
             this.mbiToolsOptions.Tag = "MainWindow.ToolMenu.Options";
             this.mbiToolsOptions.Text = "Options";
-            this.mbiToolsOptions.Click += new System.EventHandler(this.mbiToolsOptionsClick);
             // 
             // mbiToolsCustomForms
             // 
@@ -310,7 +299,6 @@ namespace GUIBuilder.Windows
             this.mbiToolsCustomForms.Size = new System.Drawing.Size(142, 22);
             this.mbiToolsCustomForms.Tag = "MainWindow.ToolMenu.CustomForms";
             this.mbiToolsCustomForms.Text = "Custom Forms";
-            this.mbiToolsCustomForms.Click += new System.EventHandler(this.mbiToolsCustomFormsClick);
             // 
             // Main
             // 
@@ -325,9 +313,6 @@ namespace GUIBuilder.Windows
             this.Name = "Main";
             this.Tag = "MainWindow.Title";
             this.Text = "Title";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnFormClosing );
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
-            this.Load += new System.EventHandler(this.OnFormLoad);
             this.sbMain.ResumeLayout( false );
             this.mbMain.ResumeLayout( false );
             this.ResumeLayout(false);

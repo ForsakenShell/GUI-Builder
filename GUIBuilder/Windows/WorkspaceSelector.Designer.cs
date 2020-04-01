@@ -54,7 +54,6 @@ namespace GUIBuilder.Windows
             this.btnCancel.Tag = "SelectorWindow.Cancel";
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancelClick);
             // 
             // btnLoad
             // 
@@ -66,7 +65,6 @@ namespace GUIBuilder.Windows
             this.btnLoad.Tag = "SelectorWindow.Load";
             this.btnLoad.Text = "Load";
             this.btnLoad.UseVisualStyleBackColor = true;
-            this.btnLoad.Click += new System.EventHandler(this.btnLoadClick);
             // 
             // tvWorkspaces
             // 
@@ -96,9 +94,6 @@ namespace GUIBuilder.Windows
             this.Tag = "WorkspaceSelectorWindow.Title";
             this.Text = "title";
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.WorkspaceSelector_OnLoad);
-            this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
-            this.Move += new System.EventHandler(this.OnFormMove);
             this.ResumeLayout(false);
 
         }
