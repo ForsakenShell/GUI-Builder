@@ -28,10 +28,15 @@ public static partial class NIFBuilder
     }
 
     static string[] DefaultExportInfo = new string[ 4 ]{
-        string.Format( "GUIBuilder {0} by 1000101", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() ),
-        "https://www.nexusmods.com/users/106891",
+        string.Format(
+            "{0} v{1} {2}",
+            "AboutWindow.ComicTitle".Translate(),
+            System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+            "AboutWindow.Author".Translate()
+        ),
+        "AboutWindow.AuthorLink".Translate(),
         "NIFBuilder",
-        "STAHP LOOKING AT ME!"
+        "AboutWindow.License".Translate()
     };
 
     static string[] _ExportInfo;

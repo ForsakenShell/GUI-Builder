@@ -6,6 +6,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Maths;
 using AnnexTheCommonwealth;
@@ -74,9 +75,7 @@ namespace GUIBuilder
             get
             {
                 if( Nodes.NullOrEmpty() ) return false;
-                foreach( var node in Nodes )
-                    if( node.HasBottom ) return true;
-                return false;
+                return Nodes.Any( n => n.HasBottom );
             }
         }
 
@@ -543,19 +542,37 @@ namespace GUIBuilder
             StartPoint = 1,
             EndPoint = 2
         }
-        
-        // Z component of P is the "surface" (either ground or water height, which ever is higher)
+
+        /// <summary>
+        /// Z component of P is the "surface" (either ground or water height, which ever is higher)
+        /// </summary>
         public Vector3f             P;
-        // Floor is the lowest point the mesh must reach to (always ground height)
+
+        /// <summary>
+        /// Floor is the lowest point the mesh must reach to (always ground height)
+        /// </summary>
         public float                Floor;
         
         public NodeType             Type;
         
-        public int                  Vertex_Count;
+        /// <summary>
+        /// Vertex Count
+        /// </summary>
+        public int                  vCount;
         
-        public int[]                Vertexes_Inside;
-        public int[]                Vertexes_Outside;
+        /// <summary>
+        /// Resolved inside vertex indexes for node frop top (0) to bottom (1/2) for this node
+        /// </summary>
+        public int[]                iVertex;
+        
+        /// <summary>
+        /// Resolved outside vertex indexes for node frop top (0) to bottom (1/2) for this node
+        /// </summary>
+        public int[]                oVertex;
 
+        /// <summary>
+        /// This node was flagged as _BorderWithBottom
+        /// </summary>
         public bool                 HasBottom;
 
         public bool                 FloorVertexMatchesGroundVertex( float groundOffset, float groundSink )
@@ -575,12 +592,12 @@ namespace GUIBuilder
             HasBottom               = hasBottom;
         }
         
-        public BorderNode Clone()
+        public BorderNode           Clone()
         {
             return new BorderNode( CellGrid, P, Floor, Type, HasBottom );
         }
         
-        public override string ToString()
+        public override string      ToString()
         {
             return string.Format(
                 "P = {0} :: Floor = {1} :: CellGrid = {2} :: Type = {3}",
@@ -824,8 +841,8 @@ namespace GUIBuilder
                     i++;
             }
 
-            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Optimized Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2} :: borderWithBottom = {3}", nodeLength, angleAllowance, slopeAllowance, borderWithBottom ) );
             DebugLog.CloseIndentLevel();
+            BorderNodeGroup.DumpGroupNodes( nodes, string.Format( "Optimized Nodes :: nodeLength = {0} :: angleAllowance = {1} :: slopeAllowance = {2} :: borderWithBottom = {3}", nodeLength, angleAllowance, slopeAllowance, borderWithBottom ) );
 
             //BorderNodeGroup.DumpGroupNodes( nodes, "Merged list from generated nodes from linked refs" );
             // If there's not enough nodes to generate a mesh with, return nothing

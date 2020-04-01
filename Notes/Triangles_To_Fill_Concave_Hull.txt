@@ -1,0 +1,57 @@
+Triangle Generation for bottoms of Border NIFs from concave border hull
+
+See the two sample .txt documents to walk through this algo
+
+vars:
+    int i, j, k;    // Node indexers
+    node n[];       // Node at indexer
+    node n{};       // All nodes optionally excluding any listed
+    tri t[];        // Triangle with nodes indexers, indexers should be in clockwise order starting with the lowest index
+    tri t{};        // All triangles optionally excluding any listed
+    tri tri;        // Triangle from indexers
+    tri r{};        // List of already rejected triangles
+
+code:
+    i = 0;
+    
+    while i < n{}.Count
+    {
+        j = ( i + 1 ) % n{}.Count;
+        while j != i
+        {
+            //if( n[ i ].Used && n[ j ].Used ) continue;
+            k = ( j + 1 ) % n{}.Count;
+            while k != j
+            {
+                if( k == i ) continueK;
+                
+                tri = ( i, j, k ).Sort
+                if( ( tri.ExistsIn( r{} ) )||
+                    ( tri.ExistsIn( t{} ) ) ) continueK;
+                
+                // Reject if it would make a counter-clockwise triangle
+                // or if it would intersect with another triangle
+                if( ( tri.LargestAngle >= 180.0f )||
+                    ( tri.AnyEdgeIntersectsWithAnyTriEdge( t{} ) )||
+                    ( tri.AnyEdgeIntersectsWithAnyHullEdge( n{} ) )||
+                    ( tri.AnyNonTriNodeInside( n{} ) ) )
+                {
+                    r{}.Add( tri );
+                    continueK;
+                }
+                
+                // Add a new triangle
+                t{}.Add( tri );
+                
+                // Done with I -> J
+                exit while;
+                
+            continueK:
+                k = ( k + 1 ) % n{}.Count;
+            }
+            j = ( j + 1 ) % n{}.Count;
+        }
+        i = i + 1;
+    }
+    
+

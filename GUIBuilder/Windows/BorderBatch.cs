@@ -28,6 +28,7 @@ namespace GUIBuilder.Windows
         public BorderBatch() : base( true )
         {
             InitializeComponent();
+            this.ClientLoad += new System.EventHandler( this.BorderBatch_OnLoad );
             this.OnSetEnableState   += new SetEnableStateHandler( this.OnFormSetEnableState );
         }
 

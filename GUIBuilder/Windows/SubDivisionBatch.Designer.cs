@@ -196,7 +196,6 @@ namespace GUIBuilder.Windows
             this.Tag = "SubDivisionBatchWindow.Title";
             this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.ClientOnLoad += new System.EventHandler(this.SubDivisionBatch_OnLoad);
             this.gbSubDivisionFunctions.ResumeLayout(false);
             this.gbElements.ResumeLayout(false);
             this.WindowPanel.ResumeLayout( false );

@@ -29,7 +29,9 @@ namespace GUIBuilder.Windows
             InitializeComponent();
             
             this.SuspendLayout();
-            
+
+            this.ClientLoad += new System.EventHandler( this.BatchImport_OnLoad );
+
             lvImportForms.CustomAscendingSort = PrioritySortAsc;
             lvImportForms.CustomDescendingSort = PrioritySortDes;
 

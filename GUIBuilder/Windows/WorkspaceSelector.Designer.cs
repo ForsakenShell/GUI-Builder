@@ -96,7 +96,7 @@ namespace GUIBuilder.Windows
             this.Tag = "WorkspaceSelectorWindow.Title";
             this.Text = "title";
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.WorkspaceSelectorLoad);
+            this.Load += new System.EventHandler(this.WorkspaceSelector_OnLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
             this.Move += new System.EventHandler(this.OnFormMove);
             this.ResumeLayout(false);

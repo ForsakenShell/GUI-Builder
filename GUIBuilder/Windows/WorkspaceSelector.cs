@@ -39,7 +39,7 @@ namespace GUIBuilder.Windows
             InitializeComponent();
         }
         
-        void WorkspaceSelectorLoad( object sender, EventArgs e )
+        void WorkspaceSelector_OnLoad( object sender, EventArgs e )
         {
             this.Translate( true );
             

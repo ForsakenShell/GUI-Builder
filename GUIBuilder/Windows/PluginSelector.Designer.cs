@@ -144,7 +144,7 @@ namespace GUIBuilder.Windows
             this.Tag = "PluginSelectorWindow.Title";
             this.Text = "title";
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.PluginSelectorLoad);
+            this.Load += new System.EventHandler(this.PluginSelector_OnLoad);
             this.ResizeEnd += new System.EventHandler(this.OnFormResizeEnd);
             this.Move += new System.EventHandler(this.OnFormMove);
             this.gbWorkingFile.ResumeLayout(false);

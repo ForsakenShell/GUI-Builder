@@ -46,7 +46,9 @@
     <AboutWindow.Title>About GUIBuilder</AboutWindow.Title>
     <AboutWindow.ComicTitle>GUIBuilder</AboutWindow.ComicTitle>
     <AboutWindow.Author>by 1000101</AboutWindow.Author>
+    <AboutWindow.AuthorLink>https://www.nexusmods.com/users/106891</AboutWindow.AuthorLink>
     <AboutWindow.ReleaseLicenseTitle>Released under the Unlicense</AboutWindow.ReleaseLicenseTitle>
+    <AboutWindow.License>http://unlicense.org/</AboutWindow.License>
     <AboutWindow.ReleaseLicenseBody>This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or

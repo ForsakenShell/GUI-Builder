@@ -44,7 +44,7 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.WindowPanel.Location = new System.Drawing.Point(0, 0);
             this.WindowPanel.Name = "WindowPanel";
-            this.WindowPanel.Size = new System.Drawing.Size( 292, 273 );
+            this.WindowPanel.Size = new System.Drawing.Size(292, 273);
             this.WindowPanel.TabIndex = 0;
             // 
             // WindowBase

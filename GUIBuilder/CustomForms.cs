@@ -994,7 +994,7 @@ namespace GUIBuilder
 
 
         // Thread Safe
-        static TForm Get_ComboBox_SelectedIndex_Set_BySuffix<TForm>( ThreadParams parameters, ComboBox control, List<TForm> forms, string suffix ) where TForm : Engine.Plugin.Form
+        static TForm Get_ComboBox_SelectedIndex_Set_BySuffix<TForm>( ThreadParams parameters, ComboBox control, List<TForm> forms, string suffix ) where TForm : Engine.Plugin.Form, Engine.Plugin.Interface.IXHandle
         {
             TForm result = null;
             if( parameters.LogUpdate )
@@ -1028,7 +1028,7 @@ namespace GUIBuilder
 
         localAbort:
             if( parameters.LogUpdate )
-                DebugLog.CloseIndentLevel( "result", result );
+                DebugLog.CloseIndentLevel( "result", result?.IDString );
             return result;
         }
 

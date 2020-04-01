@@ -25,6 +25,7 @@ namespace GUIBuilder.Windows
         public Options() : base( true )
         {
             InitializeComponent();
+            this.ClientLoad += new System.EventHandler( this.Options_OnLoad );
             tbNIFExportInfo = new System.Windows.Forms.TextBox[]{
                 tbNIFExportInfo_0,
                 tbNIFExportInfo_1,
@@ -38,11 +39,12 @@ namespace GUIBuilder.Windows
         
         
         public override string XmlNodeName { get { return "OptionsWindow"; } }
-        
-        
+
+
         #endregion
-        
-        
+
+        #region Options OnLoad
+
         void Options_OnLoad( object sender, EventArgs e )
         {
             tbSDLVideoRenderWarning.Text = string.Format( "OptionsWindow.SDLHint.Warning".Translate(), GodObject.Windows.SDLVideoDriverSoftware );
@@ -68,19 +70,31 @@ namespace GUIBuilder.Windows
 
             this.BringToFront();
         }
-        
+
+        #endregion
+
+        #region Language
+
         void cbLanguageSelectedIndexChanged(object sender, EventArgs e)
         {
             if( !OnLoadComplete ) return;
             GodObject.Paths.Language = cbLanguage.Text;
         }
-        
+
+        #endregion
+
+        #region SDL Hints
+
         void cbSDLVideoDriverSelectedIndexChanged( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
             GodObject.Windows.SDLVideoDriverIndex = cbSDLVideoDriver.SelectedIndex;
         }
-        
+
+        #endregion
+
+        #region Log Files
+
         void cbLogMainToConsoleCheckedChanged( object sender, EventArgs e )
         {
             if( !OnLoadComplete ) return;
@@ -92,6 +106,8 @@ namespace GUIBuilder.Windows
             if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteValue<bool>( GodObject.XmlConfig.XmlNode_Options, GodObject.XmlConfig.XmlKey_ZipLogs, cbZipLogFiles.Checked, true );
         }
+
+        #endregion
 
         #region NIF ExportInfo
 

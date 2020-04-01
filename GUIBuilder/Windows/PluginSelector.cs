@@ -50,7 +50,7 @@ namespace GUIBuilder.Windows
             
         }
         
-        void PluginSelectorLoad( object sender, EventArgs e )
+        void PluginSelector_OnLoad( object sender, EventArgs e )
         {
             this.Translate( true );
             
@@ -154,98 +154,99 @@ namespace GUIBuilder.Windows
         {
             if( ( !onLoadComplete )||( OverrideCheckedCheck ) ) return;
             OverrideCheckedCheck = true;
-            
-            try{
-            var key = e.Node.Text;
-            var state = e.Node.Checked;
-            UpdateChildCheckState( key, state );
-            if( state )
+
+            try
             {
-                if( e.Node.Nodes.Count > 0 )
-                    foreach( TreeNode child in e.Node.Nodes )
-                        UpdateRootCheckState( child.Text, state );
-            }
-            else
-            {
-                foreach( TreeNode node in tvPlugins.Nodes )
+                var key = e.Node.Text;
+                var state = e.Node.Checked;
+                UpdateChildCheckState( key, state );
+                if( state )
                 {
-                    if( node.Nodes.Count > 0 )
+                    if( e.Node.Nodes.Count > 0 )
+                        foreach( TreeNode child in e.Node.Nodes )
+                            UpdateRootCheckState( child.Text, state );
+                }
+                else
+                {
+                    foreach( TreeNode node in tvPlugins.Nodes )
                     {
-                        foreach( TreeNode child in node.Nodes )
+                        if( node.Nodes.Count > 0 )
                         {
-                            if( key.InsensitiveInvariantMatch( child.Text ) )
+                            foreach( TreeNode child in node.Nodes )
                             {
-                                node.Checked = false;
-                                UpdateChildCheckState( node.Text, false );
+                                if( key.InsensitiveInvariantMatch( child.Text ) )
+                                {
+                                    node.Checked = false;
+                                    UpdateChildCheckState( node.Text, false );
+                                }
                             }
                         }
                     }
                 }
-            }
-            
-            var lastSelectedWorking = cbWorkingFile.SelectedIndex < 1 ? null : (string)cbWorkingFile.Items[ cbWorkingFile.SelectedIndex ];
-            cbWorkingFile.Items.Clear();
-            cbWorkingFile.Items.Add( string.Format( " [{0}] ", "DropdownSelectNone".Translate() ) );
-            foreach( TreeNode node in tvPlugins.Nodes )
-            {
-                var f = CutOffString( node.Text, NodeFilenameTail );
-                if( ( node.Checked )&&( !f.EndsWith( ".esm", StringComparison.InvariantCultureIgnoreCase ) ) )
-                    cbWorkingFile.Items.Add( node.Text );
-            }
-            
-            var workingSelected = 0;
-            if( lastSelectedWorking == null )
-            {
-                // No working file was selected, pick the last one to load but keep searching backwards until
-                // one selected requiring ATC is found and pick it instead
-                for( int i = tvPlugins.Nodes.Count - 1; i >= 0; i-- )
+
+                var lastSelectedWorking = cbWorkingFile.SelectedIndex < 1 ? null : (string)cbWorkingFile.Items[ cbWorkingFile.SelectedIndex ];
+                cbWorkingFile.Items.Clear();
+                cbWorkingFile.Items.Add( string.Format( " [{0}] ", "DropdownSelectNone".Translate() ) );
+                foreach( TreeNode node in tvPlugins.Nodes )
                 {
-                    var node = tvPlugins.Nodes[ i ];
-                    if( node.Checked )
+                    var f = CutOffString( node.Text, NodeFilenameTail );
+                    if( ( node.Checked ) && ( !f.EndsWith( ".esm", StringComparison.InvariantCultureIgnoreCase ) ) )
+                        cbWorkingFile.Items.Add( node.Text );
+                }
+
+                var workingSelected = 0;
+                if( lastSelectedWorking == null )
+                {
+                    // No working file was selected, pick the last one to load but keep searching backwards until
+                    // one selected requiring ATC is found and pick it instead
+                    for( int i = tvPlugins.Nodes.Count - 1; i >= 0; i-- )
                     {
-                        // Pick it if nothing is selected yet
-                        if( lastSelectedWorking == null )
-                            lastSelectedWorking = node.Text;
-                        
-                        if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
+                        var node = tvPlugins.Nodes[ i ];
+                        if( node.Checked )
                         {
-                            // Prefer an ATC dependant file
-                            var p = LoadOrder.Find( f => f.Filename.InsensitiveInvariantMatch( CutOffString( node.Text, NodeFilenameTail ) ) );
-                            if( !p.Masters.NullOrEmpty() )
+                            // Pick it if nothing is selected yet
+                            if( lastSelectedWorking == null )
+                                lastSelectedWorking = node.Text;
+
+                            if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
                             {
-                                foreach( var m in p.Masters ) // Gourmetrix (discord) reported an null reference error on this line, wtf?
+                                // Prefer an ATC dependant file
+                                var p = LoadOrder.Find( f => f.Filename.InsensitiveInvariantMatch( CutOffString( node.Text, NodeFilenameTail ) ) );
+                                if( !p.Masters.NullOrEmpty() )
                                 {
-                                    if( m.InsensitiveInvariantMatch( GodObject.Master.AnnexTheCommonwealth.Filename ) )
+                                    foreach( var m in p.Masters ) // Gourmetrix (discord) reported an null reference error on this line, wtf?
                                     {
-                                        lastSelectedWorking = node.Text;
-                                        break;
+                                        if( m.InsensitiveInvariantMatch( GodObject.Master.AnnexTheCommonwealth.Filename ) )
+                                        {
+                                            lastSelectedWorking = node.Text;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-            if( lastSelectedWorking != null )
-            {
-                // Update the working file dropdown with the previously (or automagically) selected plugin
-                for( int i = 0; i < cbWorkingFile.Items.Count; i++ )
+                if( lastSelectedWorking != null )
                 {
-                    if( lastSelectedWorking.InsensitiveInvariantMatch( (string)cbWorkingFile.Items[ i ] ) )
+                    // Update the working file dropdown with the previously (or automagically) selected plugin
+                    for( int i = 0; i < cbWorkingFile.Items.Count; i++ )
                     {
-                        workingSelected = i;
-                        break;
+                        if( lastSelectedWorking.InsensitiveInvariantMatch( (string)cbWorkingFile.Items[ i ] ) )
+                        {
+                            workingSelected = i;
+                            break;
+                        }
                     }
                 }
-            }
-            cbWorkingFile.SelectedIndex = workingSelected;
-            btnLoad.Enabled = workingSelected > 0;
-            
-            OverrideCheckedCheck = false;
+                cbWorkingFile.SelectedIndex = workingSelected;
+                btnLoad.Enabled = workingSelected > 0;
+
+                OverrideCheckedCheck = false;
             }
             catch( Exception ex )
             {
-                Console.WriteLine( string.Format( "An exception has occured...no REALLY!\n{0}\n{1}\n{2}\n{3}", e.Action.ToString(), e.Node.ToStringNullSafe(), ex.ToString(), ex.StackTrace ) );
+                DebugLog.WriteException( ex, string.Format( "e.Actions = {0} :: e.Node = {1}", e.Action.ToString(), e.Node.ToStringNullSafe() ) );
             }
         }
         

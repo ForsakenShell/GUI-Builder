@@ -170,7 +170,7 @@ namespace GUIBuilder.FormImport
                         FormID.ToString( "X8" ),
                         EditorID )
                     : string.Format(
-                        "{0} {2}",
+                        "{0} {1}",
                         string.Format(
                             "IXHandle.IDString".Translate(),
                             FormID.ToString( "X8" ),

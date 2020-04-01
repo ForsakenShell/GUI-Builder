@@ -32,7 +32,7 @@ namespace SDL2ThinLayer
         
         public Surface CreateSurface( int width, int height, uint pixelFormat )
         {
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.CreateSurface()" );
+            DebugLog.WriteCaller();
             return Surface.INTERNAL_Surface_Create( this, width, height, this.BitsPerPixel, pixelFormat );
         }
         

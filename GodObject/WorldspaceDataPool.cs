@@ -383,11 +383,13 @@ namespace GodObject
                 //DebugLog.CloseIndentLevel( tEnd, "result", result.ToString() );
                 return result;
             }
-            
+
             #endregion
-            
+
             #region Heightmap[s] DDS loading and Texture creation
-            
+
+            #region Load Heightmaps
+
             public bool LoadHeightMapData()
             {
                 return
@@ -408,7 +410,11 @@ namespace GodObject
                     ( WaterHeightMap != null )||
                     ( LoadHeightMapDDS( WaterHeights_Texture_File, ref WaterHeightMap ) );
             }
-            
+
+            #endregion
+
+            #region Get Heightmap Color At Position
+
             delegate int HeightMapColorAt( int x, int y );
             
             int LandHeightmapColor( int x, int y )
@@ -428,7 +434,11 @@ namespace GodObject
                 var lh = LandHeightMap[ y, x ];
                 return wh > lh ? 0x7F00007F : 0;
             }
-            
+
+            #endregion
+
+            #region Create Surfaces and Textures
+
             unsafe SDLRenderer.Surface CreateSurface( SDLRenderer renderer, HeightMapColorAt hmColorAt, SDL.SDL_BlendMode blendMode )
             {
                 var surface = renderer.CreateSurface( HeightMap_Width, HeightMap_Height, SDL.SDL_PIXELFORMAT_ARGB8888 );
@@ -464,17 +474,17 @@ namespace GodObject
                 return surface;
             }
             
-            void THREAD_LoadAndCreateHeightmapTextures( SDLRenderer renderer )
+            void THREAD_SDL_INVOKE_LoadAndCreateHeightmapTextures( SDLRenderer renderer )
             {
-                //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "THREAD_LoadAndCreateHeightmapTextures()" } );
+                DebugLog.OpenIndentLevel();
                 
                 var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 m.PushStatusMessage();
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
-                
+
                 LoadHeightMapData();
-                
+
                 m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), LandHeights_Texture_File ) );
                 if( LandHeight_Texture != null )
                 {
@@ -501,38 +511,42 @@ namespace GodObject
                 WaterHeight_Texture = renderer.CreateTextureFromSurface( WaterHeight_Surface );
                 
                 _textureLoadQueued = false;
+                _textureLoadQueuetransform = null;
                 _texturesReady = ( LandHeight_Texture != null )&&( WaterHeight_Texture != null );
-                
+
                 m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
-                GodObject.Windows.SetEnableState( true );   // Temp fix until the async bug with this function is resolved
-                //DebugLog.CloseIndentLevel();
+                GodObject.Windows.SetEnableState( true );
+                DebugLog.CloseIndentLevel();
             }
             
             public void CreateHeightmapTextures( GUIBuilder.Windows.RenderChild.RenderTransform transform )
             {
-                DebugLog.WriteLine( "CreateHeightmapTextures()", true );
-                
-                if( !transform.ReadyForUse() )
-                    return;
-                if( _textureLoadQueued )
-                    return;
-                
-                _textureLoadQueued = true;
-                GodObject.Windows.SetEnableState( false );   // Temp fix until the async bug with this function is resolved
-                
-                _texturesReady = false;
-                _textureLoadQueuetransform = transform;
-                
-                WorkerThreadPool.CreateWorker( THREAD_CreateHeightmapTextures, null ).Start();
+                DebugLog.OpenIndentLevel();
+
+                if( ( transform != null )&&
+                    ( transform.ReadyForUse() ) &&
+                    ( !_textureLoadQueued ) )
+                {
+
+                    _textureLoadQueued = true;
+                    GodObject.Windows.SetEnableState( false );
+
+                    _texturesReady = false;
+                    _textureLoadQueuetransform = transform;
+
+                    //THREAD_SDL_INVOKE_LoadAndCreateHeightmapTextures( transform.Renderer );
+                    _textureLoadQueuetransform.Renderer.BeginInvoke( THREAD_SDL_INVOKE_LoadAndCreateHeightmapTextures );
+
+                }
+
+                DebugLog.CloseIndentLevel();
             }
-            
-            unsafe void THREAD_CreateHeightmapTextures()
-            {
-                _textureLoadQueuetransform.Renderer.BeginInvoke( THREAD_LoadAndCreateHeightmapTextures );
-                _textureLoadQueuetransform = null;
-            }
-            
+
+            #endregion
+
+            #region DDS File Handling
+
             bool FetchPhysicalStatsInfo()
             {
                 var statsLines = System.IO.File.ReadAllLines( Stats_File );
@@ -674,11 +688,13 @@ namespace GodObject
                 m.PopStatusMessage();
                 return thingsOk;
             }
-            
+
             #endregion
-            
+
+            #endregion
+
         }
-        
+
         static Dictionary<uint,PoolEntry> __Pool = null;
         static Dictionary<uint,PoolEntry> _Pool
         {

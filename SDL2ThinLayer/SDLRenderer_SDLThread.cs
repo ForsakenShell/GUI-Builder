@@ -244,39 +244,48 @@ namespace SDL2ThinLayer
         {
             WorkerThreadPool.StartMethodBase = System.Reflection.MethodInfo.GetCurrentMethod();
             WorkerThreadPool.SetName( WorkerThreadPool.StartMethodBaseNameFriendly( true ) );
-
-            DebugLog.Open();
-            
-            //Console.WriteLine( "INTERNAL_SDLThread_Main()" );
             
             _threadState = SDLThreadState.Starting;
-            
-            // Create the SDL_Window
-            var windowOK = INTERNAL_SDLThread_InitWindow();
-            if( !windowOK )
+
+            var result = SDLThreadState.Inactive;
+
+            DebugLog.Open();
+
+            try
             {
-                INTERNAL_SDLThread_Cleanup( SDLThreadState.Error );
-                return;
-            }
+                // Create the SDL_Window
+                var windowOK = INTERNAL_SDLThread_InitWindow();
+                if( !windowOK )
+                {
+                    result = SDLThreadState.Error;
+                    goto localAbort;
+                }
             
-            // Create the SDL_Renderer
-            var rendererOK = INTERNAL_SDLThread_InitRenderer();
-            if( !rendererOK )
+                // Create the SDL_Renderer
+                var rendererOK = INTERNAL_SDLThread_InitRenderer();
+                if( !rendererOK )
+                {
+                    result = SDLThreadState.Error;
+                    goto localAbort;
+                }
+            
+                // Translate the state machine into something meaningful to SDL
+                INTERNAL_UpdateState_FunctionPointers();
+                INTERNAL_UpdateState_CursorVisibility();
+                INTERNAL_UpdateState_ThreadIntervals();
+
+                // Now do the main thread loop
+                INTERNAL_SDLThread_MainLoop();
+            }
+            catch( Exception e )
             {
-                INTERNAL_SDLThread_Cleanup( SDLThreadState.Error );
-                return;
+                result = SDLThreadState.Error;
+                DebugLog.WriteException( e );
             }
-            
-            // Translate the state machine into something meaningful to SDL
-            INTERNAL_UpdateState_FunctionPointers();
-            INTERNAL_UpdateState_CursorVisibility();
-            INTERNAL_UpdateState_ThreadIntervals();
-            
-            // Now do the main thread loop
-            INTERNAL_SDLThread_MainLoop();
-            
+
+        localAbort:
             // Clean up after the thread
-            INTERNAL_SDLThread_Cleanup( SDLThreadState.Inactive );
+            INTERNAL_SDLThread_Cleanup( result );
             
             DebugLog.Close();
             
@@ -286,7 +295,12 @@ namespace SDL2ThinLayer
         {
             DebugLog.OpenIndentLevel();
             //Console.WriteCaller();
-            
+
+            // Mark the thread as running
+            _threadState = SDLThreadState.Running;
+
+            #region Loop timing and control vars
+
             TimeSpan loopTime = TimeSpan.FromTicks( 0 );
             long loopStartTick = 0;
             long loopDelayTicks = 0;
@@ -303,14 +317,16 @@ namespace SDL2ThinLayer
             long frameStart = 0;
             long frameEnd = 0;
             long frameTime = 0;
-            
-            // Thread timing
+
+            #endregion
+
+            #region Thread timing
+
             _threadTimer = new Stopwatch();
-            
-            // Mark the thread as running
-            _threadState = SDLThreadState.Running;
             _threadTimer.Start();
-            
+
+            #endregion
+
             // Loop until we exit
             //Console.WriteLine( "INTERNAL_SDLThread_MainLoop() :: Loop_Enter" );
             while( !_exitRequested )
@@ -422,13 +438,16 @@ namespace SDL2ThinLayer
                 //Console.WriteLine( "INTERNAL_SDLThread_MainLoop() :: Loop_Bottom" );
             }
             //Console.WriteLine( "INTERNAL_SDLThread_MainLoop() :: Loop_Exit" );
+
+            #region Mark the thread as no longer running
             
-            // Mark the thread as no longer running
             _threadTimer.Stop();
             _actualFPS = 0;
             _potentialFPS = 0;
             _averageFrameTime = 0;
-            
+
+            #endregion
+
             DebugLog.CloseIndentLevel();
         }
         
@@ -470,67 +489,81 @@ namespace SDL2ThinLayer
         
         void INTERNAL_SDLThread_Cleanup( SDLThreadState newState )
         {
-            Console.WriteLine( "INTERNAL_SDLThread_Cleanup()" );
+            _threadState = newState;
+            DebugLog.OpenIndentLevel();
             
             // Dispose of the renderer, window, etc
             INTERNAL_SDLThread_ReleaseWindowAndRenderer();
             
             _sdlThread = null;
-            _threadState = newState;
+
+            DebugLog.CloseIndentLevel();
         }
         
         void INTERNAL_SDLThread_ReleaseWindowAndRenderer()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_ReleaseWindowAndRenderer()" );
+            DebugLog.OpenIndentLevel();
             
             INTERNAL_SDLThread_ReleaseRenderer();
             INTERNAL_SDLThread_ReleaseWindow();
+
+            DebugLog.CloseIndentLevel();
         }
         
         void INTERNAL_SDLThread_ReleaseWindow()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_ReleaseWindow()" );
+            DebugLog.OpenIndentLevel();
+
             if( _sdlWindow != IntPtr.Zero )
                 SDL.SDL_DestroyWindow( _sdlWindow );
             _sdlWindow = IntPtr.Zero;
+
+            DebugLog.CloseIndentLevel();
         }
         
         void INTERNAL_SDLThread_ReleaseRenderer()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_ReleaseRenderer()" );
+            DebugLog.OpenIndentLevel();
+
             if( _sdlRenderer != IntPtr.Zero )
                 SDL.SDL_DestroyRenderer( _sdlRenderer );
             _sdlRenderer = IntPtr.Zero;
+
+            DebugLog.CloseIndentLevel();
         }
         
         bool INTERNAL_SDLThread_ResetWindowAndRenderer()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_ResetWindowAndRenderer()" );
-            
-            if( !INTERNAL_SDLThread_ResetWindow() )
-                return false;
-            if( !INTERNAL_SDLThread_ResetRenderer() )
-                return false;
-            
+            DebugLog.OpenIndentLevel();
+
+            var result =
+                ( INTERNAL_SDLThread_ResetWindow() )&&
+                ( INTERNAL_SDLThread_ResetRenderer() );
+
             // SDL_Window and SDL_Renderer are ready for use
-            return true;
+
+            DebugLog.CloseIndentLevel();
+            return result;
         }
         
         bool INTERNAL_SDLThread_ResetWindow()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_ResetWindow()" );
-            
+            DebugLog.OpenIndentLevel();
+
             // Free the existing SDL_Window
             INTERNAL_SDLThread_ReleaseWindow();
-            
+
             // Aquire new a SDL_Window and SDL_Renderer
-            return INTERNAL_SDLThread_InitWindow();
+            var result = INTERNAL_SDLThread_InitWindow();
+
+            DebugLog.CloseIndentLevel();
+            return result;
         }
         
         bool INTERNAL_SDLThread_ResetRenderer()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_ResetRenderer()" );
-            
+            DebugLog.OpenIndentLevel();
+
             // Get the old state values
             var obm = this.BlendMode;
             var osc = this.ShowCursor;
@@ -552,14 +585,17 @@ namespace SDL2ThinLayer
                 if( RendererReset != null )
                     RendererReset( this );
             }
-            
+
+            DebugLog.CloseIndentLevel();
             return ret;
         }
         
         bool INTERNAL_SDLThread_InitWindow()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_InitWindow()" );
-            
+            DebugLog.OpenIndentLevel();
+
+            var result = false;
+
             // Create the SDL window
             _sdlWindow = SDL.SDL_CreateWindow(
                 _InitParams.WindowTitle, /* _windowTitle, */
@@ -573,14 +609,20 @@ namespace SDL2ThinLayer
                 : (SDL.SDL_WindowFlags)0 )
             );
             if( _sdlWindow == IntPtr.Zero )
-                return false;
+            {
+                DebugLog.WriteError( "_sdlWindow = null" );
+                goto localAbort;
                 //throw new Exception( string.Format( "Unable to create SDL_Window!\n\n{0}", SDL.SDL_GetError() ) );
+            }
             
             _sdlWindow_PixelFormat = SDL.SDL_GetWindowPixelFormat( _sdlWindow );
             if( _sdlWindow_PixelFormat == SDL.SDL_PIXELFORMAT_UNKNOWN )
-                return false;
+            {
+                DebugLog.WriteError( "_sdlWindow_PixelFormat = SDL2.SDL.SDL_PIXELFORMAT_UNKNOWN" );
+                goto localAbort;
                 //throw new Exception( string.Format( "Unable to obtain SDL_Window pixel format!\n\n{0}", SDL.SDL_GetError() ) );
-            
+            }
+
             if( SDL.SDL_PixelFormatEnumToMasks(
                 _sdlWindow_PixelFormat,
                 out _sdlWindow_bpp,
@@ -588,9 +630,12 @@ namespace SDL2ThinLayer
                 out _sdlWindow_Gmask,
                 out _sdlWindow_Bmask,
                 out _sdlWindow_Amask ) == SDL.SDL_bool.SDL_FALSE )
-                return false;
+            {
+                DebugLog.WriteError( "SDL2.SDL_SDL_PixelFormatEnumToMask() = false" );
+                goto localAbort;
                 //throw new Exception( string.Format( "Unable to obtain SDL_Window pixel format bitmasks!\n\n{0}", SDL.SDL_GetError() ) );
-            
+            }
+
             // Get the Win32 HWND from the SDL window
             var sysWMinfo = new SDL.SDL_SysWMinfo();
             SDL.SDL_GetWindowWMInfo( _sdlWindow, ref sysWMinfo );
@@ -639,13 +684,19 @@ namespace SDL2ThinLayer
             
             _windowResetRequired = false;
             _rendererResetRequired = true;
-            return true;
+            result = true;
+
+        localAbort:
+            DebugLog.CloseIndentLevel(); 
+            return result;
         }
         
         bool INTERNAL_SDLThread_InitRenderer()
         {
-            Console.WriteLine( "INTERNAL_SDLThread_InitRenderer()" );
-            
+            DebugLog.OpenIndentLevel();
+
+            var result = false;
+
             // Create the underlying renderer
             _sdlRenderer = SDL.SDL_CreateRenderer(
                 _sdlWindow,
@@ -654,15 +705,26 @@ namespace SDL2ThinLayer
                 SDL.SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC
             );
             if( _sdlRenderer == IntPtr.Zero )
-                //return false;
-                throw new Exception( string.Format( "Unable to create SDL_Renderer!\n\n{0}", SDL.SDL_GetError() ) );
-            
-            if( SDL.SDL_GetRendererInfo( _sdlRenderer, out _sdlRenderInfo ) != 0 )
-                return false;
+            {
+                DebugLog.WriteError( "SDL2.SDL.SDL_CreateRenderer() = null" );
+                goto localAbort;
+                //throw new Exception( string.Format( "Unable to create SDL_Renderer!\n\n{0}", SDL.SDL_GetError() ) );
+            }
+
+            var griResult = SDL.SDL_GetRendererInfo( _sdlRenderer, out _sdlRenderInfo );
+            if( griResult != 0 )
+            {
+                DebugLog.WriteError( "SDL2.SDL.SDL_GetRendererInfo() = " + griResult.ToString() );
+                goto localAbort;
                 //throw new Exception( string.Format( "Unable to obtain SDL_RendererInfo!\n\n{0}", SDL.SDL_GetError() ) );
-            
+            }
+
             _rendererResetRequired = false;
-            return true;
+            result = true;
+
+        localAbort:
+            DebugLog.CloseIndentLevel();
+            return result;
         }
         
         #endregion

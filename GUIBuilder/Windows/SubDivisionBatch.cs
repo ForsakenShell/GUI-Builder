@@ -28,6 +28,7 @@ namespace GUIBuilder.Windows
         public SubDivisionBatch() : base( true )
         {
             InitializeComponent();
+            this.ClientLoad += new System.EventHandler( this.SubDivisionBatch_OnLoad );
         }
 
 

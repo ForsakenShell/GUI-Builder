@@ -88,15 +88,15 @@ namespace GUIBuilder.Windows
             tsRenderSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             tsRenderSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             tsRenderSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsRenderWindow.SuspendLayout();
             this.WindowPanel.SuspendLayout();
+            this.tsRenderWindow.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pnWindow
+            // WindowPanel
             // 
-            this.WindowPanel.Controls.Add( this.tsRenderWindow );
-            this.WindowPanel.Controls.Add( this.pnRenderTarget );
-            this.WindowPanel.Size = new System.Drawing.Size( 771, 355 );
+            this.WindowPanel.Controls.Add(this.tsRenderWindow);
+            this.WindowPanel.Controls.Add(this.pnRenderTarget);
+            this.WindowPanel.Size = new System.Drawing.Size(632, 416);
             // 
             // tsRenderSeparator1
             // 
@@ -164,7 +164,7 @@ namespace GUIBuilder.Windows
             this.tsRenderWindow.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsRenderWindow.Location = new System.Drawing.Point(0, 0);
             this.tsRenderWindow.Name = "tsRenderWindow";
-            this.tsRenderWindow.Size = new System.Drawing.Size(771, 23);
+            this.tsRenderWindow.Size = new System.Drawing.Size(632, 23);
             this.tsRenderWindow.TabIndex = 7;
             // 
             // tsRenderOverRegion
@@ -393,25 +393,30 @@ namespace GUIBuilder.Windows
             // 
             // pnRenderTarget
             // 
-            this.pnRenderTarget.Size = new System.Drawing.Size(771, 332);
+            this.pnRenderTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnRenderTarget.Location = new System.Drawing.Point(0, 24);
+            this.pnRenderTarget.Name = "pnRenderTarget";
+            this.pnRenderTarget.Size = new System.Drawing.Size(632, 392);
+            this.pnRenderTarget.TabIndex = 8;
             // 
             // Render
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(771, 355);
-            this.Controls.Add(this.WindowPanel);
+            this.ClientSize = new System.Drawing.Size(632, 416);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MinimumSize = new System.Drawing.Size(420, 360);
+            this.MinimumSize = new System.Drawing.Size(640, 440);
             this.Name = "Render";
             this.ShowInTaskbar = false;
             this.Tag = "RenderWindow.Title";
             this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.ClientOnLoad += new System.EventHandler(this.Render_OnLoad);
-            this.tsRenderWindow.ResumeLayout(false);
             this.WindowPanel.ResumeLayout(false);
             this.WindowPanel.PerformLayout();
+            this.tsRenderWindow.ResumeLayout(false);
+            this.tsRenderWindow.PerformLayout();
             this.ResumeLayout(false);
 
         }

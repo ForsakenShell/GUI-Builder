@@ -35,11 +35,12 @@ namespace GUIBuilder.Windows
     {
 
         /// <summary>
-        /// Use GodObject.Windows.GetWindow<About>() to create this Window
-            /// </summary>
+        /// Use GodObject.Windows.GetWindow<Render>() to create this Window
+        /// </summary>
         public Render() : base( true )
         {
             InitializeComponent();
+            this.ClientLoad += new System.EventHandler(this.Render_OnLoad);
             this.OnSetEnableState += new SetEnableStateHandler( this.OnFormSetEnableState );
         }
 
@@ -128,15 +129,16 @@ namespace GUIBuilder.Windows
         {
             DebugLog.OpenIndentLevel();
             Shutdown();
-            
-            if( twWorldspaces != null ) twWorldspaces.Close();
-            if( twWorkshops != null ) twWorkshops.Close();
-            if( twSettlements != null ) twSettlements.Close();
-            if( twSubDivisions != null ) twSubDivisions.Close();
-            twWorldspaces = null;
-            twWorkshops = null;
-            twSettlements = null;
-            twSubDivisions = null;
+
+            twWorldspaces   ?.Close();
+            twWorkshops     ?.Close();
+            twSettlements   ?.Close();
+            twSubDivisions  ?.Close();
+
+            twWorldspaces   = null;
+            twWorkshops     = null;
+            twSettlements   = null;
+            twSubDivisions  = null;
             
             DebugLog.CloseIndentLevel();
         }
@@ -151,14 +153,10 @@ namespace GUIBuilder.Windows
             _UpdatingRenderer = true;
             _ResetViewportOnUpdate = true;
             
-            DebugLog.OpenIndentLevel();
-            
             if( CreateTransform( initParams ) )
                 THREAD_UpdateRenderWindowThread(); // Call the thread function directly from this thread
             
             transform.SyncSceneUpdate( false );
-            
-            DebugLog.CloseIndentLevel();
         }
         
         #region Sync'd list monitoring
@@ -180,16 +178,17 @@ namespace GUIBuilder.Windows
 
         /// <summary>
         /// Long running functions should disable the main form so the user can't spam inputs.  Don't forget to enable the form again after the long-running function is complete so the user can continue to use the program.
+        /// Note: This is called in WindowBase.WindowBase_OnFormLoad() before WindowBase.ClientOnLoad() is called
         /// </summary>
         /// <param name="enabled">true to enable the form and it's controls, false to disable the form and it's controls.</param>
         void OnFormSetEnableState( bool enabled )
         {
-            twWorldspaces.SetEnableState( enabled );
-            twWorkshops.SetEnableState( enabled );
+            twWorldspaces?.SetEnableState( enabled );
+            twWorkshops?.SetEnableState( enabled );
             if( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) )
             {
-                twSettlements.SetEnableState( enabled );
-                twSubDivisions.SetEnableState( enabled );
+                twSettlements?.SetEnableState( enabled );
+                twSubDivisions?.SetEnableState( enabled );
             }
         }
         

@@ -1,0 +1,62 @@
+Sample:  First node is "closest to the centre" of the concave hull
+Each vertex of the concave hull is taken from border markers
+
+                  6
+                 / \
+                /   \
+               /     \
+              /       \
+             /         \
+            /           7
+           /            |
+   4------5             |
+   |                    |
+   |              0     |
+   3-----2       /|     |
+          \     / |     |
+           \   /  |     |
+            \ /   |     |
+             1    9-----8
+
+i = 0
+j = 5
+k = 6
+
+n{}.Count = 10
+
+tri tri = Sort( i, j, k )
+    n0  n1  n2
+    0   8   9
+
+tri t{} =
+    Count = 8
+    n0  n1  n2
+    0   1   2
+    0   2   3
+    0   3   4
+    0   4   5
+    0   5   6
+    0   6   7
+    0   7   8
+    0   8   9
+
+tri r{} = 
+    n0  n1  n2
+    0   1   3
+    0   1   4
+    0   1   5
+    0   1   6
+    0   1   7
+    0   2   4
+    0   2   5
+    0   2   6
+    0   2   7
+    0   3   5
+    0   3   6
+    0   3   7
+    0   4   5
+    0   4   6
+    0   4   7
+    0   5   7
+    ...
+    

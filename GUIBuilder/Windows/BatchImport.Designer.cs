@@ -155,7 +155,6 @@ namespace GUIBuilder.Windows
             this.Tag = "BatchImportWindow.Title";
             this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.ClientOnLoad += new System.EventHandler(this.BatchImport_OnLoad);
             this.WindowPanel.ResumeLayout(false);
             this.scImports.Panel1.ResumeLayout(false);
             this.scImports.Panel2.ResumeLayout(false);

@@ -224,7 +224,8 @@ namespace XeLib
                     }
                     fileHeader.Dispose();
                 }
-                //fileHandle.Dispose(); // <-- These seem to be shared internally by XeLib???  MOAR RESEARCH!
+                fileHandle.Dispose(); // <-- These seem to be shared internally by XeLib???  MOAR RESEARCH!
+                // 31-03-2020 - Maybe not?  Testing
             }
             return masters;
         }

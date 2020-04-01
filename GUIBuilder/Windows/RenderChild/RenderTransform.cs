@@ -336,14 +336,14 @@ namespace GUIBuilder.Windows.RenderChild
         
         void SDL_RendererReset( SDLRenderer renderer )
         {
-            //DebugLog.Write( "SDL_RendererReset()" );
+            DebugLog.WriteCaller();
             ReloadObjectTextures( true );
             ReloadWorldspaceTextures( true );
         }
         
         void SDL_WindowResized( SDLRenderer renderer, SDL.SDL_Event e )
         {
-            //DebugLog.Write( "SDL_WindowResized()" );
+            DebugLog.WriteCaller();
             
             // Tell the transform renderer that an external event resized the window
             rectTarget = sdlRenderer.WindowSize.ToSDLRect();
@@ -441,7 +441,7 @@ namespace GUIBuilder.Windows.RenderChild
             //sdlRenderer.ShowCursor = false;
             sdlRenderer.BlendMode = SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND;
             sdlRenderer.DrawScene += SDL_DrawScene;
-            if( sdlTarget == null )
+            if( sdlTarget != null )
                 sdlRenderer.WindowResized += SDL_WindowResized;
             sdlRenderer.RendererReset += SDL_RendererReset;
             

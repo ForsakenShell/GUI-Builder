@@ -486,7 +486,6 @@ namespace GUIBuilder.Windows
             this.Tag = "OptionsWindow.Title";
             this.Text = "Title";
             this.TopMost = true;
-            this.ClientOnLoad += new System.EventHandler(this.Options_OnLoad);
             this.WindowPanel.ResumeLayout(false);
             this.gbAlwaysSelectMasters.ResumeLayout(false);
             this.gbConflictStatus.ResumeLayout(false);

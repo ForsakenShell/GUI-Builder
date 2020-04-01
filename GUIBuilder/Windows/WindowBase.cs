@@ -22,8 +22,8 @@ namespace GUIBuilder.Windows
         public bool OnLoadComplete {  get{ return onLoadComplete; } }
 
         [Browsable(true)]
-        [Category("Client Events"), Description("Called at the end of WindowBase OnLoad, set this instead of OnLoad")]
-        public EventHandler     ClientOnLoad = null;
+        [Category("Client Events"), Description("Called at the end of WindowBase_OnLoad, set this instead of Form.Load")]
+        public EventHandler     ClientLoad = null;
 
         public WindowBase()
         {
@@ -51,26 +51,26 @@ namespace GUIBuilder.Windows
 
             this.FormClosing    += new System.Windows.Forms.FormClosingEventHandler( this.IEnableControlForm_OnFormClosing );
 
-            this.Load           += new System.EventHandler( this.WindowBase_OnFormLoad );
+            this.Load           += new System.EventHandler( this.WindowBase_OnLoad );
 
             this.ResumeLayout( false );
         }
 
 
-        #region Translation
+        #region WindowBase_OnFormLoad
 
 
-        void WindowBase_OnFormLoad( object sender, EventArgs e )
+        void WindowBase_OnLoad( object sender, EventArgs e )
         {
             SetEnableState( false );
 
             if( translateForm )
                 this.Translate( true );
 
-            ClientOnLoad?.Invoke( this, e );
+            ClientLoad?.Invoke( sender, e );
 
-            SetEnableState( true );
             onLoadComplete = true;
+            SetEnableState( true );
         }
 
 

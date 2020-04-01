@@ -919,7 +919,6 @@ namespace GUIBuilder.Windows
             this.Tag = "BorderBatchWindow.Title";
             this.Text = "title";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.ClientOnLoad += new System.EventHandler(this.BorderBatch_OnLoad);
             this.WindowPanel.ResumeLayout(false);
             this.gbTargetFolder.ResumeLayout(false);
             this.gbTargetFolder.PerformLayout();
@@ -936,7 +935,6 @@ namespace GUIBuilder.Windows
             this.gbWorkshopNIFParameters.PerformLayout();
             this.gbBorderFunctions.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
     }
 }

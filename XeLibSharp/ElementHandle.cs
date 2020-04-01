@@ -805,10 +805,10 @@ namespace XeLib
                 indents += "\t";
                 i--;
             }
-            Console.WriteLine( indents + string.Format( "Element \"{0}\" contains {1} child elements", Name,  bar.Length ) );
+            DebugLog.WriteLine( indents + string.Format( "Element \"{0}\" contains {1} child elements", Name,  bar.Length ) );
             for( int j = 0; j < bar.Length; j++ )
             {
-                Console.WriteLine( indents + string.Format( "\t[ {0} ] :: {1} :: \"{2}\" = \"{3}\"", j, bar[ j ].ElementType.ToString(), bar[ j ].Name, bar[ j ].GetValue() ) );
+                DebugLog.WriteLine( indents + string.Format( "\t[ {0} ] :: {1} :: \"{2}\" = \"{3}\"", j, bar[ j ].ElementType.ToString(), bar[ j ].Name, bar[ j ].GetValue() ) );
                 if( recurseIntoChildren )
                     bar[ j ].DebugDumpChildElements( true, indentLevel + 2 );
                 bar[ j ].Dispose();

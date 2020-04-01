@@ -33,7 +33,12 @@ public static partial class NIFBuilder
             public ByteVector3      Tangent;
             public byte             BiTangentZ;
             public uint             Colour;
-            
+
+            public override string ToString()
+            {
+                return string.Format( "{0} : {1}", Vertex.ToString(), Colour.ToString( "X8" ) );
+            }
+
             public MeshVertex( Vector3f vertex, Vector2f uv, uint colour )
             {
                 Vertex  = new Vector3f( vertex );
@@ -60,7 +65,12 @@ public static partial class NIFBuilder
             public ushort           p1, p2, p3;
             
             Mesh                    parent;
-            
+
+            public override string ToString()
+            {
+                return string.Format( "{0} : {1} : {2}", p1, p2, p3 );
+            }
+
             public                  MeshTriangle( Mesh mesh, int v1, int v2, int v3 )
             {
                 parent = mesh;
@@ -92,7 +102,7 @@ public static partial class NIFBuilder
                 return n;
             }
             
-            public void WriteToStream( System.IO.BinaryWriter stream )
+            public void             WriteToStream( System.IO.BinaryWriter stream )
             {
                 stream.Write( p1 );
                 stream.Write( p2 );
@@ -247,13 +257,51 @@ public static partial class NIFBuilder
         string              nifFilePath;
         public string       nifFile;
         //string              nifPath;
+
+        /// <summary>
+        /// Node count
+        /// </summary>
+        int                 nCount;
+
+        /// <summary>
+        /// Vertex count
+        /// </summary>
+        int                 vCount;
         
-        int                 nCount, vCount, tCount;
+        /// <summary>
+        /// Triangle count
+        /// </summary>
+        int                 tCount;
+
+        /// <summary>
+        /// Node Group
+        /// </summary>
         BorderNodeGroup     nodeGroup;
+
+        /// <summary>
+        /// Inside vertex colours top (0) -> bottom (1/2)
+        /// </summary>
         uint[]              iColours;
+
+        /// <summary>
+        /// Outside vertex colours top (0) -> bottom (1/2)
+        /// </summary>
         uint[]              oColours;
+
+        /// <summary>
+        /// Gradient Height
+        /// </summary>
+        float               gHeight;
+
+        /// <summary>
+        /// Ground Offset
+        /// </summary>
+        float               gOffset;
         
-        float               gradHeight, grndOffset, grndSink;
+        /// <summary>
+        /// Ground Sink
+        /// </summary>
+        float               gSink;
         
         Vector3f[]          rawVerts;
         Vector3f[]          rawNormals;
@@ -267,205 +315,99 @@ public static partial class NIFBuilder
         
         uint                meshBlocks;
         
-        int CalculateTotalVertexCount()
-        {
-            if( nCount < 2 ) return 0;
-            
-            var nodes = nodeGroup.Nodes;
-            int result = 0;
-            
-            for( int i = 0; i < nCount; i++ )
-            {
-                var currentNode = nodes[ i ];
-                var verts = currentNode.FloorVertexMatchesGroundVertex( grndOffset, grndSink )
-                    ? 2
-                    : 3;
-                
-                currentNode.Vertexes_Inside = new int[ verts ];
-                for( int k = 0; k < verts; k++ )
-                    currentNode.Vertexes_Inside[ k ] = result + k;
-                result += verts;
-                
-                currentNode.Vertexes_Outside = new int[ verts ];
-                for( int k = 0; k < verts; k++ )
-                    currentNode.Vertexes_Outside[ k ] = result + k;
-                result += verts;
-                
-                currentNode.Vertex_Count = verts;
-                
-                //DebugLog.Write( string.Format( "CalculateValidMeshVertexOffsets() :: {0}/{1} :: {2} :: {3} :: {4} :: {5}", i, j, verts, result, gOffset, gSink ) );
-            }
-            return result;
-        }
-        
-        int CalculateTotalTriangleCount()
-        {
-            if( nCount < 2 ) return 0;
-            
-            var nodes = nodeGroup.Nodes;
-            int result = bottom.NullOrEmpty() ? 0 : bottom.Count * 2;
-            
-            for( int i = 0; i < nCount; i++ )
-            {
-                var cNode = nodes[ i ];
-                if( cNode.Type != BorderNode.NodeType.EndPoint )
-                {
-                    var n = i >= nCount - 1 ? i - nCount: i; n++;
-                    var nNode = nodes[ n ];
-                    var tnHasFloor = cNode.Vertex_Count == 3;
-                    var nnHasFloor = nNode.Vertex_Count == 3;
-                    var tris = tnHasFloor
-                        ? nnHasFloor
-                            ? 4
-                            : 3
-                        : nnHasFloor
-                            ? 3
-                            : 2;
-                    
-                    result += tris << 1; // * 2 for inside + outside
-                    //DebugLog.Write( string.Format( "CalculateValidMeshTriangleOffsets() :: {0}/{1} :: {2} :: {3}", i, j, tris, result ) );
-                }
-            }
-            return result;
-        }
-        
-        List<MeshBottomReference> CalculateBottomTriangles()
-        {
-            if( nCount < 3 ) return null;
-            
-            //DebugLog.OpenIndentLevel();
-            
-            int i, j, k;
-            var rejected = new List<MeshBottomReference>();
-            var accepted = new List<MeshBottomReference>();
-            MeshBottomReference tri;
-            
-            i = 0;
-            while( i < nCount )
-            {
-                j = ( i + 1 ) % nCount;
-                while( j != i )
-                {
-                    k = ( j + 1 ) % nCount;
-                    while( k != j )
-                    {
-                        if( k == i ) goto continueK;
-                        
-                        tri = new MeshBottomReference( this, i, j, k );
-                        
-                        if( ( rejected.Contains( tri ) )||
-                            ( accepted.Contains( tri ) ) ) goto continueK;
-                        
-                        var largestAngle = tri.LargestAngle;
-                        if( largestAngle >= 180.0f )
-                        {
-                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Angle {1} > 180.0f", tri.ToString(), largestAngle ) );
-                            rejected.Add( tri );
-                            goto continueK;
-                        }
-                        
-                        var triIntersect = tri.IntersectsWithAnyTri( accepted );
-                        if( triIntersect >= 0 )
-                        {
-                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Tri Intersect {1}", tri.ToString(), accepted[ triIntersect ].ToString() ) );
-                            rejected.Add( tri );
-                            goto continueK;
-                        }
-                        
-                        var edgeIntersect = tri.IntersectsWithAnyEdge();
-                        if( edgeIntersect >= 0 )
-                        {
-                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Edge Intersect {1} : {2}", tri.ToString(), edgeIntersect, ( ( edgeIntersect + 1 ) % nCount ) ) );
-                            rejected.Add( tri );
-                            goto continueK;
-                        }
-                        
-                        var pointInPoly = tri.AnyNodeInsideTri();
-                        if( pointInPoly >= 0 )
-                        {
-                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Node in tri {1}", tri.ToString(), pointInPoly ) );
-                            rejected.Add( tri );
-                            goto continueK;
-                        }
-                        
-                        accepted.Add( tri );
-                        break;
-                        
-                    continueK:
-                        k = ( k + 1 ) % nCount;
-                    }
-                    
-                    j = ( j + 1 ) % nCount;
-                }
-                
-                i++;
-            }
-            
-            //DebugLog.WriteList( "rejected", rejected, false, true );
-            //DebugLog.WriteList( "accepted", accepted, false, true );
-            
-            //DebugLog.CloseIndentLevel();
-            
-            return accepted.NullOrEmpty() ? null : accepted;
-        }
-        
+
         public Mesh( BorderNodeGroup group, float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours )
         {
-            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "cTor()", "Nodes:" } );
-            //for( int i = 0; i < group.Nodes.Count; i++ )
-            //    DebugLog.WriteLine( "node[ " + i.ToString() + " ] = " + group.Nodes[ i ].ToString() );
-            //DebugLog.CloseIndentLevel();
+            //DebugLog.OpenIndentLevel();
+            //DebugLog.WriteList( "nodes", group.Nodes, true, true );
             
-            nodeGroup         = group;
+            nodeGroup           = group;
             
-            nifFilePath       = nodeGroup.NIFFilePath;
+            nifFilePath         = nodeGroup.NIFFilePath;
             string workingPath;
-            var working = GenFilePath.FilenameFromPathname( nifFilePath, out workingPath );//, out nifPath );
-            nifFile = working.EndsWith( ".nif", StringComparison.InvariantCultureIgnoreCase )
-                ? working.Substring( 0, working.Length - 4 )
-                : working;
+            var working         = GenFilePath.FilenameFromPathname( nifFilePath, out workingPath );
+            nifFile             = working.EndsWith( ".nif", StringComparison.InvariantCultureIgnoreCase )
+                                ? working.Substring( 0, working.Length - 4 )
+                                : working;
             
-            nCount            = nodeGroup == null ? 0 : nodeGroup.Nodes.NullOrEmpty() ? 0 : nodeGroup.Nodes.Count;
-            gradHeight        = Math.Max( 0.0f, gradientHeight );
-            grndOffset        = Math.Max( 0.0f, groundOffset );
-            grndSink          = Math.Max( 0.0f, groundSink );
+            nCount              = nodeGroup == null ? 0 : nodeGroup.Nodes.NullOrEmpty() ? 0 : nodeGroup.Nodes.Count;
+            gHeight             = Math.Max( 0.0f, gradientHeight );
+            gOffset             = Math.Max( 0.0f, groundOffset );
+            gSink               = Math.Max( 0.0f, groundSink );
             
-            iColours          = new uint[ 3 ];
-            oColours          = new uint[ 3 ];
+            iColours            = new uint[ 3 ];
+            oColours            = new uint[ 3 ];
             for( int i = 0; i < 3; i++ )
             {
-                iColours[ i ] = insideColours[ i ];
-                oColours[ i ] = outsideColours[ i ];
+                iColours[ i ]   = insideColours[ i ];
+                oColours[ i ]   = outsideColours[ i ];
             }
-            
-            if( ( nCount >= 2 )&&( gradHeight > 0.0f ) )
+
+            bool built = false;
+
+            if( ( nCount >= 2 ) && ( gHeight > 0.0f ) )
             {
-                bottom            = CalculateBottomTriangles();
-                vCount            = CalculateTotalVertexCount();
-                tCount            = CalculateTotalTriangleCount();
-                
-                //DebugLog.Write( string.Format( "NIFBuilder.Mesh.cTor() :: {0}:{1}:{2} :: \"{3}\" :: \"{4}\"", nCount, vCount, tCount, nifPath, nifFile ) );
-                
-                rawVerts          = new Vector3f[ vCount ];
-                rawNormals        = new Vector3f[ vCount ];
-                rawTangents       = new Vector3f[ vCount ];
-                rawBiTangents     = new Vector3f[ vCount ];
-                
-                vertexes          = new MeshVertex[ vCount ];
-                triangles         = new MeshTriangle[ tCount ];
-                
-                BuildVertexArray();
-                BuildTriangleArray();
-                CalculateVertexNormals();
-                CalculateVertexTangents();
-                
+                bottom          = CalculateBottomTriangles();
+                vCount          = CalculateTotalVertexCount();
+                tCount          = CalculateTotalTriangleCount();
+
+                DebugLog.WriteLine( string.Format( "nCount = {0} :: vCount = {1} :: tCount = {2} :: nifFilePath = \"{3}\"", nCount, vCount, tCount, nifFilePath ), true );
+
+                if( vCount > 0 )
+                {
+                    rawVerts        = new Vector3f[ vCount ];
+                    rawNormals      = new Vector3f[ vCount ];
+                    rawTangents     = new Vector3f[ vCount ];
+                    rawBiTangents   = new Vector3f[ vCount ];
+
+                    vertexes        = new MeshVertex[ vCount ];
+                    triangles       = new MeshTriangle[ tCount ];
+
+                    var bCount      = BuildVertexArray();
+                    built           = bCount == vCount;
+                    if( !built )
+                        DebugLog.WriteError( "BuildVertexArray() = " + bCount.ToString() );
+                    else
+                    {
+                        bCount      = BuildTriangleArray();
+                        built       = bCount == tCount;
+                        if( !built )
+                            DebugLog.WriteError( "BuildTriangleArray() = " + bCount.ToString() );
+                    }
+                    if( built )
+                    {
+                        CalculateVertexNormals();
+                        CalculateVertexTangents();
+                    }
+                }
+            }
+
+            if( !built )
+            {
+                iColours        = null;
+                oColours        = null;
+                    
+                bottom          = null;
+
+                vCount          = 0;
+                tCount          = 0;
+
+                rawVerts        = null;
+                rawNormals      = null;
+                rawTangents     = null;
+                rawBiTangents   = null;
+
+                vertexes        = null;
+                triangles       = null;
             }
             
             meshBlocks      = ( vCount > 0 )&&( tCount > 0 ) ? NIFBlockCount : NIFBlockCountEmpty;
             
-            //DebugLog.Write( string.Format( "{0} :: {1} :: {2}", this.FullTypeName(), nifPath, nifFile ) );
+            //DebugLog.CloseIndentLevel();
         }
-        
+
+        #region String Builders
+
         public static string MeshSubSetIndex( string neighbour = null, int subIndex = -1 )
         {
             var sSubIndex = subIndex > -1
@@ -550,59 +492,19 @@ public static partial class NIFBuilder
                 mssi );
         }
         
-        public bool Write( string targetPath, string targetSuffix, string[] exportInfo )
-        {
-            //DebugLog.Write( string.Format( "NIFBuilder.Mesh.Write()\n\tNIFFile = \"{0}\"\n\tCell = {1}\n\tPosition = {2}\n", nifFile, nodeGroup.Cell.ToString(), nodeGroup.Placement.ToString() ) );
-            
-            var fullTarget = BuildTargetPath( targetPath, targetSuffix );
-            if( ( !string.IsNullOrEmpty( fullTarget ) )&&( fullTarget[ fullTarget.Length - 1 ] != '\\' ) )
-                fullTarget += @"\";
-            var fullPath = string.Format( "{0}{1}", fullTarget, nifFilePath );
-            string nifPath;
-            GenFilePath.FilenameFromPathname( fullPath, out nifPath );
-            
-            if( string.IsNullOrEmpty( nifPath ) )
-            {
-                DebugLog.WriteError( "nifPath is null or empty!" );
-                return false;
-            }
-            if( !nifPath.CreatePath() )
-            {
-                DebugLog.WriteError( string.Format( "Could not build nifPath \"{0}\"", nifPath ) );
-                return false;
-            }
-            
-            var fileStream = new System.IO.FileStream( fullPath, System.IO.FileMode.Create );
-            if( fileStream == null )
-            {
-                DebugLog.WriteError( string.Format( "Could not create FileStream for \"{0}\"", nifPath ) );
-                return false;
-            }
-            
-            var binaryStream = new System.IO.BinaryWriter( fileStream );
-            if( binaryStream == null )
-            {
-                DebugLog.WriteError( string.Format( "Could not create BinaryWriter for \"{0}\"", nifPath ) );
-                fileStream.Close();
-                return false;
-            }
-            
-            WriteToStream( binaryStream, exportInfo );
-            
-            binaryStream.Flush();
-            binaryStream.Close();
-            
-            return true;
-        }
-        
+        #endregion
+
         #region Build Mesh
-        
+
+        #region Vertex & Triangle Array Assignment
+
         void AssignRawVert( ref int i, Vector3f p, Vector2f uv, uint c )
         {
             try
             {
                 rawVerts[ i ] = new Vector3f( p );
                 vertexes[ i ] = new MeshVertex( p, uv, c );
+                //DebugLog.WriteLine( string.Format( "rawVerts[ {0} ] = {1} :: vertexes[ {0} ] = {2}", i, rawVerts[ i ].ToString(), vertexes[ i ].ToStringNullSafe() ) );
                 i++;
             }
             catch( Exception e )
@@ -616,16 +518,54 @@ public static partial class NIFBuilder
             try
             {
                 triangles[ i ] = new MeshTriangle( this, p1, p2, p3 );
+                //DebugLog.WriteLine( string.Format( "triangle[ {0} ] = {1}", i, triangles[ i ].ToStringNullSafe() ) );
                 i++;
             }
             catch( Exception e )
             {
-                DebugLog.WriteError( string.Format( "Exception assigning raw tri\n\tindex = {0}\n\ttriangles = {1}\n\nException:\n{2}", i, triangles.Length, e.ToString() ) );
+                DebugLog.WriteException( e, string.Format( "index = {0}\ntriangles = {1}", i, triangles.Length ) );
             }
         }
-        
-        void BuildVertexArray()
+
+        #endregion
+
+        #region Calculate Vertex Array
+
+        int CalculateTotalVertexCount()
         {
+            if( nCount < 2 ) return 0;
+
+            var nodes = nodeGroup.Nodes;
+            int result = 0;
+
+            for( int i = 0; i < nCount; i++ )
+            {
+                var currentNode = nodes[ i ];
+                var verts = currentNode.FloorVertexMatchesGroundVertex( gOffset, gSink )
+                    ? 2
+                    : 3;
+
+                currentNode.iVertex = new int[ verts ];
+                for( int k = 0; k < verts; k++ )
+                    currentNode.iVertex[ k ] = result + k;
+                result += verts;
+
+                currentNode.oVertex = new int[ verts ];
+                for( int k = 0; k < verts; k++ )
+                    currentNode.oVertex[ k ] = result + k;
+                result += verts;
+
+                currentNode.vCount = verts;
+
+                //DebugLog.Write( string.Format( "CalculateValidMeshVertexOffsets() :: {0}/{1} :: {2} :: {3} :: {4} :: {5}", i, j, verts, result, gOffset, gSink ) );
+            }
+            return result;
+        }
+
+        int BuildVertexArray()
+        {
+            if( vCount < 1 ) return 0;
+
             var uv = new Vector2f[]{
                 new Vector2f( -6.632813f, 0.0f ),
                 new Vector2f( -6.632813f, 1.0f ),
@@ -638,19 +578,19 @@ public static partial class NIFBuilder
                 
                 //DebugLog.Write( string.Format( "BuildVertexArray() :: {0}/{1} :: {2}/{3}", i, nCount, vIndex, vCount ) );
                 
-                var vT = new Vector3f( nPos.X, nPos.Y, nPos.Z     + grndOffset + gradHeight );
-                var vG = new Vector3f( nPos.X, nPos.Y, nPos.Z     + grndOffset           );
-                var vF = new Vector3f( nPos.X, nPos.Y, node.Floor - grndSink             );
+                var vT = new Vector3f( nPos.X, nPos.Y, nPos.Z     + gOffset + gHeight );
+                var vG = new Vector3f( nPos.X, nPos.Y, nPos.Z     + gOffset           );
+                var vF = new Vector3f( nPos.X, nPos.Y, node.Floor - gSink             );
                 
                 // Vertexes and raw vertex coords for later normal and tangent calculations
                 AssignRawVert( ref vIndex, vT, uv[ 0 ], iColours[ 0 ] );        // Inside Top
                 AssignRawVert( ref vIndex, vG, uv[ 1 ], iColours[ 1 ] );        // Inside Ground
-                if( node.Vertex_Count == 3 )
+                if( node.vCount == 3 )
                     AssignRawVert( ref vIndex, vF, uv[ 2 ], iColours[ 2 ] );    // Inside Floor
                 
                 AssignRawVert( ref vIndex, vT, uv[ 0 ], oColours[ 0 ] );        // Outside Top
                 AssignRawVert( ref vIndex, vG, uv[ 1 ], oColours[ 1 ] );        // Outside Ground
-                if( node.Vertex_Count == 3 )
+                if( node.vCount == 3 )
                     AssignRawVert( ref vIndex, vF, uv[ 2 ], oColours[ 2 ] );    // Outside Floor
                 
                 /*
@@ -675,10 +615,53 @@ public static partial class NIFBuilder
                 vIndex += 6;
                 */
             }
+
+            return vIndex;
         }
-        
-        void BuildTriangleArray()
+
+        #endregion
+
+        #region Calculate Triangle Array
+
+        int TrianglesCountBetween( BorderNode cNode, BorderNode nNode )
         {
+            if( ( cNode == null ) || ( nNode == null ) ) return 0;
+            if( cNode.Type == BorderNode.NodeType.EndPoint ) return 0;
+
+            var cnHasFloor = cNode.vCount == 3;
+            var nnHasFloor = nNode.vCount == 3;
+            var tris = cnHasFloor
+                    ? nnHasFloor
+                        ? 4
+                        : 3
+                    : nnHasFloor
+                        ? 3
+                        : 2;
+
+            var result = tris * 2; // for inside + outside
+            //DebugLog.WriteLine( string.Format( "{0} -> {1} :: {2} :: {3}", cNode.ToStringNullSafe(), nNode.ToStringNullSafe(), tris, result ), true );
+            return result;
+        }
+
+        int CalculateTotalTriangleCount()
+        {
+            if( nCount < 2 ) return 0;
+
+            var nodes = nodeGroup.Nodes;
+            int result = bottom.NullOrEmpty() ? 0 : bottom.Count * 2;
+
+            for( int i = 0; i < nCount; i++ )
+                result += TrianglesCountBetween(
+                    nodes[ i ],
+                    nodes[ ( i + 1 ) % nCount ] );
+
+            return result;
+        }
+
+        int BuildTriangleArray()
+        {
+            if( tCount < 1 ) return 0;
+
             int tIndex = 0;
             
             var nodes = nodeGroup.Nodes;
@@ -689,32 +672,36 @@ public static partial class NIFBuilder
                 var cNode = nodes[ i ];
                 if( cNode.Type != BorderNode.NodeType.EndPoint )
                 {
-                    var n = i >= nCount - 1 ? i - nCount: i; n++;
+                    //var n = i >= nCount - 1 ? i - nCount: i; n++;
+                    var n = ( i + 1 ) % nCount;
                     var nNode = nodes[ n ];
                     
+                    var cnHasFloor = cNode.vCount == 3;
+                    var nnHasFloor = nNode.vCount == 3;
+
                     //DebugLog.Write( string.Format( "BuildTriangleArray() :: {0}/{1} :: {2}/{3}", i, nCount, tIndex, tCount ) );
-                    
-                    AssignRawTri( ref tIndex, cNode.Vertexes_Inside[ 0 ], cNode.Vertexes_Inside[ 1 ], nNode.Vertexes_Inside[ 0 ] );           // Top Inside
-                    AssignRawTri( ref tIndex, cNode.Vertexes_Inside[ 1 ], nNode.Vertexes_Inside[ 1 ], nNode.Vertexes_Inside[ 0 ] );           // Top Inside
-                    if( cNode.Vertex_Count == 3 )
+
+                    AssignRawTri( ref tIndex, cNode.iVertex[ 0 ], cNode.iVertex[ 1 ], nNode.iVertex[ 0 ] );           // Top Inside
+                    AssignRawTri( ref tIndex, cNode.iVertex[ 1 ], nNode.iVertex[ 1 ], nNode.iVertex[ 0 ] );           // Top Inside
+                    if( cnHasFloor )
                     {
-                        AssignRawTri( ref tIndex, cNode.Vertexes_Inside[ 1 ], cNode.Vertexes_Inside[ 2 ], nNode.Vertexes_Inside[ 1 ] );       // Bottom Inside
-                        if( nNode.Vertex_Count == 3 )
-                            AssignRawTri( ref tIndex, cNode.Vertexes_Inside[ 2 ], nNode.Vertexes_Inside[ 2 ], nNode.Vertexes_Inside[ 1 ] );   // Bottom Inside
+                        AssignRawTri( ref tIndex, cNode.iVertex[ 1 ], cNode.iVertex[ 2 ], nNode.iVertex[ 1 ] );       // Bottom Inside
+                        if( nnHasFloor )
+                            AssignRawTri( ref tIndex, cNode.iVertex[ 2 ], nNode.iVertex[ 2 ], nNode.iVertex[ 1 ] );   // Bottom Inside
                     }
-                    else if( nNode.Vertex_Count == 3 )
-                        AssignRawTri( ref tIndex, cNode.Vertexes_Inside[ 1 ], nNode.Vertexes_Inside[ 2 ], nNode.Vertexes_Inside[ 1 ] );       // Bottom Inside
+                    else if( nnHasFloor )
+                        AssignRawTri( ref tIndex, cNode.iVertex[ 1 ], nNode.iVertex[ 2 ], nNode.iVertex[ 1 ] );       // Bottom Inside
                     
-                    AssignRawTri( ref tIndex, cNode.Vertexes_Outside[ 1 ], cNode.Vertexes_Outside[ 0 ], nNode.Vertexes_Outside[ 0 ] );           // Top Outside
-                    AssignRawTri( ref tIndex, cNode.Vertexes_Outside[ 1 ], nNode.Vertexes_Outside[ 0 ], nNode.Vertexes_Outside[ 1 ] );           // Top Outside
-                    if( cNode.Vertex_Count == 3 )
+                    AssignRawTri( ref tIndex, cNode.oVertex[ 1 ], cNode.oVertex[ 0 ], nNode.oVertex[ 0 ] );           // Top Outside
+                    AssignRawTri( ref tIndex, cNode.oVertex[ 1 ], nNode.oVertex[ 0 ], nNode.oVertex[ 1 ] );           // Top Outside
+                    if( cnHasFloor )
                     {
-                        AssignRawTri( ref tIndex, cNode.Vertexes_Outside[ 2 ], cNode.Vertexes_Outside[ 1 ], nNode.Vertexes_Outside[ 1 ] );       // Bottom Outside
-                        if( nNode.Vertex_Count == 3 )
-                            AssignRawTri( ref tIndex, cNode.Vertexes_Outside[ 2 ], nNode.Vertexes_Outside[ 1 ], nNode.Vertexes_Outside[ 2 ] );   // Bottom Outside
+                        AssignRawTri( ref tIndex, cNode.oVertex[ 2 ], cNode.oVertex[ 1 ], nNode.oVertex[ 1 ] );       // Bottom Outside
+                        if( nnHasFloor )
+                            AssignRawTri( ref tIndex, cNode.oVertex[ 2 ], nNode.oVertex[ 1 ], nNode.oVertex[ 2 ] );   // Bottom Outside
                     }
-                    else if( nNode.Vertex_Count == 3 )
-                        AssignRawTri( ref tIndex, cNode.Vertexes_Outside[ 1 ], nNode.Vertexes_Outside[ 1 ], nNode.Vertexes_Outside[ 2 ] );       // Bottom Outside
+                    else if( nnHasFloor )
+                        AssignRawTri( ref tIndex, cNode.oVertex[ 1 ], nNode.oVertex[ 1 ], nNode.oVertex[ 2 ] );       // Bottom Outside
                 }
             }
             
@@ -724,35 +711,133 @@ public static partial class NIFBuilder
                 var bCount = bottom.Count;
                 for( int i = 0; i < bCount; i++ )
                 {
-                    var n0 = nodes[ bottom[ i ].n[ 1 ] ];
+                    var n0 = nodes[ bottom[ i ].n[ 1 ] ];               // Swap 0 and 1 to go from CW -> CCW
                     var n1 = nodes[ bottom[ i ].n[ 0 ] ];
                     var n2 = nodes[ bottom[ i ].n[ 2 ] ];
-                    var v0 = ( n0.Vertex_Count == 3 ) ? n0.Vertexes_Inside[ 2 ] : n0.Vertexes_Inside[ 1 ];
-                    var v1 = ( n1.Vertex_Count == 3 ) ? n1.Vertexes_Inside[ 2 ] : n1.Vertexes_Inside[ 1 ];
-                    var v2 = ( n2.Vertex_Count == 3 ) ? n2.Vertexes_Inside[ 2 ] : n2.Vertexes_Inside[ 1 ];
-                    AssignRawTri( ref tIndex, v0, v1, v2 );           // Inside
-                    v0 = ( n0.Vertex_Count == 3 ) ? n0.Vertexes_Outside[ 2 ] : n0.Vertexes_Outside[ 1 ];
-                    v1 = ( n1.Vertex_Count == 3 ) ? n1.Vertexes_Outside[ 2 ] : n1.Vertexes_Outside[ 1 ];
-                    v2 = ( n2.Vertex_Count == 3 ) ? n2.Vertexes_Outside[ 2 ] : n2.Vertexes_Outside[ 1 ];
-                    AssignRawTri( ref tIndex, v2, v1, v0 );           // Outside
+
+                    var v0 = n0.iVertex[ n0.vCount - 1 ]; // Bottom vertexes for all
+                    var v1 = n1.iVertex[ n1.vCount - 1 ];
+                    var v2 = n2.iVertex[ n2.vCount - 1 ];
+                    AssignRawTri( ref tIndex, v0, v1, v2 );             // Inside
+                    
+                    v0 = n0.oVertex[ n0.vCount - 1 ];
+                    v1 = n1.oVertex[ n1.vCount - 1 ];
+                    v2 = n2.oVertex[ n2.vCount - 1 ];
+                    AssignRawTri( ref tIndex, v2, v1, v0 );             // Outside
                 }
             }
-            
+
+            return tIndex;
         }
-        
+
+        List<MeshBottomReference> CalculateBottomTriangles()
+        {
+            if( !nodeGroup.HasBottom ) return null;
+            if( nCount < 3 ) return null;
+
+            //DebugLog.OpenIndentLevel();
+
+            int i, j, k;
+            var rejected = new List<MeshBottomReference>();
+            var accepted = new List<MeshBottomReference>();
+            MeshBottomReference tri;
+
+            i = 0;
+            while( i < nCount )
+            {
+                j = ( i + 1 ) % nCount;
+                while( j != i )
+                {
+                    k = ( j + 1 ) % nCount;
+                    while( k != j )
+                    {
+                        if( k == i ) goto continueK;
+
+                        tri = new MeshBottomReference( this, i, j, k );
+
+                        if( ( rejected.Contains( tri ) ) ||
+                            ( accepted.Contains( tri ) ) ) goto continueK;
+
+                        var largestAngle = tri.LargestAngle;
+                        if( largestAngle >= 180.0f )
+                        {
+                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Angle {1} > 180.0f", tri.ToString(), largestAngle ) );
+                            rejected.Add( tri );
+                            goto continueK;
+                        }
+
+                        var triIntersect = tri.IntersectsWithAnyTri( accepted );
+                        if( triIntersect >= 0 )
+                        {
+                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Tri Intersect {1}", tri.ToString(), accepted[ triIntersect ].ToString() ) );
+                            rejected.Add( tri );
+                            goto continueK;
+                        }
+
+                        var edgeIntersect = tri.IntersectsWithAnyEdge();
+                        if( edgeIntersect >= 0 )
+                        {
+                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Edge Intersect {1} : {2}", tri.ToString(), edgeIntersect, ( ( edgeIntersect + 1 ) % nCount ) ) );
+                            rejected.Add( tri );
+                            goto continueK;
+                        }
+
+                        var pointInPoly = tri.AnyNodeInsideTri();
+                        if( pointInPoly >= 0 )
+                        {
+                            //DebugLog.WriteLine( string.Format( "{0} :: Rejected :: Node in tri {1}", tri.ToString(), pointInPoly ) );
+                            rejected.Add( tri );
+                            goto continueK;
+                        }
+
+                        accepted.Add( tri );
+                        break;
+
+                    continueK:
+                        k = ( k + 1 ) % nCount;
+                    }
+
+                    j = ( j + 1 ) % nCount;
+                }
+
+                i++;
+            }
+
+            //DebugLog.WriteList( "rejected", rejected, false, true );
+            //DebugLog.WriteList( "accepted", accepted, false, true );
+
+            //DebugLog.CloseIndentLevel();
+
+            return accepted.NullOrEmpty() ? null : accepted;
+        }
+
+        #endregion
+
+        #region Calculate Normals
+
         void CalculateVertexNormals()
         {
+            if( ( tCount < 1 ) || ( vCount < 3 ) ) return;
+
             var norms = new Vector3f[ vCount ];
             
             // Compute triangle norms
             for( int i = 0; i < tCount; i++ )
             {
-                var tri = triangles[ i ];
-                var triNorm = tri.Normal();
-                
-                norms[ tri.p1 ] += triNorm;
-                norms[ tri.p2 ] += triNorm;
-                norms[ tri.p3 ] += triNorm;
+                MeshTriangle tri = null;
+                try
+                {
+                    tri = triangles[ i ];
+                    var triNorm = tri.Normal();
+
+                    norms[ tri.p1 ] += triNorm;
+                    norms[ tri.p2 ] += triNorm;
+                    norms[ tri.p3 ] += triNorm;
+                }
+                catch( Exception e )
+                {
+                    DebugLog.WriteException( e, string.Format( "index = {0}\ntriangles = {1}\ntriangle = {2}", i, triangles.Length, tri.ToStringNullSafe() ) );
+                }
             }
             
             // Compute vertex norms from triangle norms
@@ -772,6 +857,8 @@ public static partial class NIFBuilder
         
         void CalculateVertexTangents()
         {
+            if( ( tCount < 1 ) || ( vCount < 3 ) ) return;
+
             rawTangents     = new Vector3f[ vCount ];
             rawBiTangents   = new Vector3f[ vCount ];
             
@@ -851,9 +938,11 @@ public static partial class NIFBuilder
             }
             
         }
-        
+
         #endregion
-        
+
+        #endregion
+
         float LargestVertexMagnitude
         {
             get
@@ -867,9 +956,54 @@ public static partial class NIFBuilder
                 return largest;
             }
         }
-        
+
         #region NIF Writer
-        
+
+        public bool Write( string targetPath, string targetSuffix, string[] exportInfo )
+        {
+            //DebugLog.Write( string.Format( "NIFBuilder.Mesh.Write()\n\tNIFFile = \"{0}\"\n\tCell = {1}\n\tPosition = {2}\n", nifFile, nodeGroup.Cell.ToString(), nodeGroup.Placement.ToString() ) );
+
+            var fullTarget = BuildTargetPath( targetPath, targetSuffix );
+            if( ( !string.IsNullOrEmpty( fullTarget ) ) && ( fullTarget[ fullTarget.Length - 1 ] != '\\' ) )
+                fullTarget += @"\";
+            var fullPath = string.Format( "{0}{1}", fullTarget, nifFilePath );
+            string nifPath;
+            GenFilePath.FilenameFromPathname( fullPath, out nifPath );
+
+            if( string.IsNullOrEmpty( nifPath ) )
+            {
+                DebugLog.WriteError( "nifPath is null or empty!" );
+                return false;
+            }
+            if( !nifPath.CreatePath() )
+            {
+                DebugLog.WriteError( string.Format( "Could not build nifPath \"{0}\"", nifPath ) );
+                return false;
+            }
+
+            var fileStream = new System.IO.FileStream( fullPath, System.IO.FileMode.Create );
+            if( fileStream == null )
+            {
+                DebugLog.WriteError( string.Format( "Could not create FileStream for \"{0}\"", nifPath ) );
+                return false;
+            }
+
+            var binaryStream = new System.IO.BinaryWriter( fileStream );
+            if( binaryStream == null )
+            {
+                DebugLog.WriteError( string.Format( "Could not create BinaryWriter for \"{0}\"", nifPath ) );
+                fileStream.Close();
+                return false;
+            }
+
+            WriteToStream( binaryStream, exportInfo );
+
+            binaryStream.Flush();
+            binaryStream.Close();
+
+            return true;
+        }
+
         void WriteToStream( System.IO.BinaryWriter stream, string[] exportInfo )
         {
             WriteHeader( stream, exportInfo );

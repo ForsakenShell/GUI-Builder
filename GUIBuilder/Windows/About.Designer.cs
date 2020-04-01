@@ -107,7 +107,7 @@ namespace GUIBuilder.Windows
             this.linkLicense.Size = new System.Drawing.Size(495, 23);
             this.linkLicense.TabIndex = 4;
             this.linkLicense.TabStop = true;
-            this.linkLicense.Text = "http://unlicense.org/";
+            this.linkLicense.Tag = "AboutWindow.License";
             this.linkLicense.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.linkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLicenseLinkClicked);
             // 
@@ -148,7 +148,7 @@ namespace GUIBuilder.Windows
             this.linkAuthor.Size = new System.Drawing.Size(495, 23);
             this.linkAuthor.TabIndex = 7;
             this.linkAuthor.TabStop = true;
-            this.linkAuthor.Text = "https://www.nexusmods.com/users/106891";
+            this.linkAuthor.Tag = "AboutWindow.AuthorLink";
             this.linkAuthor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.linkAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkAuthorLinkClicked);
             // 
@@ -166,7 +166,6 @@ namespace GUIBuilder.Windows
             this.ShowInTaskbar = false;
             this.Tag = "AboutWindow.Title";
             this.Text = "title";
-            this.ClientOnLoad += new System.EventHandler(this.About_OnLoad);
             this.WindowPanel.ResumeLayout(false);
             this.WindowPanel.PerformLayout();
             this.ResumeLayout(false);

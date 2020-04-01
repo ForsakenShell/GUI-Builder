@@ -308,17 +308,19 @@ namespace SDL2ThinLayer
         // The actual constructor
         void INTERNAL_Init_Main()
         {
+            _threadState = SDLThreadState.Inactive;
+
             // Will this be an anchored window?
             //_anchored = ( targetControl != null );
-            
+
             // mainForm must be set regardless
             //if( mainForm == null )
             //    throw new ArgumentException( "mainForm cannot be null!" );
-            
+
             // windowClosed must be set for an unanchored window
             //if( ( !_anchored )&&( windowClosed == null ) )
             //    throw new ArgumentException( "windowClosed cannot be null!" );
-            
+
             // Assign the control objects the SDL_Window and SDL_Renderer will attach to
             //_targetControl = targetControl;
             //_parent = _anchored ? targetControl : mainForm;
@@ -334,7 +336,6 @@ namespace SDL2ThinLayer
             _invokeQueue = new List<Invoke_RendererOnly>();
             
             // Clear SDLThread controls
-            _threadState = SDLThreadState.Inactive;
             _exitRequested = false;
             _pauseThread = false;
             _rendererResetRequired = false;
@@ -393,20 +394,30 @@ namespace SDL2ThinLayer
                     "1"
                 );
             }
-            
+
             #endif
-            
+
             // SDL_Init returns 0 on success
             if( SDL.SDL_Init( subsysFlags ) != 0 )
+            {
+                DebugLog.WriteError( "SDL2.SDL.SDL_Init()" );
                 return false;
-            
+            }
+
             // IMG_Init returns same init flags on success
             var imgInit = SDL_image.IMG_InitFlags.IMG_INIT_PNG;
-            if( imgInit != (SDL_image.IMG_InitFlags)SDL_image.IMG_Init( imgInit ) ) return false;
-            
+            if( imgInit != (SDL_image.IMG_InitFlags)SDL_image.IMG_Init( imgInit ) )
+            {
+                DebugLog.WriteError( "SDL2.SDL_image.IMG_Init()" );
+                return false;
+            }
+
             // TTF_Init returns 0 on success
             if( SDL_ttf.TTF_Init() != 0 )
+            {
+                DebugLog.WriteError( "SDL2.SDL_ttf.TTF_Init()" );
                 return false;
+            }
             
             // We made it through the gambit!
             return true;
@@ -414,19 +425,29 @@ namespace SDL2ThinLayer
         
         bool INTERNAL_Init_SDLThread()
         {
-            // Create a thread for the object
-            _sdlThread = new Thread( THREAD_INTERNAL_SDL_Main );
-            if( _sdlThread == null )
-                return false;
-                //throw new Exception( "Unable to create thread!" );
-            
-            // Start the thread for the object
-            _sdlThread.Start();
-            
-            // Wait for the thread to finish creating the state machine and start looping
-            while( ( _threadState == SDLThreadState.Inactive )||( _threadState == SDLThreadState.Starting ) )
-                Thread.Sleep( 0 );
-            
+            try
+            {
+                // Create a thread for the object
+                _sdlThread = new Thread( THREAD_INTERNAL_SDL_Main );
+                if( _sdlThread == null )
+                {
+                    DebugLog.WriteError( "Unable to create thread!" );
+                    return false;
+                    //throw new Exception( "Unable to create thread!" );
+                }
+
+                // Start the thread for the object
+                _sdlThread.Start();
+
+                // Wait for the thread to finish creating the state machine and start looping
+                while( ( _threadState == SDLThreadState.Inactive ) || ( _threadState == SDLThreadState.Starting ) || ( _threadState != SDLThreadState.Running ) )
+                    Thread.Sleep( 0 );
+            }
+            catch( Exception e )
+            {
+                DebugLog.WriteException( e );
+            }
+
             // The thread is now running and ready for user code or not running with an error set
             return INTERNAL_SDLThread_Running;
         }
@@ -437,6 +458,7 @@ namespace SDL2ThinLayer
         
         void INTERNAL_UpdateState_FunctionPointers()
         {
+            DebugLog.OpenIndentLevel();
             if( _fastRender )
             {
                 DelFunc_ClearScene          = INTERNAL_DelFunc_ClearScene_Fast;
@@ -465,15 +487,19 @@ namespace SDL2ThinLayer
                 DelFunc_DrawCircle          = INTERNAL_DelFunc_DrawCircle;
                 DelFunc_DrawFilledCircle    = INTERNAL_DelFunc_DrawFilledCircle;
             }
+            DebugLog.CloseIndentLevel();
         }
         
         void INTERNAL_UpdateState_CursorVisibility()
         {
+            DebugLog.OpenIndentLevel();
             SDL.SDL_ShowCursor( (int)( _showCursor ? SDL.SDL_bool.SDL_TRUE : SDL.SDL_bool.SDL_FALSE ) );
+            DebugLog.CloseIndentLevel();
         }
         
         void INTERNAL_UpdateState_ThreadIntervals()
         {
+            DebugLog.OpenIndentLevel();
             _drawTicks = (long)( (double)TimeSpan.TicksPerSecond / _drawsPS );
             _eventTicks = (long)( (double)TimeSpan.TicksPerSecond / _eventsPS );
             _baseFrameDelay = Math.Min( _drawTicks, _eventTicks );
@@ -483,6 +509,7 @@ namespace SDL2ThinLayer
             //    _eventTicks,
             //    _baseFrameDelay
             //    ) );
+            DebugLog.CloseIndentLevel();
         }
         
         Color INTERNAL_RenderColor

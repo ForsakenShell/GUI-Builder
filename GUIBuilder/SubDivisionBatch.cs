@@ -219,7 +219,7 @@ namespace GUIBuilder
                             "Z Rotation = {0} -> {1}",
                             sandbox == null ? "[null]" : sandbox.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
                             osv.Rotation.Z.ToString() )
-                        }, false, true, false );
+                        }, false, true, false, false );
                     var w = subdivision.Reference.Worldspace;
                     var c = w == null
                         ? subdivision.Reference.Cell

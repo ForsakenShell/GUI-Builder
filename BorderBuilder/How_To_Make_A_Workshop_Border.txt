@@ -1,4 +1,4 @@
-GUIBuilder v1.0.5.17
+GUIBuilder v1.0.5.18
 
 How to create a custom terrain following workshop border for your custom
 settlement.

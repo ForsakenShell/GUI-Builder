@@ -26,6 +26,7 @@ namespace GUIBuilder.Windows
         public CustomForms() : base( true )
         {
             InitializeComponent();
+            this.ClientLoad += new System.EventHandler( this.CustomForms_OnLoad );
             this.OnSetEnableState += new SetEnableStateHandler( this.OnFormSetEnableState );
         }
 

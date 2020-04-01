@@ -23,6 +23,7 @@ namespace GUIBuilder.Windows
         public About() : base( true )
         {
             InitializeComponent();
+            this.ClientLoad += new System.EventHandler( this.About_OnLoad );
         }
 
 

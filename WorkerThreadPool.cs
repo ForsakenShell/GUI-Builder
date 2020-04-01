@@ -261,6 +261,8 @@ public static class WorkerThreadPool
             // Set the thread static global
             StartMethodBase = _StartMethodBase;
 
+            DebugLog.Open();
+
             // Start the worker
             try
             {

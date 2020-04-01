@@ -208,8 +208,8 @@ namespace SDL2ThinLayer
         protected virtual void Dispose( bool disposing )
         {
             if( _disposed ) return;
-            
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.Dispose() :: Disposing" );
+
+            DebugLog.OpenIndentLevel( "disposing = " + disposing.ToString() );
             
             // Empty the invoke queue, anything that hasn't been
             // processed at this point will never be processed.
@@ -223,7 +223,7 @@ namespace SDL2ThinLayer
             DestroyWindow();
             
             // Shutdown SDL itself
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.Dispose() :: SDL.SDL_Quit()" );
+            DebugLog.WriteLine( "SDL2.SDL.SDL_Quit()" );
             if( _sdlInitialized )
                 SDL.SDL_Quit();
             
@@ -234,7 +234,7 @@ namespace SDL2ThinLayer
             
             // This is no longer a valid state
             _disposed = true;
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.Dispose() :: Disposed" );
+            DebugLog.CloseIndentLevel();
         }
         
         #endregion
@@ -244,8 +244,8 @@ namespace SDL2ThinLayer
         public void DestroyWindow()
         {
             if( !INTERNAL_SDLThread_Active ) return;
-            
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.DestroyWindow()" );
+
+            DebugLog.OpenIndentLevel();
             
             // Disable all scenes
             //DrawScene = null;
@@ -254,12 +254,11 @@ namespace SDL2ThinLayer
             _exitRequested = true;
             
             // And wait for it to stop
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.DestroyWindow() :: Waiting for SDLRenderer_Thread to quit..." );
+            DebugLog.WriteLine( "Waiting for SDLRenderer_Thread to quit..." );
             while( INTERNAL_SDLThread_Active )
                 Thread.Sleep( 0 );
-            
-            Console.WriteLine( "SDL2ThinLayer.SDLRenderer.DestroyWindow() :: Complete" );
-            
+
+            DebugLog.CloseIndentLevel();
         }
         
         #endregion

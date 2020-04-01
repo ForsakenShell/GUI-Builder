@@ -369,7 +369,6 @@ namespace GUIBuilder.Windows
             this.Tag = "CustomFormsWindow.Title";
             this.Text = "CustomForms";
             this.TopMost = true;
-            this.ClientOnLoad += new System.EventHandler(this.CustomForms_OnLoad);
             this.WindowPanel.ResumeLayout(false);
             this.tcCustomForms.ResumeLayout(false);
             this.tpWorkshop.ResumeLayout(false);
