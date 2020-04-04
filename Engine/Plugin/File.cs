@@ -275,38 +275,38 @@ namespace Engine.Plugin
         {
             return Setup.BuildReferencesEx( _Handle.XHandle, false );
         }
-        
+
         #endregion
-        
+
         #region ISyncedListViewObject
-        
+
         /*
-        
+
         public event EventHandler  ObjectDataChanged;
-        
+
         public string ExtraInfo { get { return null; } }
-        
+
         public void SendObjectDataChangedEvent()
         {
             EventHandler handler = ObjectDataChanged;
             if( handler != null )
                 handler( this, null );
         }
-        
+
         public virtual bool InitialCheckedOrSelectedState()
         {
             return false;
         }
-        
+
         public virtual bool ObjectChecked( bool checkedValue )
         {
             return checkedValue;
         }
-        
+
         */
-        
+
         #endregion
-        
+
     }
     
 }

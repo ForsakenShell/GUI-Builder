@@ -52,8 +52,8 @@ namespace GUIBuilder.FormImport
             if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
             
-            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
-                tmp.Add(string.Format("Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ExtraInfoFor()) );
+            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                tmp.Add(string.Format("Layer {0}", GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.ExtraInfoFor()) );
             
             return tmp.ConcatDisplayInfo();
         }
@@ -62,7 +62,7 @@ namespace GUIBuilder.FormImport
         {
             var tmp = new List<string>();
             
-            tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ToString() ) );
+            tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.ToString() ) );
             
             return tmp.ConcatDisplayInfo();
         }
@@ -83,14 +83,14 @@ namespace GUIBuilder.FormImport
             
             return
                 ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
-                ( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                ( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
         }
         
         protected override bool         ApplyImport()
         {
             var refr = TargetRef;
             
-            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             // Remove unwanted elements automagically added by the CK/XeLib
             refr.LocationReference.DeleteRootElement( false, false );

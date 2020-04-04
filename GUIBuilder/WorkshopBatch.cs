@@ -130,7 +130,8 @@ namespace GUIBuilder
             string meshSubPath,
             string filePrefix,
             string fileSuffix,
-            bool createImportData )
+            bool createImportData,
+            bool highPrecisionVertexes )
         {
             DebugLog.OpenIndentLevel( workshop?.IDString );
 
@@ -189,8 +190,8 @@ namespace GUIBuilder
                 worldspace,
                 null,
                 workshop.Reference,
-                GodObject.CoreForms.WorkshopLinkedBuildAreaEdge,
-                GodObject.CoreForms.WorkshopBorderArt,
+                GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedBuildAreaEdge,
+                GodObject.CoreForms.Fallout4.Layer.WorkshopBorderArt,
                 targetPath,
                 targetSuffix,
                 meshSuffix,
@@ -214,7 +215,8 @@ namespace GUIBuilder
                 NIFBuilder.Colours.OutsideBorder,
                 originalForms,
                 true,
-                NIFBuilder.ExportInfo
+                NIFBuilder.ExportInfo,
+                highPrecisionVertexes
                 );
 
         localAbort:
@@ -234,7 +236,8 @@ namespace GUIBuilder
             string meshSubPath,
             string filePrefix,
             string fileSuffix,
-            bool createImportData )
+            bool createImportData,
+            bool highPrecisionVertexes )
         {
             if(
                 ( workshops.NullOrEmpty() ) ||
@@ -263,7 +266,8 @@ namespace GUIBuilder
                         targetPath, targetSuffix,
                         meshSuffix, meshSubPath,
                         filePrefix, fileSuffix,
-                        createImportData );
+                        createImportData,
+                        highPrecisionVertexes );
                     if( ( createImportData ) && ( !subList.NullOrEmpty() ) )
                     {
                         if( list == null )

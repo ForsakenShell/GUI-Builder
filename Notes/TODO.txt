@@ -3,3 +3,12 @@ TODO:
     + Normalize Build Volumes
     + Generate/Optimize Sandbox Volume
     + [Re]Generate Power Grid
+        + NOTE: spline ref position +- spline ref XBSD = connection refs translated and rotated P-WS-Snap
+                Need to load the connection ref NIF to get the snap point and rotate it into position to
+                detect connections (so the snap point is "close" to the spline end point).  Wires can also
+                be "fixed" as a result of having to do this.
+
++ NIF loader of extracted/loose NIFs
+    + Snap points for power grid, etc
+    + Possible worldspace heightmap modification by reference position + rotation of BSTriShape
+        NOTE: Cache results for future use as this will be slow

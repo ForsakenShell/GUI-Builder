@@ -1178,7 +1178,7 @@ namespace GodObject
                 get
                 {
                     if( _Settlements == null )
-                        _Settlements = new ScriptedObjects<Settlement>( CoreForms.ESM_ATC_ACTI_Settlement );
+                        _Settlements = new ScriptedObjects<Settlement>( CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_Settlement );
                     return _Settlements;
                 }
             }
@@ -1193,7 +1193,7 @@ namespace GodObject
                 get
                 {
                     if( _SubDivisions == null )
-                        _SubDivisions = new ScriptedObjects<SubDivision>( CoreForms.ESM_ATC_ACTI_SubDivision );
+                        _SubDivisions = new ScriptedObjects<SubDivision>( CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SubDivision );
                     return _SubDivisions;
                 }
             }
@@ -1208,7 +1208,7 @@ namespace GodObject
                 get
                 {
                     if( _BuildVolumes == null )
-                        _BuildVolumes = new ScriptedObjects<BuildAreaVolume>( CoreForms.ESM_ATC_ACTI_BuildAreaVolume );
+                        _BuildVolumes = new ScriptedObjects<BuildAreaVolume>( CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume );
                     return _BuildVolumes;
                 }
             }
@@ -1223,7 +1223,7 @@ namespace GodObject
                 get
                 {
                     if( _SandboxVolumes == null )
-                        _SandboxVolumes = new ScriptedObjects<Volume>( CoreForms.ESM_ATC_ACTI_SandboxVolume );
+                        _SandboxVolumes = new ScriptedObjects<Volume>( CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume );
                     return _SandboxVolumes;
                 }
             }
@@ -1238,7 +1238,7 @@ namespace GodObject
                 get
                 {
                     if( _BorderEnablers == null )
-                        _BorderEnablers = new ScriptedObjects<BorderEnabler>( CoreForms.ESM_ATC_ACTI_BorderEnabler );
+                        _BorderEnablers = new ScriptedObjects<BorderEnabler>( CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler );
                     return _BorderEnablers;
                 }
             }
@@ -1258,8 +1258,8 @@ namespace GodObject
                         if( _Forms == null )
                         {
                             _Forms = new List<ScriptedObjects<EdgeFlag>>();
-                            _Forms.Add( new ScriptedObjects<EdgeFlag>( CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag ) );
-                            _Forms.Add( new ScriptedObjects<EdgeFlag>( CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ ) );
+                            _Forms.Add( new ScriptedObjects<EdgeFlag>( CoreForms.AnnexTheCommonwealth.Static.ESM_ATC_STAT_SubDivisionEdgeFlag ) );
+                            _Forms.Add( new ScriptedObjects<EdgeFlag>( CoreForms.AnnexTheCommonwealth.Static.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ ) );
                         }
                         return _Forms;
                     }

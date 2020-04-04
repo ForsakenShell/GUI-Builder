@@ -51,7 +51,7 @@ namespace Engine.Plugin.Extensions
             return result;
         }
         
-        public static string         ExtraInfoFor<T>( this T target, uint formID = Engine.Plugin.Constant.FormID_Invalid, string editorID = null, string format = null, string unresolveable = null, string extra = null, bool includeSignature = false, bool includeFilename = false ) where T : class, Engine.Plugin.Interface.IXHandle
+        public static string            ExtraInfoFor<T>( this T target, uint formID = Engine.Plugin.Constant.FormID_Invalid, string editorID = null, string format = null, string unresolveable = null, string extra = null, bool includeSignature = false, bool includeFilename = false ) where T : class, Engine.Plugin.Interface.IXHandle
         {
             if( string.IsNullOrEmpty( format ) ) format = "{0}";
             if( !Resolveable( target, formID, editorID ) ) return string.Format( format, unresolveable );
@@ -81,9 +81,29 @@ namespace Engine.Plugin.Extensions
                 extra
             );
         }
-        
+
+        public static void              DumpAncestralTree( Engine.Plugin.Interface.IXHandle obj, Engine.Plugin.Interface.IXHandle initialObj = null )
+        {
+            if( ( initialObj != null ) && ( initialObj == obj ) )
+            {
+                DebugLog.WriteLine( "\tI'm my own grandpa!" );
+                return;
+            }
+            if( initialObj == null )
+            {
+                DebugLog.WriteCaller( false );
+                initialObj = obj;
+            }
+            DebugLog.WriteLine( string.Format(
+                "\t{0} :: {1}",
+                obj.TypeFullName(),
+                obj.IDString ) );
+            if( obj.Ancestor != null )
+                DumpAncestralTree( obj.Ancestor, initialObj );
+        }
+
         #endregion
-        
+
     }
-    
+
 }

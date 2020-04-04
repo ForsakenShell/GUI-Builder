@@ -7,6 +7,9 @@
  * isn't loaded multiple times for each override of a given worldspace.
  *
  */
+//#define HEIGHT_MAP_AT_POS_LERP          // Quad Lerp or;
+#define HEIGHT_MAP_AT_POS_INTERSECT     // Triangle Intersect
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,6 +53,7 @@ namespace GodObject
             // Stats file data
             public float MaxHeight = 0.0f;
             public float MinHeight = 0.0f;
+            public float DeltaHeight = 0.0f;
             
             // Height map data (extracted from DDS)
             public int HeightMap_Width = 0;
@@ -232,20 +236,11 @@ namespace GodObject
             public float HeightAtPos( int x, int y, float[,] heightMap )
             {
                 if( ( x < 0 )||( y < 0 )||( x >= HeightMap_Width )||( y >= HeightMap_Height ) ) return float.MinValue;
-                return MinHeight + ( heightMap[ y, x ] * ( MaxHeight - MinHeight ) );
+                return MinHeight + ( heightMap[ y, x ] * DeltaHeight );
             }
             
             public float HeightAtWorldPos( float x, float y, float[,] heightMap )
             {
-                // Does some slow lerps and averages to interpolate the height
-                // of the ground at a given world point, this is not a perfect value
-                // and can be off by a small amount due to the way the land tris
-                // are generated.  The closer the position is to the actual ground
-                // vertex the more accurate it is.
-                
-                // TODO:  Look at how the game/CK generates tris from
-                // the heightmap data to get a more accurate result.
-                
                 // z01      z11
                 //  +--------+
                 //  |        |   Where:
@@ -253,32 +248,46 @@ namespace GodObject
                 //  |        |   zXY = heightmap point
                 //  +--------+
                 // z00      z10
+
+                var result = 0.0f;
+
+                #region Short-hand
                 
-                #region Get points on the height map
-                
-                // Short-hand
                 var hmo = HeightMapOffset;
                 var map = heightMap;
-                
-                // Get the four verts for the quad the point is in.
-                var x0 = (int)( x * Engine.Constant.WorldMap_To_Heightmap ); if( x < 0 ) x0 -= 1;
-                var y0 = (int)( y * Engine.Constant.WorldMap_To_Heightmap ); if( y < 0 ) y0 -= 1;
-                var x1 = x0 + 1;
-                var y1 = y0 + 1;
-                var z00 = map[ hmo.Y - y0, hmo.X + x0 ];
-                var z01 = map[ hmo.Y - y0, hmo.X + x1 ];
-                var z10 = map[ hmo.Y - y1, hmo.X + x0 ];
-                var z11 = map[ hmo.Y - y1, hmo.X + x1 ];
+                const float htw = Engine.Constant.HeightMap_To_Worldmap;
+                const float wth = Engine.Constant.WorldMap_To_Heightmap;
                 
                 #endregion
+
+                #region Get points on the height map
+
+                // Get the four verts for the quad the point is in.
+                var x0 = (int)( x * wth ); if( x < 0 ) x0--;
+                var y0 = (int)( y * wth ); if( y < 0 ) y0--;
+                var x1 = x0 + 1;
+                var y1 = y0 + 1;
+                var z00 = map[ hmo.Y - y0, hmo.X + x0 ] * DeltaHeight + MinHeight;
+                var z10 = map[ hmo.Y - y0, hmo.X + x1 ] * DeltaHeight + MinHeight;
+                var z01 = map[ hmo.Y - y1, hmo.X + x0 ] * DeltaHeight + MinHeight;
+                var z11 = map[ hmo.Y - y1, hmo.X + x1 ] * DeltaHeight + MinHeight;
+
+                #endregion
+
+                #region Height By Lerping
+                #if HEIGHT_MAP_AT_POS_LERP
                 
-                #region Four line lerp - Lerp outside edges then average the results
-                
+                // Does some slow lerps and averages to interpolate the height
+                // of the ground at a given world point, this is not a perfect value
+                // and can be off by a small amount due to the way the land tris
+                // are generated.  The closer the position is to the actual ground
+                // vertex the more accurate it is.
+
                 // Get x,y delta and norms from point to the reference vert (0,0)
-                var xd = x - ( (float)x0 * Engine.Constant.HeightMap_To_Worldmap );
-                var yd = y - ( (float)y0 * Engine.Constant.HeightMap_To_Worldmap );
-                var xn = xd * Engine.Constant.WorldMap_To_Heightmap;
-                var yn = yd * Engine.Constant.WorldMap_To_Heightmap;
+                var xd = x - ( (float)x0 * htw )
+                var yd = y - ( (float)y0 * htw );
+                var xn = xd * wth;
+                var yn = yd * wth;
                 
                 // Lerp along the edges
                 var lz00z01 = Maths.Lerps.Lerp( z00, z01, xn );
@@ -287,14 +296,56 @@ namespace GodObject
                 var lz01z11 = Maths.Lerps.Lerp( z01, z11, yn );
                 
                 // Average the results
-                var az = ( lz00z01 + lz00z10 + lz10z11 + lz01z11 ) * 0.25f;
-                var result = MinHeight + ( az * ( MaxHeight - MinHeight ) );
+                result = ( lz00z01 + lz00z10 + lz10z11 + lz01z11 ) * 0.25f;
                 
+                #endif
                 #endregion
+
+                #region Height By Triangle Intersect
+                #if HEIGHT_MAP_AT_POS_INTERSECT
+
+                // Get the highest vertex from the heightmap and set the ray slightly above that
+                var zr = Math.Max( Math.Max( Math.Max( z00, z01 ), z10 ), z11 ) + 16.0f;
+
+                // Down ray
+                Ray ray = new Ray( new Vector3f( x, y, zr ), Vector3f.Down );
+
+                // Pick the proper triangle layout (See "Notes\Heightmap Triangle Layout.[txt/png]")
+                var xO = x0 & 1; // X is odd?
+                var yO = y0 & 1; // Y is odd?
+
+                var tx0 = x0 * htw;
+                var tx1 = x1 * htw;
+                var ty0 = y0 * htw;
+                var ty1 = y1 * htw;
+
+                Vector3f[] t0, t1;
+
+                if( xO == yO )          //if( (  xO &&  yO )||( !xO && !yO ) )
+                {
+                    t0 = new Vector3f[ 3 ] { new Vector3f( tx0, ty0, z00 ), new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty1, z11 ) };
+                    t1 = new Vector3f[ 3 ] { new Vector3f( tx0, ty0, z00 ), new Vector3f( tx1, ty1, z11 ), new Vector3f( tx1, ty0, z10 ) };
+                }
+                else //if( xO != yO )   //if( ( !xO &&  yO )||(  xO && !yO ) )
+                {
+                    t0 = new Vector3f[ 3 ] { new Vector3f( tx0, ty0, z00 ), new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty0, z10 ) };
+                    t1 = new Vector3f[ 3 ] { new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty1, z11 ), new Vector3f( tx1, ty0, z10 ) };
+                }
+
+                Vector3f vResult = Vector3f.Zero;
+
+                // Get the intersection with triangle
+                if     ( Geometry.Collision.RayTriangleIntersect( ray, t0, out vResult, Geometry.Orientation.CW ) )
+                    result = vResult.Z;
+                else if( Geometry.Collision.RayTriangleIntersect( ray, t1, out vResult, Geometry.Orientation.CW ) )
+                    result = vResult.Z;
                 
+                #endif
+                #endregion
+
                 return result;
             }
-            
+
             public bool ComputeZHeightsFromVolumes( Vector2f[][] volumes, out float minZ, out float maxZ, out float averageZ, out float averageWaterZ, bool useWaterIfHigher = true, bool showScanlineProgress = false )
             {
                 //DebugLog.OpenIndentLevel( new [] { "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()" } );
@@ -566,6 +617,7 @@ namespace GodObject
                     }
                     i++;
                 }
+                DeltaHeight = MaxHeight - MinHeight;
                 return true;
             }
             

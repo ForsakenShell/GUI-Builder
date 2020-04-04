@@ -1,0 +1,22 @@
+
+var xO = x0 & 1;
+var yO = y0 & 1;
+
+var tx0 = x0 * htw;
+var tx1 = x1 * htw;
+var ty0 = y0 * htw;
+var ty1 = y1 * htw;
+
+Vector3f[] t0;
+Vector3f[] t1;
+
+if( xO == yO ) //if( (  xO &&  yO )||( !xO && !yO ) )
+{
+    t0 = new Vector3f[ 3 ]{ new Vector3f( tx0, ty0, z00 ), new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty1, z11 ) };
+    t1 = new Vector3f[ 3 ]{ new Vector3f( tx0, ty0, z00 ), new Vector3f( tx1, ty1, z11 ), new Vector3f( tx1, ty0, z10 ) };
+}
+else //if( xO != yO ) //if( ( !xO &&  yO )||(  xO && !yO ) )
+{
+    t0 = new Vector3f[ 3 ]{ new Vector3f( tx0, ty0, z00 ), new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty0, z10 ) };
+    t1 = new Vector3f[ 3 ]{ new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty1, z11 ), new Vector3f( tx1, ty0, z10 ) };
+}

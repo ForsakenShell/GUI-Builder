@@ -16,29 +16,6 @@ using XeLib.API;
 namespace GodObject
 {
     
-    public static class Debug
-    {
-        public static void DumpAncestralTree( Engine.Plugin.Interface.IXHandle obj, Engine.Plugin.Interface.IXHandle initialObj = null )
-        {
-            if( ( initialObj != null )&&( initialObj == obj ) )
-            {
-                DebugLog.WriteLine( "\tI'm my own grandpa!" );
-                return;
-            }
-            if( initialObj == null )
-            {
-                DebugLog.WriteCaller( false );
-                initialObj = obj;
-            }
-            DebugLog.WriteLine( string.Format(
-                "\t{0} :: {1}",
-                obj.TypeFullName(),
-                obj.IDString ) );
-            if( obj.Ancestor != null )
-                DumpAncestralTree( obj.Ancestor, initialObj );
-        }
-    }
-
     public static partial class Plugin
     {
         
@@ -195,11 +172,6 @@ namespace GodObject
                 : unloadThread.Start();
         }
         
-        static void THREAD_UnloadPlugins()
-        {
-            INTERNAL_Unload( true, true, true, null, true );
-        }
-
         #endregion
         
         #region Internal functions
@@ -229,23 +201,23 @@ namespace GodObject
                 mod.BuildReferences() &&
                 XeLibHelper.Thread.Sync( "Engine.Plugin.File.BuildReferences() :: " + mod.Filename, thread );
         }
-        
+
         static void INTERNAL_Unload( bool dispose, bool stopThread, bool sync, string prefix, bool enableUI )
         {
-            DebugLog.OpenIndentLevel( new [] { "dispose = " + dispose.ToString(), "stopThread = " + stopThread.ToString(), "sync = " + sync.ToString(), "prefix = \"" + prefix + "\"" }, true, true, false );
-            
+            DebugLog.OpenIndentLevel( new[] { "dispose = " + dispose.ToString(), "stopThread = " + stopThread.ToString(), "sync = " + sync.ToString(), "prefix = \"" + prefix + "\"" }, true, true, false );
+
             var isLoading = _isLoading;
             _isLoading = true;
             _isLoaded = false;
-            
+
             GodObject.Windows.CloseAllChildWindows();
-            
-            if( ( _thread != null )&&( stopThread ) )
+
+            if( ( _thread != null ) && ( stopThread ) )
             {
                 _thread.Stop( sync );
                 _thread = null;
             }
-            
+
             if( dispose )
             {
                 // Unload references to custom forms...
@@ -258,9 +230,9 @@ namespace GodObject
                 CoreForms.Dispose();
                 //foreach( var form in CoreForms.Forms )
                 //    form.Dispose();
-                
+
             }
-            
+
             if( _Workspace != null )
                 _Workspace.Commit();
 
@@ -276,11 +248,11 @@ namespace GodObject
 
             DebugLog.CloseIndentLevel();
         }
-        
+
         #endregion
-        
+
         #region Worker Threads
-        
+
         static void THREAD_LoadCoreForms()
         {
             var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
@@ -383,7 +355,7 @@ namespace GodObject
                     
                     Data.Files.Loaded = new List<Engine.Plugin.File>();
                     
-                    foreach( var fileHandle in Setup.GetLoadedFiles() )
+                    foreach( var fileHandle in Setup.GetLoadedFiles( false ) )
                     {
                         var newFile = new Engine.Plugin.File( fileHandle );
                         Data.Files.Loaded.Add( newFile );
@@ -415,7 +387,7 @@ namespace GodObject
                     foreach( var file in Data.Files.Loaded )
                     {
                         Messages.ClearMessages();
-                        
+
                         if( !file.BuildReferences() )
                             throw new Exception( "Could not start thread fop XeLib.API.Setup.BuildReferencesEx()" );
 
@@ -487,10 +459,15 @@ namespace GodObject
             _isLoading = false;
             _thread = null;
         }
-        
+
+        static void THREAD_UnloadPlugins()
+        {
+            INTERNAL_Unload( true, true, true, "UnloadPlugins()", true );
+        }
+
         #endregion
-        
+
     }
-    
+
 }
 

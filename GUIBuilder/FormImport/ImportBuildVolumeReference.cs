@@ -375,7 +375,7 @@ namespace GUIBuilder.FormImport
                 {
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new Script Object on new instance of {0} in cell {1}",
-                        GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.ToString(),
+                        GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
                         ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }

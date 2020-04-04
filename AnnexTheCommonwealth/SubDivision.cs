@@ -334,10 +334,10 @@ namespace AnnexTheCommonwealth
                     if( subRefs.NullOrEmpty() )
                         return null;
                     
-                    var volumeActivator = GodObject.CoreForms.ESM_ATC_ACTI_BuildAreaVolume;
+                    var volumeActivator = GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume;
                     if( volumeActivator == null )
                         return null;
-                    var linkKeyword = GodObject.CoreForms.ESM_ATC_KYWD_LinkedBuildAreaVolume;
+                    var linkKeyword = GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBuildAreaVolume;
                     if( linkKeyword == null )
                         return null;
                     
@@ -398,7 +398,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                return Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxEdge.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                return Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSandboxEdge.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             }
         }
         
@@ -406,7 +406,7 @@ namespace AnnexTheCommonwealth
         {
             get
             {
-                var sandboxRef = Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxVolume.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                var sandboxRef = Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSandboxVolume.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 return sandboxRef == null
                     ? null
                     : sandboxRef.GetScript<AnnexTheCommonwealth.Volume>();
@@ -786,13 +786,13 @@ namespace AnnexTheCommonwealth
                     new GUIBuilder.FormImport.ImportBuildVolumeReference(
                         volume,
                         volume.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                        GodObject.CoreForms.ESM_ATC_ACTI_BuildAreaVolume,
+                        GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume,
                         w, c,
                         pos,
                         volume.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
                         bounds,
                         this.Reference,
-                        GodObject.CoreForms.ESM_ATC_KYWD_LinkedBuildAreaVolume,
+                        GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBuildAreaVolume,
                         useLayerEditorID ) );
             }
             
@@ -1067,7 +1067,8 @@ namespace AnnexTheCommonwealth
             string meshSubPath,
             string filePrefix,
             string fileSuffix,
-            bool createImportData )
+            bool createImportData,
+            bool highPrecisionVertexes )
         {
             //DebugLog.Write( string.Format( "\n{0} :: CreateBorderNIFs() :: sub-division 0x{1} \"{2}\"", this.FullTypeName(), this.FormID.ToString( "X8" ), this.EditorID ) );
             if( _BorderEnablers.NullOrEmpty() )
@@ -1100,7 +1101,8 @@ namespace AnnexTheCommonwealth
                     meshSuffix, meshSubPath,
                     filePrefix, fileSuffix,
                     volumeCeiling,
-                    createImportData );
+                    createImportData,
+                    highPrecisionVertexes );
                 if( ( createImportData )&&( !subList.NullOrEmpty() ) )
                     GUIBuilder.FormImport.ImportBase.AddToList( ref list, subList );
             }

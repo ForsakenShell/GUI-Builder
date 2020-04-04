@@ -105,14 +105,14 @@ namespace GUIBuilder.FormImport
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
                 tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
-                tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ExtraInfoFor() ) );
+            if( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.ExtraInfoFor() ) );
             
-            var ownSub = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var ownSub = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( !stSubDivision.Matches( ownSub, false ) )
                 tmp.Add( stSubDivision.DisplayIDInfo( "Linked to Sub-Division {0}" ) );
             
-            var naySub = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var naySub = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( !stNeighbour.Matches( naySub, true ) )
                 tmp.Add( stNeighbour.DisplayIDInfo( "Linked to neighbour {0}" ) );
             
@@ -126,7 +126,7 @@ namespace GUIBuilder.FormImport
         {
             var tmp = new List<string>();
             
-            tmp.Add( string.Format( "Placed instance of {0}", GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.ExtraInfoFor() ) );
+            tmp.Add( string.Format( "Placed instance of {0}", GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ExtraInfoFor() ) );
             
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
@@ -134,7 +134,7 @@ namespace GUIBuilder.FormImport
             tmp.Add( ftCell.DisplayIDInfo( "Cell {0}", "unresolved" ) );
             tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.ESM_ATC_LAYR_Controllers.ExtraInfoFor() ) );
+            tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.ExtraInfoFor() ) );
             
             tmp.Add( stSubDivision.DisplayIDInfo( "Linked to Sub-Division {0}" ) );
             
@@ -163,8 +163,8 @@ namespace GUIBuilder.FormImport
             
             var targetRef = targetScript.Reference;
             
-            var ownSub = targetRef.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
-            var naySub = targetRef.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var ownSub = targetRef.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var naySub = targetRef.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             var result = 
                 ( string.Compare( targetRef.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 )&&
@@ -172,7 +172,7 @@ namespace GUIBuilder.FormImport
                 ( ftCell.Matches( targetRef.Cell, false ) )&&
                 ( targetRef.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
                 ( targetRef.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
-                ( targetRef.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )&&
+                ( targetRef.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )&&
                 ( stSubDivision.Matches( ownSub, false ) )&&
                 ( stNeighbour.Matches( naySub, !stNeighbour.Resolveable() ) );
             return result;
@@ -256,17 +256,17 @@ namespace GUIBuilder.FormImport
                 {
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new ObjectReference instance of {0} in cell {1}",
-                        GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.ToString(),
+                        GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
                         ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
-                refr.SetName( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                refr.SetName( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 var newenablerscript = new BorderEnabler( refr );
                 if( newenablerscript == null )
                 {
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new Script Object on new instance of {0} in cell {1}",
-                        GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.ToString(),
+                        GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
                         ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
@@ -279,7 +279,7 @@ namespace GUIBuilder.FormImport
             {
                 AddErrorMessage( ErrorTypes.Import, string.Format(
                     "An exception occured when trying to create a new ObjectReference instance of {0} in cell {1}\nInner Exception:\n{2}",
-                    GodObject.CoreForms.ESM_ATC_ACTI_BorderEnabler.ToString(),
+                    GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
                     ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ),
                     e.ToString() ) );
             }
@@ -301,13 +301,13 @@ namespace GUIBuilder.FormImport
             
             refr.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
-            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            refr.SetLayer( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
-            var oldSubdivisionRefr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
-            refr.LinkedRefs.SetLinkedRef( Engine.Plugin.TargetHandle.Working, stSubDivision.FormID, GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            var oldSubdivisionRefr = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            refr.LinkedRefs.SetLinkedRef( Engine.Plugin.TargetHandle.Working, stSubDivision.FormID, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             var nayFID = stNeighbour.IsResolved ? stNeighbour.FormID : Engine.Plugin.Constant.FormID_None;
-            refr.LinkedRefs.SetLinkedRef( Engine.Plugin.TargetHandle.Working, nayFID, GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            refr.LinkedRefs.SetLinkedRef( Engine.Plugin.TargetHandle.Working, nayFID, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             
             // Remove invalid elements automagically added by the CK/XeLib
             refr.LocationReference.DeleteRootElement( false, false );

@@ -25,6 +25,7 @@ public static partial class NIFBuilder
         
         public class MeshVertex
         {
+            Mesh                    Parent;
             public Vector3f         Vertex;
             public float            BiTangentX;
             public HalfVector2f     UV;
@@ -39,8 +40,9 @@ public static partial class NIFBuilder
                 return string.Format( "{0} : {1}", Vertex.ToString(), Colour.ToString( "X8" ) );
             }
 
-            public MeshVertex( Vector3f vertex, Vector2f uv, uint colour )
+            public MeshVertex( Mesh parent, Vector3f vertex, Vector2f uv, uint colour )
             {
+                Parent  = parent;
                 Vertex  = new Vector3f( vertex );
                 UV      = new HalfVector2f( uv );
                 Colour  = colour;
@@ -48,16 +50,28 @@ public static partial class NIFBuilder
             
             public void WriteToStream( System.IO.BinaryWriter stream )
             {
-                Vertex.WriteToStream( stream );
-                stream.Write( BiTangentX );
-                UV.WriteToStream( stream );
-                Normal.WriteToStream( stream );
-                stream.Write( BiTangentY );
-                Tangent.WriteToStream( stream );
-                stream.Write( BiTangentZ );
-                stream.Write( Colour );
-            }
-            
+                if( Parent.fullPrecisionVerts )
+                {
+                    Vertex.WriteToStream( stream ); // + 12 (3 x sizeof( float ))
+                    stream.Write( BiTangentX );     // +  4 (sizeof( float ))
+                }                                   // = 16
+                else
+                {
+                    var hv3 = new HalfVector3f( Vertex );
+                    var h = new Half( BiTangentX );
+                    hv3.WriteToStream( stream );    // +  6 (3 x Half.SizeOf())
+                    h.WriteToStream( stream );      // +  2 (Half.SizeOf())
+                }                                   // =  8
+
+                UV.WriteToStream( stream );         // +  6 (3 x Half.SizeOf())
+                Normal.WriteToStream( stream );     // +  3
+                stream.Write( BiTangentY );         // +  1
+                Tangent.WriteToStream( stream );    // +  3
+                stream.Write( BiTangentZ );         // +  1
+                stream.Write( Colour );             // +  2
+                                                    // = 16
+            }                                       // 24 or 32 = 16 + 8 or 16
+
         }
         
         public class MeshTriangle
@@ -314,13 +328,16 @@ public static partial class NIFBuilder
         List<MeshBottomReference> bottom;
         
         uint                meshBlocks;
-        
 
-        public Mesh( BorderNodeGroup group, float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours )
+        bool                fullPrecisionVerts = false;
+
+        public Mesh( BorderNodeGroup group, float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours, bool fullPrecisionVertexes )
         {
             //DebugLog.OpenIndentLevel();
             //DebugLog.WriteList( "nodes", group.Nodes, true, true );
-            
+
+            fullPrecisionVerts  = fullPrecisionVertexes;
+
             nodeGroup           = group;
             
             nifFilePath         = nodeGroup.NIFFilePath;
@@ -503,7 +520,7 @@ public static partial class NIFBuilder
             try
             {
                 rawVerts[ i ] = new Vector3f( p );
-                vertexes[ i ] = new MeshVertex( p, uv, c );
+                vertexes[ i ] = new MeshVertex( this, p, uv, c );
                 //DebugLog.WriteLine( string.Format( "rawVerts[ {0} ] = {1} :: vertexes[ {0} ] = {2}", i, rawVerts[ i ].ToString(), vertexes[ i ].ToStringNullSafe() ) );
                 i++;
             }
@@ -1057,7 +1074,19 @@ public static partial class NIFBuilder
             }
         }
         
-        const uint    NIFVertexSize   = 32;
+        //const uint    NIFVertexSize   = 32;
+        uint NIFVertexSize
+        {
+            get
+            {
+                return 16 +
+                    4 * (
+                        fullPrecisionVerts
+                        ? sizeof( float )
+                        : (uint)Half.SizeOf()
+                    );
+            }
+        }
         const uint    NIFTriangleSize = 6;
         
         #region Header / Footer
@@ -1078,16 +1107,6 @@ public static partial class NIFBuilder
                 string.Format( "{0}:0", nifFile ),
                 ""
             };
-            
-            // The "ExportInfo" is user supplied
-            /*
-            string[] ExportInfo = {
-                string.Format( "GUIBuilder {0} by 1000101", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() ),
-                "https://www.nexusmods.com/users/106891",
-                "NIFBuilder",
-                "STAHP LOOKING AT ME!"
-            };
-            */
             
             // Base NIF Header
             stream.WriteStringRaw( NIFIdent );
@@ -1253,12 +1272,14 @@ public static partial class NIFBuilder
             // Collision Object
             stream.Write( Nodes.IndexOf( Nodes.UNUSED ) );
             
-            // Centre
-            for( int i = 0; i < 3; i++ )
-                stream.Write( centre[ i ] );
+            // Bounding Sphere
+
+                // Centre
+                for( int i = 0; i < 3; i++ )
+                    stream.Write( centre[ i ] );
             
-            // Radius
-            stream.Write( LargestVertexMagnitude );
+                // Radius
+                stream.Write( LargestVertexMagnitude );
             
             // Skin
             stream.Write( Nodes.IndexOf( Nodes.UNUSED ) );
@@ -1273,8 +1294,11 @@ public static partial class NIFBuilder
             stream.Write( (byte)( NIFVertexSize / sizeof( uint ) ) );
             
             // Float Size
-            stream.Write( (byte)( sizeof( float ) ) );
-            
+            if( fullPrecisionVerts )
+                stream.Write( (byte)( sizeof( float ) ) );
+            else
+                stream.Write( (byte)( Half.SizeOf() ) );
+
             // VF3
             stream.Write( (byte)101 );
             
@@ -1283,9 +1307,12 @@ public static partial class NIFBuilder
             
             // VF5
             stream.Write( (byte)0 );
-            
+
             // VF
-            stream.Write( (ushort)0x43B0 );
+            if( fullPrecisionVerts )
+                stream.Write( (ushort)0x43B0 );
+            else
+                stream.Write( (ushort)0x03B0 );
             
             // VF8
             stream.Write( (byte)0 );

@@ -199,8 +199,8 @@ namespace GUIBuilder
                 var tStart = m.SyncTimerElapsed();
                 
                 var osv = subdivision.GetOptimalSandboxVolume(
-                    fSandboxCylinderBottom: GodObject.CoreForms.ATC_fSandboxCylinderBottom,
-                    fSandboxCylinderTop: GodObject.CoreForms.ATC_fSandboxCylinderTop );
+                    fSandboxCylinderBottom: GodObject.CoreForms.AnnexTheCommonwealth.fSandboxCylinderBottom,
+                    fSandboxCylinderTop: GodObject.CoreForms.AnnexTheCommonwealth.fSandboxCylinderTop );
                 
                 if( osv == null )
                     DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", subdivision.ToString() ) );
@@ -233,14 +233,14 @@ namespace GUIBuilder
                                 "ESM",
                                 subdivision.NameFromEditorID,
                                 "SandboxArea" ),
-                            GodObject.CoreForms.ESM_ATC_ACTI_SandboxVolume,
+                            GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume,
                             w, c,
                             osv.Position,
                             osv.Rotation,
                             osv.Size,
                             subdivision.Reference,
-                            GodObject.CoreForms.ESM_ATC_KYWD_LinkedSandboxVolume,
-                            GodObject.CoreForms.ESM_ATC_LAYR_SandboxVolumes
+                            GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSandboxVolume,
+                            GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes
                     ) );
                 }
                 var elapsed =  m.StopSyncTimer( tStart );
@@ -314,7 +314,8 @@ namespace GUIBuilder
             string meshSubPath,
             string filePrefix,
             string fileSuffix,
-            bool createImportData )
+            bool createImportData,
+            bool highPrecisionVertexes )
         {
             if(
                 ( subdivisions.NullOrEmpty() ) ||
@@ -342,7 +343,8 @@ namespace GUIBuilder
                         targetPath, targetSuffix,
                         meshSuffix, meshSubPath,
                         filePrefix, fileSuffix,
-                        createImportData );
+                        createImportData,
+                        highPrecisionVertexes );
                     if( ( createImportData ) && ( !subList.NullOrEmpty() ) )
                     {
                         if( list == null )

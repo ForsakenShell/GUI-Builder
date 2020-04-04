@@ -19,6 +19,7 @@ namespace Maths
     public static class Geometry
     {
         
+        
         // All shapes (triangles, rectangles and polygons):
         //
         // Can be ordered: CW or CCW, NOT RANDOMLY!
@@ -32,6 +33,7 @@ namespace Maths
         //
         // Functions default to CCW but can be explicitly told CW.
         
+
         public enum Orientation
         {
             Random = 0,
@@ -50,7 +52,8 @@ namespace Maths
             OverlappingRegions = 5
         }
 
-        #region Intersection and overlap (AKA Collission)
+
+        #region Intersection and overlap (AKA Collision)
 
         public static float Angle( float x1, float y1, float x2, float y2 )
         {
@@ -254,7 +257,70 @@ namespace Maths
                 return CollisionType.SinglePoint;
                 
             }
-            
+
+            /// <summary>
+            /// Determines if a ray intersects with a triangle
+            /// </summary>
+            /// <param name="ray">The ray to test</param>
+            /// <param name="triangle">The triangle to test</param>
+            /// <param name="result">The point on the triangle should the ray intersect it</param>
+            /// <param name="order">The vertex order of the triangle</param>
+            /// <returns>true if the ray intersects the triangle, false otherwise</returns>
+            public static bool RayTriangleIntersect(
+                Ray ray,
+                Vector3f[] triangle,
+                out Vector3f result,
+                Orientation order = Orientation.CW )
+            {
+                result = Vector3f.Zero;
+                var bResult = false;
+
+                if( ( ray.Origin == null )||( ray.Direction == null ) ) goto localReturnResult;
+                if( ( triangle == null )||( triangle.Length != 3 ) ) goto localReturnResult;
+                if( ( order != Orientation.CCW )&&( order != Orientation.CW ) ) goto localReturnResult;
+
+                var tri     = new Vector3f[ 3 ]{
+                    triangle[ ( order == Orientation.CCW ) ? 2 : 0 ],
+                    triangle[ 1 ],
+                    triangle[ ( order == Orientation.CCW ) ? 0 : 2 ]
+                };
+
+                var u       = tri[ 1 ] - tri[ 0 ];
+                var v       = tri[ 2 ] - tri[ 0 ];
+                var n       =  Vector3f.Cross( u, v );
+                if( n.IsZero() ) goto localReturnResult;
+
+                var w0      = ray.Origin - tri[ 0 ];
+                var a       = -Vector3f.Dot( n, w0 );
+                var b       =  Vector3f.Dot( n, ray.Direction );
+                if( b.ApproximatelyEquals( 0.0f ) ) goto localReturnResult;
+
+                var r       = a / b;
+                if( r < 0.0f ) goto localReturnResult;
+
+                var I       = ray.Origin + ray.Direction * r;
+
+                var uu      = Vector3f.Dot( u, u );
+                var uv      = Vector3f.Dot( u, v );
+                var vv      = Vector3f.Dot( v, v );
+                var w       = I - triangle[ 0 ];
+                var wu      = Vector3f.Dot( w, u );
+                var wv      = Vector3f.Dot( w, v );
+                var D       = uv * uv - uu * vv;
+
+                var s       = ( uv * wv - vv * wu ) / D;
+                if( ( s < 0.0f )||(   s       > 1.0f ) ) goto localReturnResult;
+
+                var t       = ( uv * wu - uu * wv ) / D;
+                if( ( t < 0.0f )||( ( s + t ) > 1.0f ) ) goto localReturnResult;
+
+                result  = I;
+                bResult = true;
+
+            localReturnResult:
+                return bResult;
+            }
+
             /// <summary>
             /// Determines if an arbitrary point is inside a polygon made of a minimum of three points
             /// Note:  Only works with convex polygons.
@@ -505,6 +571,7 @@ namespace Maths
         
         #endregion
         
+
         #region Convex Hulls
         
         public static class ConvexHull

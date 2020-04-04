@@ -175,6 +175,20 @@ NIF Creation Parameters (Border Batch Window):
         generated to update the plugin including creating/updating the static
         object and object reference of the border itself for the workshop[s].
 
+    High Precision Vertexes:
+        Use 32-bit floats for vertex points and BiTangentX, otherwise use half-
+        floats (16-bit).  Most times using half-floats is optimal as it
+        decreases the overall NIF file size.  For Annex The Commonwealth Sub-
+        Division borders use high-precision vertexes so that cell edge splits
+        properly line up.
+        
+        NOTE:
+            The overall difference is 8 bytes per vertex so the difference is
+            relatively insignificant - 32 vs 24 for high-precision vs half-
+            precision per vertex.  However, the more vertexes there are means
+            relatively smaller file sizes.  This setting does not effect
+            triangle sizes in any way.
+
     Gradient Height:
         The height in game units of the gradient portion of the border NIF[s].
 

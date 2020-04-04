@@ -385,6 +385,7 @@ namespace GUIBuilder.Windows
                     message = message.Substring( 0, lastCRLR - 1 );
                     lastCRLR = message.LastIndexOfAny( CRLF );
                 }
+                SetCurrentStatusMessageEx( message );
             }
         }
 

@@ -51,19 +51,21 @@ namespace GUIBuilder.Windows
             this.tbSubDivisionNodeLength.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
             this.tbSubDivisionNodeAngleAllowance.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
             this.tbSubDivisionNodeSlopeAllowance.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
-            this.tbSubDivisionNIFGroundSink.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
             this.cbSubDivisionNIFCreateImportData.CheckedChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
-            this.tbSubDivisionNIFGroundOffset.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.cbSubDivisionNIFHighPrecisionVertexes.CheckedChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
             this.tbSubDivisionNIFGradientHeight.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNIFGroundOffset.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
+            this.tbSubDivisionNIFGroundSink.TextChanged += new System.EventHandler( this.OnSubDivisionPresetParameterChange );
 
             this.cbWorkshopPresets.SelectedIndexChanged += new System.EventHandler( this.OnWorkshopPresetIndexChange );
             this.tbWorkshopNodeLength.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
             this.tbWorkshopNodeAngleAllowance.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
             this.tbWorkshopNodeSlopeAllowance.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
             this.cbWorkshopNIFCreateImportData.CheckedChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
-            this.tbWorkshopNIFGroundSink.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
-            this.tbWorkshopNIFGroundOffset.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.cbWorkshopNIFHighPrecisionVertexes.CheckedChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
             this.tbWorkshopNIFGradientHeight.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNIFGroundOffset.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
+            this.tbWorkshopNIFGroundSink.TextChanged += new System.EventHandler( this.OnWorkshopPresetParameterChange );
 
             this.tbWorkshopNIFSampleFilePath.MouseClick += new System.Windows.Forms.MouseEventHandler( this.OnNIFBuilderNIFFilePathSampleMouseClick );
 
@@ -467,6 +469,7 @@ namespace GUIBuilder.Windows
                 if( wsPreset == null )
                 {
                     var createImportData = cbWorkshopNIFCreateImportData.Checked;
+                    var highPrecisionVertexes = cbWorkshopNIFHighPrecisionVertexes.Checked;
                     var subList = GUIBuilder.WorkshopBatch.BuildNIFs(
                         "Custom",
                         workshops,
@@ -476,7 +479,8 @@ namespace GUIBuilder.Windows
                         targetPath, tbWorkshopNIFTargetSubDirectory.Text,
                         meshSuffix, tbWorkshopNIFMeshSubDirectory.Text,
                         tbWorkshopNIFFilePrefix.Text, tbWorkshopNIFFileSuffix.Text,
-                        createImportData );
+                        createImportData,
+                        highPrecisionVertexes );
                     if( ( createImportData )&&( !subList.NullOrEmpty() ) )
                     {
                         if( list == null )
@@ -517,6 +521,7 @@ namespace GUIBuilder.Windows
                     if( sdPreset == null )
                     {
                         var createImportData = cbSubDivisionNIFCreateImportData.Checked;
+                        var highPrecisionVertexes = cbSubDivisionNIFHighPrecisionVertexes.Checked;
                         var subList = GUIBuilder.SubDivisionBatch.BuildNIFs(
                             "Custom",
                             subDivisions,
@@ -526,7 +531,8 @@ namespace GUIBuilder.Windows
                             targetPath, tbSubDivisionNIFTargetSubDirectory.Text,
                             meshSuffix, tbSubDivisionNIFMeshSubDirectory.Text,
                             tbSubDivisionNIFFilePrefix.Text, tbSubDivisionNIFFileSuffix.Text,
-                            cbSubDivisionNIFCreateImportData.Checked );
+                            createImportData,
+                            highPrecisionVertexes );
                         if( ( createImportData )&&( !subList.NullOrEmpty() ) )
                         {
                             if( list == null )
@@ -594,7 +600,8 @@ namespace GUIBuilder.Windows
                 meshSuffix,
                 preset.MeshSubDirectory,
                 preset.FilePrefix, preset.FileSuffix,
-                preset.CreateImportData );
+                preset.CreateImportData,
+                preset.HighPrecisionFloats );
         }
         
         List<GUIBuilder.FormImport.ImportBase> CreatePresetSubDivisionNIFs(
@@ -632,7 +639,8 @@ namespace GUIBuilder.Windows
                 meshSuffix,
                 preset.MeshSubDirectory,
                 preset.FilePrefix, preset.FileSuffix,
-                preset.CreateImportData );
+                preset.CreateImportData,
+                preset.HighPrecisionFloats );
         }
         
         void OnBuildNIFsButtonClick( object sender, EventArgs e )
@@ -775,6 +783,7 @@ namespace GUIBuilder.Windows
             TextBox targetSuffix, TextBox meshSubDirectory,
             TextBox filePrefix, TextBox fileSuffix,
             TextBox gradientHeight, TextBox groundOffset, TextBox groundSink,
+            CheckBox highPrecisionFloats,
             CheckBox createImportData )
         {
             if( UpdatingPresetUI ) return;
@@ -802,6 +811,7 @@ namespace GUIBuilder.Windows
                 lastPreset.MeshSubDirectory = meshSubDirectory.Text;
                 lastPreset.FilePrefix       = filePrefix.Text;
                 lastPreset.FileSuffix       = fileSuffix.Text;
+                lastPreset.HighPrecisionFloats = highPrecisionFloats.Checked;
                 lastPreset.CreateImportData = createImportData.Checked;
                 lastPreset.Serialize();
             }
@@ -819,6 +829,7 @@ namespace GUIBuilder.Windows
                     SetPresetUIValue( gradientHeight    , newPreset.GradientHeight      , newPreset.SetOfPresets );
                     SetPresetUIValue( groundOffset      , newPreset.GroundOffset        , newPreset.SetOfPresets );
                     SetPresetUIValue( groundSink        , newPreset.GroundSink          , newPreset.SetOfPresets );
+                    SetPresetUIValue( highPrecisionFloats, newPreset.HighPrecisionFloats, newPreset.SetOfPresets );
                     SetPresetUIValue( createImportData  , newPreset.CreateImportData    , newPreset.SetOfPresets );
                 }
                 lastPreset = newPreset;
@@ -848,7 +859,8 @@ namespace GUIBuilder.Windows
                 tbWorkshopNIFGradientHeight,
                 tbWorkshopNIFGroundOffset,
                 tbWorkshopNIFGroundSink,
-                cbWorkshopNIFCreateImportData ); ;
+                cbWorkshopNIFHighPrecisionVertexes,
+                cbWorkshopNIFCreateImportData );
             UpdateNIFFilePathSampleInternal();
         }
 
@@ -871,6 +883,7 @@ namespace GUIBuilder.Windows
                 tbSubDivisionNIFGradientHeight,
                 tbSubDivisionNIFGroundOffset,
                 tbSubDivisionNIFGroundSink,
+                cbSubDivisionNIFHighPrecisionVertexes,
                 cbSubDivisionNIFCreateImportData );
             UpdateNIFFilePathSampleInternal();
         }

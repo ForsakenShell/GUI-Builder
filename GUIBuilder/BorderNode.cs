@@ -98,10 +98,10 @@ namespace GUIBuilder
             return null;
         }
         
-        public bool BuildMesh( float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours )
+        public bool BuildMesh( float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours, bool highPrecisionVertexes )
         {
-            DebugLog.OpenIndentLevel( new[] { "gradientHeight = " + gradientHeight.ToString(), "groundOffset = " + groundOffset.ToString(), "groundSink = " + groundSink.ToString() }, false, false, false, false, true );
-            Mesh = new NIFBuilder.Mesh( this, gradientHeight, groundOffset, groundSink, insideColours, outsideColours );
+            DebugLog.OpenIndentLevel( new[] { "gradientHeight = " + gradientHeight.ToString(), "groundOffset = " + groundOffset.ToString(), "groundSink = " + groundSink.ToString(), "highPrecisionVertexes = " + highPrecisionVertexes.ToString() }, false, false, false, false, true );
+            Mesh = new NIFBuilder.Mesh( this, gradientHeight, groundOffset, groundSink, insideColours, outsideColours, highPrecisionVertexes );
             DebugLog.CloseIndentLevel();
             return Mesh != null;
         }
@@ -528,6 +528,7 @@ namespace GUIBuilder
     public class BorderNode
     {
 
+        public const bool DEFAULT_NIF_HIGH_PRECISION = false;
         public const float DEFAULT_NODE_LENGTH = 128.0f;
         public const float DEFAULT_ANGLE_ALLOWANCE = 2.5f;
         public const float DEFAULT_SLOPE_ALLOWANCE = 0.01f;

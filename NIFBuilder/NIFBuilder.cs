@@ -101,7 +101,8 @@ public static partial class NIFBuilder
             uint[] outsideColours,
             List<Engine.Plugin.Form> originalForms,
             bool workshopBorder,
-            string[] exportInfo )
+            string[] exportInfo,
+            bool highPrecisionVertexes )
     {
         DebugLog.OpenIndentLevel(
             new string [] {
@@ -111,7 +112,8 @@ public static partial class NIFBuilder
                 "groundSink = " + groundSink.ToString(),
                 "location = \"" + location + "\"",
                 "neighbour = \"" + neighbour + "\"",
-                "createImportData = " + createImportData.ToString()
+                "createImportData = " + createImportData.ToString(),
+                "highPrecisionVertexes = " + highPrecisionVertexes.ToString()
             },
             true, true, false );
         
@@ -224,7 +226,7 @@ public static partial class NIFBuilder
             var group = nodeGroups[ i ];
             BorderNodeGroup.DumpGroupNodes( group.Nodes, "Group[ " + i + " ] Nodes:" );
             
-            if( group.BuildMesh( gradientHeight, groundOffset, groundSink, insideColours, outsideColours ) )
+            if( group.BuildMesh( gradientHeight, groundOffset, groundSink, insideColours, outsideColours, highPrecisionVertexes ) )
             {
                 group.Mesh.Write( targetPath, targetSuffix, exportInfo );
                 if( createImportData )

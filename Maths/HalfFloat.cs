@@ -243,6 +243,11 @@ namespace Maths
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         internal ushort value;
 
+        public static int SizeOf()
+        {
+            return sizeof( ushort );
+        }
+
         #region Constants
         /// <summary>
         /// Represents the smallest positive Half value greater than zero. This field is constant.

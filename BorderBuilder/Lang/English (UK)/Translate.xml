@@ -153,6 +153,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.Node.AngleAllowance>Angle Allowance</BorderBatchWindow.Node.AngleAllowance>
     <BorderBatchWindow.Node.SlopeAllowance>Slope Allowance</BorderBatchWindow.Node.SlopeAllowance>
     <BorderBatchWindow.NIF.Parameters>NIF Parameters</BorderBatchWindow.NIF.Parameters>
+    <BorderBatchWindow.NIF.UseHighPrecisionFloats>High Precision Vertexes</BorderBatchWindow.NIF.UseHighPrecisionFloats>
     <BorderBatchWindow.NIF.CreateImports>Create Import Data</BorderBatchWindow.NIF.CreateImports>
     <BorderBatchWindow.NIF.GradientHeight>Gradient Height</BorderBatchWindow.NIF.GradientHeight>
     <BorderBatchWindow.NIF.GroundOffset>Ground Offset</BorderBatchWindow.NIF.GroundOffset>
@@ -270,7 +271,7 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <Plugin.LoadingReferencesOf>Loading all references of {0}...</Plugin.LoadingReferencesOf>
     <Plugin.PostLoadReferencesOf>PostLoad() for all references of {0}...</Plugin.PostLoadReferencesOf>
     <Plugin.PostLoadReferenceOfSig>Post load of {0} Forms...</Plugin.PostLoadReferenceOfSig>
-    <Plugin.LoadingSigFormsFromAncestor>Loading {0} forms from {1}...</Plugin.LoadingSigFormsFromAncestor>
+    <Plugin.LoadingSigFormsFromAncestor>Loading {0} Forms from {1}...</Plugin.LoadingSigFormsFromAncestor>
     
     <Cells.LoadingRange>Loading Cells from {0} {1} in {2}...</Cells.LoadingRange>
     

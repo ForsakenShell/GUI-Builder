@@ -74,7 +74,7 @@ namespace AnnexTheCommonwealth
             {
                 //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "SubDivision" } );
                 
-                var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
+                var kfid = GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
                 var reference = Reference;
                 
                 var sref = reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
@@ -87,7 +87,7 @@ namespace AnnexTheCommonwealth
             }
             set
             {
-                var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
+                var kfid = GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master );
                 _segments = null;
                 
                 var sIdx = Reference.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
@@ -137,7 +137,7 @@ namespace AnnexTheCommonwealth
             {
                 //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "Neighbour" } );
                 
-                var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
+                var kfid = GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
                 var reference = Reference;
                 
                 var nref = reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
@@ -150,7 +150,7 @@ namespace AnnexTheCommonwealth
             }
             set
             {
-                var kfid = GodObject.CoreForms.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
+                var kfid = GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master );
                 _segments = null;
                 
                 var nIdx = Reference.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kfid );
@@ -215,7 +215,8 @@ namespace AnnexTheCommonwealth
             string filePrefix,
             string fileSuffix,
             float volumeCeiling,
-            bool createImportData )
+            bool createImportData,
+            bool highPrecisionVertexes )
         {
             //DebugLog.Write( string.Format( "\n{0} :: CreateBorderNIFs() :: enabler 0x{1} \"{2}\"", this.FullTypeName(), this.FormID.ToString( "X8" ), this.EditorID ) );
             if( _segments.NullOrEmpty() )
@@ -272,7 +273,7 @@ namespace AnnexTheCommonwealth
                     worldspace,
                     this,
                     null, null,
-                    GodObject.CoreForms.ESM_ATC_LAYR_BorderMeshes,
+                    GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_BorderMeshes,
                     targetPath,
                     targetSuffix,
                     meshSuffix,
@@ -295,7 +296,8 @@ namespace AnnexTheCommonwealth
                     NIFBuilder.Colours.OutsideBorder,
                     originalForms,
                     false,
-                    NIFBuilder.ExportInfo
+                    NIFBuilder.ExportInfo,
+                    highPrecisionVertexes
                     );
                 
                 if( ( createImportData )&&( !subList.NullOrEmpty() ) )

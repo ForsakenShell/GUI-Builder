@@ -132,7 +132,23 @@ namespace Maths
                 return new Vector3f( 0.0f, 0.0f, 0.0f );
             }
         }
-        
+
+        public static Vector3f Up
+        {
+            get
+            {
+                return new Vector3f( 0.0f, 0.0f, 1.0f );
+            }
+        }
+
+        public static Vector3f Down
+        {
+            get
+            {
+                return new Vector3f( 0.0f, 0.0f, -1.0f );
+            }
+        }
+
         public static Vector3f MinValue
         {
             get
@@ -171,14 +187,22 @@ namespace Maths
         
         public void Normalize()
         {
-            var length = Length;
-            if( length.ApproximatelyEquals( 0f ) )
-                return;
-            X /= length;
-            Y /= length;
-            Z /= length;
+            this = Vector3f.Normal( this );
         }
-        
+
+        public static Vector3f Normal( Vector3f v )
+        {
+            if( v == null )
+                return Vector3f.Zero;
+            var length = v.Length;
+            return length.ApproximatelyEquals( 0.0f )
+                ? Vector3f.Zero
+                : new Vector3f(
+                    v.X / length,
+                    v.Y / length,
+                    v.Z / length );
+        }
+
         public bool IsZero()
         {
             return Length.ApproximatelyEquals( 0f );

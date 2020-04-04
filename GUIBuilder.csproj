@@ -102,6 +102,7 @@
     <Compile Include="Engine\Plugin\Extensions\CachedGetSetIXHandle.cs" />
     <Compile Include="Engine\Plugin\Extensions\GenIXHandle.cs" />
     <Compile Include="Engine\Plugin\Extensions\TargetHandle.cs" />
+    <Compile Include="Engine\Plugin\Forms\ActorValue.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\CachedColorField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\CachedFloatField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\CachedIntField.cs" />
@@ -172,6 +173,8 @@
       <DependentUpon>WorkspaceSelector.cs</DependentUpon>
     </Compile>
     <Compile Include="GUIBuilder\WorkshopBatch.cs" />
+    <Compile Include="Maths\HalfVector3f.cs" />
+    <Compile Include="Maths\Ray.cs" />
     <Compile Include="XmlBase.cs" />
     <None Include=".editorconfig" />
     <None Include="BorderBuilder\Lang\English %28UK%29\Translate.xml">

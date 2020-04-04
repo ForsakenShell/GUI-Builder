@@ -35,7 +35,7 @@ namespace GUIBuilder
         {
             if( ( _enabler == null )||( _enabler.Reference == null )||( _enabler.Reference.Worldspace == null )||( _flags.NullOrEmpty() ) )
                 return;
-            _nodes = BorderNode.GenerateBorderNodes( _enabler.Reference.Worldspace, _flags, approximateNodeLength, angleAllowance, slopeAllowance, GodObject.CoreForms.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ );
+            _nodes = BorderNode.GenerateBorderNodes( _enabler.Reference.Worldspace, _flags, approximateNodeLength, angleAllowance, slopeAllowance, GodObject.CoreForms.AnnexTheCommonwealth.Static.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ );
         }
         
     }

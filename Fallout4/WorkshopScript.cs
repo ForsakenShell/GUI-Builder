@@ -97,7 +97,7 @@ namespace Fallout4
                     if( forms.NullOrEmpty() )
                         return null;
                     
-                    var wlbae = GodObject.CoreForms.WorkshopLinkedBuildAreaEdge;
+                    var wlbae = GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedBuildAreaEdge;
                     if( wlbae == null )
                         return null;
 
@@ -126,7 +126,7 @@ namespace Fallout4
             }
             set
             {
-                var wlbae = GodObject.CoreForms.WorkshopLinkedBuildAreaEdge;
+                var wlbae = GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedBuildAreaEdge;
                 if( wlbae == null )
                     return;
                 
@@ -177,7 +177,7 @@ namespace Fallout4
         {
             get
             {
-                return Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.WorkshopLinkSandbox.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                return Reference.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkSandbox.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             }
         }
         
@@ -191,7 +191,7 @@ namespace Fallout4
                     if( forms.NullOrEmpty() )
                         return null;
                     
-                    var wlp = GodObject.CoreForms.WorkshopLinkedPrimitive;
+                    var wlp = GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedPrimitive;
                     if( wlp == null )
                         return null;
                     

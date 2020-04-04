@@ -25,6 +25,7 @@ namespace GodObject
         public static class Filename
         {
             public static readonly string Fallout4                  = "Fallout4.esm";
+            public static readonly string Fallout4Exe               = "Fallout4.Hardcoded.dat";
             public static readonly string AnnexTheCommonwealth      = "AnnexTheCommonwealth.esm";
             public static readonly string SimSettlements            = "SimSettlements.esm";
         }
