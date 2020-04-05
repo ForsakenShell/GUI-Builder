@@ -31,13 +31,18 @@ namespace GodObject
             public const float fSandboxCylinderBottom       =  -100.0f;
             public const float fSandboxCylinderTop          =  1280.0f;
             
-            
             public static class Container
             {
                 public static Engine.Plugin.Forms.Container WorkshopWorkbench                       = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x000C1AEB );
                 public static Engine.Plugin.Forms.Container WorkshopWorkbenchInterior               = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x0012E2C4 );
                 public static Engine.Plugin.Forms.Container WorkshopWorkbenchNonSettlement          = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x00246F86 );
                 public static Engine.Plugin.Forms.Container WorkshopWorkbenchWireOnly               = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x000C1AEC );
+            }
+
+            public static class Activator
+            {
+                public static Engine.Plugin.Forms.Activator DefaultDummy                            = new Engine.Plugin.Forms.Activator  ( Master.Filename.Fallout4      , 0x0003B695 );
+                public static Engine.Plugin.Forms.Activator DefaultEmptyTrigger                     = new Engine.Plugin.Forms.Activator  ( Master.Filename.Fallout4      , 0x000224E3 );
             }
 
             public static class Keyword
@@ -175,6 +180,9 @@ namespace GodObject
                         Fallout4.Container.WorkshopWorkbenchInterior,
                         Fallout4.Container.WorkshopWorkbenchNonSettlement,
                         Fallout4.Container.WorkshopWorkbenchWireOnly,
+
+                        Fallout4.Activator.DefaultDummy,
+                        Fallout4.Activator.DefaultEmptyTrigger,
 
                         Fallout4.Keyword.WorkshopLinkedBuildAreaEdge,
                         Fallout4.Keyword.WorkshopLinkedPrimitive,

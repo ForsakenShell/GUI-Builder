@@ -142,12 +142,13 @@ namespace GUIBuilder.Windows
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
             GUIBuilder.SubDivisionBatch.GenerateSandboxes( ref list, subdivisions, m, false, false );
-            
-            bool allImportsMatchTarget = false;
-            FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
+
+            bool allImportsMatchTarget = false;
+            FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
+
             GodObject.Windows.SetEnableState( this, true );
         }
         

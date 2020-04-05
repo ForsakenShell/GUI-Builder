@@ -18,13 +18,16 @@ namespace GUIBuilder.FormImport
     public class ImportSandboxReference : ImportBase
     {
         const string            IMPORT_SIGNATURE = "SandboxRef";
-        const uint              TARGET_RECORD_FLAGS =
+
+        public const uint       FO4_TARGET_RECORD_FLAGS = 0;
+
+        public const uint       ATC_TARGET_RECORD_FLAGS =
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled |
             (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn;
         
         string                  NewEditorID = null;
-        FormTarget              ftBaseActi = null;
+        FormTarget              ftBaseForm = null;
         FormTarget              ftWorldspace = null;
         FormTarget              ftCell = null;
         Vector3f                Position = Vector3f.MinValue;
@@ -33,29 +36,12 @@ namespace GUIBuilder.FormImport
         FormTarget              ftLinkRef = null;
         FormTarget              ftLinkKeyword = null;
         FormTarget              ftLayer = null;
+        System.Drawing.Color    Color = System.Drawing.Color.Empty;
         
         //Engine.Plugin.Forms.ObjectReference TargetRef           { get { return Target         == null ? null : Target.Form           as Engine.Plugin.Forms.ObjectReference; } }
-        Engine.Plugin.Forms.Activator TargetActivator           { get { return ftBaseActi     == null ? null : ftBaseActi.Form       as Engine.Plugin.Forms.Activator; } }
+        Engine.Plugin.Form      TargetBaseForm                  { get { return ftBaseForm     == null ? null : ftBaseForm.Form; } }
         Engine.Plugin.Forms.Worldspace TargetWorldspace         { get { return ftWorldspace   == null ? null : ftWorldspace.Form     as Engine.Plugin.Forms.Worldspace; } }
         Engine.Plugin.Forms.Cell TargetCell                     { get { return ftCell         == null ? null : ftCell.Form           as Engine.Plugin.Forms.Cell; } }
-        
-        /* TODO:  Move this to the call site, imports shouldn't be resolving this
-        Engine.Plugin.Forms.Cell TargetCell
-        {
-            get
-            {
-                var worldspace = TargetWorldspace;
-                if( worldspace == null ) return null;
-                // This will equate to a compile time constant, but we'll do it if we change the named constant at the top.
-                return 
-                    // disable once ConditionIsAlwaysTrueOrFalse
-                    ( TARGET_RECORD_FLAGS & (uint)Engine.Plugin.Forms.Fields.RecordFlags.Common.Persistent ) == 0
-                    ? worldspace.Cells.GetByGrid( Engine.SpaceConversions.WorldspaceToCellGrid( Position ) )
-                    : worldspace.Cells.Persistent;
-            }
-        }
-        */
-        
         Engine.Plugin.Forms.ObjectReference TargetLinkRef       { get { return ftLinkRef      == null ? null : ftLinkRef.Form        as Engine.Plugin.Forms.ObjectReference; } }
         Engine.Plugin.Forms.Keyword TargetLinkKeyword           { get { return ftLinkKeyword  == null ? null : ftLinkKeyword.Form    as Engine.Plugin.Forms.Keyword; } }
         Engine.Plugin.Forms.Layer TargetLayer                   { get { return ftLayer        == null ? null : ftLayer.Form          as Engine.Plugin.Forms.Layer; } }
@@ -68,19 +54,20 @@ namespace GUIBuilder.FormImport
                 this.TypeFullName(),
                 Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
                 string.IsNullOrEmpty( NewEditorID ) ? null : string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID ),
-                ftBaseActi      .DisplayIDInfo( "\n\tBaseActi = {0}" ),
+                ftBaseForm      .DisplayIDInfo( "\n\tBaseForm = {0}" ),
                 ftWorldspace    .DisplayIDInfo( "\n\tWorldspace = {0}" ),
                 string          .Format       ( "\n\tPosition = {0}", Position.ToString() ),
                 string          .Format       ( "\n\tRotation = {0}", Rotation.ToString() ),
                 string          .Format       ( "\n\tBounds = {0}", Bounds.ToString() ),
+                string          .Format       ( "\n\tColor = {0}", Color.ToString() ),
                 ftLinkRef       .DisplayIDInfo( "\n\tLinkRef = {0}" ),
                 ftLinkKeyword   .DisplayIDInfo( "\n\tLinkKeyword = {0}" ),
                 ftLayer         .DisplayIDInfo( "\n\tLayer = {0}" )
             ) );
         }
         
-        public                          ImportSandboxReference( AnnexTheCommonwealth.Volume originalScript, string newEditorID, Engine.Plugin.Forms.Activator baseActi, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, Vector3f rotation, Vector3f bounds, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, Engine.Plugin.Forms.Layer layer )
-            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.Volume ), originalScript )
+        public                          ImportSandboxReference( Engine.Plugin.Forms.ObjectReference originalVolume, string newEditorID, Engine.Plugin.Form volumeBase, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell, Vector3f position, Vector3f rotation, Vector3f bounds, System.Drawing.Color color, Engine.Plugin.Forms.ObjectReference linkRef, Engine.Plugin.Forms.Keyword linkKeyword, Engine.Plugin.Forms.Layer layer, uint recordFlags )
+            : base( IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.ObjectReference ), originalVolume )
         {
             if( string.IsNullOrEmpty( newEditorID ) )
                 throw new Exception( string.Format( "{0} :: cTor() :: newEditorID cannot be null!", this.TypeFullName() ) );
@@ -88,22 +75,23 @@ namespace GUIBuilder.FormImport
             if( !Target.IsResolved )
                 Target.EditorID = newEditorID;
             NewEditorID     = newEditorID;
-            ftBaseActi      = new FormTarget( "Activator", this, typeof( Engine.Plugin.Forms.Activator ), baseActi );
+            ftBaseForm      = new FormTarget( "Base Form", this, typeof( Engine.Plugin.Form ), volumeBase );
             ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ), worldspace );
             ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ), cell );
             Position        = new Vector3f( position );
             Rotation        = new Vector3f( rotation );
             Bounds          = new Vector3f( bounds );
+            Color           = System.Drawing.Color.FromArgb( color.A, color.R, color.G, color.B );
             ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
             ftLinkKeyword   = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
             ftLayer         = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ), layer );
             DumpImport();
         }
         
-        public                          ImportSandboxReference( string[] importData )
-            : base( IMPORT_SIGNATURE, TARGET_RECORD_FLAGS, false, typeof( AnnexTheCommonwealth.Volume ), importData )
+        public                          ImportSandboxReference( string[] importData, uint recordFlags )
+            : base( IMPORT_SIGNATURE, recordFlags, false, typeof( Engine.Plugin.Forms.ObjectReference ), importData )
         {
-            ftBaseActi      = new FormTarget( "Activator", this, typeof( Engine.Plugin.Forms.Activator ) );
+            ftBaseForm      = new FormTarget( "Base Form", this, typeof( Engine.Plugin.Form ) );
             ftWorldspace    = new FormTarget( "Worldspace", this, typeof( Engine.Plugin.Forms.Worldspace ) );
             ftCell          = new FormTarget( "Cell", this, typeof( Engine.Plugin.Forms.Cell ) );
             ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ) );
@@ -144,8 +132,8 @@ namespace GUIBuilder.FormImport
             var tmp = new List<string>();
             var refr = TargetRef;
             
-            if( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != ftBaseActi.FormID )
-                tmp.Add( ftBaseActi.DisplayIDInfo( "Base form {0}" ) );
+            if( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != ftBaseForm.FormID )
+                tmp.Add( ftBaseForm.DisplayIDInfo( "Base form {0}" ) );
             
             var oldEDID = refr.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             if( string.Compare( oldEDID, NewEditorID, StringComparison.InvariantCulture ) != 0 )
@@ -167,8 +155,11 @@ namespace GUIBuilder.FormImport
             
             if( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Bounds )
                 tmp.Add( string.Format( "Bounds {0}", Bounds.ToString() ) );
-            
-            if( !ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
+
+            if( refr.Primitive.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Color )
+                tmp.Add( string.Format( "Color {0}", Color.ToString() ) );
+
+            if( !ftLayer.Matches( refr.GetLayerFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
                 tmp.Add( ftLayer.DisplayIDInfo( "Layer {0}" ) );
             
             if(
@@ -200,7 +191,7 @@ namespace GUIBuilder.FormImport
         {
             var tmp = new List<string>();
             
-            tmp.Add( ftBaseActi.DisplayIDInfo( "Placed instance of {0}" ) );
+            tmp.Add( ftBaseForm.DisplayIDInfo( "Placed instance of {0}" ) );
             
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
@@ -212,6 +203,8 @@ namespace GUIBuilder.FormImport
             
             tmp.Add( string.Format( "Bounds {0}", Bounds.ToString() ) );
             
+            tmp.Add( string.Format( "Color {0}", Color.ToString() ) );
+
             tmp.Add( ftLayer.DisplayIDInfo( "Layer {0}" ) );
             
             if(
@@ -251,26 +244,27 @@ namespace GUIBuilder.FormImport
             
             return
                 ( string.Compare( refr.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) == 0 )&&
-                ( ftBaseActi.Matches( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )&&
+                ( ftBaseForm.Matches( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )&&
                 ( ftWorldspace.Matches( refr.Worldspace, false ) )&&
                 ( ftCell.Matches( refr.Cell, false ) )&&
                 //( TargetCell == refr.Cell )&&
                 ( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
                 ( refr.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Rotation )&&
                 ( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Bounds )&&
+                ( refr.Primitive.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Color )&&
                 ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
-                ( ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
+                ( ftLayer.Matches( refr.GetLayerFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
                 ( ftLinkRef.Matches( lr, false ) );
         }
         
         protected override bool         ResolveReferenceForms( bool errorIfUnresolveable )
         {
             // Resolve required forms
-            ftBaseActi    .Resolve( errorIfUnresolveable );
+            ftBaseForm    .Resolve( errorIfUnresolveable );
             ftWorldspace  .Resolve( errorIfUnresolveable );
             ftCell        .Resolve( errorIfUnresolveable );
             if( ( TargetCell == null )&&( TargetWorldspace != null ) )
-                ftCell.Form = Engine.Plugin.Forms.Worldspace.GetCellForRefr( TargetWorldspace, Position, TARGET_RECORD_FLAGS );
+                ftCell.Form = Engine.Plugin.Forms.Worldspace.GetCellForRefr( TargetWorldspace, Position, RecordFlags );
             //if( ( TargetCell == null )&&( errorIfUnresolveable ) )
             //    AddErrorMessage( ErrorTypes.Resolve, "Unable to resolve target cell in worldspace" );
             
@@ -282,7 +276,7 @@ namespace GUIBuilder.FormImport
             
             // Minimum forms resolved?
             var minFormsFound =
-                ( ftBaseActi.IsResolved )&&
+                ( ftBaseForm.IsResolved )&&
                 ( ftWorldspace.IsResolved )&&
                 ( TargetCell != null )&&
                 (
@@ -298,10 +292,10 @@ namespace GUIBuilder.FormImport
             switch( key )
             {
                 case "ACTIFormID":
-                    ftBaseActi.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
+                    ftBaseForm.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
                     break;
                 case "ACTIEDID":
-                    ftBaseActi.EditorID = value;
+                    ftBaseForm.EditorID = value;
                     break;
                     
                 case "WorldspaceFormID":
@@ -329,7 +323,7 @@ namespace GUIBuilder.FormImport
                 case "Bounds":
                     Maths.Vector3f.TryParse( value, out Bounds );
                     break;
-                    
+
                 case "LinkRefFormID":
                     ftLinkRef.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
                     break;
@@ -372,11 +366,11 @@ namespace GUIBuilder.FormImport
                 {
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new ObjectReference instance of {0} in cell {1}",
-                        ftBaseActi.DisplayIDInfo(unresolveableSuffix: "unresolved"),
+                        ftBaseForm.DisplayIDInfo(unresolveableSuffix: "unresolved"),
                         cell.ExtraInfoFor(unresolveable: "unresolved")) );
                     return false;
                 }
-                refr.SetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftBaseActi.FormID );
+                refr.SetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, ftBaseForm.FormID );
                 var newVolume = new Volume( refr );
                 if( newVolume == null )
                 {
@@ -396,7 +390,7 @@ namespace GUIBuilder.FormImport
             {
                 AddErrorMessage( ErrorTypes.Import, string.Format(
                     "An exception occured when trying to create a new ObjectReference instance of {0} in cell {1}\nInner Exception:\n{2}",
-                    ftBaseActi.DisplayIDInfo(unresolveableSuffix: "unresolved"),
+                    ftBaseForm.DisplayIDInfo(unresolveableSuffix: "unresolved"),
                     cell.ExtraInfoFor(unresolveable: "unresolved"),
                     e.ToString()) );
             }
@@ -408,13 +402,13 @@ namespace GUIBuilder.FormImport
             var refr = TargetRef;
             
             refr.SetEditorID( Engine.Plugin.TargetHandle.Working, NewEditorID );
-            refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseActi.FormID );
+            refr.SetNameFormID( Engine.Plugin.TargetHandle.Working, ftBaseForm.FormID );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
             refr.SetRotation( Engine.Plugin.TargetHandle.Working, Rotation );
             refr.Primitive.SetBounds( Engine.Plugin.TargetHandle.Working, Bounds );
-            refr.Primitive.SetColor( Engine.Plugin.TargetHandle.Working, TargetActivator.GetMarkerColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            refr.Primitive.SetColor( Engine.Plugin.TargetHandle.Working, Color );
             refr.Primitive.SetUnknown( Engine.Plugin.TargetHandle.Working, 0.3f );
-            refr.Primitive.SetType( Engine.Plugin.TargetHandle.Working, 1 ); // Box
+            refr.Primitive.SetType( Engine.Plugin.TargetHandle.Working, Engine.Plugin.Forms.Fields.ObjectReference.Primitive.PrimitiveType.Box );
             
             var newParent = TargetLinkRef;
             var orgParent = OriginalLinkParent( TargetLinkKeyword );
@@ -430,7 +424,7 @@ namespace GUIBuilder.FormImport
             }
             
             if( ftLayer.IsResolved )
-                refr.SetLayer( Engine.Plugin.TargetHandle.Working, ftLayer.FormID );
+                refr.SetLayerFormID( Engine.Plugin.TargetHandle.Working, ftLayer.FormID );
             
             // Remove unwanted elements automagically added by the CK/XeLib
             refr.LocationReference.DeleteRootElement( false, false );

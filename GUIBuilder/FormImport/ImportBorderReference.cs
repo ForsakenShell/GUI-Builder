@@ -101,7 +101,7 @@ namespace GUIBuilder.FormImport
             var tmp = new List<string>();
             var refr = TargetRef;
             
-            if( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != ftBaseStat.FormID )
+            if( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != ftBaseStat.FormID )
                 tmp.Add( ftBaseStat.DisplayIDInfo( "Base form {0}" ) );
             
             if( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Position )
@@ -117,7 +117,7 @@ namespace GUIBuilder.FormImport
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
                 tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
             
-            if( !ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
+            if( !ftLayer.Matches( refr.GetLayerFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
                 tmp.Add( ftLayer.DisplayIDInfo( "Layer {0}" ) );
             
             if(
@@ -199,12 +199,12 @@ namespace GUIBuilder.FormImport
                 : null;
             
             return
-                ( ftBaseStat.Matches( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )&&
+                ( ftBaseStat.Matches( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), false ) )&&
                 ( ftWorldspace.Matches( refr.Worldspace, false ) )&&
                 ( ftCell.Matches( refr.Cell, false ) )&&
                 ( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Position )&&
                 ( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == Engine.Plugin.Constant.FormID_None )&&
-                ( ftLayer.Matches( refr.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
+                ( ftLayer.Matches( refr.GetLayerFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )&&
                 ( stEnableParent.Matches( refr.EnableParent.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), !stEnableParent.Resolveable() ) )||
                 ( ftLinkRef.Matches( lr, !lwk ) );
         }
@@ -348,7 +348,7 @@ namespace GUIBuilder.FormImport
                         ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
-                refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.Form.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+                refr.SetNameFormID( Engine.Plugin.TargetHandle.Working, ftBaseStat.Form.GetFormID( Engine.Plugin.TargetHandle.Master ) );
                 SetTarget( refr );
                 //TargetForm = refr;
                 return true;
@@ -368,10 +368,10 @@ namespace GUIBuilder.FormImport
         {
             var refr = TargetRef;
             
-            refr.SetName( Engine.Plugin.TargetHandle.Working, ftBaseStat.Form.GetFormID( Engine.Plugin.TargetHandle.Master ) );
+            refr.SetNameFormID( Engine.Plugin.TargetHandle.Working, ftBaseStat.Form.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             refr.SetPosition( Engine.Plugin.TargetHandle.Working, Position );
             if( ftLayer.IsResolved )
-                refr.SetLayer( Engine.Plugin.TargetHandle.Working, ftLayer.FormID );
+                refr.SetLayerFormID( Engine.Plugin.TargetHandle.Working, ftLayer.FormID );
             if( stEnableParent.IsResolved )
             {   // Set the enable parent and update it's references
                 refr.EnableParent.SetReferenceID( Engine.Plugin.TargetHandle.Working, stEnableParent.FormID );

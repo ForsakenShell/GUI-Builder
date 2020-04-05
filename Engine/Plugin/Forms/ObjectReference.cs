@@ -66,18 +66,25 @@ namespace Engine.Plugin.Forms
             _LocationReference = new Fields.ObjectReference.LocationReference( this );
             _locationRefTypes = new Fields.ObjectReference.LocationRefTypes( this );
         }
-        
+
         #endregion
-        
+
         #endregion
-        
+
         #region Properties
+
+        public Engine.Plugin.Form GetName( TargetHandle target )
+        {
+            var nFID = _Name.GetValue( target );
+            if( !nFID.ValidFormID() ) return null;
+            return GodObject.Plugin.Data.Root.Find( nFID, true ) as Engine.Plugin.Form;
+        }
         
-        public uint GetName( TargetHandle target )
+        public uint GetNameFormID( TargetHandle target )
         {
             return _Name.GetValue( target );
         }
-        public void SetName( TargetHandle target, uint value )
+        public void SetNameFormID( TargetHandle target, uint value )
         {
             _Name.SetValue( target, value );
         }
@@ -90,11 +97,18 @@ namespace Engine.Plugin.Forms
             }
         }
         
-        public uint GetLayer( TargetHandle target )
+        public Engine.Plugin.Forms.Layer GetLayer( TargetHandle target )
+        {
+            var lFID = GetLayerFormID( target );
+            if( !lFID.ValidFormID() ) return null;
+            return GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Layer>( lFID, true );
+        }
+
+        public uint GetLayerFormID( TargetHandle target )
         {
             return _Layer.GetValue( target );
         }
-        public void SetLayer( TargetHandle target, uint value )
+        public void SetLayerFormID( TargetHandle target, uint value )
         {
             _Layer.SetValue( target, value );
         }
@@ -300,14 +314,27 @@ namespace Engine.Plugin.Forms
             
             return null;
         }
+
+        #region Primitive Volume Corners
+
+        public Vector2f[] GetCorners( Engine.Plugin.TargetHandle target )
+        {
+            if( _Primitive.GetType( target ) != Fields.ObjectReference.Primitive.PrimitiveType.Box ) return null;
+            var p = _Position.GetValue( target );
+            var r = _Rotation.GetValue( target );
+            var b = _Primitive.GetBounds( target );
+            return Vector2fExtensions.CalculateCornerPositions( p, r, b );
+        }
         
+        #endregion
+
         #region Debugging
-        
+
         public override void DebugDumpChild( TargetHandle target )
         {
             if( _Name.HasValue( target ) )
             {
-                var b = GodObject.Plugin.Data.Root.Find( GetName( target ) );
+                var b = GodObject.Plugin.Data.Root.Find( GetNameFormID( target ) );
                 DebugLog.WriteLine( string.Format( "\tName: {0}", b.ToString() ) );
             }
             if( _Layer.HasValue( target ) )

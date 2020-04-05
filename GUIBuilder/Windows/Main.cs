@@ -71,6 +71,7 @@ namespace GUIBuilder.Windows
             this.mbiFileExit.Click += new System.EventHandler( this.OnMenuExitClick );
             
             this.mbiToolsSubDivisionBatch.Click += new System.EventHandler( this.OnSubDivisionBatchWindowClick );
+            this.mbiToolsWorkshopBatch.Click += new System.EventHandler( this.OnWorkshopBatchWindowClick );
             this.mbiToolsBorderBatch.Click += new System.EventHandler( this.OnBorderBatchWindowClick );
             this.mbiToolsRenderWindow.Click += new System.EventHandler( this.OnRenderWindowClick );
             this.mbiToolsAbout.Click += new System.EventHandler( this.OnAboutWindowClick );
@@ -255,6 +256,7 @@ namespace GUIBuilder.Windows
                 mbiFileCloseFiles.Enabled = enabled;
                 mbiToolsBorderBatch.Enabled = enabled;
                 mbiToolsSubDivisionBatch.Enabled = ( enabled ) && ( GodObject.Master.Loaded( GodObject.Master.AnnexTheCommonwealth ) );
+                mbiToolsWorkshopBatch.Enabled = ( enabled ) && ( GodObject.Master.Loaded( GodObject.Master.Fallout4 ) );
                 mbiToolsRenderWindow.Enabled = enabled;
                 mbiToolsCustomForms.Enabled = enabled;
             }
@@ -267,6 +269,7 @@ namespace GUIBuilder.Windows
                 mbiFileCloseFiles.Enabled = false;
                 mbiToolsBorderBatch.Enabled = false;
                 mbiToolsSubDivisionBatch.Enabled = false;
+                mbiToolsWorkshopBatch.Enabled = false;
                 mbiToolsRenderWindow.Enabled = false;
                 mbiToolsCustomForms.Enabled = false;
             }
@@ -690,7 +693,20 @@ namespace GUIBuilder.Windows
             
             GodObject.Windows.GetWindow<GUIBuilder.Windows.SubDivisionBatch>( true );
         }
-        
+
+        void OnWorkshopBatchWindowClick( object sender, EventArgs e )
+        {
+            if(
+                ( !GodObject.Plugin.IsLoaded )||
+                ( GodObject.Plugin.Data.Workshops.SyncedGUIList.Count == 0 )
+            )
+                return;
+
+            //GodObject.Plugin.DoSampleReading();
+
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.WorkshopBatch>( true );
+        }
+
         void OnRenderWindowClick( object sender, EventArgs e )
         {
             if( !GodObject.Plugin.IsLoaded ) return;

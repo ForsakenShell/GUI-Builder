@@ -303,7 +303,7 @@ namespace GUIBuilder
             {
                 var refr = originalForms[ i ] as Engine.Plugin.Forms.ObjectReference;
                 if( refr == null  ) continue;
-                if( originalStaticFormID == refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                if( originalStaticFormID == refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
                 {
                     bestMatchIndex = i;
                     match = refr;
@@ -617,7 +617,7 @@ namespace GUIBuilder
             foreach( var flag in flags )
             {
                 var p = new Vector3f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null )||( forcedZFID != flag.Reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( ( forcedZ == null )||( forcedZFID != flag.Reference.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                     p.Z = float.MinValue;
                 
                 refPoints.Add( p );
@@ -636,7 +636,7 @@ namespace GUIBuilder
             foreach( var reference in references )
             {
                 var p = new Vector3f( reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null ) || ( statWFZ != reference.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( ( forcedZ == null ) || ( statWFZ != reference.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                 {
                     p.Z = float.MinValue;
                     anyNonForcedZMarkers = true;

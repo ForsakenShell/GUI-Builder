@@ -44,13 +44,13 @@ namespace GUIBuilder.Windows
         void OnClientLoad( object sender, EventArgs e )
         {
             //lvWorkshops.SyncedEditorFormType = typeof( FormEditor.Workshop );
-            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnWorkshopListChanged;
+            GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged += OnWorkshopListChanged;
             UpdateWorkshopList();
         }
 
         void OnClientClosing( object sender, FormClosingEventArgs e )
         {
-            GodObject.Plugin.Data.SubDivisions.ObjectDataChanged -= OnWorkshopListChanged;
+            GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged -= OnWorkshopListChanged;
         }
 
         /// <summary>
@@ -142,14 +142,14 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
 
-            // TODO: Write me!
-            //GUIBuilder.WorkshopBatch.GenerateSandboxes( ref list, workshops, m, false, false );
-            
-            bool allImportsMatchTarget = false;
-            FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
+            GUIBuilder.WorkshopBatch.GenerateSandboxes( ref list, workshops, m, false, false );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
+
+            bool allImportsMatchTarget = false;
+            FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
+
             GodObject.Windows.SetEnableState( this, true );
         }
         
@@ -176,8 +176,7 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            // TODO: Write me!
-            //GUIBuilder.WorkshopBatch.NormalizeBuildVolumes( ref list, workshops, m, false );
+            GUIBuilder.WorkshopBatch.NormalizeBuildVolumes( ref list, workshops, m, false );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );

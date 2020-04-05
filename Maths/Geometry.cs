@@ -579,6 +579,7 @@ namespace Maths
             
             public class OptimalBoundingBox
             {
+                
                 #region Size
                 Vector3f _Size = Vector3f.Zero;
                 public Vector3f Size
@@ -633,7 +634,19 @@ namespace Maths
                 
                 public OptimalBoundingBox( Vector2f size, Vector2f position, float rotation )
                 {
-                    _Size = new Vector3f( size );
+                    // First normalize the rotation to >= 0.0f, < 90.0f
+                    var sX = size.X;
+                    var sY = size.Y;
+                    while( rotation < 0.0f )
+                        rotation += 360.0f;
+                    while( rotation > 90.0f )
+                    {
+                        var t = sX;
+                        sX = sY;
+                        sY = t;
+                        rotation -= 90.0f;
+                    }
+                    _Size = new Vector3f( sX, sY, 0.0f );
                     _Position = new Vector3f( position );
                     ZRotation = rotation;
                     //Dump( "cTor()" );
@@ -647,10 +660,10 @@ namespace Maths
                         var hSize = _Size * 0.5f;
                         return new Vector2f[]
                         {
-                            Vector2f.RotateAround( new Vector2f( _Position.X - hSize.X, _Position.Y - hSize.Y ), p2D, - ZRotation ),
-                            Vector2f.RotateAround( new Vector2f( _Position.X + hSize.X, _Position.Y - hSize.Y ), p2D, - ZRotation ),
-                            Vector2f.RotateAround( new Vector2f( _Position.X + hSize.X, _Position.Y + hSize.Y ), p2D, - ZRotation ),
-                            Vector2f.RotateAround( new Vector2f( _Position.X - hSize.X, _Position.Y + hSize.Y ), p2D, - ZRotation )
+                            Vector2f.RotateAround( new Vector2f( _Position.X - hSize.X, _Position.Y - hSize.Y ), p2D, -ZRotation ),
+                            Vector2f.RotateAround( new Vector2f( _Position.X + hSize.X, _Position.Y - hSize.Y ), p2D, -ZRotation ),
+                            Vector2f.RotateAround( new Vector2f( _Position.X + hSize.X, _Position.Y + hSize.Y ), p2D, -ZRotation ),
+                            Vector2f.RotateAround( new Vector2f( _Position.X - hSize.X, _Position.Y + hSize.Y ), p2D, -ZRotation )
                         };
                     }
                 }
@@ -803,9 +816,9 @@ namespace Maths
                     float temp;
                     switch( currentControlPoint )
                     {
-                        case 0:  // null to do.
+                        case 0:  // dx =  dx, dy =  dy (null to do)
                             break;
-                        case 1:  // dx = -dy, dy = dx
+                        case 1:  // dx = -dy, dy =  dx
                             temp = dx;
                             dx = -dy;
                             dy = temp;
@@ -814,7 +827,7 @@ namespace Maths
                             dx = -dx;
                             dy = -dy;
                             break;
-                        case 3:  // dx = dy, dy = -dx
+                        case 3:  // dx =  dy, dy = -dx
                             temp = dx;
                             dx = dy;
                             dy = -temp;
@@ -850,7 +863,7 @@ namespace Maths
                         ( bestRect[ 0 ].X + bestRect[ 1 ].X + bestRect[ 2 ].X + bestRect[ 3 ].X ) * 0.25f,
                         ( bestRect[ 0 ].Y + bestRect[ 1 ].Y + bestRect[ 2 ].Y + bestRect[ 3 ].Y ) * 0.25f );
                     
-                    result = new OptimalBoundingBox( size, pos, AngleValue( bestRect[ 1 ].X, bestRect[ 1 ].Y, bestRect[ 2 ].X, bestRect[ 2 ].Y ) );
+                    result = new OptimalBoundingBox( size, pos, AngleValue( bestRect[ 0 ].X, bestRect[ 0 ].Y, bestRect[ 1 ].X, bestRect[ 1 ].Y ) );
                 }
                 
                 //DebugLog.CloseIndentLevel( "result", result.ToStringNullSafe() );
@@ -873,11 +886,11 @@ namespace Maths
                 // Get the side lengths of the bounding rectangle.
                 float vx0 = rect[ 0 ].X - rect[ 1 ].X;
                 float vy0 = rect[ 0 ].Y - rect[ 1 ].Y;
-                s2 = (float)Math.Sqrt( vx0 * vx0 + vy0 * vy0 );
+                s1 = (float)Math.Sqrt( vx0 * vx0 + vy0 * vy0 );
                 
                 float vx1 = rect[ 1 ].X - rect[ 2 ].X;
                 float vy1 = rect[ 1 ].Y - rect[ 2 ].Y;
-                s1 = (float)Math.Sqrt( vx1 * vx1 + vy1 * vy1 );
+                s2 = (float)Math.Sqrt( vx1 * vx1 + vy1 * vy1 );
                 
                 // Get the area of the bounding rectangle.
                 area = s1 * s2;
@@ -919,6 +932,7 @@ namespace Maths
                     foreach( var pt in culled )
                     {
                         var test_angle = AngleValue( X, Y, pt.X, pt.Y );
+                        if( test_angle == 0.0f ) test_angle = 360.0f;
                         if( ( test_angle >= sweep_angle )&&
                             ( test_angle <  best_angle ) )
                         {
@@ -930,6 +944,7 @@ namespace Maths
                     // See if the first point is better.
                     // If so, we are done.
                     var first_angle = AngleValue( X, Y, hull[ 0 ].X, hull[ 0 ].Y );
+                    if( first_angle == 0.0f ) first_angle = 360.0f;
                     if( ( first_angle >= sweep_angle )&&
                         ( first_angle <= best_angle  ) )
                         break; // The first point is better. We're done.
@@ -1010,25 +1025,10 @@ namespace Maths
             
             public static float AngleValue( float x1, float y1, float x2, float y2 )
             {
-                float t;
-                
                 var dx = x2 - x1;
                 var dy = y1 - y2;
-                
-                var ax = Math.Abs( dx );
-                var ay = Math.Abs( dy );
-                
-                if( ( ax + ay ).ApproximatelyEquals( 0.0f ) )
-                    t = 360.0f / 9.0f;
-                else
-                    t = dy / ( ax + ay );
-                
-                if( dx < 0.0f )
-                    t = 2.0f - t;
-                else if( dy < 0.0f )
-                    t = 4.0f + t;
-                
-                return t * 9.0f;
+                return ( 360.0f + (float)( Math.Atan2( dy, dx ) * Maths.Constant.RAD_TO_DEG ) ) % 360.0f;
+
             }
             
             // Find the slope of the edge from point i to point i+1.

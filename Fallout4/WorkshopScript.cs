@@ -158,7 +158,7 @@ namespace Fallout4
                 //var cStatics = GodObject.Plugin.Data.Root.GetContainer<Engine.Plugin.Forms.Static>( true, false );
                 //if( cStatics == null ) return null;
                 //var stat = cStatics.Find<Engine.Plugin.Forms.Static>( border.Name );
-                var stat = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( border.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                var stat = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( border.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 //var stat = border == null
                 //    ? null
                 //    : GodObject.Plugin.Data.Statics.Find( border.Name );

@@ -38,7 +38,7 @@ public static class GenCollection
     {
         return ( list == null )||( list.Count == 0 );
     }
-    
+
     public static bool Contains<T>( this List<T> list, Predicate<T> match )
     {
         if( list.NullOrEmpty() ) return false;

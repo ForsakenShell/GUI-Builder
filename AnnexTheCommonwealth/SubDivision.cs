@@ -114,7 +114,7 @@ namespace AnnexTheCommonwealth
             for( int i = 0; i < lrs.GetCount( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ); i++ )
             {
                 var lro = lrs.GetReference( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, i );
-                if( ( lro != null )&&( GodObject.CoreForms.IsSubDivisionEdgeFlag( lro.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) ) )
+                if( ( lro != null )&&( GodObject.CoreForms.IsSubDivisionEdgeFlag( lro.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) ) )
                 {
                     flag = lro.GetScript<EdgeFlag>();
                     if( flag != null )
@@ -153,7 +153,7 @@ namespace AnnexTheCommonwealth
             while( linkedRef != null )
             {
                 bool added = false;
-                if( GodObject.CoreForms.IsSubDivisionEdgeFlag( linkedRef.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                if( GodObject.CoreForms.IsSubDivisionEdgeFlag( linkedRef.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
                 {
                     flag = linkedRef.GetScript<EdgeFlag>();
                     if( flag != null )
@@ -350,7 +350,7 @@ namespace AnnexTheCommonwealth
                     foreach( var subRef in subRefs )
                     {
                         var refr = subRef as Engine.Plugin.Forms.ObjectReference;
-                        if( ( refr != null )&&( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == volumeFID ) )
+                        if( ( refr != null )&&( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == volumeFID ) )
                         {
                             var li = refr.LinkedRefs.FindKeywordIndex( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, keywordFID );
                             if( ( li >= 0 )&&( refr.LinkedRefs.GetReferenceID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, li ) == thisFID ) )
@@ -580,7 +580,7 @@ namespace AnnexTheCommonwealth
             var list = new List<Vector2f>();
             foreach( var volume in volumes )
             {
-                var corners = volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var corners = volume.Reference.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 foreach( var corner in corners )
                 {
                     list.Add( new Vector2f( corner ) );
@@ -591,6 +591,7 @@ namespace AnnexTheCommonwealth
             return list;
         }
         
+        /*
         public Maths.Geometry.ConvexHull.OptimalBoundingBox GetOptimalSandboxVolume( bool skipZScan = false, float fSandboxCylinderBottom = -100.0f, float fSandboxCylinderTop = 1280.0f, float volumeMargin = 128.0f, float sandboxSink = 128.0f )
         {
             var edgeFlags = EdgeFlags;
@@ -687,7 +688,7 @@ namespace AnnexTheCommonwealth
             var vCount = volumes.Count;
             var volumeCorners = new Vector2f[ vCount ][];
             for( int i = 0; i < vCount; i++ )
-                volumeCorners[ i ] = volumes[ i ].GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                volumeCorners[ i ] = volumes[ i ].Reference.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             
             var cNW = volumeCorners.GetCornerNWFrom();
             var cSE = volumeCorners.GetCornerSEFrom();
@@ -784,7 +785,7 @@ namespace AnnexTheCommonwealth
                 GUIBuilder.FormImport.ImportBase.AddToList(
                     ref list,
                     new GUIBuilder.FormImport.ImportBuildVolumeReference(
-                        volume,
+                        volume.Reference,
                         volume.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
                         GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume,
                         w, c,
@@ -793,12 +794,15 @@ namespace AnnexTheCommonwealth
                         bounds,
                         this.Reference,
                         GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBuildAreaVolume,
-                        useLayerEditorID ) );
+                        useLayerEditorID,
+                        GUIBuilder.FormImport.ImportBuildVolumeReference.ATC_TARGET_RECORD_FLAGS
+                        ) );
             }
             
             return true;
         }
-        
+        */
+
         public Vector2f CornerNW
         {
             get

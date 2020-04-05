@@ -1555,7 +1555,7 @@ namespace GUIBuilder.Windows.RenderChild
                             }
                         }
                         
-                        DrawPolyWorldTransform( volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), useColor );
+                        DrawPolyWorldTransform( volume.Reference.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), useColor );
                     }
                 }
                 #if DEBUG
@@ -1759,7 +1759,7 @@ namespace GUIBuilder.Windows.RenderChild
                 
                 var c = Color.FromArgb( 255, 204, 76, 51 );
                 
-                var corners = volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var corners = volume.Reference.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 //DebugLog.WriteArray( "DrawSandboxVolume() :: Corners", corners );
                 
                 DrawPolyWorldTransform( corners, c );

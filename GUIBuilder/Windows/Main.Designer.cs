@@ -31,7 +31,8 @@ namespace GUIBuilder.Windows
 		System.Windows.Forms.ToolStripMenuItem mbiToolsBorderBatch;
 		System.Windows.Forms.ToolStripMenuItem mbiFileSavePlugin;
 		System.Windows.Forms.ToolStripMenuItem mbiToolsSubDivisionBatch;
-		System.Windows.Forms.ToolStripMenuItem mbiToolsOptions;
+        System.Windows.Forms.ToolStripMenuItem mbiToolsWorkshopBatch;
+        System.Windows.Forms.ToolStripMenuItem mbiToolsOptions;
 		System.Windows.Forms.ToolStripStatusLabel sbiTimeEstimated;
 		private System.Windows.Forms.ToolStripMenuItem mbiFileLoadWorkspace;
 		private System.Windows.Forms.ToolStripMenuItem mbiFileCreateWorkspace;
@@ -81,6 +82,7 @@ namespace GUIBuilder.Windows
             this.mbiFileExit = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiTools = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiToolsSubDivisionBatch = new System.Windows.Forms.ToolStripMenuItem();
+            this.mbiToolsWorkshopBatch = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiToolsBorderBatch = new System.Windows.Forms.ToolStripMenuItem();
             this.mbiToolsRenderWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -239,6 +241,7 @@ namespace GUIBuilder.Windows
             // 
             this.mbiTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mbiToolsSubDivisionBatch,
+            this.mbiToolsWorkshopBatch,
             this.mbiToolsBorderBatch,
             this.mbiToolsRenderWindow,
             this.toolStripSeparator1,
@@ -257,6 +260,14 @@ namespace GUIBuilder.Windows
             this.mbiToolsSubDivisionBatch.Size = new System.Drawing.Size(142, 22);
             this.mbiToolsSubDivisionBatch.Tag = "MainWindow.ToolMenu.SubDivisions";
             this.mbiToolsSubDivisionBatch.Text = "SubDivisions";
+            // 
+            // mbiToolsWorkshopBatch
+            // 
+            this.mbiToolsWorkshopBatch.Enabled = false;
+            this.mbiToolsWorkshopBatch.Name = "mbiToolsWorkshopBatch";
+            this.mbiToolsWorkshopBatch.Size = new System.Drawing.Size( 142, 22 );
+            this.mbiToolsWorkshopBatch.Tag = "MainWindow.ToolMenu.Workshops";
+            this.mbiToolsWorkshopBatch.Text = "Workshops";
             // 
             // mbiToolsBorderBatch
             // 

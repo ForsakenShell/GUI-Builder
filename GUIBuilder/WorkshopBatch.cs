@@ -291,6 +291,236 @@ namespace GUIBuilder
 
         #endregion
 
+        #region Generate and Optimize Workshop Elements
+
+        public static void CheckMissingElements( List<Fallout4.WorkshopScript> workshops, bool checkBorderEnablers, bool checkSandboxVolumes )
+        {
+            /*
+            DebugLog.OpenIndentLevel();
+
+            var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
+            m.PushStatusMessage();
+            m.SetCurrentStatusMessage( string.Format( "ControllerBatch.CheckingElements".Translate(), "Controller.WorkshopL".Translate() ) );
+
+            List<GUIBuilder.FormImport.ImportBase> list = null;
+
+            if( checkBorderEnablers )
+                GenerateMissingBorderEnablers( ref list, workshops, m );
+            if( checkSandboxVolumes )
+                GenerateSandboxes( ref list, workshops, m, true, true );
+
+            bool allImportsMatchTarget = false;
+            FormImport.ImportBase.ShowImportDialog( list, true, ref allImportsMatchTarget );
+
+            m.PopStatusMessage();
+            DebugLog.CloseIndentLevel();
+            */
+        }
+
+        public static void GenerateSandboxes( ref List<FormImport.ImportBase> list, List<Fallout4.WorkshopScript> workshops, GUIBuilder.Windows.Main m, bool createMissing, bool ignoreExisting )
+        {
+            if( ( !createMissing ) && ( ignoreExisting ) )
+                return; // So, uh...do nothing, der?
+
+            DebugLog.OpenIndentLevel();
+            m.PushStatusMessage();
+            m.SetCurrentStatusMessage( "ControllerBatch.CalculatingSandboxes".Translate() );
+            string msg;
+            m.StartSyncTimer();
+            var fStart = m.SyncTimerElapsed();
+
+            foreach( var workshop in workshops )
+            {
+                m.PushStatusMessage();
+                msg = string.Format( "ControllerBatch.CheckingSandboxFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.SetCurrentStatusMessage( msg );
+
+                var borderMarkers = workshop.GetBorderMarkers();
+                var sandbox = workshop.SandboxVolume;
+                /*DebugLog.Write( string.Format(
+                    "Sandbox for:{0}{1}",
+                    ImportBase.ExtraInfoFor( "\n\tWorkshop = {0}", workshop, unresolveable: "unresolved" ),
+                    ImportBase.ExtraInfoFor( "\n\tSandbox = {0}", sandbox, unresolveable: "unresolved" ) ) ); */
+                if(
+                    ( ( sandbox != null ) && ( ignoreExisting ) ) ||
+                    ( ( sandbox == null ) && ( !createMissing ) ) ||
+                    ( borderMarkers.NullOrEmpty() )
+                )
+                {
+                    m.PopStatusMessage();
+                    continue;
+                }
+
+                DebugLog.OpenIndentLevel( workshop.IDString, false );
+
+                msg = string.Format( "ControllerBatch.CalculatingSandboxFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.SetCurrentStatusMessage( msg );
+                m.StartSyncTimer();
+                var tStart = m.SyncTimerElapsed();
+
+                var hintZ = 0.0f;
+                var buildVolumes = workshop.BuildVolumes;
+                if( !buildVolumes.NullOrEmpty() )
+                {
+                    foreach( var volume in buildVolumes )
+                        hintZ += volume.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                    hintZ /= buildVolumes.Count;
+                }
+                else if( sandbox != null )
+                    hintZ = sandbox.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                else
+                    hintZ = workshop.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+
+                // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
+                var points = new List<Vector2f>();
+                foreach( var marker in borderMarkers )
+                    points.Add( new Vector2f( marker.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+
+                var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
+
+                var osv = VolumeBatch.CalculateOptimalSandboxVolume(
+                    hull,
+                    workshop.Reference.Worldspace,
+                    false,
+                    GodObject.CoreForms.Fallout4.fSandboxCylinderBottom,
+                    GodObject.CoreForms.Fallout4.fSandboxCylinderTop,
+                    128.0f, 128.0f,
+                    hintZ
+                );
+
+                if( osv == null )
+                    DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", workshop.ToString() ) );
+                else
+                {
+                    DebugLog.WriteStrings( null, new[] {
+                        string.Format(
+                            "Position = {0} -> {1}",
+                            sandbox == null ? "[null]" : sandbox.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            osv.Size.ToString() ),
+                        string.Format(
+                            "Size = {0} -> {1}",
+                            sandbox == null ? "[null]" : sandbox.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            osv.Position.ToString() ),
+                        string.Format(
+                            "Z Rotation = {0} -> {1}",
+                            sandbox == null ? "[null]" : sandbox.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
+                            osv.Rotation.Z.ToString() )
+                        }, false, true, false, false );
+                    var w = workshop.Reference.Worldspace;
+                    var c = w == null
+                        ? workshop.Reference.Cell
+                        : workshop.Reference.Worldspace.Cells.Persistent;
+                    var sandboxBase = sandbox == null
+                        ? GodObject.CoreForms.Fallout4.Activator.DefaultDummy
+                        : sandbox.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    var color = sandbox == null
+                        ? System.Drawing.Color.FromArgb( 255, 0, 0 )
+                        : sandbox.Primitive.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    FormImport.ImportBase.AddToList(
+                        ref list,
+                        new FormImport.ImportSandboxReference(
+                            sandbox,
+                            string.Format(
+                                "{0}{1}",
+                                workshop.NameFromEditorID,
+                                "SandboxArea" ),
+                            sandboxBase,
+                            w, c,
+                            osv.Position,
+                            osv.Rotation,
+                            osv.Size,
+                            color,
+                            workshop.Reference,
+                            GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkSandbox,
+                            workshop.Reference.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                            FormImport.ImportSandboxReference.FO4_TARGET_RECORD_FLAGS
+                    ) );
+                }
+                var elapsed = m.StopSyncTimer( tStart );
+                m.PopStatusMessage();
+                DebugLog.CloseIndentLevel( elapsed );
+            }
+
+            m.StopSyncTimer( fStart );
+            m.PopStatusMessage();
+            DebugLog.CloseIndentLevel();
+        }
+
+        public static void NormalizeBuildVolumes( ref List<FormImport.ImportBase> list, List<Fallout4.WorkshopScript> workshops, GUIBuilder.Windows.Main m, bool missingOnly )
+        {
+            DebugLog.OpenIndentLevel();
+
+            m.PushStatusMessage();
+            m.SetCurrentStatusMessage( "ControllerBatch.CheckingBuildVolumes".Translate() );
+            string msg;
+            m.StartSyncTimer();
+            var fStart = m.SyncTimerElapsed();
+
+            foreach( var workshop in workshops )
+            {
+                m.PushStatusMessage();
+                m.StartSyncTimer();
+                var tStart = m.SyncTimerElapsed();
+                msg = string.Format( "ControllerBatch.CheckingBuildVolumesFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.SetCurrentStatusMessage( msg );
+
+                var volumes = workshop.BuildVolumes;
+                /*DebugLog.Write( string.Format(
+                    "Sandbox for:{0}{1}",
+                    ImportBase.ExtraInfoFor( "\n\tSub-Division = {0}", subdivision, unresolveable: "unresolved" ),
+                    ImportBase.ExtraInfoFor( "\n\tSandbox = {0}", sandbox, unresolveable: "unresolved" ) ) ); */
+                //if( ( volumes.NullOrEmpty() )&&( missingOnly ) )
+                if( volumes.NullOrEmpty() )
+                {
+                    m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    m.PopStatusMessage();
+                    continue;
+                }
+                var borderMarkers = workshop.GetBorderMarkers();
+                if( borderMarkers.NullOrEmpty() )
+                {
+                    m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    m.PopStatusMessage();
+                    continue;
+                }
+
+                msg = string.Format( "ControllerBatch.NormalizingBuildVolumesFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.SetCurrentStatusMessage( msg );
+
+                // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
+                var points = new List<Vector2f>();
+                foreach( var marker in borderMarkers )
+                    points.Add( new Vector2f( marker.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+
+                var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
+
+                var color = System.Drawing.Color.FromArgb( 128, 0, 255 );
+
+                VolumeBatch.NormalizeBuildVolumes(
+                    ref list,
+                    workshop.NameFromEditorID,   // FIX ME!
+                    hull,
+                    volumes,
+                    workshop.Reference.Worldspace,
+                    workshop.Reference,
+                    GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedPrimitive,
+                    GodObject.CoreForms.Fallout4.Activator.DefaultDummy,
+                    color,
+                    GUIBuilder.FormImport.ImportBuildVolumeReference.FO4_TARGET_RECORD_FLAGS,
+                    -512.0f, 512.0f
+                ); ;
+
+                m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.PopStatusMessage();
+            }
+
+            m.StopSyncTimer( fStart );
+            m.PopStatusMessage();
+            DebugLog.CloseIndentLevel();
+        }
+
+        #endregion
+
     }
 
 }

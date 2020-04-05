@@ -20,6 +20,7 @@ namespace AnnexTheCommonwealth
     public class Volume : Engine.Plugin.PapyrusScript
     {
         
+        /*
         public const int ANCHOR_SELF = 1000;
         public const int ANCHOR_NEIGHBOUR = 50;
         public const int ANCHOR_OPPOSITE = 0;
@@ -31,9 +32,10 @@ namespace AnnexTheCommonwealth
             public bool Anchored;
             public int Anchoring;
         }
-        
-        Engine.Plugin.TargetHandle _lastTarget;
-        CornerData[] _corners;
+        */
+
+        //Engine.Plugin.TargetHandle _lastTarget;
+        //CornerData[] _corners;
         
         public Vector2f GetPosition2D( Engine.Plugin.TargetHandle target )
         {
@@ -55,8 +57,8 @@ namespace AnnexTheCommonwealth
         // Clear any cached values to force the change to be properly reflected
         void OnSyncObjectDataChanged( object sender, EventArgs e )
         {
-            _lastTarget = Engine.Plugin.TargetHandle.None;
-            _corners = null;
+            //_lastTarget = Engine.Plugin.TargetHandle.None;
+            //_corners = null;
         }
         
         #endregion
@@ -67,16 +69,17 @@ namespace AnnexTheCommonwealth
             return primitive.GetBounds( target );
         }
         
+        /*
         public void CalculateCornerPositions( Engine.Plugin.TargetHandle target, bool overrideAndClearAnchoring = false )
         {
             // Restrict rotation to 0->360
-            /*
-            while( rotation.Z < 0f )
-            {
-                rotation.Z += 360f;
-            }
-            rotation.Z %= 360f;
-            */
+            // *
+            //while( rotation.Z < 0f )
+            //{
+            //    rotation.Z += 360f;
+            //}
+            //rotation.Z %= 360f;
+            // * /
             
             _lastTarget = target;
             
@@ -102,7 +105,9 @@ namespace AnnexTheCommonwealth
                         _corners[ i ].Position = newCorners[ i ];
             }
         }
+        */
         
+        /*
         /// <summary>
         /// Modifies the specified corner to the new position.  If forceSquare is true, this function will also
         /// recalculate the entire volumes length, width and, position using the new position of the corner and
@@ -185,7 +190,9 @@ namespace AnnexTheCommonwealth
             // Corner set [and anchored] and, volume was recalculated
             return true;
         }
-        
+        */
+
+        /*
         /// <summary>
         /// Check whether a specific corner is anchored
         /// </summary>
@@ -216,7 +223,9 @@ namespace AnnexTheCommonwealth
             if( ( corner < 0 )||( corner > 3 ) ) return;
             _corners[ corner ].Anchored = anchoring;
         }
-        
+        */
+
+        /*
         /// <summary>
         /// Copy of the internal corner array position fields
         /// </summary>
@@ -230,6 +239,7 @@ namespace AnnexTheCommonwealth
                 clone[ index ] = new Vector2f( _corners[ index ].Position );
             return clone;
         }
+        */
         
     }
     

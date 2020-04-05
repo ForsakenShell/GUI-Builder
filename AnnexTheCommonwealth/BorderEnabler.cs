@@ -254,7 +254,7 @@ namespace AnnexTheCommonwealth
                         var refr = form as Engine.Plugin.Forms.ObjectReference;
                         if( refr == null ) continue;
                         originalForms.Add( refr );
-                        var stat = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        var stat = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                         if( stat != null )
                             originalForms.Add( stat );
                     }
@@ -519,7 +519,7 @@ namespace AnnexTheCommonwealth
                             refrs[ refrFID ] = refrBucket;
                         }
                         
-                        var statFID = refr.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                        var statFID = refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                         
                         nifBucket<Engine.Plugin.Forms.Static> statBucket;
                         if( !stats.TryGetValue( statFID, out statBucket ) )
@@ -663,7 +663,7 @@ namespace AnnexTheCommonwealth
                     for( int i = 0; i < pNifs.Count; i++ )
                     {
                         var pn = pNifs[ i ];
-                        var sn = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( pn.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                        var sn = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Static>( pn.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                         moel.Add(
                             string.Format(
                                 "\tMesh: 0x{0} ({1}) at {2}",

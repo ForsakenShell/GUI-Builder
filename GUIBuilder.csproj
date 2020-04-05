@@ -141,6 +141,7 @@
     <Compile Include="Extensions\GenStream.cs" />
     <Compile Include="Extensions\GenString.cs" />
     <Compile Include="GUIBuilder\CustomForms.cs" />
+    <Compile Include="GUIBuilder\VolumeBatch.cs" />
     <Compile Include="GUIBuilder\Windows\CustomForms.cs">
       <SubType>Form</SubType>
     </Compile>

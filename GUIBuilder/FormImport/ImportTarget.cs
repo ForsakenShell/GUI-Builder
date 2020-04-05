@@ -18,6 +18,36 @@ using AnnexTheCommonwealth;
 namespace GUIBuilder.FormImport
 {
     
+    public static class ImportTargetExtensions
+    {
+        public static string DisplayIDInfo( this ImportTarget target, string format = null, string unresolveableSuffix = null )
+        {
+            if( string.IsNullOrEmpty( format ) ) format = "{0} for {1}";
+            if( target == null ) return string.Format( format, "[null]" );
+            //return ImportBase.ExtraInfoFor( f, Value, FormID, EditorID, unresolveable, extra );
+            var tmp = !target.Resolveable()
+                ? string.IsNullOrEmpty( unresolveableSuffix )
+                    ? string.Format(
+                        "IXHandle.IDString".Translate(),
+                        target.FormID.ToString( "X8" ),
+                        target.EditorID )
+                    : string.Format(
+                        "{0} {1}",
+                        string.Format(
+                            "IXHandle.IDString".Translate(),
+                            target.FormID.ToString( "X8" ),
+                            target.EditorID
+                        ),
+                        unresolveableSuffix )
+                : string.Format(
+                    "IXHandle.IDString".Translate(),
+                    target.DisplayFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
+                    target.DisplayEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            return string.Format( format, tmp, target.Name );
+        }
+
+    }
+
     public abstract class ImportTarget
     {
         
@@ -59,9 +89,12 @@ namespace GUIBuilder.FormImport
         
         protected ImportTarget( string name, ImportBase parent, Type classType, uint formID, string editorID )
         {
-            Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
-            if( Association == null )
-                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
+            if( classType != typeof( Engine.Plugin.Form ) )
+            {
+                Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
+                if( Association == null )
+                    throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
+            }
             Name = name;
             Parent = parent;
             FormID = formID;
@@ -70,9 +103,12 @@ namespace GUIBuilder.FormImport
         
         protected ImportTarget( string name, ImportBase parent, Type classType, Engine.Plugin.Interface.IXHandle target = null)
         {
-            Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
-            if( Association == null )
-                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
+            if( classType != typeof( Engine.Plugin.Form ) )
+            {
+                Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
+                if( Association == null )
+                    throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
+            }
             Name = name;
             Parent = parent;
             Value = target;
@@ -80,9 +116,12 @@ namespace GUIBuilder.FormImport
         
         protected ImportTarget( string name, ImportBase parent, Type classType )
         {
-            Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
-            if( Association == null )
-                throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
+            if( classType != typeof( Engine.Plugin.Form ) )
+            {
+                Association = Engine.Plugin.Attributes.Reflection.AssociationFrom( classType );
+                if( Association == null )
+                    throw new Exception( string.Format( "{0} :: cTor() :: Cannot resolve Association from classType {1}", this.TypeFullName(), ( classType == null ? "null" : classType.ToString() ) ) );
+            }
             Name = name;
             Parent = parent;
         }
@@ -157,31 +196,6 @@ namespace GUIBuilder.FormImport
             if( ( errorIfUnresolveable )&&( _Value == null ) )
                 Parent.AddErrorMessage( FormImport.ErrorTypes.Resolve, this.DisplayIDInfo( "Cannot resolve {0} for {1}" ) );
             return ( _Value != null );
-        }
-        
-        public string DisplayIDInfo( string format = null, string unresolveableSuffix = null )
-        {
-            if( string.IsNullOrEmpty( format ) ) format = "{0} for {1}";
-            //return ImportBase.ExtraInfoFor( f, Value, FormID, EditorID, unresolveable, extra );
-            var tmp = !Resolveable()
-                ? string.IsNullOrEmpty( unresolveableSuffix )
-                    ? string.Format(
-                        "IXHandle.IDString".Translate(),
-                        FormID.ToString( "X8" ),
-                        EditorID )
-                    : string.Format(
-                        "{0} {1}",
-                        string.Format(
-                            "IXHandle.IDString".Translate(),
-                            FormID.ToString( "X8" ),
-                            EditorID
-                        ),
-                        unresolveableSuffix )
-                : string.Format(
-                    "IXHandle.IDString".Translate(),
-                    DisplayFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ),
-                    DisplayEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-            return string.Format( format, tmp, Name );
         }
         
         protected void SyncImportReferenceInfoWithResolvedTarget()

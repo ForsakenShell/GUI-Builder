@@ -11,6 +11,13 @@
     
     <Location.Name>Name</Location.Name>
 
+    <Controller.WorkshopL>workshop</Controller.WorkshopL>
+    <Controller.WorkshopU>Workshop</Controller.WorkshopU>
+    <Controller.SubDivisionL>sub-division</Controller.SubDivisionL>
+    <Controller.SubDivisionU>Sub-Division</Controller.SubDivisionU>
+    <Controller.SettlementL>settlement</Controller.SettlementL>
+    <Controller.SettlementU>Settlement</Controller.SettlementU>
+
     <IXHandle.IDString>0x{0} - "{1}"</IXHandle.IDString>
 
     <DropdownSelectNone>NONE</DropdownSelectNone>
@@ -48,6 +55,7 @@
     <MainWindow.FileMenu.Exit>Exit</MainWindow.FileMenu.Exit>
     <MainWindow.ToolMenu>Tools</MainWindow.ToolMenu>
     <MainWindow.ToolMenu.SubDivisions>Sub-Division Batch</MainWindow.ToolMenu.SubDivisions>
+    <MainWindow.ToolMenu.Workshops>Workshop Batch</MainWindow.ToolMenu.Workshops>
     <MainWindow.ToolMenu.Borders>Border Batch</MainWindow.ToolMenu.Borders>
     <MainWindow.ToolMenu.Render>Render Window</MainWindow.ToolMenu.Render>
     <MainWindow.ToolMenu.About>About</MainWindow.ToolMenu.About>
@@ -241,19 +249,20 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatch.CreateNIFsFor>Creating "{0}" NIFs for {1}...</BorderBatch.CreateNIFsFor>
     <BorderBatch.CalculatingBordersFor>Calculating borders for "{0}"...</BorderBatch.CalculatingBordersFor>
     <BorderBatch.CalculatingBordersForWith>Calculating borders for "{0}" - "{1}"</BorderBatch.CalculatingBordersForWith>
+
+    <ControllerBatch.CheckingElements>Checking for missing {0} elements...</ControllerBatch.CheckingElements>
+    <ControllerBatch.CalculatingSandboxes>Calculating sandbox volumes...</ControllerBatch.CalculatingSandboxes>
+    <ControllerBatch.CheckingSandboxFor>Checking sandbox for "{0}"...</ControllerBatch.CheckingSandboxFor>
+    <ControllerBatch.CalculatingSandboxFor>Calculating sandbox for "{0}"...</ControllerBatch.CalculatingSandboxFor>
+    <ControllerBatch.CheckingBuildVolumes>Checking build volumes...</ControllerBatch.CheckingBuildVolumes>
+    <ControllerBatch.CheckingBuildVolumesFor>Checking build volumes for "{0}"...</ControllerBatch.CheckingBuildVolumesFor>
+    <ControllerBatch.NormalizingBuildVolumesFor>Normalizing build volumes for "{0}"...</ControllerBatch.NormalizingBuildVolumesFor>
     
     <SubDivisionBatch.ClearingBordersFor>Clearing borders for "{0}"...</SubDivisionBatch.ClearingBordersFor>
     <SubDivisionBatch.WarnMissingEnablers.Title>Cannot generate border segments</SubDivisionBatch.WarnMissingEnablers.Title>
     <SubDivisionBatch.WarnMissingEnablers.Body>Must automatically generate or manually create missing border enablers before calculating border segments from edge flags.</SubDivisionBatch.WarnMissingEnablers.Body>
-    <SubDivisionBatch.CheckingElements>Checking for missing sub-division elements...</SubDivisionBatch.CheckingElements>
     <SubDivisionBatch.CheckingMissingBorderEnablers>Checking for missing border enablers..."</SubDivisionBatch.CheckingMissingBorderEnablers>
     <SubDivisionBatch.CheckingBorderEnablersFor>Checking border enablers for "{0}"...</SubDivisionBatch.CheckingBorderEnablersFor>
-    <SubDivisionBatch.CalculatingSandboxes>Calculating sandbox volumes...</SubDivisionBatch.CalculatingSandboxes>
-    <SubDivisionBatch.CheckingSandboxFor>Checking sandbox for "{0}"...</SubDivisionBatch.CheckingSandboxFor>
-    <SubDivisionBatch.CalculatingSandboxFor>Calculating sandbox for "{0}"...</SubDivisionBatch.CalculatingSandboxFor>
-    <SubDivisionBatch.CheckingBuildVolumes>Checking build volumes...</SubDivisionBatch.CheckingBuildVolumes>
-    <SubDivisionBatch.CheckingBuildVolumesFor>Checking build volumes for "{0}"...</SubDivisionBatch.CheckingBuildVolumesFor>
-    <SubDivisionBatch.NormalizingBuildVolumesFor>Normalizing build volumes for "{0}"...</SubDivisionBatch.NormalizingBuildVolumesFor>
     
     <WorldspaceDataPool.CreatingTextures>Creating textures...</WorldspaceDataPool.CreatingTextures>
     <WorldspaceDataPool.CreatingTexturesP>Creating textures...{0}%</WorldspaceDataPool.CreatingTexturesP>

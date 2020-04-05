@@ -16,6 +16,16 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
     public class Primitive : RawField
     {
         
+        public enum PrimitiveType
+        {
+            None = 0,
+            Box = 1,
+            Sphere = 2,
+            Plane = 3,
+            Line = 4,
+            Ellipsoid =5
+        }
+        
         const string _XPath         = "XPRM";
         
         const string _BOUNDS        = "Bounds";
@@ -63,13 +73,13 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
             cache_U.SetValue( target, value );
         }
         
-        public int GetType( TargetHandle target )
+        public PrimitiveType GetType( TargetHandle target )
         {
-            return cache_T.GetValue( target );
+            return (PrimitiveType)cache_T.GetValue( target );
         }
-        public void SetType( TargetHandle target, int value )
+        public void SetType( TargetHandle target, PrimitiveType value )
         {
-            cache_T.SetValue( target, value );
+            cache_T.SetValue( target, (int)value );
         }
         
         public override string ToString( TargetHandle target, string format = null )
@@ -79,7 +89,7 @@ namespace Engine.Plugin.Forms.Fields.ObjectReference
                 GetBounds( target ).ToString(),
                 GetColor( target ).ToString(),
                 GetUnknown( target ),
-                GetType( target ) );
+                GetType( target ).ToString() );
         }
         
     }
