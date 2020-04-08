@@ -10,7 +10,7 @@ Changes:
     + Log files are now created in BorderBuilder\Logs\
     + BorderBuilder\ can properly be in the Fallout 4\ or GUIBuilder.exe directory
     + Simplified some field names and gave them summaries with a description of their use
-    + Moved client windows (WindowBase inherited forms) event registration to child constructor from InitializeComponent() (fixes IDE Form Designer would crashing)
+    + Moved client windows (WindowBase inherited forms) event registration to child constructor from InitializeComponent() (fixes IDE Form Designer crashing)
     + Improved some code readability
     + WIP for Render window crashing on loading textures (not sure when this issue cropped up)
     + Changes default NIF ExportInfo line creation
@@ -18,15 +18,15 @@ Changes:
     + Reorganize English (UK) translation file
     + General thread safety improvements
     + Worldspace Height at Worldpos is now calculated by ray-triangle intersection based on how the CK generates heightmap triangles
+    + Refactored how imports are generated and handled
 Adds:
     + Options menu - mirror main thread log to console
     + Options menu - NIF ExportInfo is customizable (global setting, saved in BorderBuilder\GUIBuilder_Options.xml)
     + Borders with solid bottoms can now be created, see BorderBuilder\How_To_Make_A_Workshop_Border.txt, _BorderWithBottom LocationRef
     + Good Neighbor and Diamond City CK exported worldspace files
-    + XeLibSharp API expanded
     + WIP of loading Landscape records and using the heightmaps stored in the plugins instead of CK exported DDS files
-    + WIP of WorkshopBatch window for workshop specific functions
-    + Custom Forms window for setting Workspace wide Forms for your mod
+    + WIP of "Workshop Batch" window for workshop specific functions - currently supports normalizing build volumes and calculating an optimial sandbox volume
+    + "Custom Forms" window for setting Workspace wide Forms for your mod
     + Notes for creating a set of triangles for a concave hull
     + NIFBuilder - Option to use full (32-bit) precision or half (16-bit) precision vertexes
     + Added some missing Forms to Fallout4.Hardcoded.dat
