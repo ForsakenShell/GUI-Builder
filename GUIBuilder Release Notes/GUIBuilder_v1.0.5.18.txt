@@ -30,4 +30,4 @@ Adds:
     + Notes for creating a set of triangles for a concave hull
     + NIFBuilder - Option to use full (32-bit) precision or half (16-bit) precision vertexes
     + Added some missing Forms to Fallout4.Hardcoded.dat
-https://www.dropbox.com/TBD
+https://www.dropbox.com/s/umovr246441rum7/guibuilder_test_08_04_2020.7z?dl=0
