@@ -22,6 +22,11 @@ public static class GenString
         return string.Equals( a, b, StringComparison.InvariantCultureIgnoreCase );
     }
 
+    public static bool SensitiveInvariantMatch( this string a, string b )
+    {
+        return string.Equals( a, b, StringComparison.InvariantCulture );
+    }
+
     public static bool InsensitiveInvariantMatch( this string a, string[] b )
     {
         if( ( b != null ) && ( b.Length > 0 ) )
@@ -212,6 +217,40 @@ public static class GenString
     }
 
     #endregion
+
+
+    /// <summary>
+    /// Replace all instances of tokenName with tokenValue in source.
+    /// </summary>
+    /// <param name="source">Tokenized string</param>
+    /// <param name="tokenName">Token to replace in source</param>
+    /// <param name="tokenValue">Token replacement value for source</param>
+    /// <param name="comparisonType">String comparison type</param>
+    public static void ReplaceToken( ref string source, string tokenName, string tokenValue = null, StringComparison comparisonType = StringComparison.InvariantCultureIgnoreCase )
+    {
+        if( string.IsNullOrEmpty( tokenName ) ) return;
+
+        while( true )
+        {
+            if( string.IsNullOrEmpty( source ) ) break;
+
+            var i = source.IndexOf( tokenName, comparisonType );
+            if( i < 0 ) break;
+
+            var l = tokenName.Length;
+            var pre  = i == 0 ? null : source.Substring( 0, i );
+            var post = i + l == source.Length ? null : source.Substring( i + l );
+
+            var result = string.Format(
+                "{0}{1}{2}",
+                pre,
+                tokenValue,
+                post
+            );
+
+            source = result;
+        }
+    }
 
     #region Pretty Type [Full]Name and, Null-safe object and List<T> Type [Full]Name
 

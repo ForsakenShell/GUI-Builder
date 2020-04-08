@@ -117,10 +117,11 @@ public static class DebugLog
                 string rightNow = GenFilePath.RightNow( DateTimeFormat ).ReplaceInvalidFilenameChars();
                 if( string.IsNullOrEmpty( instanceTime ) )
                 {
+                    var logRoot = GodObject.Paths.DebugLog;
+                    if( string.IsNullOrEmpty( logRoot ) )
+                        return null;
                     instanceTime = rightNow;
-                    //_logPath = string.Format( "{0}\\{1}", LogRootPath, instanceTime );
-                    _logPath = string.Format( "{0}\\{1}", GodObject.Paths.DebugLog, instanceTime );
-                    //LogRootPath.DeleteFile();   // Force removal of the old global log file
+                    _logPath = string.Format( "{0}\\{1}", logRoot, instanceTime );
                     _logPath.CreatePath();
                 }
                 var fullThreadId = WorkerThreadPool.FriendlyThreadIdName();
@@ -151,11 +152,13 @@ public static class DebugLog
         }
     }
     
-    public static string Open( bool logToConsole = false )
+    public static bool Open( bool logToConsole = false )
     {
         if( ( !_logClosed )&&( !_logInitialized ) )
         {
             _logToConsole = logToConsole;
+            var filename = Filename;
+            if( string.IsNullOrEmpty( filename ) ) return false;
             _logStream = File.Open( Filename, FileMode.Create, FileAccess.Write, FileShare.Read );
             _logInitialized = true;
             _WriteLine( string.Format(
@@ -169,7 +172,7 @@ public static class DebugLog
             ) );
             _logStream.Flush();
         }
-        return Filename;
+        return false;
     }
 
     #endregion
@@ -181,7 +184,7 @@ public static class DebugLog
     public static void OpenIndentLevel( string[] values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = false, bool indentElements = true, bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, true, false, true ) : null;
 
@@ -204,7 +207,7 @@ public static class DebugLog
     public static void OpenIndentLevel<TIXHandle>( List<TIXHandle> values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = false, bool indentElements = true, bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null ) where TIXHandle : Engine.Plugin.Interface.IXHandle
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, true, false, true ) : null;
 
@@ -227,7 +230,7 @@ public static class DebugLog
     public static void OpenIndentLevel( string message, bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         string result = _BuildStringsLine( new [] { ( prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null ), message }, false );
         _WriteLine( result );
@@ -239,7 +242,7 @@ public static class DebugLog
     public static void OpenIndentLevel( bool prefixCallerId = true, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         if( prefixCallerId ) _WriteLine( GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) );
         _WriteLine( OpenIndentChar );
@@ -254,7 +257,7 @@ public static class DebugLog
     public static void CloseIndentIDStrings<TIXHandle>( string listName, List<TIXHandle> list, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true ) where TIXHandle : Engine.Plugin.Interface.IXHandle
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         WriteIDStrings( listName, list, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
         _WriteLine( CloseIndentChar );
@@ -265,7 +268,7 @@ public static class DebugLog
     public static void CloseIndentList<TList>( string listName, List<TList> list, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         WriteList( listName, list, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
         _WriteLine( CloseIndentChar );
@@ -276,7 +279,7 @@ public static class DebugLog
     public static void CloseIndentArray<TArray>( string arrayName, TArray[] array, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         WriteArray( arrayName, array, includeNulls, singleLinePerItem, includeElementCount, includeIndicies, indentElements );
         _WriteLine( CloseIndentChar );
@@ -287,7 +290,7 @@ public static class DebugLog
     public static void CloseIndentLevel( string resultName, string result )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteLine( string.Format( "{0} = {1}", resultName, result ) );
         _WriteLine( CloseIndentChar );
@@ -298,7 +301,7 @@ public static class DebugLog
     public static void CloseIndentLevel<TResult>( string resultName, TResult result ) where TResult : class
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteLine( string.Format( "{0} = {1}", resultName, result.ToStringNullSafe() ) );
         _WriteLine( CloseIndentChar );
@@ -309,7 +312,7 @@ public static class DebugLog
     public static void CloseIndentLevel( long elapsed, string resultName, string result )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         if( elapsed >= 0 )
         {
@@ -326,7 +329,7 @@ public static class DebugLog
     public static void CloseIndentLevel( long elapsed )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var tmp = new TimeSpan( elapsed );
         _WriteLine( string.Format( "Completed in {0}", tmp.ToString() ) );
@@ -338,7 +341,7 @@ public static class DebugLog
     public static void CloseIndentLevel()
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteLine( CloseIndentChar );
 
@@ -359,17 +362,46 @@ public static class DebugLog
                 alertCap,
                 alertName
                 ) );
+        
         _WriteLine( GenString.GetCallerId( 2, null, false, false, true ) );
         if( !string.IsNullOrEmpty( message ) ) _WriteLine( message );
-        if( stackTrace ) _WriteLine( Environment.StackTrace );
+
+        if( stackTrace )
+        {
+            var trace = new System.Diagnostics.StackTrace();
+            _WriteLine( trace.ToString() );
+            //var frames = trace.GetFrames();
+            //_WriteStackTrace( 2, frames );
+        }
+        
         _WriteLine( alertCap );
         _logStream.Flush();
+    }
+
+    // This doesn't work, frame.GetFileLineNumber() always returns 0 and frame.GetFileName() returns null :(
+    private static void _WriteStackTrace( int initialFrame, System.Diagnostics.StackFrame[] frames )
+    {
+        if( frames == null ) return;
+        if( initialFrame >= frames.Length ) return;
+        for( int i = initialFrame; i < frames.Length; i++ )
+        {
+            var frame = frames[ i ];
+            var method = frame.GetMethod();
+            var callerID = GenString.FormatMethod( method, null, false, false, true );
+            _WriteLine( string.Format(
+                "{0}Line: {1} : {2} : {3}",
+                FormatTabChar,
+                frame.GetFileLineNumber(),
+                callerID,
+                frame.GetFileName()
+                ) );
+        }
     }
 
     public static void WriteException( Exception e, string message = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteAlertMessage( "EXCEPTION", "======",
             string.Format(
@@ -377,13 +409,13 @@ public static class DebugLog
                 message,
                 ( message == null ? null : FormatNewLineChar ),
                 e.ToString()
-            ), false );
+            ), true );
     }
 
     public static void WriteError( string message )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteAlertMessage( "ERROR", "======", message, true );
     }
@@ -391,7 +423,7 @@ public static class DebugLog
     public static void WriteWarning( string message )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteAlertMessage( "Warning", "------", message, false );
     }
@@ -403,7 +435,7 @@ public static class DebugLog
     public static void WriteCaller( bool includeParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteLine( GenString.GetCallerId( 1, reportParams, includeParams, false, true ) );
         _logStream.Flush();
@@ -412,7 +444,7 @@ public static class DebugLog
     public static void WriteLine( string message, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         string result = _BuildStringsLine( new [] { ( prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null ), message }, false );
         _WriteLine( result );
@@ -426,7 +458,7 @@ public static class DebugLog
     public static void WriteStrings( string name, string[] values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
         var nameData = _FormatNameElementCount( "Strings", name, ( values.NullOrEmpty() ? 0 : values.Length ), singleLinePerItem, includeElementCount );
@@ -465,7 +497,7 @@ public static class DebugLog
     public static void WriteArray<TArray>( string name, TArray[] values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
         var nameData = _FormatNameElementCount( "Array", name, ( values.NullOrEmpty() ? 0 : values.Length ), singleLinePerItem, includeElementCount );
@@ -504,7 +536,7 @@ public static class DebugLog
     public static void WriteList<TList>( string name, IList<TList> values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null )
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
         var nameData = _FormatNameElementCount( "List", name, ( values.NullOrEmpty() ? 0 : values.Count ), singleLinePerItem, includeElementCount ); 
@@ -543,7 +575,7 @@ public static class DebugLog
     public static void WriteIDStrings<TIXHandle>( string name, IList<TIXHandle> values, bool includeNulls = false, bool singleLinePerItem = false, bool includeElementCount = true, bool includeIndicies = true, bool indentElements = true, bool prefixCallerId = false, bool includeCallerParams = false, string[] reportParams = null ) where TIXHandle : Engine.Plugin.Interface.IXHandle
     {
         if( _logClosed ) return;
-        if( !_logInitialized ) Open();
+        if( ( !_logInitialized )&&( !Open() ) ) return;
 
         var callerId = prefixCallerId ? GenString.GetCallerId( 1, reportParams, includeCallerParams, false, true ) : null;
         var nameData = _FormatNameElementCount( "IDStrings", name, ( values.NullOrEmpty() ? 0 : values.Count ), singleLinePerItem, includeElementCount );

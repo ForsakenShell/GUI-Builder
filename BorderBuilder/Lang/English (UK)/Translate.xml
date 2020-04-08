@@ -4,6 +4,7 @@
     <Form.FormID>FormID</Form.FormID>
     <Form.EditorID>EditorID</Form.EditorID>
     <Form.Filename>Filename</Form.Filename>
+    <Form.RecordFlags>RecordFlags</Form.RecordFlags>
     
     <Workshop.Elements>Elements</Workshop.Elements>
     <Workshop.Element.BuildVolumes>Build Volumes</Workshop.Element.BuildVolumes>
@@ -18,6 +19,45 @@
     <Controller.SettlementL>settlement</Controller.SettlementL>
     <Controller.SettlementU>Settlement</Controller.SettlementU>
 
+    <ClearU>Clear</ClearU>
+    <ClearL>clear</ClearL>
+    <FlagsU>Flags</FlagsU>
+    <FlagsL>flags</FlagsL>
+    <FormL>form</FormL>
+    <FormU>Form</FormU>
+    <BaseFormL>base form</BaseFormL>
+    <BaseFormU>Base Form</BaseFormU>
+    <TargetL>target</TargetL>
+    <TargetU>Target</TargetU>
+    <LinkedRef.ReferenceL>linked reference</LinkedRef.ReferenceL>
+    <LinkedRef.ReferenceU>Linked Reference</LinkedRef.ReferenceU>
+    <EnableParent.ReferenceL>reference</EnableParent.ReferenceL>
+    <EnableParent.ReferenceU>Reference</EnableParent.ReferenceU>
+    <LinkedRef.KeywordL>keyword</LinkedRef.KeywordL>
+    <LinkedRef.KeywordU>Keyword</LinkedRef.KeywordU>
+    <Form.CellL>cell</Form.CellL>
+    <Form.CellU>Cell</Form.CellU>
+    <Form.LayerL>layer</Form.LayerL>
+    <Form.LayerU>Layer</Form.LayerU>
+    <Form.LocationL>location</Form.LocationL>
+    <Form.LocationU>Location</Form.LocationU>
+    <Form.WorldspaceL>worldspace</Form.WorldspaceL>
+    <Form.WorldspaceU>Worldspace</Form.WorldspaceU>
+    <Reference.LocationRefL>location reference</Reference.LocationRefL>
+    <Reference.LocationRefU>Location Reference</Reference.LocationRefU>
+    <Reference.Position>Position</Reference.Position>
+    <Reference.Rotation>Rotation</Reference.Rotation>
+    <Reference.Primitive.Size>Size</Reference.Primitive.Size>
+    <Reference.Primitive.Color>Color</Reference.Primitive.Color>
+    <Reference.Primitive.Shape>Shape</Reference.Primitive.Shape>
+    <Reference.Primitive.Unknown>Unknown</Reference.Primitive.Unknown>
+    <Reference.ScriptU>Script</Reference.ScriptU>
+    <Reference.ScriptL>script</Reference.ScriptL>
+    <Static.MinBounds>Min Bounds</Static.MinBounds>
+    <Static.MaxBounds>Max Bounds</Static.MaxBounds>
+    <Static.Model>Model</Static.Model>
+    <Static.LOD>LOD</Static.LOD>
+    
     <IXHandle.IDString>0x{0} - "{1}"</IXHandle.IDString>
 
     <DropdownSelectNone>NONE</DropdownSelectNone>
@@ -303,4 +343,6 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <CustomForms.SearchingForLocationRef>Searching for default location ref...</CustomForms.SearchingForLocationRef>
     <CustomForms.SearchingForContainer>Searching for default container...</CustomForms.SearchingForContainer>
     
+
+
 </GUIBuilder>

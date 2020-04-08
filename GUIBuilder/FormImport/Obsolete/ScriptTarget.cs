@@ -3,7 +3,9 @@
  *
  * Base papyrus script import class.
  *
+ * OBSOLETE - Use ImportTarget
  */
+/*
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,3 +46,4 @@ namespace GUIBuilder.FormImport
     }
     
 }
+*/

@@ -10,10 +10,15 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 using Maths;
 using GUIBuilder;
+
+using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using Operations = GUIBuilder.FormImport.Operations;
+using Priority = GUIBuilder.FormImport.Priority;
+
+
 
 public static partial class NIFBuilder
 {
@@ -26,6 +31,20 @@ public static partial class NIFBuilder
         public static uint[] InsideSandbox    = { 0x00000000, 0xFFFF00FF, 0xFFFF00FF };
         public static uint[] OutsideSandbox   = { 0x00000000, 0xFF007FFF, 0xFF007FFF };
     }
+
+    public const uint       F4_BORDER_STATIC_RECORD_FLAGS = 0;
+
+    public const uint       ATC_BORDER_STATIC_RECORD_FLAGS =
+        (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD;
+
+    public const uint       F4_BORDER_REFERENCE_RECORD_FLAGS =
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled;
+
+    public const uint       ATC_BORDER_REFERENCE_RECORD_FLAGS =
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.IsFullLOD |
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.LODRespectsEnableState |
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn |
+            (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.VisibleWhenDistant;
 
     static string[] DefaultExportInfo = new string[ 4 ]{
         string.Format(
@@ -238,27 +257,49 @@ public static partial class NIFBuilder
                     // Create an import for the Static Object
                     
                     uint recordFlags = workshopBorder
-                        ? GUIBuilder.FormImport.ImportBorderStatic.F4_BORDER_RECORD_FLAGS
-                        : GUIBuilder.FormImport.ImportBorderStatic.ATC_BORDER_RECORD_FLAGS;
+                        ? F4_BORDER_STATIC_RECORD_FLAGS
+                        : ATC_BORDER_STATIC_RECORD_FLAGS;
 
                     var orgStat = group.BestStaticFormFromOriginalsFor( originalForms, keys, true );
-                    var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_None : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
+                    var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_Invalid : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
                     var statEditorID = group.Mesh.nifFile;
                     var minBounds = group.MinBounds; // Nodes are terrain following and their bounds will be
                     var maxBounds = group.MaxBounds; // the elevation differences from the center (placement)
                     minBounds.Z -= (int)groundSink;  // point, so add the appropriate offsets for the mesh
                     maxBounds.Z += (int)( groundOffset + gradientHeight );
-                    
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, minBounds, maxBounds, recordFlags ) );
+
+                    CreateBorderStaticImport( ref list,
+                        workshopBorder,
+                        statEditorID,
+                        orgStat,
+                        group.NIFFilePath,
+                        minBounds,
+                        maxBounds );
+
+                    //GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, minBounds, maxBounds, recordFlags ) );
 
                     // Create an import for the Object Reference
-                    recordFlags = workshopBorder
-                        ? GUIBuilder.FormImport.ImportBorderReference.F4_BORDER_RECORD_FLAGS
-                        : GUIBuilder.FormImport.ImportBorderReference.ATC_BORDER_RECORD_FLAGS;
-                    
-                        var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
-                    var cell = worldspace.Cells.GetByGrid( group.Cell );
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderReference( orgRefr, statFormID, statEditorID, worldspace, cell, group.Placement, enablerReference, linkRef, linkKeyword, layer, recordFlags ) );
+                    var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
+
+                    CreateBorderReferenceImport( ref list,
+                        workshopBorder,
+                        orgStat,
+                        statEditorID,
+                        orgRefr,
+                        (
+                            ( worldspace == null )
+                            ? orgRefr?.Cell
+                            : worldspace.Cells.GetByGrid( group.Cell )
+                        ),
+                        group.Placement,
+                        layer,
+                        (
+                            ( layer == null )
+                            ? null
+                            : layer.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
+                        ),
+                        enablerReference,
+                        linkRef, linkKeyword );
                 }
             }
             else
@@ -271,5 +312,135 @@ public static partial class NIFBuilder
         DebugLog.CloseIndentList( "Imports", list, false, true, true );
         return list;
     }
-    
+
+    static void CreateBorderStaticImport( ref List<GUIBuilder.FormImport.ImportBase> list,
+        bool workshopBorder,
+        string statEditorID,
+        Engine.Plugin.Forms.Static orgStat,
+        string NIFFilePath,
+        Vector3i minBounds,
+        Vector3i maxBounds
+        )
+    {
+        uint recordFlags = workshopBorder
+                        ? F4_BORDER_STATIC_RECORD_FLAGS
+                        : ATC_BORDER_STATIC_RECORD_FLAGS;
+
+        var import = new GUIBuilder.FormImport.ImportBase(
+                        "Border Static",
+                        Priority.Form_Static,
+                        false,
+                        typeof( Engine.Plugin.Forms.Static ),
+                        orgStat,
+                        statEditorID );
+
+        import.AddOperation( new Operations.SetRecordFlags( import, recordFlags ) );
+
+        import.AddOperation( new Operations.SetEditorID( import, statEditorID ) );
+
+        import.AddOperation( new Operations.SetStaticObjectModels( import,
+            NIFFilePath,
+            (
+                ( ( recordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD ) == 0 )
+                ? null
+                : new string[] { NIFFilePath, NIFFilePath, NIFFilePath, NIFFilePath }
+            ) ) );
+
+        import.AddOperation( new Operations.SetStaticObjectBounds( import,
+            minBounds,
+            maxBounds
+            ) );
+        
+        GUIBuilder.FormImport.ImportBase.AddToList(
+            ref list,
+            import );
+    }
+
+    static void CreateBorderReferenceImport( ref List<GUIBuilder.FormImport.ImportBase> list,
+        bool workshopBorder,
+        Engine.Plugin.Forms.Static baseStat,
+        string statEditorID,
+        Engine.Plugin.Forms.ObjectReference orgRefr,
+        Engine.Plugin.Forms.Cell cell,
+        Vector3f position,
+        Engine.Plugin.Forms.Layer layer,
+        string layerEditorID,
+        AnnexTheCommonwealth.BorderEnabler enablerReference,
+        Engine.Plugin.Forms.ObjectReference linkedRef,
+        Engine.Plugin.Forms.Keyword linkKeyword
+        )
+    {
+        var recordFlags = workshopBorder
+            ? F4_BORDER_REFERENCE_RECORD_FLAGS
+            : ATC_BORDER_REFERENCE_RECORD_FLAGS;
+
+        var import = new GUIBuilder.FormImport.ImportBase(
+            "Border Reference",
+            Priority.Ref_Border,
+            false,
+            orgRefr,
+            statEditorID,
+            cell );
+
+        import.AddOperation( new Operations.SetRecordFlags( import, recordFlags ) );
+        
+        if( baseStat != null )
+            import.AddOperation( new Operations.SetReferenceBaseForm( import, baseStat ) );
+        else if( !string.IsNullOrEmpty( statEditorID ) )
+            import.AddOperation( new Operations.SetReferenceBaseForm( import, statEditorID ) );
+        
+        import.AddOperation( new Operations.SetReferencePosition( import, position ) );
+        
+        if( layer != null )
+            import.AddOperation( new Operations.SetReferenceLayer( import, layer ) );
+        else if( !string.IsNullOrEmpty( layerEditorID ) )
+            import.AddOperation( new Operations.SetReferenceLayer( import, layerEditorID ) );
+        
+        if( enablerReference != null )
+        {
+            import.AddOperation( new Operations.SetReferenceEnableParent( import,
+                enablerReference?.Reference,
+                0x00000000,
+                EnableParentChanged
+            ) );
+        }
+        
+        if( ( linkedRef != null ) && ( linkKeyword != null ) )
+        {
+            import.AddOperation( new Operations.SetReferenceLinkedRef( import,
+                linkedRef, linkKeyword
+            ) );
+        }
+        
+        import.AddOperation( new Operations.SetReferenceLocationReference( import ) );
+
+        GUIBuilder.FormImport.ImportBase.AddToList(
+            ref list,
+            import );
+
+    }
+
+    static bool EnableParentChanged( Engine.Plugin.Forms.ObjectReference reference, bool linked )
+    {   // TODO:  Put this somewhere more appropriate, it will likely be used by other imports
+        
+        var borderEnabler = reference.GetScript<AnnexTheCommonwealth.BorderEnabler>();
+        if( borderEnabler == null ) return true;
+        
+        var baseStatic = reference.GetName<Engine.Plugin.Forms.Static>( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+        if( linked )
+        {
+            borderEnabler.AddBaseFormAsNIFReference( baseStatic );
+            borderEnabler.AddPlacedNIFReference( reference );
+        }
+        else
+        {
+            borderEnabler.RemoveBaseFormAsNIFReference( baseStatic );
+            borderEnabler.RemovePlacedNIFReference( reference );
+        }
+        
+        borderEnabler.SendObjectDataChangedEvent( borderEnabler );
+
+        return true;
+    }
+
 }

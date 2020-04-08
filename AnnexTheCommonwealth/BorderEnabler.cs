@@ -235,10 +235,10 @@ namespace AnnexTheCommonwealth
             var neighbour = Neighbour;
             var worldspace = Reference.Worldspace;
             //var subFID = subdivision.GetFormID( Engine.Plugin.TargetHandle.Master );
-            var subName = subdivision.NameFromEditorID;
+            var subName = subdivision.QualifiedName;
             var nsubName = neighbour == null
                 ? "Main"
-                : neighbour.NameFromEditorID;
+                : neighbour.QualifiedName;
             
             if( ( !string.IsNullOrEmpty( meshSubPath ) )&&( meshSubPath[ meshSubPath.Length - 1 ] != '\\' ) )
                 meshSubPath += @"\";
@@ -571,7 +571,20 @@ namespace AnnexTheCommonwealth
             
             return true;
         }
-        
+
+        public bool RemoveBaseFormAsNIFReference( Engine.Plugin.Forms.Static baseform )
+        {
+            if( baseform == null )
+                return false;
+
+            if( _NIFs == null )
+                return true;
+
+            var baseFID = baseform.GetFormID( Engine.Plugin.TargetHandle.Master );
+
+            return _NIFs.Remove( baseFID );
+        }
+
         public bool FlagPlacedNIFAsUsedByImport( Engine.Plugin.Forms.ObjectReference refr )
         {
             if( ( refr == null )||( _placedNIFs == null ) )
@@ -604,11 +617,24 @@ namespace AnnexTheCommonwealth
             
             return true;
         }
-        
+
+        public bool RemovePlacedNIFReference( Engine.Plugin.Forms.ObjectReference refr )
+        {
+            if( refr == null )
+                return false;
+
+            if( _placedNIFs == null )
+                return true;
+
+            var refrFID = refr.GetFormID( Engine.Plugin.TargetHandle.Master );
+
+            return _placedNIFs.Remove( refrFID );
+        }
+
         #endregion
-        
+
         #region IMouseOver
-        
+
         public override List<string> MouseOverExtra
         {
             get

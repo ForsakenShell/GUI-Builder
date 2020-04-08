@@ -42,6 +42,7 @@ namespace GodObject
             public static class Activator
             {
                 public static Engine.Plugin.Forms.Activator DefaultDummy                            = new Engine.Plugin.Forms.Activator  ( Master.Filename.Fallout4      , 0x0003B695 );
+                public static Engine.Plugin.Forms.Activator DefaultDisableSelfTrigger               = new Engine.Plugin.Forms.Activator  ( Master.Filename.Fallout4      , 0x0015BCD9 );
                 public static Engine.Plugin.Forms.Activator DefaultEmptyTrigger                     = new Engine.Plugin.Forms.Activator  ( Master.Filename.Fallout4      , 0x000224E3 );
             }
 
@@ -182,6 +183,7 @@ namespace GodObject
                         Fallout4.Container.WorkshopWorkbenchWireOnly,
 
                         Fallout4.Activator.DefaultDummy,
+                        Fallout4.Activator.DefaultDisableSelfTrigger,
                         Fallout4.Activator.DefaultEmptyTrigger,
 
                         Fallout4.Keyword.WorkshopLinkedBuildAreaEdge,

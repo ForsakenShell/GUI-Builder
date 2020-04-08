@@ -17,6 +17,12 @@ using Maths;
 using Fallout4;
 using AnnexTheCommonwealth;
 
+using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using Operations = GUIBuilder.FormImport.Operations;
+using Priority = GUIBuilder.FormImport.Priority;
+using Shape = Engine.Plugin.Forms.Fields.ObjectReference.Primitive.PrimitiveType;
+
+
 namespace GUIBuilder
 {
     /// <summary>
@@ -165,7 +171,7 @@ namespace GUIBuilder
             //var keyword = GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword;
             var worldspace = workshop.Reference.Worldspace;
             //var workshopFID = this.GetFormID( Engine.Plugin.TargetHandle.Master );
-            var workshopName = workshop.NameFromEditorID;
+            var workshopName = workshop.QualifiedName;
             var border = workshop.BorderReference;
             if( ( createImportData ) && ( border != null ) )
                 originalForms.Add( border );
@@ -317,7 +323,12 @@ namespace GUIBuilder
             */
         }
 
-        public static void GenerateSandboxes( ref List<FormImport.ImportBase> list, List<Fallout4.WorkshopScript> workshops, GUIBuilder.Windows.Main m, bool createMissing, bool ignoreExisting )
+        public static void GenerateSandboxes(
+            ref List<FormImport.ImportBase> list,
+            List<Fallout4.WorkshopScript> workshops,
+            GUIBuilder.Windows.Main m,
+            bool createMissing,
+            bool ignoreExisting )
         {
             if( ( !createMissing ) && ( ignoreExisting ) )
                 return; // So, uh...do nothing, der?
@@ -342,8 +353,22 @@ namespace GUIBuilder
                     ImportBase.ExtraInfoFor( "\n\tWorkshop = {0}", workshop, unresolveable: "unresolved" ),
                     ImportBase.ExtraInfoFor( "\n\tSandbox = {0}", sandbox, unresolveable: "unresolved" ) ) ); */
                 if(
-                    ( ( sandbox != null ) && ( ignoreExisting ) ) ||
-                    ( ( sandbox == null ) && ( !createMissing ) ) ||
+                    ( sandbox != null )&&
+                    (
+                        sandbox.LinkedRefs.GetLinkedRef(
+                            Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                            GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedPrimitive.GetFormID( Engine.Plugin.TargetHandle.Master )
+                        ) != null
+                    )
+                )
+                {
+                    // Make a new sandbox so the build volume[s] are separate volumes
+                    sandbox = null;
+                    // TODO: Add WorkshopImport before updating the WorkshopScript ObjectReference for the sandbox volume linked ref
+                }
+                if(
+                    ( ( sandbox != null )&&( ignoreExisting ) )||
+                    ( ( sandbox == null )&&( !createMissing ) )||
                     ( borderMarkers.NullOrEmpty() )
                 )
                 {
@@ -371,7 +396,8 @@ namespace GUIBuilder
                 else
                     hintZ = workshop.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
 
-                // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
+                // Use border marker reference points instead of build volumes so we can work with less points that are accurate enough
+                // also, don't need to calculate any corner/intersection vertexes and the associated problems that go with it.
                 var points = new List<Vector2f>();
                 foreach( var marker in borderMarkers )
                     points.Add( new Vector2f( marker.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
@@ -406,35 +432,82 @@ namespace GUIBuilder
                             sandbox == null ? "[null]" : sandbox.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
                             osv.Rotation.Z.ToString() )
                         }, false, true, false, false );
-                    var w = workshop.Reference.Worldspace;
-                    var c = w == null
+
+                    #region Find layer for sandbox
+
+                    var preferedLayer = VolumeBatch.GetRecommendedLayer(
+                        ref list,
+                        (
+                            sandbox == null
+                            ? null
+                            : new List<Engine.Plugin.Forms.ObjectReference>(){ sandbox }
+                        ),
+                        workshop.Reference.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        string.Format( "{0}Workshop", SetEditorID.Token_Name ),
+                        workshop.QualifiedName,
+                        -1,
+                        out string useLayerEditorID
+                        );
+
+                    #endregion
+
+                    var recordFlags = (uint)0;
+                    var sandboxEditorID = string.Format( "{0}WorkshopSandboxArea", workshop.QualifiedName );
+                    var worldspace = workshop.Reference.Worldspace;
+                    var cell = worldspace == null
                         ? workshop.Reference.Cell
-                        : workshop.Reference.Worldspace.Cells.Persistent;
+                        : ( recordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent ) != 0
+                        ? worldspace.Cells.Persistent
+                        : worldspace.Cells.GetByGrid( Engine.SpaceConversions.WorldspaceToCellGrid( osv.Position.X, osv.Position.Y ) );
                     var sandboxBase = sandbox == null
                         ? GodObject.CoreForms.Fallout4.Activator.DefaultDummy
-                        : sandbox.GetName( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                        : sandbox.GetName<Engine.Plugin.Forms.Activator>( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                     var color = sandbox == null
                         ? System.Drawing.Color.FromArgb( 255, 0, 0 )
                         : sandbox.Primitive.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+
+                    VolumeBatch.CreateVolumeRefImport( ref list,
+                        "Sandbox Volume",
+                        Priority.Ref_SandboxVolume,
+                        sandbox,
+                        sandboxEditorID,
+                        sandboxBase,
+                        sandboxBase.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        cell,
+                        osv.Position,
+                        osv.Rotation,
+                        osv.Size,
+                        color,
+                        workshop.Reference,
+                        GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkSandbox,
+                        true,
+                        preferedLayer,
+                        useLayerEditorID,
+                        recordFlags,
+                        null );
+
+                    /*
                     FormImport.ImportBase.AddToList(
                         ref list,
                         new FormImport.ImportSandboxReference(
                             sandbox,
                             string.Format(
                                 "{0}{1}",
-                                workshop.NameFromEditorID,
+                                workshop.QualifiedName,
                                 "SandboxArea" ),
                             sandboxBase,
-                            w, c,
+                            worldspace, cell,
                             osv.Position,
                             osv.Rotation,
                             osv.Size,
                             color,
                             workshop.Reference,
                             GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkSandbox,
-                            workshop.Reference.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                            FormImport.ImportSandboxReference.FO4_TARGET_RECORD_FLAGS
+                            preferedLayer,
+                            useLayerEditorID,
+                            recordFlags
                     ) );
+                    */
                 }
                 var elapsed = m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
@@ -498,16 +571,25 @@ namespace GUIBuilder
 
                 VolumeBatch.NormalizeBuildVolumes(
                     ref list,
-                    workshop.NameFromEditorID,   // FIX ME!
+                    workshop.Reference,
+                    workshop.QualifiedName,
+                    string.Format( "{0}Workshop", SetEditorID.Token_Name ),
+                    string.Format( "{0}BuildableArea{1}", SetEditorID.Token_Name, SetEditorID.Token_Index ),
                     hull,
                     volumes,
                     workshop.Reference.Worldspace,
+                    true,
                     workshop.Reference,
                     GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedPrimitive,
-                    GodObject.CoreForms.Fallout4.Activator.DefaultDummy,
+                    new Engine.Plugin.Forms.Activator[]{
+                        GodObject.CoreForms.Fallout4.Activator.DefaultDummy,
+                        GodObject.CoreForms.Fallout4.Activator.DefaultDisableSelfTrigger,
+                        GodObject.CoreForms.Fallout4.Activator.DefaultEmptyTrigger
+                    }, 0,
                     color,
-                    GUIBuilder.FormImport.ImportBuildVolumeReference.FO4_TARGET_RECORD_FLAGS,
-                    -512.0f, 512.0f
+                    (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent,
+                    0f, 0f,
+                    null
                 ); ;
 
                 m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );

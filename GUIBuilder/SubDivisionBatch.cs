@@ -17,6 +17,12 @@ using Maths;
 using Fallout4;
 using AnnexTheCommonwealth;
 
+using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using Operations = GUIBuilder.FormImport.Operations;
+using Priority = GUIBuilder.FormImport.Priority;
+using Shape = Engine.Plugin.Forms.Fields.ObjectReference.Primitive.PrimitiveType;
+
+
 namespace GUIBuilder
 {
     /// <summary>
@@ -275,9 +281,17 @@ namespace GUIBuilder
                 var buildVolumes = subdivision.BuildVolumes;
                 if( !buildVolumes.NullOrEmpty() )
                 {
+                    var bCount = 0;
                     foreach( var volume in buildVolumes )
-                        hintZ += volume.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
-                    hintZ /= buildVolumes.Count;
+                    {
+                        if( subdivision.Reference.Cell == volume.Reference.Cell )
+                        {
+                            hintZ += volume.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                            bCount++;
+                        }
+                    }
+                    if( bCount > 1 )
+                        hintZ /= bCount;
                 }
                 else if( sandbox != null )
                     hintZ = sandbox.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
@@ -319,31 +333,49 @@ namespace GUIBuilder
                             sandbox == null ? "[null]" : sandbox.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
                             osv.Rotation.Z.ToString() )
                         }, false, true, false, false );
+
+                    #region Find layer for sandbox
+
+                    var preferedLayer =
+                        sandbox != null
+                        ?   sandbox.Reference.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
+                        ??  GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes
+                        :   GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes;
+                    string useLayerEditorID = preferedLayer.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+
+                    #endregion
+
+                    var recordFlags =
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled |
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn;
+                    var sandboxEditorID = string.Format( "ESM_ATC_REFR_SV_{0}", subdivision.QualifiedName );
                     var worldspace = subdivision.Reference.Worldspace;
-                    var cell = worldspace == null
+                    var cell = ( worldspace == null )
                         ? subdivision.Reference.Cell
                         : worldspace.Cells.Persistent;
-                    var color = GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume.GetMarkerColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    FormImport.ImportBase.AddToList(
-                        ref list,
-                        new FormImport.ImportSandboxReference(
-                            sandbox.Reference,
-                            string.Format(
-                                "{0}{1}{2}",
-                                "ESM",
-                                subdivision.NameFromEditorID,
-                                "SandboxArea" ),
-                            GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume,
-                            worldspace, cell,
-                            osv.Position,
-                            osv.Rotation,
-                            osv.Size,
-                            color,
-                            subdivision.Reference,
-                            GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSandboxVolume,
-                            GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes,
-                            FormImport.ImportSandboxReference.ATC_TARGET_RECORD_FLAGS
-                    ) );
+                    var sandboxBase = GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume;
+                    var color = sandboxBase.GetMarkerColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    
+                    VolumeBatch.CreateVolumeRefImport( ref list,
+                        "Sandbox Volume",
+                        Priority.Ref_SandboxVolume,
+                        sandbox?.Reference,
+                        sandboxEditorID,
+                        sandboxBase,
+                        sandboxBase.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        cell,
+                        osv.Position,
+                        osv.Rotation,
+                        osv.Size,
+                        color,
+                        subdivision.Reference,
+                        GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSandboxVolume,
+                        true,
+                        preferedLayer,
+                        useLayerEditorID,
+                        recordFlags,
+                        null );
                 }
                 var elapsed = m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
@@ -405,17 +437,27 @@ namespace GUIBuilder
 
                 VolumeBatch.NormalizeBuildVolumes(
                     ref list,
-                    subdivision.NameFromEditorID,   // FIX ME!
+                    subdivision.Reference,
+                    subdivision.QualifiedName,
+                    string.Format( "ESM_ATC_LAYR_{0}", SetEditorID.Token_Name ),
+                    string.Format( "ESM_ATC_REFR_BV_{0}_{1}", SetEditorID.Token_Name, SetEditorID.Token_Index ),
                     hull,
                     volumes.ConvertAll<Engine.Plugin.Forms.ObjectReference>( v => v.Reference ),
                     subdivision.Reference.Worldspace,
+                    false,
                     subdivision.Reference,
                     GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBuildAreaVolume,
-                    GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume,
+                    new Engine.Plugin.Forms.Activator[ 1 ] { GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume },
+                    0,
                     GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume.GetMarkerColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
-                    GUIBuilder.FormImport.ImportBuildVolumeReference.ATC_TARGET_RECORD_FLAGS,
-                    -1024.0f, 5120.0f
-                ); ;
+                    (
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled |
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn
+                    ),
+                    -1024.0f, 5120.0f,
+                    typeof( AnnexTheCommonwealth.BuildAreaVolume )
+                );
 
                 m.StopSyncTimer( tStart, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.PopStatusMessage();

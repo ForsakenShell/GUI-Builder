@@ -141,6 +141,25 @@
     <Compile Include="Extensions\GenStream.cs" />
     <Compile Include="Extensions\GenString.cs" />
     <Compile Include="GUIBuilder\CustomForms.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportOperation.cs" />
+    <Compile Include="GUIBuilder\FormImport\ImportPriority.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\AddPapyrusScript.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetEditorID.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceBaseForm.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceEnableParent.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceLinkedRef.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferencePosition.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetRecordFlags.cs" />
+    <None Include="GUIBuilder\FormImport\Operations\Template.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceLayer.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferencePrimitiveBounds.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferencePrimitiveColor.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferencePrimitiveShape.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferencePrimitiveUnknown.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceRotation.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceLocationReference.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetStaticObjectBounds.cs" />
+    <Compile Include="GUIBuilder\FormImport\Operations\SetStaticObjectModels.cs" />
     <Compile Include="GUIBuilder\VolumeBatch.cs" />
     <Compile Include="GUIBuilder\Windows\CustomForms.cs">
       <SubType>Form</SubType>
@@ -190,10 +209,10 @@
     <Compile Include="GUIBuilder\BorderSegment.cs" />
     <Compile Include="GUIBuilder\ConflictStatusHelpers.cs" />
     <Compile Include="GUIBuilder\Constants.cs" />
-    <Compile Include="GUIBuilder\Obsolete\ImportMod.cs" />
-    <Compile Include="GUIBuilder\Obsolete\NodeSegment.cs" />
-    <Compile Include="GUIBuilder\Obsolete\VolumeEditor.cs" />
-    <Compile Include="GUIBuilder\Obsolete\WeldPoints.cs" />
+    <None Include="GUIBuilder\Obsolete\ImportMod.cs" />
+    <None Include="GUIBuilder\Obsolete\NodeSegment.cs" />
+    <None Include="GUIBuilder\Obsolete\VolumeEditor.cs" />
+    <None Include="GUIBuilder\Obsolete\WeldPoints.cs" />
     <Compile Include="GUIBuilder\Windows\About.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -225,19 +244,18 @@
       <DependentUpon>SubDivision.cs</DependentUpon>
     </Compile>
     <Compile Include="GUIBuilder\FormImport\ErrorTypes.cs" />
-    <Compile Include="GUIBuilder\FormImport\FormTarget.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportBorderEnablerReference.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportBuildVolumeReference.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportEdgeFlagReference.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportLayer.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportSandboxReference.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\FormTarget.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ImportBorderEnablerReference.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ImportBuildVolumeReference.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ImportEdgeFlagReference.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ImportSandboxReference.cs" />
     <Compile Include="GUIBuilder\FormImport\ImportBase.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportBorderReference.cs" />
-    <Compile Include="GUIBuilder\FormImport\ImportBorderStatic.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ImportBorderReference.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ImportBorderStatic.cs" />
     <Compile Include="GUIBuilder\FormImport\ImportStates.cs" />
     <Compile Include="GUIBuilder\FormImport\ImportTarget.cs" />
     <Compile Include="GUIBuilder\FormImport\ObjectReferenceTarget.cs" />
-    <Compile Include="GUIBuilder\FormImport\ScriptTarget.cs" />
+    <None Include="GUIBuilder\FormImport\Obsolete\ScriptTarget.cs" />
     <Compile Include="GUIBuilder\SubDivisionBatch.cs" />
     <Compile Include="GUIBuilder\IMouseOver.cs" />
     <Compile Include="GUIBuilder\SpaceConversions.cs" />

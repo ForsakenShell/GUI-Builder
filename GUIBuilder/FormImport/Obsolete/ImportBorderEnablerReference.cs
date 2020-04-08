@@ -3,7 +3,9 @@
  *
  * Border Enabler import (REFR(ACTI)).
  *
+ * OBSOLETE - Use ImportBase
  */
+ /*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,13 +43,13 @@ namespace GUIBuilder.FormImport
         protected override void         DumpImport()
         {
             return;
-            var s1 = Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" );
+            var s1 = Target          .NullSafeIDString( "\n\tTarget Form = {0}", "unresolved" );
             var s2 = ( string.IsNullOrEmpty( NewEditorID ) ? null : string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID ) );
-            var s3 = ftWorldspace    .DisplayIDInfo( "\n\tWorldspace = {0}" );
-            var s4 = ftCell          .DisplayIDInfo( "\n\tCell = {0}" );
+            var s3 = ftWorldspace    .NullSafeIDString( "\n\tWorldspace = {0}" );
+            var s4 = ftCell          .NullSafeIDString( "\n\tCell = {0}" );
             var s5 = string          .Format       ( "\n\tPosition = {0}", Position.ToString() );
-            var s6 = stSubDivision   .DisplayIDInfo( "\n\tSubDivision = {0}" );
-            var s7 = stNeighbour     .DisplayIDInfo( "\n\tNeighbour = {0}" );
+            var s6 = stSubDivision   .NullSafeIDString( "\n\tSubDivision = {0}" );
+            var s7 = stNeighbour     .NullSafeIDString( "\n\tNeighbour = {0}" );
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}{2}{3}{4}{5}{6}{7}",
                 this.TypeFullName(),
@@ -101,20 +103,20 @@ namespace GUIBuilder.FormImport
             if( refr.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Position )
                 tmp.Add( string.Format( "Position {0}", Position.ToString() ) );
             if( !ftCell.Matches( refr.Cell, false ) )
-                tmp.Add( ftCell.DisplayIDInfo( "Cell {0}", "unresolved" ) );
+                tmp.Add( ftCell.NullSafeIDString( "Cell {0}", "unresolved" ) );
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
-                tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
+                tmp.Add( ftWorldspace.NullSafeIDString( "Worldspace {0}", "unresolved" ) );
             
             if( refr.GetLayerFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                 tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.ExtraInfoFor() ) );
             
             var ownSub = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBorder.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( !stSubDivision.Matches( ownSub, false ) )
-                tmp.Add( stSubDivision.DisplayIDInfo( "Linked to Sub-Division {0}" ) );
+                tmp.Add( stSubDivision.NullSafeIDString( "Linked to Sub-Division {0}" ) );
             
             var naySub = refr.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSubDivision.GetFormID( Engine.Plugin.TargetHandle.Master ) );
             if( !stNeighbour.Matches( naySub, true ) )
-                tmp.Add( stNeighbour.DisplayIDInfo( "Linked to neighbour {0}" ) );
+                tmp.Add( stNeighbour.NullSafeIDString( "Linked to neighbour {0}" ) );
             
             if( refr.LocationReference.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Engine.Plugin.Constant.FormID_None )
                 tmp.Add( "Clear Location Reference" );
@@ -131,15 +133,15 @@ namespace GUIBuilder.FormImport
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
             tmp.Add( string.Format( "Position {0}", Position.ToString() ) );
-            tmp.Add( ftCell.DisplayIDInfo( "Cell {0}", "unresolved" ) );
-            tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
+            tmp.Add( ftCell.NullSafeIDString( "Cell {0}", "unresolved" ) );
+            tmp.Add( ftWorldspace.NullSafeIDString( "Worldspace {0}", "unresolved" ) );
             
             tmp.Add( string.Format( "Layer {0}", GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_Controllers.ExtraInfoFor() ) );
             
-            tmp.Add( stSubDivision.DisplayIDInfo( "Linked to Sub-Division {0}" ) );
+            tmp.Add( stSubDivision.NullSafeIDString( "Linked to Sub-Division {0}" ) );
             
             if( stNeighbour.Resolveable() )
-                tmp.Add( stNeighbour.DisplayIDInfo( "Linked to neighbour {0}" ) );
+                tmp.Add( stNeighbour.NullSafeIDString( "Linked to neighbour {0}" ) );
             
             return tmp.ConcatDisplayInfo();
         }
@@ -257,7 +259,7 @@ namespace GUIBuilder.FormImport
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new ObjectReference instance of {0} in cell {1}",
                         GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
-                        ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
+                        ftCell.NullSafeIDString( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
                 refr.SetNameFormID( Engine.Plugin.TargetHandle.Working, GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.GetFormID( Engine.Plugin.TargetHandle.Master ) );
@@ -267,7 +269,7 @@ namespace GUIBuilder.FormImport
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new Script Object on new instance of {0} in cell {1}",
                         GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
-                        ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
+                        ftCell.NullSafeIDString( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
                 newenablerscript.PostLoad();
@@ -280,7 +282,7 @@ namespace GUIBuilder.FormImport
                 AddErrorMessage( ErrorTypes.Import, string.Format(
                     "An exception occured when trying to create a new ObjectReference instance of {0} in cell {1}\nInner Exception:\n{2}",
                     GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
-                    ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ),
+                    ftCell.NullSafeIDString( unresolveableSuffix: "unresolved" ),
                     e.ToString() ) );
             }
             return false;
@@ -339,3 +341,4 @@ namespace GUIBuilder.FormImport
     }
     
 }
+*/

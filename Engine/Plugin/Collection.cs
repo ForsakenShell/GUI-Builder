@@ -28,7 +28,7 @@ namespace Engine.Plugin
 
         #region Container Data
 
-        object                                  _CollectionLock         = new object();
+        protected object                        CollectionLock          = new object();
 
 
         ClassAssociation                        _Association            = null;
@@ -89,7 +89,7 @@ namespace Engine.Plugin
         
         protected virtual void          Dispose( bool disposing )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
             {
                 if( Disposed )
                     return;
@@ -137,7 +137,7 @@ namespace Engine.Plugin
         public virtual bool             Add( IXHandle syncObject )
         {
             if( Disposed ) return false;
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return AddEx( syncObject, false );
         }
 
@@ -196,7 +196,7 @@ namespace Engine.Plugin
         public virtual void             Remove( IXHandle syncObject )
         {
             if( Disposed ) return;
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 RemoveEx( syncObject, false );
         }
 
@@ -270,7 +270,7 @@ namespace Engine.Plugin
 
         public IXHandle                 AddFromRecord( IXHandle ancestor, ElementHandle handle )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return AddFromRecordEx( ancestor, handle, false );
         }
 
@@ -368,7 +368,7 @@ namespace Engine.Plugin
         
         public IXHandle                 CreateNew()
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return CreateNewEx( false );
         }
 
@@ -487,7 +487,7 @@ namespace Engine.Plugin
         {
             get
             {
-                lock( _CollectionLock )
+                lock( CollectionLock )
                     return _AllForms.NullOrEmpty()
                         ? 0
                         : _AllForms.Count;
@@ -496,7 +496,7 @@ namespace Engine.Plugin
 
         public IXHandle                 TryLoad( uint formid )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return TryLoadEx( formid, false );
         }
 
@@ -518,7 +518,7 @@ namespace Engine.Plugin
 
         public IXHandle                 TryLoad( FormHandle record )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return TryLoadEx( record, false );
         }
 
@@ -575,7 +575,7 @@ namespace Engine.Plugin
 
         public IXHandle                 TryLoad( string editorid )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return TryLoadEx( editorid, false );
         }
 
@@ -610,7 +610,7 @@ namespace Engine.Plugin
 
         IXHandle                        TryLoad( string editorid, ElementHandle source )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return TryLoadEx( editorid, source, false );
         }
 
@@ -701,7 +701,7 @@ namespace Engine.Plugin
                 }
                 else
                 {
-                    lock( _CollectionLock )
+                    lock( CollectionLock )
                     {
                         if( ( searchByFormID   )&&( TryFindInFormIDDictionaryEx(   out result, handle, formid  , tryLoad, alreadyHoldsRootLock ) ) )
                             goto localReturnResult;
@@ -748,13 +748,13 @@ namespace Engine.Plugin
 
         public IXHandle                 Find( XeLib.FormHandle handle, bool tryLoad = true )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return FindExEx( handle, tryLoad, false );
         }
 
         public IXHandle                 FindEx( XeLib.FormHandle handle, bool tryLoad = true, bool alreadyHoldsRootLock = false )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return FindExEx( handle, tryLoad, alreadyHoldsRootLock );
         }
 
@@ -905,13 +905,13 @@ namespace Engine.Plugin
 
         public List<IXHandle>           ToList( int loadOrderFilter = -1, bool tryLoad = true )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return ToListExEx( loadOrderFilter, tryLoad, true, false );
         }
         
         public List<IXHandle>           ToListEx( int loadOrderFilter = -1, bool tryLoad = true, bool alreadyHoldsRootLock = false )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return ToListExEx( loadOrderFilter, tryLoad, true, alreadyHoldsRootLock );
         }
 
@@ -961,7 +961,7 @@ namespace Engine.Plugin
 
         public List<TSync>              ToList<TSync>( int loadOrderFilter = -1, bool tryLoad = true ) where TSync : class, IXHandle
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return ToListEx<TSync>( loadOrderFilter, tryLoad, false );
         }
 
@@ -990,7 +990,7 @@ namespace Engine.Plugin
 
         protected bool                  LoadFromEx( Interface.IXHandle source, ElementHandle handle, bool updateUI )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return LoadFromExEx( source, handle, updateUI, false );
         }
 
@@ -1128,7 +1128,7 @@ namespace Engine.Plugin
 
         public bool                     LoadAllForms( bool updateUI )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return LoadAllFormsEx( updateUI, false );
         }
 
@@ -1190,7 +1190,7 @@ namespace Engine.Plugin
 
         public virtual bool             LoadFrom( Interface.IXHandle source, bool updateUI )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return LoadFromEx( source, updateUI, false );
         }
 
@@ -1212,7 +1212,7 @@ namespace Engine.Plugin
 
         public bool                     PostLoad( bool updateUI )
         {
-            lock( _CollectionLock )
+            lock( CollectionLock )
                 return PostLoadEx( updateUI, false );
         }
 

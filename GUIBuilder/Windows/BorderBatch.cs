@@ -396,7 +396,7 @@ namespace GUIBuilder.Windows
             
             var wsPreset = FullChildSelectedWorkshopPreset;
             var wsFilePrefix = tbWorkshopNIFFilePrefix.Text;
-            var wsName = _sampleWorkshop    != null ? _sampleWorkshop   .NameFromEditorID : "";
+            var wsName = _sampleWorkshop    != null ? _sampleWorkshop   .QualifiedName : "";
             var wsSample = NIFBuilder.Mesh.BuildFilePath(
                 tbMeshDirectory.Text,
                 ( wsPreset != null ? wsPreset.MeshSubDirectory : tbWorkshopNIFMeshSubDirectory.Text ),
@@ -412,7 +412,7 @@ namespace GUIBuilder.Windows
             {
                 var sdPreset = FullChildSelectedSubDivisionPreset;
                 var sdFilePrefix = tbSubDivisionNIFFilePrefix.Text;
-                var sdName = _sampleSubDivision != null ? _sampleSubDivision.NameFromEditorID : "";
+                var sdName = _sampleSubDivision != null ? _sampleSubDivision.QualifiedName : "";
                 var sdNeighbourName = "Main";
                 var subBorders = _sampleSubDivision != null ? _sampleSubDivision.BorderEnablers : null;
                 if( !subBorders.NullOrEmpty() )
@@ -421,7 +421,7 @@ namespace GUIBuilder.Windows
                     var neighbour = border == null ? null : border.Neighbour;
                     //if( ( border != null )&&( border.Neighbour != null ) )
                     if( neighbour != null )
-                        sdNeighbourName = neighbour.NameFromEditorID;
+                        sdNeighbourName = neighbour.QualifiedName;
                 }
                 
                 var sdSample = NIFBuilder.Mesh.BuildFilePath(

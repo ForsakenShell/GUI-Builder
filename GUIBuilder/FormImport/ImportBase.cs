@@ -8,32 +8,45 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using GUIBuilder.Windows;
+
+using Engine.Plugin;
+using Engine.Plugin.Forms;
+using Engine.Plugin.Interface;
+using Engine.Plugin.Attributes;
 using Engine.Plugin.Extensions;
 
 
 namespace GUIBuilder.FormImport
 {
     
-    public abstract class ImportBase : Engine.Plugin.Interface.ISyncedGUIObject
+    public class ImportBase : ISyncedGUIObject
     {
+
+        BatchImport                                     _BatchWindow = null;
+
+        Priority                                        _InjectPriority;
+        public Priority                                 InjectPriority
+        {
+            get
+            {
+                return _InjectPriority;
+            }
+        }
+
+        string                                          _Signature = typeof( ImportBase ).TypeName();
+        public string                                   Signature
+        {
+            get
+            {
+                return _Signature;
+            }
+        }
         
-        /* TODO:  Implement this cleaner
-         * Copy-pasta these into child classes and change as appropriate
-         * The first two parameters of the base constructor will then be
-         * IMPORT_SIGNATURE, TARGET_RECORD_FLAGS
-        const string                    IMPORT_SIGNATURE = "ImportClass";
-        const uint                      TARGET_RECORD_FLAGS = Target_Form_Flags;
-        */
+        bool                                            _FailOnApplyIfUnresolved = true;
         
-        GUIBuilder.Windows.BatchImport _BatchWindow                 = null;
-        
-        string                         _Signature                   = null;
-        uint                           _RecordFlags                 = 0;
-        public uint                     RecordFlags                 { get { return _RecordFlags; } }
-        bool                           _FailOnApplyIfUnresolved     = true;
-        
-        ImportStates                   _ImportState                 = ImportStates.Unparsed;
-        public ImportStates             ImportState
+        ImportStates                                    _ImportState = ImportStates.Unparsed;
+        public ImportStates                             ImportState
         {
             get
             {
@@ -43,61 +56,70 @@ namespace GUIBuilder.FormImport
             }
         }
         
-        bool                           _ErrorState                  = false;
-        string                         _ErrorMessage                = null;
-        protected string                ErrorMessasge               { get { return _ErrorMessage; } }
-        
-        private ImportTarget           _Target                      = null;
-
-        /*
-        public string                   IDString
+        bool                                            _ErrorState = false;
+        string                                          _ErrorMessage = null;
+        protected string                                ErrorMessasge
         {
             get
             {
-                var tvID = _Target.Value as Engine.Plugin.Interface.ISyncedGUIObject;
-                return tvID != null ? tvID.IDString : string.Format( "IXHandle.IDString".Translate(), _Target.Value.FormID.ToString( "X8" ), _Target.Value.EditorID );
+                return _ErrorMessage;
             }
         }
-        */
+        
+        private ImportTarget                            _Target = null;
+        public ImportTarget                             Target
+        {
+            get
+            {
+                return _Target;
+            }
+        }
 
-        /// <summary>
-        /// Base import constructor
-        /// </summary>
-        /// <param name="signature">Import signature</param>
-        /// <param name="recordFlags">Target record flags</param>
-        /// <param name="failOnApplyIfUnresolved">Throw an exception if the target cannot be resolved</param>
-        /// <param name="classType">Target class type, cannot be null</param>
-        /// <param name="targetForm">Target form to apply import to (may be null for injection)</param>
-        protected ImportBase( string signature, uint recordFlags, bool failOnApplyIfUnresolved, Type classType, Engine.Plugin.Form targetForm )
+        private List<ImportOperation>                   _Operations = new List<ImportOperation>();
+
+        public void                                     AddOperation( ImportOperation operation )
         {
-            if( classType == null )
-                throw new NullReferenceException( "classType cannot be null" );
-            var fType = typeof( Engine.Plugin.Form );
-            if( ( fType != classType )&&( !classType.IsSubclassOf( fType ) ) )
-                throw new NullReferenceException( "classType must be or derrived from \"Engine.Plugin.Form\"" );
-            var tType = targetForm == null ? null : targetForm.GetType();
-            if( ( targetForm != null )&&( classType != tType ) )
-                throw new NullReferenceException( string.Format( "classType does not match targetForm!  Must be \"{0}\"", tType.ToString() ) );
+            _Operations.Add( operation );
+        }
+
+        #region Constructor
+
+        private void                                    INTERNAL_Constructor(
+            string signature,
+            Priority priority,
+            bool failOnApplyIfUnresolved,
+            Type type,
+            IXHandle target,
+            string editorID,
+            Cell cell )
+        {
             bool resolved = false;
             try
             {
-                _Signature = signature;
-                _RecordFlags = recordFlags;
-                _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
-                _Target = classType == typeof( Engine.Plugin.Forms.ObjectReference )
-                    ? new ObjectReferenceTarget( "Target Ref", this, targetForm, null, null )
-                    : new FormTarget( "Target Form", this, classType, targetForm );
-                resolved = _Target.Resolve( failOnApplyIfUnresolved );
-                if( ( failOnApplyIfUnresolved )&( !resolved ) )
-                    throw new Exception( string.Format(
-                        "{0} :: cTor :: Unable to resolve import target!\n{1}",
-                        this.TypeFullName(),
-                        _ErrorMessage ) );
+                if( type == null )
+                    throw new NullReferenceException( "'type' cannot be null" );
+                if( !type.HasInterface<IXHandle>() )
+                    throw new NullReferenceException( "'type' must implement Engine.Plugin.Interface.IXHandle" );
+
+                var tType = target?.GetType();
+                if( ( target != null ) && ( type != tType ) )
+                    throw new NullReferenceException( string.Format( "target is wrong type!\n'type' = {0}\n'target' = {1}", type.FullName(), tType.FullName() ) ); ;
+                
+                _Signature                  = signature;
+                _InjectPriority             = priority;
+                _FailOnApplyIfUnresolved    = failOnApplyIfUnresolved;
+                _Target                     = type == typeof( ObjectReference )
+                                            ? new ObjectReferenceTarget( this, "TargetU".Translate(), target as ObjectReference, cell )
+                                            : new ImportTarget( this, "TargetU".Translate(), type, target, editorID );
+                resolved                    = _Target.Resolve( failOnApplyIfUnresolved );
+
+                if( ( failOnApplyIfUnresolved ) & ( !resolved ) )
+                    throw new Exception( "Unable to resolve import target!" );
             }
             catch( Exception e )
-            {
+            {   // Catch the inner exception and pass it to the caller
                 throw new Exception( string.Format(
-                    "{0} :: cTor :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
+                    "{0} :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
                     this.TypeFullName(),
                     _ErrorMessage,
                     e.ToString() ) );
@@ -105,143 +127,41 @@ namespace GUIBuilder.FormImport
             _ImportState = resolved
                 ? ImportStates.Resolved
                 : ImportStates.Parsed;
+
         }
-        
-        /// <summary>
-        /// Base import constructor
-        /// </summary>
-        /// <param name="signature">Import signature</param>
-        /// <param name="recordFlags">Target record flags</param>
-        /// <param name="failOnApplyIfUnresolved">Throw an exception if the target cannot be resolved</param>
-        /// <param name="classType">Target class type, cannot be null</param>
-        /// <param name="targetScript">Target script to apply import to (may be null for injection)</param>
-        protected                       ImportBase( string signature, uint recordFlags, bool failOnApplyIfUnresolved, Type classType, Engine.Plugin.PapyrusScript targetScript )
+
+        public                                          ImportBase(
+            string signature,
+            Priority priority,
+            bool failOnApplyIfUnresolved,
+            Type type,
+            IXHandle target,
+            string editorID )
         {
-            if( classType == null )
-                throw new NullReferenceException( "classType cannot be null" );
-            var fType = typeof( Engine.Plugin.PapyrusScript );
-            if( ( fType != classType )&&( !classType.IsSubclassOf( fType ) ) )
-                throw new NullReferenceException( "classType must be or derrived from \"Engine.Plugin.PapyrusScript\"" );
-            var tType = targetScript == null ? null : targetScript.GetType();
-            if( ( targetScript != null )&&( classType != tType ) )
-                throw new NullReferenceException( string.Format( "classType does not match targetScript!  Must be \"{0}\", targetScript is \"{1}\"", classType.ToString(), tType.ToString() ) );
-            bool resolved = false;
-            try
-            {
-                _Signature = signature;
-                _RecordFlags = recordFlags;
-                _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
-                _Target = new ScriptTarget( "Target Ref Script", this, classType, targetScript );
-                resolved = _Target.Resolve( failOnApplyIfUnresolved );
-                if( ( failOnApplyIfUnresolved )&( !resolved ) )
-                    throw new Exception( string.Format(
-                        "{0} :: cTor :: Unable to resolve import target!\n{1}",
-                        this.TypeFullName(),
-                        _ErrorMessage ) );
-            }
-            catch( Exception e )
-            {
-                throw new Exception( string.Format(
-                    "{0} :: cTor :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.TypeFullName(),
-                    _ErrorMessage,
-                    e.ToString() ) );
-            }
-            _ImportState = resolved
-                ? ImportStates.Resolved
-                : ImportStates.Parsed;
+            INTERNAL_Constructor( signature, priority, failOnApplyIfUnresolved, type, target, editorID, null );
         }
-        
-        /// <summary>
-        /// Base import constructor
-        /// </summary>
-        /// <param name="signature">Import signature</param>
-        /// <param name="recordFlags">Target record flags</param>
-        /// <param name="failOnApplyIfUnresolved">Throw an exception if the target cannot be resolved</param>
-        /// <param name="classType">Target class type, cannot be null</param>
-        /// <param name="targetForm">Target form to apply import to (may be null for injection)</param>
-        protected                       ImportBase( string signature, uint recordFlags, bool failOnApplyIfUnresolved, Type classType, Engine.Plugin.Forms.ObjectReference targetForm, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
+
+        public                                          ImportBase(
+            string signature,
+            Priority priority,
+            bool failOnApplyIfUnresolved,
+            ObjectReference target,
+            string editorID,
+            Cell cell )
         {
-            if( classType == null )
-                throw new NullReferenceException( "classType cannot be null" );
-            var fType = typeof( Engine.Plugin.Forms.ObjectReference );
-            if( ( fType != classType )&&( !classType.IsSubclassOf( fType ) ) )
-                throw new NullReferenceException( "classType must be or derrived from \"Engine.Plugin.Forms.ObjectReference\"" );
-            var tType = targetForm == null ? null : targetForm.GetType();
-            if( ( targetForm != null )&&( classType != tType ) )
-                throw new NullReferenceException( string.Format( "classType does not match targetForm!  Must be \"{0}\"", tType.ToString() ) );
-            bool resolved = false;
-            try
-            {
-                _Signature = signature;
-                _RecordFlags = recordFlags;
-                _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
-                _Target = classType == typeof( Engine.Plugin.Forms.ObjectReference )
-                    ? new ObjectReferenceTarget( "Target Ref", this, targetForm, worldspace, cell )
-                    : new FormTarget( "Target Form", this, classType, targetForm );
-                resolved = _Target.Resolve( failOnApplyIfUnresolved );
-                if( ( failOnApplyIfUnresolved )&( !resolved ) )
-                    throw new Exception( string.Format(
-                        "{0} :: cTor :: Unable to resolve import target!\n{1}",
-                        this.TypeFullName(),
-                        _ErrorMessage ) );
-            }
-            catch( Exception e )
-            {
-                throw new Exception( string.Format(
-                    "{0} :: cTor :: Exception parsing parameters\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.TypeFullName(),
-                    _ErrorMessage,
-                    e.ToString() ) );
-            }
-            _ImportState = resolved
-                ? ImportStates.Resolved
-                : ImportStates.Parsed;
+            INTERNAL_Constructor( signature, priority, failOnApplyIfUnresolved, typeof( ObjectReference ), target, editorID, cell );
         }
-        
-        protected                       ImportBase( string signature, uint recordFlags, bool failOnApplyIfUnresolved, Type classType, string[] importData )
-        {
-            if( classType == null )
-                throw new NullReferenceException( "classType cannot be null" );
-            var fType = typeof( Engine.Plugin.Form );
-            if( ( fType != classType )&&( !classType.IsSubclassOf( fType ) ) )
-                throw new NullReferenceException( "classType must be or derrived from \"Engine.Plugin.Form\"" );
-            bool resolved = false;
-            try
-            {
-                _Signature = signature;
-                _RecordFlags = recordFlags;
-                _FailOnApplyIfUnresolved = failOnApplyIfUnresolved;
-                _Target = classType == typeof( Engine.Plugin.Forms.ObjectReference )
-                    ? new ObjectReferenceTarget( "Target Ref", this )
-                    : new FormTarget( "Target Form", this, classType );
-                //_Target = new FormTarget( this, classType );
-                resolved = ParseImport( importData );
-                if( ( failOnApplyIfUnresolved )&( !resolved ) )
-                    throw new Exception( string.Format(
-                        "{0} :: cTor :: Unable to parse importData\nParse Error:\n{1}",
-                        this.TypeFullName(),
-                        _ErrorMessage ) );
-            }
-            catch( Exception e )
-            {
-                throw new Exception( string.Format(
-                    "{0} :: cTor :: Exception parsing importData\nParse Error:\n{1}\nInner Exception:\n{2}",
-                    this.TypeFullName(),
-                    _ErrorMessage,
-                    e.ToString() ) );
-            }
-            _ImportState = resolved
-                ? ImportStates.Resolved
-                : ImportStates.Parsed;
-        }
-        
-        protected void                  ClearErrors()
+
+        #endregion
+
+        #region Internal Error Monitoring
+
+        protected void                                  ClearErrors()
         {
             _ErrorMessage = null;
             _ErrorState = false;
         }
-        public void                     AddErrorMessage( FormImport.ErrorTypes type, string message, Exception e = null )
+        public void                                     AddErrorMessage( ErrorTypes type, string message, Exception e = null )
         {
             var errorLine = string.Format( "{0} : {1} : {2}", Signature, type.ToString(), string.IsNullOrEmpty( message ) ? "Undefined" : message );
             if( _ErrorMessage == null )
@@ -252,271 +172,37 @@ namespace GUIBuilder.FormImport
                 _BatchWindow.AddImportMessage( errorLine );
             DebugLog.WriteLine( errorLine );
             if( e != null )
-                DebugLog.WriteStrings( null, new [] { e.ToString(), e.StackTrace }, false, true, false, false, false );
+                DebugLog.WriteStrings( null, new [] { e.ToString() }, false, true, false, false, false );
             _ErrorState = true;
         }
-        
-        public bool                     ImportIsValid()
-        {
-            return
-                _ErrorState
-                // This conditional is wanted as it is cheaper than Resolve()
-                // disable once SimplifyConditionalTernaryExpression
-                ? false
-                : Resolve( false );
-        }
-        
-        public bool                     Resolve( bool errorIfUnresolveable )
+
+        #endregion
+
+        public virtual bool                             Resolve( bool errorIfUnresolveable )
         {
             ClearErrors();
             if( ImportState == ImportStates.Resolved ) return true;
-            var resolved = _Target.Resolve( errorIfUnresolveable ) && ResolveReferenceForms( errorIfUnresolveable );
+            var resolved = _Target.Resolve( errorIfUnresolveable );
+            var oCount = _Operations.Count;
+            if( ( resolved )&&( oCount > 0 ) )
+            {
+                for( int i = 0; i < oCount; i++ )
+                {
+                    var opResult = _Operations[ i ].Resolve( errorIfUnresolveable );
+                    if( ( errorIfUnresolveable )&&( !opResult ) )
+                    {
+                        resolved = false;
+                        break;
+                    }
+                }
+            }
             if( resolved ) _ImportState = ImportStates.Resolved;
             return resolved;
         }
-        
-        #region Target Shortcuts
-        
-        protected ImportTarget          Target                      { get { return _Target; } }
-        protected void                  SetTarget( Engine.Plugin.Interface.IXHandle syncObject )
-        {
-            _Target.Value = syncObject;
-        }
-        
-        protected Engine.Plugin.Form    TargetForm
-        {
-            get
-            {
-                var f = _Target as FormTarget;
-                if( f != null )
-                    return f.Form;
-                var s = _Target as ScriptTarget;
-                return ( s != null )&&( s.Script != null )
-                    ? s.Script.Form
-                    : null;
-            }
-        }
-        protected Engine.Plugin.Forms.ObjectReference TargetRef
-        {
-            get
-            {
-                var f = _Target as ObjectReferenceTarget;
-                if( f != null )
-                    return f.Reference;
-                var s = _Target as ScriptTarget;
-                return ( s != null )&&( s.Script != null )
-                    ? s.Script.Reference
-                    : null;
-            }
-        }
-        protected Engine.Plugin.PapyrusScript TargetScript
-        {
-            get
-            {
-                var s = _Target as ScriptTarget;
-                return ( s != null )
-                    ? s.Script
-                    : null;
-            }
-        }
-        
-        protected uint                  TargetFormID                { get { return _Target.FormID; } }
-        protected string                TargetEditorID              { get { return _Target.EditorID; } }
-        
-        public string                   DisplayIDInfo( string f = "{0}", string unresolveableSuffix = null )
-        {
-            //return ImportBase.ExtraInfoFor( f, Value, FormID, EditorID, unresolveable, extra );
-            return _Target.DisplayIDInfo( f, unresolveableSuffix );
-        }
-        
-        #endregion
-        
-        #region Override Target[s]
-        
-        protected bool                  CopyToWorkingFile<T>( T syncObject ) where T : class, Engine.Plugin.Interface.IXHandle
-        {
-            if( syncObject == null ) return false;
-            
-            string errorMessage = null;
-            try
-            {
-                if( syncObject.IsInWorkingFile() )
-                    return true;
-                if( syncObject.CopyAsOverride() != null )
-                    return true;
-                errorMessage = string.Format(
-                    "\nUnable to copy override for {0}!",
-                    syncObject.ExtraInfoFor( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" )
-                );
-            }
-            catch( Exception e )
-            {
-                errorMessage = string.Format(
-                    "\nAn exception occured when trying to copy override for {0}\nInner Exception:\n{1}",
-                    syncObject.ExtraInfoFor( syncObject.GetFormID( Engine.Plugin.TargetHandle.Master ), syncObject.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), unresolveable: "unresolved" ),
-                    e.ToString());
-            }
-            
-            DebugLog.WriteLine( errorMessage, true );
-            return false;
-        }
-        
-        protected virtual bool          CreateNewFormInWorkingFile()
-        {
-            return false;
-        }
-        
-        #endregion
-        
-        #region Target Record Flags
-        
-        bool                            TargetRecordFlagsMatch
-        {
-            get
-            {
-                return ( TargetForm != null )&&( TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == _RecordFlags );
-                //if( TargetForm == null ) return false;
-                //var rf = TargetForm.RecordFlags.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                //DebugLog.WriteLine( new string[] { this.FullTypeName(), TargetForm.ExtraInfoFor(), string.Format( "Record Flags = 0x{0} ?= 0x{1}", rf.ToString( "X8" ), _RecordFlags.ToString( "X8" ) ) } );
-                //return rf == _RecordFlags;
-            }
-        }
-        
-        bool                            ApplyRecordFlagsToTarget()
-        {
-            var targetForm = TargetForm;
-            if( targetForm == null ) return false;
-            targetForm.RecordFlags.SetValue( Engine.Plugin.TargetHandle.Working, _RecordFlags );
-            return TargetRecordFlagsMatch;
-        }
-        
-        #endregion
-        
-        #region Parse import file data
-        
-        public bool                     ParseImport( string[] importData )
-        {
-            ClearErrors();
-            
-            if( importData.NullOrEmpty() )
-            {
-                AddErrorMessage( ErrorTypes.Parse, "Null or empty importData!" );
-                return false;
-            }
-            
-            var result = true;  // We hope
-            var properFormType = false;
-            foreach( var keyValue in importData )
-            {
-                if( string.IsNullOrEmpty( keyValue ) )
-                    continue;
-                
-                var kv = keyValue.ParseImportLine( ':' );
-                if( ( kv == null )||( kv.Length != 2 ) )
-                    continue;
-                
-                if( string.IsNullOrEmpty( kv[ 0 ] ) )
-                    continue;
-                
-                //DebugLog.Write( string.Format( "\"{0}\" :: \"{1}\"", kv[ 0 ], kv[ 1 ] ) );
-                
-                if( kv[ 0 ] == "Type" )
-                {
-                    properFormType = kv[ 1 ] == Signature;
-                    if( !properFormType )
-                    {
-                        AddErrorMessage(
-                            ErrorTypes.Parse,
-                            string.Format(
-                                "Invalid \"Type\", expected \"{0}\" got \"{1}\"",
-                                Signature,
-                                kv[ 1 ] )
-                        );
-                        result = false;
-                    }
-                }
-                else if( properFormType )
-                {
-                    switch( kv[ 0 ] )
-                    {
-                        case "TargetFormID":
-                            _Target.FormID = uint.Parse( kv[ 1 ], System.Globalization.NumberStyles.HexNumber );
-                            break;
-                        case "TargetEditorID":
-                            _Target.EditorID = kv[ 1 ];
-                            break;
-                            
-                        case "TargetSignature":
-                            var fa = Engine.Plugin.Attributes.Reflection.FormAssociationFrom( kv[ 1 ] );
-                            if( fa == null )
-                            {
-                                AddErrorMessage(
-                                    ErrorTypes.Parse,
-                                    string.Format(
-                                        "Unknown Form Signature :: \"{0}\"",
-                                        kv[ 1 ] )
-                                );
-                                result = false;
-                                break;
-                            }
-                            _Target.Association = fa;
-                            break;
-                            
-                        default:
-                            if( !ParseKeyValue( kv[ 0 ], kv[ 1 ] ) )
-                            {
-                                AddErrorMessage(
-                                    ErrorTypes.Parse,
-                                    string.Format(
-                                        "Unknown keyword and value :: \"{0}\" = \"{1}\"",
-                                        kv[ 0 ], kv[ 1 ] )
-                                );
-                                result = false;
-                            }
-                            break;
-                    }
-                }
-                else if ( result )
-                {   // No error yet and "Type" not yet encountered (should be first keyword:value of the import line)
-                    AddErrorMessage(
-                        ErrorTypes.Parse,
-                        string.Format(
-                            "Expected keyword \"Type\" got \"{0}\"",
-                            kv[ 0 ] )
-                    );
-                    result = false;
-                }
-            }
-            // Try to finalize but don't worry if we can't yet;
-            // May be trying to reference a base object which
-            // hasn't yet been injected or is going to be
-            if( result )
-                result = Resolve( false );
-            return result;
-        }
-        
-        public virtual bool             ParseKeyValue( string key, string value )
-        {
-            return true;
-        }
-        
-        #endregion
-        
+
         #region ISyncedListViewObject
         
-        /*
-        public string                   Filename
-        {
-            get
-            {
-                return _Target.Value != null
-                    ? _Target.Value.Filename
-                    : null;
-            }
-        }
-        */
-        
-        public Engine.Plugin.File[]     Files
+        public Engine.Plugin.File[]                     Files
         {   // This should just be the list of targets which means just the working file...right...?
             get
             {
@@ -527,7 +213,7 @@ namespace GUIBuilder.FormImport
             }
         }
         
-        public string[]                 Filenames
+        public string[]                                 Filenames
         {
             get
             {
@@ -540,9 +226,7 @@ namespace GUIBuilder.FormImport
             }
         }
         
-        public string                   Signature                   { get { return _Signature; } }
-        
-        public uint                     LoadOrder
+        public uint                                     LoadOrder
         {
             get
             {
@@ -552,89 +236,46 @@ namespace GUIBuilder.FormImport
             }
         }
         
-        /*
-        public uint                     FormID
-        {
-            get
-            {
-                return( _Target == null )||( _Target.Value == null )
-                    ? Engine.Plugin.Constant.FormID_Invalid
-                    : _Target.Value.FormID;
-            }
-        }
-        */
-        
-        public uint                     GetFormID( Engine.Plugin.TargetHandle target )
+        public uint                                     GetFormID( TargetHandle target )
         {
             return ( _Target == null )||( _Target.Value == null )
                 ? Engine.Plugin.Constant.FormID_Invalid
                 : _Target.Value.GetFormID( target );
         }
-        public void                     SetFormID( Engine.Plugin.TargetHandle target, uint value )
-        {
-            if( ( _Target == null )||( _Target.Value == null ) ) return;
-            _Target.Value.SetFormID( target, value );
-        }
-        
-        /*
-        public string                   EditorID
-        {
-            get { return GetDisplayEditorID(); }
-            set { throw new NotImplementedException(); }
-        }
-        */
-        
-        public string                   GetEditorID( Engine.Plugin.TargetHandle target )
-        {
-            return GetDisplayEditorID( target );
-        }
-        public void                     SetEditorID( Engine.Plugin.TargetHandle target, string value )
+        public void                                     SetFormID( TargetHandle target, uint value )
         {
             throw new NotImplementedException();
         }
         
-        public Engine.Plugin.ConflictStatus ConflictStatus
+        public string                                   GetEditorID( TargetHandle target )
+        {
+            return ( Target.Value == null )
+                ? Target.EditorID
+                : Target.Value.GetEditorID( target );
+        }
+        public void                                     SetEditorID( TargetHandle target, string value )
+        {
+            throw new NotImplementedException();
+        }
+        
+        public ConflictStatus                           ConflictStatus
         {
             get
             {
-                //DebugLog.Write( "ConflictStatus.get()" );
-                if(!_Target.Value.Resolveable(_Target.FormID, _Target.EditorID) )
-                    return Engine.Plugin.ConflictStatus.NewForm;
-                    //return Engine.Plugin.ConflictStatus.Invalid;
-                var targetForm = TargetForm;
-                if( targetForm == null )
-                    return Engine.Plugin.ConflictStatus.NewForm;
-                /*
-                var isMaster = targetForm.WorkingFileHandle.IsMaster;
-                var wFile = GodObject.Plugin.Data.Files.Working;
-                var tfFile = targetForm.Mod;
-                var isInWorkingFile =
-                    ( tfFile != null   )&&
-                    ( wFile  != null   )&&
-                    ( wFile  == tfFile );
-                */
-                //var isInWorkingFile = targetForm.IsInWorkingFile();
-                return
-                     !TargetRecordFlagsMatch || !ImportDataMatchesTarget()
-                        ? Engine.Plugin.ConflictStatus.RequiresOverride
-                        : Engine.Plugin.ConflictStatus.NoConflict;
+                if( !_Target.Value.Resolveable(_Target.FormID, _Target.EditorID ) )
+                    return ConflictStatus.NewForm;
+                
+                var target = _Target.Value;
+                if( target == null )
+                    return ConflictStatus.NewForm;
+                
+                return !ImportDataMatchesTarget()
+                    ? ConflictStatus.RequiresOverride
+                    : ConflictStatus.NoConflict;
             }
         }
         
-        /*
-        public bool                     IsModified
-        {
-            get
-            {
-                var form = TargetForm;
-                return
-                    ( form != null )&&
-                    ( form.IsModified );
-            }
-        }
-        */
-        
-        public string                   ExtraInfo
+        public string                                   ExtraInfo
         {
             get
             {
@@ -644,169 +285,203 @@ namespace GUIBuilder.FormImport
             }
         }
         
-        public event EventHandler       ObjectDataChanged;
-        bool                           _SupressEvents = false;
+        public event EventHandler                       ObjectDataChanged;
+        bool                                            _SupressEvents = false;
         
-        public bool ObjectDataChangedEventsSupressed { get { return _SupressEvents; } }
+        public bool                                     ObjectDataChangedEventsSupressed
+        {
+            get
+            {
+                return _SupressEvents;
+            }
+        }
 
-        public void                     SupressObjectDataChangedEvents()
+        public void                                     SupressObjectDataChangedEvents()
         {
             _SupressEvents = true;
-            if( TargetForm != null )
-                TargetForm.SupressObjectDataChangedEvents();
+            var targetSync = _Target.Value as ISyncedGUIObject;
+            if( targetSync != null )
+                targetSync.SupressObjectDataChangedEvents();
         }
         
-        public void                     ResumeObjectDataChangedEvents( bool sendevent )
+        public void                                     ResumeObjectDataChangedEvents( bool sendevent )
         {
             //DebugLog.Write( string.Format( "{0} :: ResumeObjectDataChangedEvents() :: sendevent = {1}", this.FullTypeName(), sendevent ) );
             _SupressEvents = false;
-            if( TargetForm != null )
-                TargetForm.ResumeObjectDataChangedEvents( sendevent );
+            var targetSync = _Target.Value as ISyncedGUIObject;
+            if( targetSync != null )
+                targetSync.ResumeObjectDataChangedEvents( sendevent );
             if( sendevent ) SendObjectDataChangedEvent( this );
         }
         
-        public void                     SendObjectDataChangedEvent( object sender )
+        public void                                     SendObjectDataChangedEvent( object sender )
         {
             //DebugLog.Write( string.Format( "{0} :: SendObjectDataChangedEvent()", this.FullTypeName() ) );
             if( _SupressEvents ) return;
-            EventHandler handler = ObjectDataChanged;
-            if( handler != null )
-                handler( sender, null );
+            ObjectDataChanged?.Invoke( sender, null );
         }
         
-        public bool                     InitialCheckedOrSelectedState()
+        public bool                                     InitialCheckedOrSelectedState()
         {
             var cs = ConflictStatus;
             return
-                ( cs == Engine.Plugin.ConflictStatus.NewForm )||
-                ( cs == Engine.Plugin.ConflictStatus.RequiresOverride );
+                ( cs == ConflictStatus.NewForm )||
+                ( cs == ConflictStatus.RequiresOverride );
         }
         
-        public bool                     ObjectChecked( bool checkedValue )
+        public bool                                     ObjectChecked( bool checkedValue )
         {
             return checkedValue;
         }
         
         #endregion
         
-        protected abstract string       GetDisplayUpdateFormInfo();
-        protected abstract string       GetDisplayNewFormInfo();
-        
-        protected string                GetDisplayExtraInfo()
+        protected string                                GetDisplayExtraInfo()
         {
-            var targetForm = TargetForm;
+            Target.Resolve( false );
+            var target = _Target.Value;
             
-            if( ( targetForm != null )&&( TargetRecordFlagsMatch )&&( ImportDataMatchesTarget() ) )
+            if( ( target != null )&&( ImportDataMatchesTarget() ) )
                 return "No changes";
             
-            var prefix = ( targetForm == null )
+            var prefix = ( target == null )
                 ? "New Form: "
                 : "Update Form: ";
             
             var tmp = new List<string>();
-            if( !TargetRecordFlagsMatch )
+
+            var oCount = _Operations.Count;
+            for( int i = 0; i < oCount; i++ )
             {
-                if( _RecordFlags == 0 )
-                    tmp.Add( "Clear Record Flags" );
-                else
-                    tmp.Add( string.Format( "Record Flags 0x{0}", _RecordFlags.ToString( "X8" ) ) );
+                var operation = _Operations[ i ];
+                if(
+                    ( !Target.IsResolved )||
+                    ( !operation.Resolve( false ) )||
+                    ( !operation.TargetMatchesImport() ) )
+                {
+                    var infos = operation.OperationalInformation();
+                    if( !infos.NullOrEmpty() )
+                        foreach( var info in infos )
+                            tmp.Add( info );
+                }
             }
-            
-            tmp.Add( ( targetForm == null )
-                    ? GetDisplayNewFormInfo()
-                    : GetDisplayUpdateFormInfo() );
-            
+
             var tmp2 = GenIXHandle.ConcatDisplayInfo( tmp );
             return prefix + tmp2;
         }
         
-        protected abstract string       GetDisplayEditorID( Engine.Plugin.TargetHandle target );
         
-        public abstract int             InjectPriority { get; }
-        
-        protected virtual bool          ResolveReferenceForms( bool errorIfUnresolveable )
+        protected virtual bool                          ResolveReferenceForms( bool errorIfUnresolveable )
         {
             return true;
         }
         
-        protected abstract bool         ImportDataMatchesTarget();
-        
-        public bool                     Apply( GUIBuilder.Windows.BatchImport importWindow )
+        public virtual bool                             ImportDataMatchesTarget()
         {
-            DebugLog.OpenIndentLevel( Target.DisplayIDInfo() );
+            if( !_Target.Resolve( false ) ) return false;
+            var oCount = _Operations.Count;
+            int i;
+            for( i = 0; i < oCount; i++ )
+            {
+                var operation = _Operations[ i ];
+
+                if(
+                    ( !operation.Resolve( false ) )||
+                    ( !operation.TargetMatchesImport() )
+                )   return false;
+            }
+            return true;
+        }
+
+        public bool                                     Apply( BatchImport importWindow )
+        {
+            DebugLog.OpenIndentLevel( Target.NullSafeIDString() );
             var result = false;
-            
+
+            DumpImport();
+
             _BatchWindow = importWindow;
             if( _ErrorState )
             {
                 AddErrorMessage( ErrorTypes.Import, "Import in error state, cannot Apply()" );
                 goto localAbort;
             }
-            /*
-            if(
-                ( _FailOnApplyIfUnresolved )&
-                ( !Resolve( _FailOnApplyIfUnresolved ) )
-            )
-            {
-                AddErrorMessage( ErrorTypes.Import, "Resolve() errors, cannot Apply()" );
-                goto localAbort;
-            }
-            */
+
             // Target may not resolve if this is a new form
             _Target.Resolve( false );
-            // All reference forms must resolve, however
-            if( !ResolveReferenceForms( true ) )
+
+            if( _Target.Value == null )
             {
-                AddErrorMessage( ErrorTypes.Import, "Resolve() errors, cannot Apply()" );
-                goto localAbort;
-            }
-            
-            if( TargetForm == null )
-            {
-                if( !CreateNewFormInWorkingFile() )
-                {
-                    AddErrorMessage( ErrorTypes.Import, "Unable to create new form in working file" );
+                var message = "Target.CreateNewFormInWorkingFile"; // TODO:  Add translation
+                DebugLog.WriteLine( message );
+                importWindow.AddImportMessage( message );
+                if( !_Target.CreateNewFormInWorkingFile() )
                     goto localAbort;
-                }
             }
-            else if( !CopyToWorkingFile( TargetForm ) )
+            else
             {
-                AddErrorMessage(
-                    ErrorTypes.Import,
-                    string.Format(
-                        "Unable to create override of {0} in \"{1}\"",
-                        TargetForm.ToString(),
-                        GodObject.Plugin.Data.Files.Working.Filename
-                    )
-                );
-                goto localAbort;
+                var message = "Target.CopyToWorkingFile"; // TODO:  Add translation
+                DebugLog.WriteLine( message );
+                importWindow.AddImportMessage( message );
+                if( !_Target.CopyToWorkingFile() )
+                    goto localAbort;
             }
             
             SupressObjectDataChangedEvents();
             
             try
             {
-                DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "ApplyImport()" }, false, true, false, false, true, false );
-                result = ApplyImport();
-                DebugLog.CloseIndentLevel();
-                
-                DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "ApplyRecordFlagsToTarget()" }, false, true, false, false, true, false );
-                result &= ApplyRecordFlagsToTarget();
+                result = true;  // Assume at this point that everything is ok, that way any skipped operation does not false flag a failure
+                DebugLog.OpenIndentLevel( new [] { this.TypeFullName(), "Apply Import Operations" }, false, true, false, false, true, false );
+                var oCount = _Operations.Count;
+                int i;
+                for( i = 0; i < oCount; i++ )
+                {
+                    var operation = _Operations[ i ];
+
+                    // Resolve this operations resources
+                    result = operation.Resolve( true );
+                    if( !result )
+                    {
+                        var message = operation.Signature + ": Unable to resolve additional operation references";
+                        importWindow.AddImportMessage( message );
+                        DebugLog.WriteLine( message );
+                        break;
+                    }
+
+                    // Is this operation redundant?
+                    if( !operation.TargetMatchesImport() )
+                    {
+                        // Apply the operation
+                        importWindow.AddImportMessage( operation.Signature );
+                        DebugLog.WriteLine( operation.Signature );
+                        result = operation.Apply();
+                    }
+                    if( !result )
+                    {
+                        var message = operation.Signature + ": Unable to apply operation to target";
+                        importWindow.AddImportMessage( message );
+                        DebugLog.WriteLine( message );
+                        break;
+                    }
+                }
+                if( !result )
+                {
+                    var message = "Import operation failed\n" + _Operations[ i ].TypeFullName();
+                    importWindow.AddImportMessage( message );
+                    DebugLog.WriteLine( message );
+                }
                 DebugLog.CloseIndentLevel();
             }
             catch( Exception e )
             {
+                result = false;
                 AddErrorMessage( ErrorTypes.Import, "An unexpected exception has occured applying import!", e );
             }
 
             ResumeObjectDataChangedEvents( true );
 
-            if( result )
-            {
-                var refr = TargetForm as Engine.Plugin.Forms.ObjectReference;
-                if( refr != null ) refr.CheckForBackgroundCellChange( true );
-            }
-            else
+            if( !result )
                 DebugLog.WriteError( "Unable to apply import to the target form!" );
             
         localAbort:
@@ -814,29 +489,48 @@ namespace GUIBuilder.FormImport
             return result;
         }
         
-        protected abstract void         DumpImport();
-        protected abstract bool         ApplyImport();
-        
-        #region Generic Sub-Class Functions
-        
+        protected virtual void                          DumpImport()
+        {
+            var oCount = _Operations.Count;
+            DebugLog.OpenIndentLevel();
+            DebugLog.WriteStrings( null,
+                new[] {
+                    this            .Signature,
+                    Target          .NullSafeIDString( "Target = {0}", "unresolved" ),
+                    string          .Format( "Operations = {0}", oCount.ToString() )
+                },
+                false, true, false, false, false );
+            for( int i = 0; i < oCount; i++ )
+            {
+                var operation = _Operations[ i ];
+                DebugLog.OpenIndentLevel( operation.Signature, false );
+                var infos = operation.OperationalInformation();
+                if( !infos.NullOrEmpty() )
+                    foreach( var info in infos )
+                        DebugLog.WriteLine( info );
+                DebugLog.CloseIndentLevel();
+            }
+            DebugLog.CloseIndentLevel();
+        }
+
         #region Import List Management
         
-        public static void              AddToList( ref List<ImportBase> list, ImportBase i )
+        public static void                              AddToList( ref List<ImportBase> list, ImportBase i )
         {
             if( i == null ) return;
             if( list == null ) list = new List<ImportBase>();
             if( !list.NullOrEmpty() )
             {
-                var iFID = i.GetFormID( Engine.Plugin.TargetHandle.Master );
-                var iFIDValid = Engine.Plugin.Constant.ValidFormID( iFID );
+                var iFID = i.GetFormID( TargetHandle.Master );
+                var iFIDValid = iFID.ValidFormID();
                 foreach( var li in list )
                 {
                     if( li.Signature.InsensitiveInvariantMatch( i.Signature ) )
                     {
-                        var liFID = li.GetFormID( Engine.Plugin.TargetHandle.Master );
-                        if( ( !iFIDValid )||( !Engine.Plugin.Constant.ValidFormID( liFID ) ) )
+                        var liFID = li.GetFormID( TargetHandle.Master );
+                        if( ( !iFIDValid )||( !liFID.ValidFormID() ) )
                         {
-                            if( li.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( i.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                            if( li.GetEditorID( TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( i.GetEditorID( TargetHandle.WorkingOrLastFullRequired ) ) )
                             {
                                 //DebugLog.Write( string.Format( "\nReject :: \"{0}\" :: \"{1}\"", li.EditorID, i.EditorID ) );
                                 return;
@@ -850,24 +544,27 @@ namespace GUIBuilder.FormImport
                     }
                 }
             }
+            DebugLog.OpenIndentLevel();
+            i.DumpImport();
+            DebugLog.CloseIndentLevel();
             list.Add( i );
         }
         
-        public static void              AddToList( ref List<ImportBase> list, List<ImportBase> otherList )
+        public static void                              AddToList( ref List<ImportBase> list, List<ImportBase> otherList )
         {
             if( otherList.NullOrEmpty() ) return;
             foreach( var oli in otherList )
                 AddToList( ref list, oli );
         }
         
-        public static bool              AllImportsMatchState( List<ImportBase> list, ImportStates state )
+        public static bool                              AllImportsMatchState( List<ImportBase> list, ImportStates state )
         {
             return
                 ( !list.NullOrEmpty() )&&
                 ( !list.Any( item =>( item.ImportState != state ) ) );
         }
         
-        public static bool              AllImportsMatchTarget( List<ImportBase> list )
+        public static bool                              AllImportsMatchTarget( List<ImportBase> list )
         {
             return
                 ( list.NullOrEmpty() )||
@@ -876,11 +573,9 @@ namespace GUIBuilder.FormImport
         
         #endregion
         
-        #endregion
-        
-        public override string          ToString()
+        public override string                          ToString()
         {
-            return string.Format( "[Signature = \"{0}\" :: Target = {1}]", Signature, DisplayIDInfo() );
+            return string.Format( "[Signature = \"{0}\" :: Target = {1}]", Signature, _Target.NullSafeIDString() );
         }
         
         /// <summary>
@@ -891,7 +586,10 @@ namespace GUIBuilder.FormImport
         /// <param name="enableControlsOnClose">Enable all forms when the dialog closes</param>
         /// <param name="allImportsMatchTarget">All import targets match import data on close</param>
         /// <returns></returns>
-        public static bool              ShowImportDialog( List<ImportBase> importForms, bool enableControlsOnClose, ref bool allImportsMatchTarget )
+        public static bool                              ShowImportDialog(
+            List<ImportBase> importForms,
+            bool enableControlsOnClose,
+            ref bool allImportsMatchTarget )
         {
             if( importForms.NullOrEmpty() ) return false;
             if( System.Threading.Thread.CurrentThread.ManagedThreadId == 1 )

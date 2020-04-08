@@ -46,18 +46,15 @@ namespace Fallout4
         
         // Build volumes for workshops
         List<Engine.Plugin.Forms.ObjectReference> _BuildVolumes = null;
-        
+
         // Pulled from handle for quick access
-        
-        public string LocationName = null;
-        
+
+        //public string LocationName = null;
+        Engine.Plugin.Forms.Location _Location = null;
+
         #region Constructor
-        
-        public WorkshopScript( Engine.Plugin.Forms.ObjectReference reference ) : base( reference )
-        {
-            // TODO : DO THIS PROPERLY!
-            LocationName = string.Format( "{0} - No location", reference.IDString );
-        }
+
+        public WorkshopScript( Engine.Plugin.Forms.ObjectReference reference ) : base( reference ) {}
 
         #endregion
 
@@ -74,10 +71,17 @@ namespace Fallout4
             }
         }
 
-        public string NameFromEditorID
+        public string QualifiedName
         {
             get
             {
+                var location = Location;
+                if( location != null )
+                {
+                    var lName = location.GetFullName( TargetHandle.WorkingOrLastFullRequired );
+                    if( !string.IsNullOrEmpty( lName ) )
+                        return lName.Replace( " ", "" ).Replace( "-", "" );
+                }
                 // TODO:  FIX ME FOR PROPER NAMESPACE PREFIXES AND STRING SCANNING, THIS CODE SUX!
                 var foo = Reference.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
                 foo = foo.StripFrom( "WorkshopREF", StringComparison.InvariantCultureIgnoreCase );
@@ -86,7 +90,31 @@ namespace Fallout4
                 return foo;
             }
         }
-        
+
+        public Engine.Plugin.Forms.Location Location
+        {
+            get
+            {
+                if( _Location == null )
+                {
+                    var forms = Form.References;
+                    if( forms.NullOrEmpty() )
+                        return null;
+
+                    foreach( var form in forms )
+                    {
+                        var lctn = form as Engine.Plugin.Forms.Location;
+                        if( lctn == null )
+                            continue;
+                        _Location = lctn;
+                        break;
+                    }
+                }
+                return _Location;
+            }
+        }
+
+
         public Engine.Plugin.Forms.ObjectReference BorderReference
         {
             get
@@ -276,8 +304,8 @@ namespace Fallout4
 
                 DebugLog.OpenIndentLevel( new string[] {
                     "workshop = " + this.IDString,
-                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator + " = " + GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.IDString,
-                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink + " = " + GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.IDString
+                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator + " = " + GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.NullSafeIDString(),
+                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink + " = " + GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.NullSafeIDString()
                     }, true, true, false );
                 
                 var abort = false;

@@ -49,78 +49,36 @@ namespace Engine.Plugin.Forms
         
         //public ObjectReference() : base() {}
         
-        public ObjectReference( string filename, uint formID ) : base( filename, formID ) {}
+        public ObjectReference( string filename, uint formID ) :
+            base( filename, formID )
+        {
+            this.ObjectDataChanged += this.OnObjectDataChanged;
+        }
         
         //public ObjectReference( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public ObjectReference( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
+        public ObjectReference( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) :
+            base( parentCollection, ancestor, handle )
+        {
+            this.ObjectDataChanged += this.OnObjectDataChanged;
+        }
         
         public override void CreateChildFields()
         {
-            _Name = new Fields.ObjectReference.Name( this );
-            _Primitive = new Fields.ObjectReference.Primitive( this );
-            _Layer = new Fields.ObjectReference.Layer( this );
-            _EnableParent = new Fields.ObjectReference.EnableParent( this );
-            _Position = new Fields.ObjectReference.Position( this );
-            _Rotation = new Fields.ObjectReference.Rotation( this );
-            _LinkedRefs = new Fields.ObjectReference.LinkedRefs( this );
-            _LocationReference = new Fields.ObjectReference.LocationReference( this );
-            _locationRefTypes = new Fields.ObjectReference.LocationRefTypes( this );
+            _Name               = new Fields.ObjectReference.Name( this );
+            _Primitive          = new Fields.ObjectReference.Primitive( this );
+            _Layer              = new Fields.ObjectReference.Layer( this );
+            _EnableParent       = new Fields.ObjectReference.EnableParent( this );
+            _Position           = new Fields.ObjectReference.Position( this );
+            _Rotation           = new Fields.ObjectReference.Rotation( this );
+            _LinkedRefs         = new Fields.ObjectReference.LinkedRefs( this );
+            _LocationReference  = new Fields.ObjectReference.LocationReference( this );
+            _locationRefTypes   = new Fields.ObjectReference.LocationRefTypes( this );
         }
 
         #endregion
 
         #endregion
 
-        #region Properties
-
-        public Engine.Plugin.Form GetName( TargetHandle target )
-        {
-            var nFID = _Name.GetValue( target );
-            if( !nFID.ValidFormID() ) return null;
-            return GodObject.Plugin.Data.Root.Find( nFID, true ) as Engine.Plugin.Form;
-        }
-        
-        public uint GetNameFormID( TargetHandle target )
-        {
-            return _Name.GetValue( target );
-        }
-        public void SetNameFormID( TargetHandle target, uint value )
-        {
-            _Name.SetValue( target, value );
-        }
-        
-        public Fields.ObjectReference.Primitive Primitive
-        {
-            get
-            {
-                return _Primitive;
-            }
-        }
-        
-        public Engine.Plugin.Forms.Layer GetLayer( TargetHandle target )
-        {
-            var lFID = GetLayerFormID( target );
-            if( !lFID.ValidFormID() ) return null;
-            return GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Layer>( lFID, true );
-        }
-
-        public uint GetLayerFormID( TargetHandle target )
-        {
-            return _Layer.GetValue( target );
-        }
-        public void SetLayerFormID( TargetHandle target, uint value )
-        {
-            _Layer.SetValue( target, value );
-        }
-        
-        public Fields.ObjectReference.EnableParent EnableParent
-        {
-            get
-            {
-                return _EnableParent;
-            }
-        }
-        
         bool UpdateContainerCellHandle( Cell cell )
         {
             DebugLog.OpenIndentLevel();
@@ -155,8 +113,10 @@ namespace Engine.Plugin.Forms
             DebugLog.CloseIndentLevel();
             return result;
         }
-        
-        public void CheckForBackgroundCellChange( bool sendObjectDataChangedEvent )
+
+        //CheckForBackgroundCellChange( true )
+
+        void OnObjectDataChanged( object sender, EventArgs e )
         {
             if( ObjectDataChangedEventsSupressed )
                 return;
@@ -183,40 +143,80 @@ namespace Engine.Plugin.Forms
                 DebugLog.WriteError( "Unable to copy new CELL to working file!" );
                 goto localAbort;
             }
-            
-            /*
-            try
-            {
-                //var ncOH = newCell.WorkingFileHandle as XeLib.FormHandle;
-                //oH.SetCell( ncOH );
-                //var newHandle = oH.CopyMoveToCell( ncOH, true );
-                //if( !newHandle.IsValid() )
-                //    DebugLog.WriteError( this.FullTypeName(), "CheckForBackgroundCellChange()", "Unable to move object reference to new cell!" );
-                //else
-                //    this.AddNewHandle( newHandle );
-            }
-            catch( Exception e )
-            {
-                DebugLog.WriteException( e );
-                //DebugLog.WriteError( this.FullTypeName(), "CheckForBackgroundCellChange()", e.ToString() );
-            }
-            */
-            
+
             DebugLog.WriteStrings( null, new [] { "Cell.ObjectReferences.Remove()", oldCell.IDString }, false, false, false, false, false );
             oldCell.ObjectReferences.Remove( this );
             DebugLog.WriteStrings( null, new [] { "Cell.ObjectReferences.Add()", newCell.IDString }, false, false, false, false, false );
             newCell.ObjectReferences.Add( this );
             
-            DebugLog.WriteLine( string.Format( "sendObjectDataChangedEvent = {0}", sendObjectDataChangedEvent.ToString() ) );
-            if( sendObjectDataChangedEvent )
-            {
+            //DebugLog.WriteLine( string.Format( "sendObjectDataChangedEvent = {0}", sendObjectDataChangedEvent.ToString() ) );
+            //if( sendObjectDataChangedEvent )
+            //{
                 oldCell.SendObjectDataChangedEvent( null );
                 newCell.SendObjectDataChangedEvent( null );
-                this.SendObjectDataChangedEvent( null );
-            }
+                //this.SendObjectDataChangedEvent( null );
+            //}
             
         localAbort:
             DebugLog.CloseIndentLevel();
+        }
+        
+        #region Properties
+
+        public TForm GetName<TForm>( TargetHandle target ) where TForm : Engine.Plugin.Form
+        {
+            var nFID = _Name.GetValue( target );
+            if( !nFID.ValidFormID() ) return null;
+            return GodObject.Plugin.Data.Root.Find( nFID, true ) as TForm;
+        }
+        
+        public uint GetNameFormID( TargetHandle target )
+        {
+            return _Name.GetValue( target );
+        }
+        public void SetNameFormID( TargetHandle target, uint value )
+        {
+            _Name.SetValue( target, value );
+        }
+        
+        public Fields.ObjectReference.Primitive Primitive
+        {
+            get
+            {
+                return _Primitive;
+            }
+        }
+        
+        public Engine.Plugin.Forms.Layer GetLayer( TargetHandle target )
+        {
+            var lFID = GetLayerFormID( target );
+            if( !lFID.ValidFormID() ) return null;
+            return GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Layer>( lFID, true );
+        }
+        public void SetLayer( TargetHandle target, Engine.Plugin.Forms.Layer value )
+        {
+            if( value == null )
+                _Layer.DeleteRootElement( true, true );
+            else
+                _Layer.SetValue( target, value.GetFormID( TargetHandle.Master ) );
+        }
+
+
+        public uint GetLayerFormID( TargetHandle target )
+        {
+            return _Layer.GetValue( target );
+        }
+        public void SetLayerFormID( TargetHandle target, uint value )
+        {
+            _Layer.SetValue( target, value );
+        }
+        
+        public Fields.ObjectReference.EnableParent EnableParent
+        {
+            get
+            {
+                return _EnableParent;
+            }
         }
         
         public Vector3f GetPosition( TargetHandle target )
@@ -226,7 +226,7 @@ namespace Engine.Plugin.Forms
         public void SetPosition( TargetHandle target, Vector3f value )
         {
             _Position.SetValue( target, value );
-            CheckForBackgroundCellChange( true );
+            //CheckForBackgroundCellChange( true );
         }
         
         public Vector3f GetRotation( TargetHandle target )

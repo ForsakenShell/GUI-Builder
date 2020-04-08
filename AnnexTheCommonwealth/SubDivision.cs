@@ -559,10 +559,17 @@ namespace AnnexTheCommonwealth
         
         #endregion
         
-        public string NameFromEditorID
+        public string QualifiedName
         {
             get
             {
+                var location = GodObject.Plugin.Data.Root.Find<Engine.Plugin.Forms.Location>( GetMyLocation( TargetHandle.WorkingOrLastFullRequired ), true );
+                if( location != null )
+                {
+                    var lName = location.GetFullName( TargetHandle.WorkingOrLastFullRequired );
+                    if( !string.IsNullOrEmpty( lName ) )
+                        return lName.Replace( " ", "" ).Replace( "-", "" );
+                }
                 // TODO:  FIX ME FOR PROPER NAMESPACE PREFIXES!
                 var foo = GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 var si = foo.IndexOf( "SubDivision", StringComparison.InvariantCultureIgnoreCase );
@@ -952,8 +959,8 @@ namespace AnnexTheCommonwealth
                         string.Format(
                             "{0}{1}Border01{2}",
                             "ESM",
-                            this.NameFromEditorID,
-                            ( neighbour == null ? "Main" : neighbour.NameFromEditorID ) );
+                            this.QualifiedName,
+                            ( neighbour == null ? "Main" : neighbour.QualifiedName ) );
                     
                     // Check enablers linked to the sub-division
                     e = _BorderEnablers.Find( (b) => ( b.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == newEditorID ) );
@@ -988,6 +995,7 @@ namespace AnnexTheCommonwealth
                     
                     //DebugLog.WriteLine( "Adding import for " + newEditorID );
                     
+                    /*
                     var import = new GUIBuilder.FormImport.ImportBorderEnablerReference(
                          null,
                          newEditorID,
@@ -997,6 +1005,7 @@ namespace AnnexTheCommonwealth
                          this, neighbour );
                     
                     GUIBuilder.FormImport.ImportBase.AddToList( ref result, import );
+                    */
                     
                 }
             }
@@ -1093,7 +1102,7 @@ namespace AnnexTheCommonwealth
                         var c = w == null
                             ? flag.Reference.Cell
                             : flag.Reference.Worldspace.Cells.Persistent;
-                        GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportEdgeFlagReference( flag, w, c ) );
+                        //GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportEdgeFlagReference( flag, w, c ) );
                     }
                 }
             }
@@ -1107,8 +1116,8 @@ namespace AnnexTheCommonwealth
                     volumeCeiling,
                     createImportData,
                     highPrecisionVertexes );
-                if( ( createImportData )&&( !subList.NullOrEmpty() ) )
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, subList );
+                //if( ( createImportData )&&( !subList.NullOrEmpty() ) )
+                //    GUIBuilder.FormImport.ImportBase.AddToList( ref list, subList );
             }
             
             return list;

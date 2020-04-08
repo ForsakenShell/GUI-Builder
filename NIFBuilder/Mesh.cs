@@ -499,7 +499,7 @@ public static partial class NIFBuilder
                 : null;
             var mssi = MeshSubSetIndex( neighbour, subIndex );
             return string.Format(
-                @"Meshes\{0}{1}{2}{3}{4}{5}{6}.nif",
+                @"{0}{1}{2}{3}{4}{5}{6}.nif",
                 meshPathSuffix,
                 meshSubPath,
                 filePrefix,
@@ -978,12 +978,19 @@ public static partial class NIFBuilder
 
         public bool Write( string targetPath, string targetSuffix, string[] exportInfo )
         {
-            //DebugLog.Write( string.Format( "NIFBuilder.Mesh.Write()\n\tNIFFile = \"{0}\"\n\tCell = {1}\n\tPosition = {2}\n", nifFile, nodeGroup.Cell.ToString(), nodeGroup.Placement.ToString() ) );
+            DebugLog.WriteStrings( null,
+                new[] {
+                    "targetPath = \"" + targetPath + "\"",
+                    "targetSuffix = \"" + targetSuffix + "\"",
+                    "nifFilePath = \"" + nifFilePath + "\"",
+                    "nifFile = \"" + nifFile + "\""
+                }, false, true, false, false, false
+            );
 
             var fullTarget = BuildTargetPath( targetPath, targetSuffix );
-            if( ( !string.IsNullOrEmpty( fullTarget ) ) && ( fullTarget[ fullTarget.Length - 1 ] != '\\' ) )
+            if( ( !string.IsNullOrEmpty( fullTarget ) )&&( fullTarget[ fullTarget.Length - 1 ] != '\\' ) )
                 fullTarget += @"\";
-            var fullPath = string.Format( "{0}{1}", fullTarget, nifFilePath );
+            var fullPath = string.Format( @"{0}Meshes\{1}", fullTarget, nifFilePath );
             string nifPath;
             GenFilePath.FilenameFromPathname( fullPath, out nifPath );
 

@@ -3,7 +3,9 @@
  *
  * Base import form target.
  *
+ * OBSOLETE - Use ImportTarget
  */
+/*
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,3 +47,4 @@ namespace GUIBuilder.FormImport
     }
     
 }
+*/

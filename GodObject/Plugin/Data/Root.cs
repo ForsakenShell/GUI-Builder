@@ -69,10 +69,10 @@ namespace GodObject
 
                 #region Get Root Collection in Master Table
 
-                public static Collection GetCollection<TSync>( bool createIfNeeded, bool doFullLoad, bool updateUIOnFullLoad )
-                    where TSync : class, IXHandle
+                public static Collection GetCollection<TIXHandle>( bool createIfNeeded, bool doFullLoad, bool updateUIOnFullLoad )
+                    where TIXHandle : class, IXHandle
                 {
-                    return GetCollection( typeof( TSync ), createIfNeeded, doFullLoad, updateUIOnFullLoad );
+                    return GetCollection( typeof( TIXHandle ), createIfNeeded, doFullLoad, updateUIOnFullLoad );
                 }
                 
                 public static Collection GetCollection( Type classType, bool createIfNeeded, bool doFullLoad, bool updateUIOnFullLoad )
@@ -381,6 +381,15 @@ namespace GodObject
 
                 #region Find in Master Table
 
+                public static IXHandle Find( ClassAssociation classAssociation, uint formID, bool tryLoad = true )
+                {
+                    //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "Find()\n", "formID = 0x" + formID.ToString( "X8" ) + "\n", "tryLoad = " + tryLoad.ToString() } );
+                    var result = FindEx( classAssociation, null, formID, null, tryLoad );
+                    //localReturnResult:
+                    //DebugLog.CloseIndentLevel<IDataSync>( result );
+                    return result;
+                }
+
                 public static IXHandle Find( uint formID, bool tryLoad = true )
                 {
                     //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "Find()\n", "formID = 0x" + formID.ToString( "X8" ) + "\n", "tryLoad = " + tryLoad.ToString() } );
@@ -428,13 +437,41 @@ namespace GodObject
                     return result;
                 }
 
-                public static TSync Find<TSync>( uint formID, bool tryLoad = true ) where TSync : class, IXHandle
+                public static IXHandle Find( Type formType, string editorID, bool tryLoad = true )
+                {
+                    //DebugLog.OpenIndentLevel( new [] { "formType = " + formType?.FullName(), "editorID = \"" + editorID + "\"\n", "tryLoad = " + tryLoad.ToString() }, true );
+
+                    IXHandle result = null;
+
+                    var association = Engine.Plugin.Attributes.Reflection.AssociationFrom( formType );
+                    if( !association.IsValid() )
+                    {
+                        DebugLog.WriteError( string.Format( "Unable to get Association from {0}", formType.FullName() ) );
+                        goto localReturnResult;
+                    }
+                    result = FindEx( association, null, 0, editorID, tryLoad );
+
+                localReturnResult:
+                    //DebugLog.CloseIndentLevel( result );
+                    return result;
+                }
+
+                public static TIXHandle Find<TIXHandle>( uint formID, bool tryLoad = true ) where TIXHandle : class, IXHandle
                 {
                     //DebugLog.OpenIndentLevel( new [] { "formID = 0x" + formID.ToString( "X8" ) + "\n", "tryLoad = " + tryLoad.ToString() }, true );
 
-                    var result = Find( typeof( TSync ), formID, tryLoad ) as TSync;
+                    var result = Find( typeof( TIXHandle ), formID, tryLoad ) as TIXHandle;
 
-                    //DebugLog.CloseIndentLevel<TSync>( result );
+                    //DebugLog.CloseIndentLevel<TIXHandle>( result );
+                    return result;
+                }
+
+                public static IXHandle Find( ClassAssociation classAssociation, string editorID, bool tryLoad = true )
+                {
+                    //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "Find()\n", "editorID = \"" + editorID + "\"\n", "tryLoad = " + tryLoad.ToString() } );
+                    var result = FindEx( classAssociation, null, 0, editorID, tryLoad );
+                    //localReturnResult:
+                    //DebugLog.CloseIndentLevel<IDataSync>( result );
                     return result;
                 }
 
@@ -465,23 +502,23 @@ namespace GodObject
                     return result;
                 }
 
-                public static TSync Find<TSync>( string editorID, bool tryLoad = true ) where TSync : class, IXHandle
+                public static TIXHandle Find<TIXHandle>( string editorID, bool tryLoad = true ) where TIXHandle : class, IXHandle
                 {
-                    //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "Find<" + typeof( TSync ).ToString() + ">()\n", "editorID = \"" + editorID + "\"\n", "tryLoad = " + tryLoad.ToString() } );
+                    //DebugLog.OpenIndentLevel( new [] { "GodObject.Plugin.Data.Root", "Find<" + typeof( TIXHandle ).ToString() + ">()\n", "editorID = \"" + editorID + "\"\n", "tryLoad = " + tryLoad.ToString() } );
 
-                    TSync result = null;
+                    TIXHandle result = null;
 
-                    var type = typeof( TSync );
+                    var type = typeof( TIXHandle );
                     var association = Engine.Plugin.Attributes.Reflection.AssociationFrom( type );
                     if( !association.IsValid() )
                     {
                         DebugLog.WriteError( string.Format( "Unable to get Association from {0}", ( type == null ? "null" : type.ToString() ) ) );
                         goto localReturnResult;
                     }
-                    result = FindEx( association, null, 0, editorID, tryLoad ) as TSync;
+                    result = FindEx( association, null, 0, editorID, tryLoad ) as TIXHandle;
 
                 localReturnResult:
-                    //DebugLog.CloseIndentLevel<TSync>( result );
+                    //DebugLog.CloseIndentLevel<TIXHandle>( result );
                     return result;
                 }
 

@@ -28,7 +28,9 @@ namespace GUIBuilder.Windows
 
             this.ClientLoad += new System.EventHandler( this.OnClientLoad );
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
-            
+
+            this.lvImportForms.OnSetSyncObjectsThreadComplete += OnSyncImportThreadComplete;
+
             this.scImports.SplitterMoved += new System.Windows.Forms.SplitterEventHandler( this.OnImportsSplitterMoved );
             this.btnImportSelected.Click += new System.EventHandler( this.OnImportButtonClick );
             this.btnClose.Click += new System.EventHandler( this.OnCloseButtonClick );
@@ -115,11 +117,16 @@ namespace GUIBuilder.Windows
             if( !OnLoadComplete ) return;
             GodObject.XmlConfig.WriteValue<int>( XmlNodeName, XmlKey_SplitterOffset, e.SplitY, true );
         }
-        
+
+        void OnSyncImportThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<FormImport.ImportBase> sender )
+        {
+            SetEnableState( sender, true );
+        }
+
         #endregion
-        
+
         #region Import Forms <-> Import List (ListViewItem)
-        
+
         public static int PrioritySortImportAsc( FormImport.ImportBase x, FormImport.ImportBase y )
         {
             return
@@ -173,7 +180,8 @@ namespace GUIBuilder.Windows
             }
             var lines = message.Split( '\n' );
             foreach( var line in lines )
-                if( !string.IsNullOrEmpty( line ) ) tbImportMessages.AppendText( line + "\r\n" );
+                if( !string.IsNullOrEmpty( line ) )
+                    tbImportMessages.AppendText( line + "\r\n" );
             tbImportMessages.Refresh();
             tbImportMessages.ScrollToCaret();
         }
@@ -199,18 +207,21 @@ namespace GUIBuilder.Windows
             var msg = "BatchImportWindow.ImportingForms".Translate();
             m.SetCurrentStatusMessage( msg );
             
-            var selectedImportForms = lvImportForms.GetSelectedSyncObjects();
-            if( !selectedImportForms.NullOrEmpty() )
+            var selectedImports = lvImportForms.GetSelectedSyncObjects();
+            if( !selectedImports.NullOrEmpty() )
             {
                 m.PushStatusMessage();
                 m.SetCurrentStatusMessage( "BatchImportWindow.Sorting".Translate() );
-                SortImportForms( selectedImportForms, true );
-                foreach( var importForm in selectedImportForms )
+                SortImportForms( selectedImports, true );
+                foreach( var import in selectedImports )
                 {
-                    msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), importForm.Signature, string.Format( "IXHandle.IDString".Translate(), importForm.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), importForm.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
-                    m.SetCurrentStatusMessage( msg );
-                    AddImportMessage( msg );
-                    importForm.Apply( this );
+                    if( !import.ImportDataMatchesTarget() )
+                    {
+                        msg = string.Format( "BatchImportWindow.ImportingForm".Translate(), import.Signature, string.Format( "IXHandle.IDString".Translate(), import.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" ), import.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                        m.SetCurrentStatusMessage( msg );
+                        AddImportMessage( msg );
+                        import.Apply( this );
+                    }
                 }
                 m.PopStatusMessage();
             }

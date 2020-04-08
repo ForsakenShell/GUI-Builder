@@ -3,7 +3,9 @@
  *
  * Sub-division/Workshop edge flag reference (REFR(STAT)).
  *
+ * OBSOLETE - Use ImportBase
  */
+ /*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,11 +27,7 @@ namespace GUIBuilder.FormImport
         protected override void         DumpImport()
         {
             return;
-            DebugLog.WriteLine( string.Format(
-                "\n{0}{1}",
-                this.TypeFullName(),
-                Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" )
-            ) );
+            base.DumpImport();
         }
         
         public                          ImportEdgeFlagReference( AnnexTheCommonwealth.EdgeFlag originalScript, Engine.Plugin.Forms.Worldspace worldspace, Engine.Plugin.Forms.Cell cell )
@@ -101,3 +99,4 @@ namespace GUIBuilder.FormImport
     }
     
 }
+*/

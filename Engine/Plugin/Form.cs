@@ -699,11 +699,11 @@ namespace Engine.Plugin
 
             // No collection means this is a CoreForm or an "early load" CustomForm
             if( _ParentCollection == null )
-            {
                 _ParentCollection = GodObject.Plugin.Data.Root.GetCollection( this.GetType(), true, false, false );
-                if( _ParentCollection != null )
-                    _ParentCollection.Add( this );
-            }
+            
+            // Make sure the parent collection actually contains this Form
+            if( _ParentCollection != null )
+                _ParentCollection.Add( this );
 
             result = true;
             Disposed = false;
@@ -825,8 +825,7 @@ namespace Engine.Plugin
         public void                     SendObjectDataChangedEvent( object sender )
         {
             if( _SupressObjectDataChangedEvent ) return;
-            EventHandler handler = ObjectDataChanged;
-            if( handler != null ) handler( sender, null );
+            ObjectDataChanged?.Invoke( sender, null );
             if( !_Scripts.NullOrEmpty() )
                 foreach( var script in _Scripts )
                     if( sender != script )
@@ -868,7 +867,7 @@ namespace Engine.Plugin
                     m.PushItemOfItems();
                     m.SetCurrentStatusMessage( string.Format( "Plugin.LoadingReferencesOf".Translate(), IDString ) );
 
-                    //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "References", this.IDString } );
+                    //DebugLog.OpenIndentLevel( this.IDString );
 
                     List<Form> resultList = null;
 
@@ -895,7 +894,7 @@ namespace Engine.Plugin
                     }
 
                 localReturnResult:
-                    //DebugLog.CloseIndentLevel<Form>( "Forms", resultList );
+                    //DebugLog.CloseIndentList( "Forms", resultList, false, true );
                     m.PopItemOfItems();
                     m.PopStatusMessage();
                     _References = resultList.NullOrEmpty()

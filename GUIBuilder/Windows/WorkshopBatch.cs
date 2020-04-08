@@ -142,7 +142,7 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
 
-            GUIBuilder.WorkshopBatch.GenerateSandboxes( ref list, workshops, m, false, false );
+            GUIBuilder.WorkshopBatch.GenerateSandboxes( ref list, workshops, m, true, false );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();

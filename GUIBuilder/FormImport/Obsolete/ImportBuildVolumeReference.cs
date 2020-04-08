@@ -3,7 +3,9 @@
  *
  * Sub-division/Workshop build volume reference (REFR(ACTI)).
  *
+ * OBSOLETE - Use ImportBase
  */
+ /*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,19 +51,19 @@ namespace GUIBuilder.FormImport
         protected override void         DumpImport()
         {
             //return;
+            base.DumpImport();
             DebugLog.WriteStrings( null, new[]{
-                this.TypeFullName(),
-                Target          .DisplayIDInfo( "Target Form = {0}", "unresolved" ),
                 string.IsNullOrEmpty( NewEditorID ) ? null : string.Format( "NewEditorID = \"{0}\"", NewEditorID ),
-                ftBaseForm      .DisplayIDInfo( "BaseActi = {0}" ),
-                ftWorldspace    .DisplayIDInfo( "Worldspace = {0}" ),
+                ftBaseForm      .NullSafeIDString( "BaseActi = {0}" ),
+                ftWorldspace    .NullSafeIDString( "Worldspace = {0}" ),
+                ftCell          .NullSafeIDString( "Cell = {0}" ),
                 string          .Format       ( "Position = {0}", Position.ToString() ),
                 string          .Format       ( "Rotation = {0}", Rotation.ToString() ),
                 string          .Format       ( "Bounds = {0}", Bounds.ToString() ),
-                string          .Format       ( "\n\tColor = {0}", Color.ToString() ),
-                ftLinkRef       .DisplayIDInfo( "LinkRef = {0}" ),
-                ftLinkKeyword   .DisplayIDInfo( "LinkKeyword = {0}" ),
-                ftLayer         .DisplayIDInfo( "Layer = {0}" ) },
+                string          .Format       ( "Color = {0}", Color.ToString() ),
+                ftLinkRef       .NullSafeIDString( "LinkRef = {0}" ),
+                ftLinkKeyword   .NullSafeIDString( "LinkKeyword = {0}" ),
+                ftLayer         .NullSafeIDString( "Layer = {0}" ) },
                 false, true, false, false );
         }
         
@@ -83,7 +85,7 @@ namespace GUIBuilder.FormImport
             Color           = System.Drawing.Color.FromArgb( color.A, color.R, color.G, color.B );
             ftLinkRef       = new FormTarget( "Linked Ref", this, typeof( Engine.Plugin.Forms.ObjectReference ), linkRef );
             ftLinkKeyword   = new FormTarget( "Linked Ref Keyword", this, typeof( Engine.Plugin.Forms.Keyword ), linkKeyword );
-            if( layer != null)
+            if( layer != null )
                 ftLayer     = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ), layer );
             else if( !string.IsNullOrEmpty( layerEditorID ) )
                 ftLayer     = new FormTarget( "Layer", this, typeof( Engine.Plugin.Forms.Layer ), Engine.Plugin.Constant.FormID_None, layerEditorID );
@@ -132,7 +134,7 @@ namespace GUIBuilder.FormImport
             var refr = TargetRef;
             
             if( refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != ftBaseForm.FormID )
-                tmp.Add( ftBaseForm.DisplayIDInfo( "Base form {0}" ) );
+                tmp.Add( ftBaseForm.NullSafeIDString( "Base form {0}" ) );
             
             if( string.Compare( refr.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), NewEditorID, StringComparison.InvariantCulture ) != 0 )
                 tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
@@ -144,12 +146,12 @@ namespace GUIBuilder.FormImport
                 tmp.Add( string.Format( "Rotation {0}", Rotation.ToString() ) );
             
             if( !ftCell.Matches( refr.Cell, false ) )
-                tmp.Add( ftCell.DisplayIDInfo( "Cell {0}", "unresolved" ) );
+                tmp.Add( ftCell.NullSafeIDString( "Cell {0}", "unresolved" ) );
             //var cell = TargetCell;
             //if( ( cell != null )&&( refr.Cell != cell ) )
             //    tmp.Add( GenIDataSync.ExtraInfoFor( cell, format: "Cell {0}", unresolveable: "unresolved" ) );
             if( !ftWorldspace.Matches( refr.Worldspace, false ) )
-                tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
+                tmp.Add( ftWorldspace.NullSafeIDString( "Worldspace {0}", "unresolved" ) );
             
             if( refr.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) != Bounds )
                 tmp.Add( string.Format( "Bounds {0}", Bounds.ToString() ) );
@@ -158,7 +160,7 @@ namespace GUIBuilder.FormImport
                 tmp.Add( string.Format( "Color {0}", Color.ToString() ) );
 
             if( !ftLayer.Matches( refr.GetLayerFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ), true ) )
-                tmp.Add( ftLayer.DisplayIDInfo( "Layer {0}" ) );
+                tmp.Add( ftLayer.NullSafeIDString( "Layer {0}" ) );
             
             if(
                 ( ftLinkRef.Resolveable() )&&
@@ -173,8 +175,8 @@ namespace GUIBuilder.FormImport
                     tmp.Add(
                         string.Format(
                             "Link to {0} using keyword {1}",
-                            ftLinkRef.DisplayIDInfo(),
-                            ftLinkKeyword.DisplayIDInfo()
+                            ftLinkRef.NullSafeIDString(),
+                            ftLinkKeyword.NullSafeIDString()
                     ) );
                 }
             }
@@ -189,21 +191,21 @@ namespace GUIBuilder.FormImport
         {
             var tmp = new List<string>();
             
-            tmp.Add( ftBaseForm.DisplayIDInfo( "Placed instance of {0}" ) );
+            tmp.Add( ftBaseForm.NullSafeIDString( "Placed instance of {0}" ) );
             
             tmp.Add( string.Format( "EditorID \"{0}\"", NewEditorID ) );
             
             tmp.Add( string.Format( "Position {0}", Position.ToString() ) );
             tmp.Add( string.Format( "Rotation {0}", Rotation.ToString() ) );
             //tmp.Add( GenIDataSync.ExtraInfoFor( TargetCell, format: "Cell {0}", unresolveable: "unresolved" ) );
-            tmp.Add( ftCell.DisplayIDInfo( "Cell {0}", "unresolved" ) );
-            tmp.Add( ftWorldspace.DisplayIDInfo( "Worldspace {0}", "unresolved" ) );
+            tmp.Add( ftCell.NullSafeIDString( "Cell {0}", "unresolved" ) );
+            tmp.Add( ftWorldspace.NullSafeIDString( "Worldspace {0}", "unresolved" ) );
             
             tmp.Add( string.Format( "Bounds {0}", Bounds.ToString() ) );
 
             tmp.Add( string.Format( "Color {0}", Color.ToString() ) );
 
-            tmp.Add( ftLayer.DisplayIDInfo( "Layer {0}" ) );
+            tmp.Add( ftLayer.NullSafeIDString( "Layer {0}" ) );
             
             if(
                 ( ftLinkRef.Resolveable() )&&
@@ -211,8 +213,8 @@ namespace GUIBuilder.FormImport
             )   tmp.Add(
                     string.Format(
                         "Link to {0} using keyword {1}",
-                        ftLinkRef.DisplayIDInfo(),
-                        ftLinkKeyword.DisplayIDInfo()
+                        ftLinkRef.NullSafeIDString(),
+                        ftLinkKeyword.NullSafeIDString()
                 ) );
             
             return tmp.ConcatDisplayInfo();
@@ -286,70 +288,6 @@ namespace GUIBuilder.FormImport
             return minFormsFound;
         }
         
-        public override bool            ParseKeyValue( string key, string value )
-        {
-            switch( key )
-            {
-                case "ACTIFormID":
-                    ftBaseForm.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
-                    break;
-                case "ACTIEDID":
-                    ftBaseForm.EditorID = value;
-                    break;
-                    
-                case "WorldspaceFormID":
-                    ftWorldspace.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
-                    break;
-                case "WorldspaceEDID":
-                    ftWorldspace.EditorID = value;
-                    break;
-                    
-                case "CellFormID":
-                    ftCell.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
-                    break;
-                case "CellEDID":
-                    ftCell.EditorID = value;
-                    break;
-                    
-                case "Position":
-                    Maths.Vector3f.TryParse( value, out Position );
-                    break;
-                    
-                case "Rotation":
-                    Maths.Vector3f.TryParse( value, out Rotation );
-                    break;
-                    
-                case "Bounds":
-                    Maths.Vector3f.TryParse( value, out Bounds );
-                    break;
-                    
-                case "LinkRefFormID":
-                    ftLinkRef.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
-                    break;
-                case "LinkRefEDID":
-                    ftLinkRef.EditorID = value;
-                    break;
-                    
-                case "LinkKeywordFormID":
-                    ftLinkKeyword.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
-                    break;
-                case "LinkKeywordEDID":
-                    ftLinkKeyword.EditorID = value;
-                    break;
-                    
-                case "LayerFormID":
-                    ftLayer.FormID = uint.Parse( value, System.Globalization.NumberStyles.HexNumber );
-                    break;
-                case "LayerEDID":
-                    ftLayer.EditorID = value;
-                    break;
-                    
-                default:
-                    return false;
-            }
-            return true;
-        }
-        
         protected override bool         CreateNewFormInWorkingFile()
         {
             var cell = TargetCell;
@@ -365,7 +303,7 @@ namespace GUIBuilder.FormImport
                 {
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new ObjectReference instance of {0} in cell {1}",
-                        ftBaseForm.DisplayIDInfo(unresolveableSuffix: "unresolved"),
+                        ftBaseForm.NullSafeIDString(unresolveableSuffix: "unresolved"),
                         cell.ExtraInfoFor( unresolveable: "unresolved" ) ) );
                     return false;
                 }
@@ -376,7 +314,7 @@ namespace GUIBuilder.FormImport
                     AddErrorMessage( ErrorTypes.Import, string.Format(
                         "Unable to create a new Script Object on new instance of {0} in cell {1}",
                         GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BorderEnabler.ToString(),
-                        ftCell.DisplayIDInfo( unresolveableSuffix: "unresolved" ) ) );
+                        ftCell.NullSafeIDString( unresolveableSuffix: "unresolved" ) ) );
                     return false;
                 }
                 newVolume.PostLoad();
@@ -389,7 +327,7 @@ namespace GUIBuilder.FormImport
             {
                 AddErrorMessage( ErrorTypes.Import, string.Format(
                     "An exception occured when trying to create a new ObjectReference instance of {0} in cell {1}\nInner Exception:\n{2}",
-                    ftBaseForm.DisplayIDInfo(unresolveableSuffix: "unresolved"),
+                    ftBaseForm.NullSafeIDString(unresolveableSuffix: "unresolved"),
                     cell.ExtraInfoFor( unresolveable: "unresolved" ),
                     e.ToString()) );
             }
@@ -431,3 +369,4 @@ namespace GUIBuilder.FormImport
     }
     
 }
+*/

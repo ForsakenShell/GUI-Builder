@@ -3,7 +3,9 @@
  *
  * Border Mesh import (STAT).
  *
+ * OBSOLETE - Use ImportBase
  */
+ /*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +39,7 @@ namespace GUIBuilder.FormImport
             DebugLog.WriteLine( string.Format(
                 "\n{0}{1}{2}{3}{4}{5}",
                 this.TypeFullName(),
-                Target          .DisplayIDInfo( "\n\tTarget Form = {0}", "unresolved" ),
+                Target          .NullSafeIDString( "\n\tTarget Form = {0}", "unresolved" ),
                 string.Format( "\n\tNewEditorID = \"{0}\"", NewEditorID ),
                 string.Format( "\n\tMinBounds = {0}", MinBounds.ToString() ),
                 string.Format( "\n\tMaxBounds = {0}", MaxBounds.ToString() ),
@@ -144,59 +146,6 @@ namespace GUIBuilder.FormImport
                 ( stat.ObjectBounds.GetMaxValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) == MaxBounds );
         }
         
-        public override bool            ParseKeyValue( string key, string value )
-        {
-            switch( key )
-            {
-                case "EditorID":
-                    NewEditorID = value;
-                    break;
-                case "NIFFile":
-                    NIFFilePath = value;
-                    break;
-                case "OBounds":
-                    var minmax = value.ParseImportLine( '_' );
-                    Maths.Vector3i.TryParse( minmax[ 0 ], out MinBounds );
-                    Maths.Vector3i.TryParse( minmax[ 1 ], out MaxBounds );
-                    break;
-                default:
-                    return false;
-            }
-            return true;
-        }
-        
-        protected override bool         CreateNewFormInWorkingFile()
-        {
-            try
-            {
-                var cStatics = GodObject.Plugin.Data.Root.GetCollection<Engine.Plugin.Forms.Static>( true, false, false );
-                if( cStatics == null )
-                {
-                    AddErrorMessage( ErrorTypes.Import, "Unable to get root container for Static Objects" );
-                    return false;
-                }
-                var stat = cStatics.CreateNew<Engine.Plugin.Forms.Static>();
-                if( stat == null )
-                {
-                    AddErrorMessage( ErrorTypes.Import, string.Format(
-                        "Unable to create a new Static Object in \"{0}\"",
-                        GodObject.Plugin.Data.Files.Working.Filename ) );
-                    return false;
-                }
-                SetTarget( stat );
-                //TargetForm = stat;
-                return true;
-            }
-            catch( Exception e )
-            {
-                AddErrorMessage( ErrorTypes.Import, string.Format(
-                    "An exception occured when trying to create a new Static Object in \"{0}\"!\nInner exception:\n{1}",
-                    GodObject.Plugin.Data.Files.Working.Filename,
-                    e.ToString() ) );
-            }
-            return false;
-        }
-        
         protected override bool         ApplyImport()
         {
             var stat = TargetStatic;
@@ -215,3 +164,4 @@ namespace GUIBuilder.FormImport
     }
     
 }
+*/

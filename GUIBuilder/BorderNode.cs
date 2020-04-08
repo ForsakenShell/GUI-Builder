@@ -55,7 +55,7 @@ namespace GUIBuilder
                 //targetSuffix
                 if( ( !string.IsNullOrEmpty( forcedNIFPath ) )&&( forcedNIFPath[ forcedNIFPath.Length - 1 ] != '\\' ) )
                     forcedNIFPath += @"\";
-                NIFFilePath = string.Format( @"Meshes\{0}{1}", forcedNIFPath, forcedNIFFile );
+                NIFFilePath = string.Format( @"{0}{1}", forcedNIFPath, forcedNIFFile );
             }
             else
             {

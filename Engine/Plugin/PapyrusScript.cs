@@ -367,8 +367,7 @@ namespace Engine.Plugin
         {
             if( _SupressObjectDataChangedEvent )
                 return;
-            EventHandler handler = ObjectDataChanged;
-            if( handler != null ) handler( sender, null );
+            ObjectDataChanged?.Invoke( sender, null );
             if( sender != Form )
                 Form.SendObjectDataChangedEvent( this );
         }
