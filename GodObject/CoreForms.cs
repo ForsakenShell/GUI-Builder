@@ -109,6 +109,7 @@ namespace GodObject
                 public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_SpawnMarker                = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x000C4DBD );
                 public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_SandboxVolume              = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BD4 );
                 
+                #region Script Thread Base Forms
                 #if INCLUDE_SCRIPT_THREADING_FORMS
 
                 public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_ForcedPersistManager      = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110B8B );
@@ -118,6 +119,8 @@ namespace GodObject
                 public static Engine.Plugin.Forms.Activator ESM_ATC_ACTI_UpdateSubDivisionOnLoad   = new Engine.Plugin.Forms.Activator  ( Master.Filename.AnnexTheCommonwealth   , 0x00110BF2 );
                 
                 #endif
+                #endregion
+
             }
 
             public static class Keyword
@@ -156,6 +159,16 @@ namespace GodObject
                 public static Engine.Plugin.Forms.Static ESM_ATC_STAT_XMarker                       = new Engine.Plugin.Forms.Static     ( Master.Filename.AnnexTheCommonwealth   , 0x000F0F77 );
                 public static Engine.Plugin.Forms.Static ESM_ATC_STAT_SubDivisionEdgeFlag           = new Engine.Plugin.Forms.Static     ( Master.Filename.AnnexTheCommonwealth   , 0x000F6312 );
                 public static Engine.Plugin.Forms.Static ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ   = new Engine.Plugin.Forms.Static     ( Master.Filename.AnnexTheCommonwealth   , 0x00110CA5 );
+            }
+
+            public static class Formlist
+            {
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_LvlActorHostile             = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D39 );
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_LvlActorHostileAnimals      = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3A );
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_Traps                       = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3B );
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_LvlActorPassiveAnimals      = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3C );
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_Ambushes                    = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3D );
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_WorkshopResources           = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3E );
             }
 
         }
@@ -225,15 +238,17 @@ namespace GodObject
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SpawnMarker,
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume,
 
-#if INCLUDE_SCRIPT_THREADING_FORMS
-            
+                        #region Script Thread Base Forms
+                        #if INCLUDE_SCRIPT_THREADING_FORMS
+                        
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_ForcedPersistManager,
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_ForcedPersistScanner,
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_EnhancedSandboxScanner,
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_UpdateSettlementOnLoad,
                         AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_UpdateSubDivisionOnLoad,
-            
-#endif
+                        
+                        #endif
+                        #endregion
 
                         AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedWorkshop,
                         AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSettlement,
@@ -262,7 +277,14 @@ namespace GodObject
                         AnnexTheCommonwealth.Static.ESM_ATC_STAT_AttackMarker,
                         AnnexTheCommonwealth.Static.ESM_ATC_STAT_XMarker,
                         AnnexTheCommonwealth.Static.ESM_ATC_STAT_SubDivisionEdgeFlag,
-                        AnnexTheCommonwealth.Static.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ
+                        AnnexTheCommonwealth.Static.ESM_ATC_STAT_SubDivisionEdgeFlag_ForcedZ,
+
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_LvlActorHostile,
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_LvlActorHostileAnimals,
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_Traps,
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_LvlActorPassiveAnimals,
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_Ambushes,
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_WorkshopResources
 
                         #endregion
 

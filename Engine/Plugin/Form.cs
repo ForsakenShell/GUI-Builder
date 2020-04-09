@@ -936,7 +936,7 @@ namespace Engine.Plugin
         
         public void                     DebugDump( TargetHandle target )
         {
-            DebugLog.WriteLine( string.Format( "\nBase: {0}", this.GetType().FullName ) );
+            DebugLog.WriteLine( string.Format( "Base: {0}", this.GetType().FullName ) );
             DebugLog.WriteLine( string.Format( "\tHandles: {0}", _Handles.Count ) );
             DebugLog.WriteLine( string.Format( "\t\tLastFullRequiredHandleIndex: {0}", _LastFullRequiredHandleIndex ) );
             DebugLog.WriteLine( string.Format( "\t\tLastFullOptionalHandleIndex: {0}", _LastFullOptionalHandleIndex ) );

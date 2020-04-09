@@ -113,6 +113,7 @@
     <Compile Include="Engine\Plugin\Forms\Fields\CachedVector3iField.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Cell\Flags.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Cell\WaterHeight.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Formlist\FormIDs.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Landscape\Heightmap.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\LocationRef\Color.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\ObjectReference\LocationRefTypes.cs" />

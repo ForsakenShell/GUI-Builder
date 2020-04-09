@@ -7,6 +7,9 @@
  */
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 using XeLib;
 using XeLib.API;
@@ -14,13 +17,13 @@ using XeLib.API;
 namespace Engine.Plugin.Forms
 {
     
-    [Attributes.FormAssociation( "FLST", "FormList", true )]
+    [Attributes.FormAssociation( "FLST", "Formlist", true )]
     public class Formlist : Form
     {
         
         #region Formlist fields
         
-        //Fields.Layer.Parent _Parent;
+        Fields.Formlist.FormIDs _FormIDs;
         
         #endregion
         
@@ -37,7 +40,7 @@ namespace Engine.Plugin.Forms
         
         public override void CreateChildFields()
         {
-            //_Parent = new Fields.Layer.Parent( this );
+            _FormIDs = new Fields.Formlist.FormIDs( this );
         }
         
         #endregion
@@ -46,31 +49,22 @@ namespace Engine.Plugin.Forms
         
         #region Properties
         
-        /*
-        public uint Parent
-        {
-            get
-            {
-                return _Parent.Value;
-            }
-            set
-            {
-                _Parent.Value = value;
-            }
-        }
-        */
-        
         #endregion
         
         #region Debugging
         
-        /*
-        public override void DebugDumpChild()
+        public  void        DebugDumpFormlist( TargetHandle target )
         {
-            if( _Parent.HasValue() )
-                DebugLog.WriteLine( string.Format( "\tParent: 0x{0}", _Parent.ToString() ) );
+            if( !_FormIDs.HasValue( target ) ) return;
+
+            var formIDs = _FormIDs.GetFormIDs( target );
+            var pretty = formIDs.ConvertAll<string>( (x) => ( "0x" + x.ToString( "X8" ) ) );
+
+            DebugLog.OpenIndentLevel( "target = " + target.ToString() );
+            DebugLog.WriteList( "FormIDs", pretty, false, true );
+            DebugLog.CloseIndentLevel();
+
         }
-        */
         
         #endregion
         
