@@ -171,7 +171,9 @@ namespace GUIBuilder.Windows.RenderChild
 
         void OnSyncWorldspacesThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<Engine.Plugin.Forms.Worldspace> sender )
         {
-            SetEnableState( sender, true );
+            // Try to enable the Render Window, it will try to enable all child tool windows (such as this one)
+            _parent.SetEnableState( this, true );
+            //SetEnableState( sender, true );
         }
 
         public List<Engine.Plugin.Forms.Worldspace> SyncObjects

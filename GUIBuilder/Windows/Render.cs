@@ -89,7 +89,7 @@ namespace GUIBuilder.Windows
         {
             DebugLog.OpenIndentLevel();
             
-            _cancelInitWindow = false;
+            _cancelSDLWindowInit = false;
             
             tslMouseToCellGrid.Text = "";
             tslMouseToWorldspace.Text = "";
@@ -157,7 +157,7 @@ namespace GUIBuilder.Windows
             DebugLog.CloseIndentLevel();
         }
         
-        bool _cancelInitWindow = false;
+        bool _cancelSDLWindowInit = false;
         void THREAD_InitRenderTarget( object obj )
         {
             var initParams = obj as SDLRenderer.InitParams;
@@ -425,7 +425,7 @@ namespace GUIBuilder.Windows
         
         void RenderWindow_Closed( SDLRenderer renderer )
         {
-            //DebugLog.Write( "MainForm.RenderWindow_Closed()" );
+            DebugLog.WriteCaller();
             DestroyTransform();
         }
         
@@ -468,6 +468,8 @@ namespace GUIBuilder.Windows
         
         void RenderWindow_MouseMove( SDLRenderer renderer, SDL.SDL_Event e )
         {
+            DebugLog.WriteCaller();
+
             _mouseWorldPos = transform.ScreenspaceToWorldspace( e.motion.x, e.motion.y );
             transform.SetMousePos( new Maths.Vector2i( e.motion.x, e.motion.y ) );
             UpdateMousePositionInScene( _mouseWorldPos );
@@ -514,6 +516,7 @@ namespace GUIBuilder.Windows
         
         void RenderWindow_MouseWheel( SDLRenderer renderer, SDL.SDL_Event e )
         {
+            DebugLog.WriteCaller();
             var scale = transform.GetScale();
             scale += (float)e.wheel.y * 0.0125f;
             transform.SetScale( scale );
@@ -678,11 +681,11 @@ namespace GUIBuilder.Windows
         
         void DestroyTransform()
         {
-            //DebugLog.Write( "GUIBuilder.RenderWindow.DestroyTransform()" );
+            DebugLog.OpenIndentLevel();
             
             SetEnableState( this, false );
             
-            _cancelInitWindow = true;
+            _cancelSDLWindowInit = true;
             
             if( fpsUpdater != null )
             {
@@ -702,12 +705,14 @@ namespace GUIBuilder.Windows
             transform = null;
             
             SetEnableState( this, true );
+            
+            DebugLog.CloseIndentLevel();
         }
         
         bool CreateTransform( SDLRenderer.InitParams initParams )
         {
             //DebugLog.Write( "GUIBuilder.RenderWindow.CreateTransform()" );
-            if( _cancelInitWindow )
+            if( _cancelSDLWindowInit )
                 return false;
             
             #region These should never happen...

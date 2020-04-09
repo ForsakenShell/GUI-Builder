@@ -369,6 +369,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         public void InvokeSetSDLWindowSize()
         {
+            DebugLog.WriteCaller();
             //DebugLog.Write( "InvokeSetSDLWindowSize()" );
             
             // Not attached, SDL_Window will handle this
@@ -385,6 +386,7 @@ namespace GUIBuilder.Windows.RenderChild
         
         void RecreateSDLRenderer( bool forceRebuild, SDLRenderer.InitParams initParams )
         {
+            DebugLog.WriteCaller();
             //DebugLog.Write( "GUIBuilder.RenderTransform.RecreateSDLRenderer()" );
             //SyncSceneUpdate( true );
             

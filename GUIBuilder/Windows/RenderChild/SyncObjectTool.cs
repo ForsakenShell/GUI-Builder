@@ -151,7 +151,9 @@ namespace GUIBuilder.Windows.RenderChild
 
         void OnSyncObjectsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<TSync> sender )
         {
-            SetEnableState( sender, true );
+            // Try to enable the Render Window, it will try to enable all child tool windows (such as this one)
+            _parent.SetEnableState( this, true );
+            //SetEnableState( sender, true );
         }
 
         void UpdateSyncedList( Engine.Plugin.Forms.Worldspace worldspace )

@@ -78,6 +78,9 @@ namespace GUIBuilder.Windows
             this.mbiToolsOptions.Click += new System.EventHandler( this.OnOptionsWindowClick );
             this.mbiToolsCustomForms.Click += new System.EventHandler( this.OnCustomFormsWindowClick );
             
+            // Hide the render window option until the render window is fixed
+            this.mbiToolsRenderWindow.Visible = false;
+            
             this.ResumeLayout( false );
         }
         
