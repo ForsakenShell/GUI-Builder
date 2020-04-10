@@ -205,17 +205,17 @@ namespace GodObject
             
             #region Heightmap scanning
             
-            public float SurfaceHeightAtWorldPos( float x, float y )
+            public float SurfaceHeightAtWorldPos( Engine.Plugin.TargetHandle target, float x, float y )
             {
                 // If the land is below the water, return the waters surface
-                var lh = LandHeightAtWorldPos( x, y );
-                var wh = WaterHeightAtWorldPos( x, y );
+                var lh = LandHeightAtWorldPos( target, x, y );
+                var wh = WaterHeightAtWorldPos( target, x, y );
                 return lh > wh ? lh : wh;
             }
             
-            public float LandHeightAtWorldPos( float x, float y )
+            public float LandHeightAtWorldPos( Engine.Plugin.TargetHandle target, float x, float y )
             {
-                return HeightAtWorldPos( x, y );//, LandHeightMap );
+                return HeightAtWorldPos( target, x, y );//, LandHeightMap );
             }
             /*
             public float LandHeightAtPos( int x, int y )
@@ -226,13 +226,13 @@ namespace GodObject
 
             // Read the water height from the CELL record (or the WRLD default) instead of the exported water texture
             // as the exported water texture isn't accurate enough for analysis but it's fine for rendering purposes.
-            public float WaterHeightAtWorldPos( float x, float y )
+            public float WaterHeightAtWorldPos( Engine.Plugin.TargetHandle target, float x, float y )
             {
                 var grid = Engine.SpaceConversions.WorldspaceToCellGrid( x, y );
                 var cell = _Worldspace.Cells.GetByGrid( grid );
                 var value = cell == null
-                    ? _Worldspace.LandData.GetDefaultWaterHeight( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
-                    : cell.WaterHeight.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    ? _Worldspace.LandData.GetDefaultWaterHeight( target )
+                    : cell.WaterHeight.GetValue( target );
                 return value;
             }
 
@@ -256,7 +256,26 @@ namespace GodObject
             }
             */
 
-            public float HeightAtWorldPos( float x, float y )//, float[,] heightMap )
+            public float[,] HeightMapForWorldspaceGrid( Engine.Plugin.TargetHandle target, Vector2i grid )
+            {
+                var cell = _Worldspace.Cells.GetByGrid( grid );
+                var landscape = cell?.Landscape;
+                if( landscape != null )
+                    return landscape.Heightmap.GetHeightmap( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                
+                // No CELL for the grid or the CELL does not have a LAND record
+                // Create a flat heightmap with the default height
+                var hms = Engine.Plugin.Forms.Fields.Landscape.Heightmap.HeightmapSize;
+                var dlh = _Worldspace.LandData.GetDefaultLandHeight( target );
+                var heightmap = new float[ hms, hms ];
+                for( var row = 0; row < hms; row++ )
+                    for( var col = 0; col < hms; col++ )
+                        heightmap[ col, row ] = dlh;
+                
+                return heightmap;
+            }
+
+            public float HeightAtWorldPos( Engine.Plugin.TargetHandle target, float x, float y )//, float[,] heightMap )
             {
                 // z01      z11
                 //  +--------+
@@ -278,18 +297,7 @@ namespace GodObject
                 #endregion
 
                 var grid = Engine.SpaceConversions.WorldspaceToCellGrid( x, y );
-
-                var cell = _Worldspace.Cells.GetByGrid( grid );
-                if( cell == null )
-                    throw new Exception( this.TypeFullName() + " : Worldspace.Cells.GetByGrid() returned null!" );
-                
-                var landscape = cell.Landscape;
-                if( landscape == null )
-                    throw new Exception( this.TypeFullName() + " : Cell.Landscape returned null!" );
-                
-                var heightmap = landscape.Heightmap.GetHeightmap( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                if( heightmap == null )
-                    throw new Exception( this.TypeFullName() + " : Landscape.GetHeightMap() returned null!" );
+                var heightmap = HeightMapForWorldspaceGrid( target, grid );
 
                 // Subtract the bottom-left corner of the CELL from the input world pos
                 var cellBase = Engine.SpaceConversions.CellGridToWorldspace( grid );
@@ -431,6 +439,7 @@ namespace GodObject
                 
                 var result = true; // Unless it isn't
                 
+                var target = Engine.Plugin.TargetHandle.WorkingOrLastFullRequired;
                 minZ = float.MaxValue;
                 maxZ = float.MinValue;
                 averageWaterZ = float.MinValue;
@@ -481,8 +490,8 @@ namespace GodObject
                         if( hitIndex < 0 ) continue;
                         //var lh = LandHeightAtPos( hx, hy );
                         //var wh = WaterHeightAtPos( hx, hy );
-                        var lh = LandHeightAtWorldPos( hx, hy );
-                        var wh = WaterHeightAtWorldPos( hx, hy );
+                        var lh = LandHeightAtWorldPos( target, hx, hy );
+                        var wh = WaterHeightAtWorldPos( target, hx, hy );
                         if( wh > float.MinValue )
                         {
                             totalWaterZ += (double)wh;

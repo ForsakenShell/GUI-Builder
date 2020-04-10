@@ -17,7 +17,7 @@ namespace Engine.Plugin.Forms.Fields.Landscape
     {
 
         const float                         _HeightmapScalar            = 8.0f;
-        const int                           _HeightmapSize              = 33;
+        public const int                    HeightmapSize               = 33;
         
         const string                        _XPath                      = "VHGT";
 
@@ -54,16 +54,16 @@ namespace Engine.Plugin.Forms.Fields.Landscape
 
             var defaultLandHeight = ws.LandData.GetDefaultLandHeight( target );
 
-            var hm = new float[ _HeightmapSize, _HeightmapSize ];
+            var hm = new float[ HeightmapSize, HeightmapSize ];
 
             float offset = ReadFloat( h, _Offset ) * _HeightmapScalar;
             float row_Offset = 0.0f;
 
-            for( int row = 0; row < _HeightmapSize; row++ )
+            for( int row = 0; row < HeightmapSize; row++ )
             //for( int rc = 0; rc < _HeightmapSize * _HeightmapSize; rc++ )
             {
                 //var tmp = "Row " + row.ToString();
-                for( int col = 0; col < _HeightmapSize; col++ )
+                for( int col = 0; col < HeightmapSize; col++ )
                 {
                     //var row = rc / _HeightmapSize;
                     //var col = rc % _HeightmapSize;
@@ -94,9 +94,9 @@ namespace Engine.Plugin.Forms.Fields.Landscape
         {
             ReadHeightmap( target );
             // Make a copy of the array so anyone writing to it doesn't wreck it
-            var result = new float[ _HeightmapSize, _HeightmapSize ];
-            for( int row = 0; row < _HeightmapSize; row++ )
-                for( int col = 0; col < _HeightmapSize; col++ )
+            var result = new float[ HeightmapSize, HeightmapSize ];
+            for( int row = 0; row < HeightmapSize; row++ )
+                for( int col = 0; col < HeightmapSize; col++ )
                     result[ col, row ] = _Heightmap[ col, row ];
             // Return the copy
             return result;

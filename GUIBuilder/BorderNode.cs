@@ -707,6 +707,7 @@ namespace GUIBuilder
                 //}
             }
             
+            var target = Engine.Plugin.TargetHandle.WorkingOrLastFullRequired;
             nodeLength     = nodeLength     < BorderNode.MIN_NODE_LENGTH     ? BorderNode.MIN_NODE_LENGTH     : nodeLength;
             angleAllowance = angleAllowance < BorderNode.MIN_ANGLE_ALLOWANCE ? BorderNode.MIN_ANGLE_ALLOWANCE : angleAllowance;
             slopeAllowance = slopeAllowance < BorderNode.MIN_SLOPE_ALLOWANCE ? BorderNode.MIN_SLOPE_ALLOWANCE : slopeAllowance;
@@ -764,12 +765,12 @@ namespace GUIBuilder
 
                     // Initial position is current reference point
                     var lastPos = new Vector3f( rp0 );
-                    float lh = wpEntry.LandHeightAtWorldPos( lastPos.X, lastPos.Y );
+                    float lh = wpEntry.LandHeightAtWorldPos( target, lastPos.X, lastPos.Y );
                     if( lh < lowestFloor ) lowestFloor = lh;
                     float wh;
                     if( !forcedZRef )
                     {   // Not forced Z reference, use terrain
-                        wh = wpEntry.WaterHeightAtWorldPos( lastPos.X, lastPos.Y );
+                        wh = wpEntry.WaterHeightAtWorldPos( target, lastPos.X, lastPos.Y );
                         lastPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
                     }
 
@@ -783,11 +784,11 @@ namespace GUIBuilder
                     {
                         // Next position and reference point
                         var newPos = lastPos + stride;
-                        lh = wpEntry.LandHeightAtWorldPos( newPos.X, newPos.Y );
+                        lh = wpEntry.LandHeightAtWorldPos( target, newPos.X, newPos.Y );
                         if( lh < lowestFloor ) lowestFloor = lh;
                         if( !forcedZStride )
                         {   // Not between forced Z markers, follow terrain
-                            wh = wpEntry.WaterHeightAtWorldPos( newPos.X, newPos.Y );
+                            wh = wpEntry.WaterHeightAtWorldPos( target, newPos.X, newPos.Y );
                             newPos.Z = lh > wh ? lh : wh; // If the land is above the water, use the land, otherwise the water surface
                         }
                         else if( newPos.Z < bottomZ ) bottomZ = newPos.Z;
