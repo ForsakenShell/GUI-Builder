@@ -175,7 +175,12 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            GUIBuilder.SubDivisionBatch.NormalizeBuildVolumes( ref list, subdivisions, m, false );
+            GUIBuilder.SubDivisionBatch.NormalizeBuildVolumes(
+                ref list,
+                Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                subdivisions,
+                m,
+                false );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );

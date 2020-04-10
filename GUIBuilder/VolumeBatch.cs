@@ -23,6 +23,7 @@ namespace GUIBuilder
     {
         
         public static Geometry.ConvexHull.OptimalBoundingBox CalculateOptimalSandboxVolume(
+            Engine.Plugin.TargetHandle target,
             List<Vector2f> hull,
             Engine.Plugin.Forms.Worldspace worldspace,
             bool skipZScan,
@@ -60,7 +61,7 @@ namespace GUIBuilder
             {
                 var volumeCorners = new Vector2f[][]{ optVol.Corners };
                 float minZ, maxZ, avgZ, avgWaterZ;
-                if( wsdp.ComputeZHeightsFromVolumes( volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
+                if( wsdp.ComputeZHeightsFromVolumes( target, volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
                 {
                     var zUse = avgZ;                                        // Start with the average land height
                     if( ( zUse - volOffset ) + fSandboxCylinderBottom > minZ ) zUse = minZ; // Move down to make sure the lowest point is inside the volume
@@ -89,6 +90,7 @@ namespace GUIBuilder
 
         public static bool NormalizeBuildVolumes(
             ref List<GUIBuilder.FormImport.ImportBase> list,
+            Engine.Plugin.TargetHandle target,
             Engine.Plugin.Forms.ObjectReference controller,
             string ownerName,
             string layerEditorIDFormat,
@@ -164,7 +166,7 @@ namespace GUIBuilder
                 var cNW = volumeCorners.GetCornerNWFrom();
                 var cSE = volumeCorners.GetCornerSEFrom();
 
-                if( !wsdp.ComputeZHeightsFromVolumes( volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
+                if( !wsdp.ComputeZHeightsFromVolumes( target, volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
                 {
                     DebugLog.WriteError( "Could not compute Z coords from worldspace heightmap" );
                     return false;

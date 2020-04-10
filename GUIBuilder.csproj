@@ -127,6 +127,7 @@
     <Compile Include="Engine\Plugin\Forms\Fields\Record\RecordFlags.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\LandData.cs" />
     <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\Location.cs" />
+    <Compile Include="Engine\Plugin\Forms\Fields\Worldspace\Parent.cs" />
     <Compile Include="Engine\Plugin\Forms\Formlist.cs" />
     <Compile Include="Engine\Plugin\Forms\Landscape.cs" />
     <Compile Include="Engine\Plugin\Forms\LocationRef.cs" />

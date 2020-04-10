@@ -306,6 +306,7 @@ namespace GUIBuilder
                 var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
 
                 var osv = VolumeBatch.CalculateOptimalSandboxVolume(
+                    Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
                     hull,
                     subdivision.Reference.Worldspace,
                     false,
@@ -387,7 +388,12 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
 
-        public static void NormalizeBuildVolumes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool missingOnly )
+        public static void NormalizeBuildVolumes(
+            ref List<FormImport.ImportBase> list,
+            Engine.Plugin.TargetHandle target,
+            List<AnnexTheCommonwealth.SubDivision> subdivisions,
+            GUIBuilder.Windows.Main m,
+            bool missingOnly )
         {
             DebugLog.OpenIndentLevel();
 
@@ -402,7 +408,7 @@ namespace GUIBuilder
                 m.PushStatusMessage();
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
-                msg = string.Format( "ControllerBatch.CheckingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.CheckingBuildVolumesFor".Translate(), subdivision.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
                 var volumes = subdivision.BuildVolumes;
@@ -413,30 +419,31 @@ namespace GUIBuilder
                 //if( ( volumes.NullOrEmpty() )&&( missingOnly ) )
                 if( volumes.NullOrEmpty() )
                 {
-                    m.StopSyncTimer( tStart, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    m.StopSyncTimer( tStart, subdivision.GetEditorID( target ) );
                     m.PopStatusMessage();
                     continue;
                 }
                 var edgeFlags = subdivision.EdgeFlags;
                 if( edgeFlags.NullOrEmpty() )
                 {
-                    m.StopSyncTimer( tStart, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    m.StopSyncTimer( tStart, subdivision.GetEditorID( target ) );
                     m.PopStatusMessage();
                     continue;
                 }
 
-                msg = string.Format( "ControllerBatch.NormalizingBuildVolumesFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.NormalizingBuildVolumesFor".Translate(), subdivision.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
                 // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
                 var points = new List<Vector2f>();
                 foreach( var flag in edgeFlags )
-                    points.Add( new Vector2f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    points.Add( new Vector2f( flag.Reference.GetPosition( target ) ) );
 
                 var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
 
                 VolumeBatch.NormalizeBuildVolumes(
                     ref list,
+                    target,
                     subdivision.Reference,
                     subdivision.QualifiedName,
                     string.Format( "ESM_ATC_LAYR_{0}", SetEditorID.Token_Name ),
@@ -449,7 +456,7 @@ namespace GUIBuilder
                     GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBuildAreaVolume,
                     new Engine.Plugin.Forms.Activator[ 1 ] { GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume },
                     0,
-                    GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume.GetMarkerColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                    GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume.GetMarkerColor( target ),
                     (
                         (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
                         (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled |
@@ -459,7 +466,7 @@ namespace GUIBuilder
                     typeof( AnnexTheCommonwealth.BuildAreaVolume )
                 );
 
-                m.StopSyncTimer( tStart, subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.StopSyncTimer( tStart, subdivision.GetEditorID( target ) );
                 m.PopStatusMessage();
             }
 

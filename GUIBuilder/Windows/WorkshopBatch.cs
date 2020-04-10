@@ -142,7 +142,12 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
 
-            GUIBuilder.WorkshopBatch.GenerateSandboxes( ref list, workshops, m, true, false );
+            GUIBuilder.WorkshopBatch.GenerateSandboxes(
+                ref list,
+                Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                workshops,
+                m,
+                true, false );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
@@ -176,7 +181,12 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            GUIBuilder.WorkshopBatch.NormalizeBuildVolumes( ref list, workshops, m, false );
+            GUIBuilder.WorkshopBatch.NormalizeBuildVolumes(
+                ref list,
+                Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                workshops,
+                m,
+                false );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );

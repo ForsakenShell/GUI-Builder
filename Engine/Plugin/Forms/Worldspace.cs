@@ -26,7 +26,8 @@ namespace Engine.Plugin.Forms
         Fields.Worldspace.LandData _LandData;
         Fields.Worldspace.MapData _MapData;
         Fields.Worldspace.WorldBounds _Bounds;
-        
+        Fields.Worldspace.Parent _Parent;
+
         #endregion
         
         GodObject.WorldspaceDataPool.PoolEntry _PoolEntry = null;
@@ -54,26 +55,18 @@ namespace Engine.Plugin.Forms
         
         #region Allocation
         
-        //public Worldspace() : base() {}
-        
         public Worldspace( string filename, uint formID ) : base( filename, formID ) {}
         
-        //public Worldspace( Plugin.File mod, Interface.IDataSync ancestor, Handle handle ) : base( mod, ancestor, handle ) {}
-        public Worldspace( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle )
-        {
-            //DebugLog.OpenIndentLevel( this.IDString, true );
-            //DebugDump( TargetHandle.Master );
-            //DebugLog.CloseIndentLevel();
-        }
+        public Worldspace( Collection parentCollection, Interface.IXHandle ancestor, FormHandle handle ) : base( parentCollection, ancestor, handle ) {}
         
         public override void CreateChildFields()
         {
             _FullName = new Fields.Shared.FullName( this );
             _Location = new Fields.Worldspace.Location( this );
             _LandData = new Engine.Plugin.Forms.Fields.Worldspace.LandData( this );
-            _MapData = new Fields.Worldspace.MapData( this );
-            _Bounds = new Fields.Worldspace.WorldBounds( this );
-            //_Cells = new Containers.Cells( this );
+            _MapData  = new Fields.Worldspace.MapData( this );
+            _Bounds   = new Fields.Worldspace.WorldBounds( this );
+            _Parent   = new Fields.Worldspace.Parent( this );
         }
         
         #endregion
@@ -133,6 +126,14 @@ namespace Engine.Plugin.Forms
             get
             {
                 return _Bounds;
+            }
+        }
+        
+        public Fields.Worldspace.Parent Parent
+        {
+            get
+            {
+                return _Parent;
             }
         }
         

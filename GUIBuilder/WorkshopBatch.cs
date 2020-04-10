@@ -325,6 +325,7 @@ namespace GUIBuilder
 
         public static void GenerateSandboxes(
             ref List<FormImport.ImportBase> list,
+            Engine.Plugin.TargetHandle target,
             List<Fallout4.WorkshopScript> workshops,
             GUIBuilder.Windows.Main m,
             bool createMissing,
@@ -343,7 +344,7 @@ namespace GUIBuilder
             foreach( var workshop in workshops )
             {
                 m.PushStatusMessage();
-                msg = string.Format( "ControllerBatch.CheckingSandboxFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.CheckingSandboxFor".Translate(), workshop.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
                 var borderMarkers = workshop.GetBorderMarkers();
@@ -378,7 +379,7 @@ namespace GUIBuilder
 
                 DebugLog.OpenIndentLevel( workshop.IDString, false );
 
-                msg = string.Format( "ControllerBatch.CalculatingSandboxFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.CalculatingSandboxFor".Translate(), workshop.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
@@ -388,23 +389,24 @@ namespace GUIBuilder
                 if( !buildVolumes.NullOrEmpty() )
                 {
                     foreach( var volume in buildVolumes )
-                        hintZ += volume.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                        hintZ += volume.GetPosition( target ).Z;
                     hintZ /= buildVolumes.Count;
                 }
                 else if( sandbox != null )
-                    hintZ = sandbox.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                    hintZ = sandbox.GetPosition( target ).Z;
                 else
-                    hintZ = workshop.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                    hintZ = workshop.Reference.GetPosition( target ).Z;
 
                 // Use border marker reference points instead of build volumes so we can work with less points that are accurate enough
                 // also, don't need to calculate any corner/intersection vertexes and the associated problems that go with it.
                 var points = new List<Vector2f>();
                 foreach( var marker in borderMarkers )
-                    points.Add( new Vector2f( marker.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    points.Add( new Vector2f( marker.GetPosition( target ) ) );
 
                 var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
 
                 var osv = VolumeBatch.CalculateOptimalSandboxVolume(
+                    target,
                     hull,
                     workshop.Reference.Worldspace,
                     false,
@@ -421,15 +423,15 @@ namespace GUIBuilder
                     DebugLog.WriteStrings( null, new[] {
                         string.Format(
                             "Position = {0} -> {1}",
-                            sandbox == null ? "[null]" : sandbox.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            sandbox == null ? "[null]" : sandbox.GetPosition( target ).ToString(),
                             osv.Size.ToString() ),
                         string.Format(
                             "Size = {0} -> {1}",
-                            sandbox == null ? "[null]" : sandbox.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            sandbox == null ? "[null]" : sandbox.Primitive.GetBounds( target ).ToString(),
                             osv.Position.ToString() ),
                         string.Format(
                             "Z Rotation = {0} -> {1}",
-                            sandbox == null ? "[null]" : sandbox.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
+                            sandbox == null ? "[null]" : sandbox.GetRotation( target ).Z.ToString(),
                             osv.Rotation.Z.ToString() )
                         }, false, true, false, false );
 
@@ -442,7 +444,7 @@ namespace GUIBuilder
                             ? null
                             : new List<Engine.Plugin.Forms.ObjectReference>(){ sandbox }
                         ),
-                        workshop.Reference.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        workshop.Reference.GetLayer( target ),
                         string.Format( "{0}Workshop", SetEditorID.Token_Name ),
                         workshop.QualifiedName,
                         -1,
@@ -461,10 +463,10 @@ namespace GUIBuilder
                         : worldspace.Cells.GetByGrid( Engine.SpaceConversions.WorldspaceToCellGrid( osv.Position.X, osv.Position.Y ) );
                     var sandboxBase = sandbox == null
                         ? GodObject.CoreForms.Fallout4.Activator.DefaultDummy
-                        : sandbox.GetName<Engine.Plugin.Forms.Activator>( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                        : sandbox.GetName<Engine.Plugin.Forms.Activator>( target );
                     var color = sandbox == null
                         ? System.Drawing.Color.FromArgb( 255, 0, 0 )
-                        : sandbox.Primitive.GetColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                        : sandbox.Primitive.GetColor( target );
 
                     VolumeBatch.CreateVolumeRefImport( ref list,
                         "Sandbox Volume",
@@ -472,7 +474,7 @@ namespace GUIBuilder
                         sandbox,
                         sandboxEditorID,
                         sandboxBase,
-                        sandboxBase.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        sandboxBase.GetEditorID( target ),
                         cell,
                         osv.Position,
                         osv.Rotation,
@@ -519,7 +521,12 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
 
-        public static void NormalizeBuildVolumes( ref List<FormImport.ImportBase> list, List<Fallout4.WorkshopScript> workshops, GUIBuilder.Windows.Main m, bool missingOnly )
+        public static void NormalizeBuildVolumes(
+            ref List<FormImport.ImportBase> list,
+            Engine.Plugin.TargetHandle target,
+            List<Fallout4.WorkshopScript> workshops,
+            GUIBuilder.Windows.Main m,
+            bool missingOnly )
         {
             DebugLog.OpenIndentLevel();
 
@@ -534,7 +541,7 @@ namespace GUIBuilder
                 m.PushStatusMessage();
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
-                msg = string.Format( "ControllerBatch.CheckingBuildVolumesFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.CheckingBuildVolumesFor".Translate(), workshop.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
                 var volumes = workshop.BuildVolumes;
@@ -545,25 +552,25 @@ namespace GUIBuilder
                 //if( ( volumes.NullOrEmpty() )&&( missingOnly ) )
                 if( volumes.NullOrEmpty() )
                 {
-                    m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    m.StopSyncTimer( tStart, workshop.GetEditorID( target ) );
                     m.PopStatusMessage();
                     continue;
                 }
                 var borderMarkers = workshop.GetBorderMarkers();
                 if( borderMarkers.NullOrEmpty() )
                 {
-                    m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                    m.StopSyncTimer( tStart, workshop.GetEditorID( target ) );
                     m.PopStatusMessage();
                     continue;
                 }
 
-                msg = string.Format( "ControllerBatch.NormalizingBuildVolumesFor".Translate(), workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.NormalizingBuildVolumesFor".Translate(), workshop.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
                 // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
                 var points = new List<Vector2f>();
                 foreach( var marker in borderMarkers )
-                    points.Add( new Vector2f( marker.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    points.Add( new Vector2f( marker.GetPosition( target ) ) );
 
                 var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
 
@@ -571,6 +578,7 @@ namespace GUIBuilder
 
                 VolumeBatch.NormalizeBuildVolumes(
                     ref list,
+                    target,
                     workshop.Reference,
                     workshop.QualifiedName,
                     string.Format( "{0}Workshop", SetEditorID.Token_Name ),
@@ -592,7 +600,7 @@ namespace GUIBuilder
                     null
                 ); ;
 
-                m.StopSyncTimer( tStart, workshop.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                m.StopSyncTimer( tStart, workshop.GetEditorID( target ) );
                 m.PopStatusMessage();
             }
 
