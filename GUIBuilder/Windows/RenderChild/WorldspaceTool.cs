@@ -124,16 +124,16 @@ namespace GUIBuilder.Windows.RenderChild
                 var mapData = worldspace.MapData;
                 tbWorldspaceFormID.Text = worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ).ToString( "X8" );
                 tbWorldspaceEditorID.Text = worldspace.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
-                tbWorldspaceMapHeightMax.Text = poolEntry.MaxHeight.ToString( "n6" );
-                tbWorldspaceMapHeightMin.Text = poolEntry.MinHeight.ToString( "n6" );
+                //tbWorldspaceMapHeightMax.Text = poolEntry.MaxHeight.ToString( "n6" );
+                //tbWorldspaceMapHeightMin.Text = poolEntry.MinHeight.ToString( "n6" );
                 var cellNW = mapData.GetCellNW( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 var cellSE = mapData.GetCellSE( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 tbWorldspaceGridTopX.Text = cellNW.X.ToString();
                 tbWorldspaceGridTopY.Text = cellNW.Y.ToString();
                 tbWorldspaceGridBottomX.Text = cellSE.X.ToString();
                 tbWorldspaceGridBottomY.Text = cellSE.Y.ToString();
-                tbWorldspaceHeightmapTexture.Text = poolEntry.LandHeights_Texture_File;
-                tbWorldspaceWaterHeightsTexture.Text = poolEntry.WaterHeights_Texture_File;
+                //tbWorldspaceHeightmapTexture.Text = poolEntry.LandHeights_Texture_File;
+                //tbWorldspaceWaterHeightsTexture.Text = poolEntry.WaterHeights_Texture_File;
             }
             rw.UpdateSettlementObjectChildWindowContentsForWorldspace( worldspace );
             rw.TryUpdateRenderWindow( true );

@@ -24,6 +24,8 @@ namespace Engine.Plugin.Forms
         Fields.Cell.CellGrid _CellGrid;
         Fields.Cell.WaterHeight _WaterHeight;
         
+        Engine.Plugin.Forms.Landscape _Landscape;
+
         #endregion
         
         #region Allocation & Disposal
@@ -123,11 +125,21 @@ namespace Engine.Plugin.Forms
             }
         }
 
-        public Engine.Plugin.Collection Landscapes
+        public Engine.Plugin.Forms.Landscape Landscape
         {
             get
             {
-                return CollectionFor<Engine.Plugin.Forms.Landscape>() as Engine.Plugin.Collection;
+                if( _Landscape == null )
+                {
+                    var landscapes = CollectionFor<Engine.Plugin.Forms.Landscape>();
+                    if( ( landscapes != null )&&( landscapes.LoadAllForms( false ) ) )
+                    {
+                        var allLandscapes = landscapes.ToList<Engine.Plugin.Forms.Landscape>();
+                        if( !allLandscapes.NullOrEmpty() )
+                            _Landscape = allLandscapes[ 0 ];
+                    }
+                }
+                return _Landscape;
             }
         }
 

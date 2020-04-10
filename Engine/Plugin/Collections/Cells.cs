@@ -23,19 +23,21 @@ namespace Engine.Plugin.Collections
     public class Cells : Collection
     {
         
-        const int BLOCK_SIZE = 32;
-        const int SUB_BLOCK_SIZE = 8;
+        const int                               BLOCK_SIZE          = 32;
+        const int                               SUB_BLOCK_SIZE      = 8;
         
-        Plugin.Forms.Cell _Persistent = null;
-        Dictionary<Vector2i,Plugin.Forms.Cell> _ByGrid = null;
+        Plugin.Forms.Cell                       _Persistent         = null;
+        Dictionary<Vector2i,Plugin.Forms.Cell>  _ByGrid             = null;
         
-        //public Cells( Plugin.Forms.Worldspace ancestor ) : base( "CELL", ancestor ) {}
+        public                                  Cells( Attributes.ClassAssociation association, IXHandle ancestor )
+            : base( association, ancestor )
+            {}
+
+        public                                  Cells( Attributes.ClassAssociation association )
+            : base( association )
+            {}
         
-        //public Cells( Plugin.Forms.Worldspace ancestor ) : base( typeof( Plugin.Forms.Cell ), ancestor ) {}
-        public Cells( Attributes.ClassAssociation association, IXHandle ancestor ) : base( association, ancestor ) {}
-        public Cells( Attributes.ClassAssociation association ) : base( association ) {}
-        
-        protected override void Dispose( bool disposing )
+        protected override void                 Dispose( bool disposing )
         {
             // Base will set this, after it's disposed, so check first _then_ call it
             if( Disposed )
@@ -49,7 +51,21 @@ namespace Engine.Plugin.Collections
             _Persistent = null;
         }
         
-        public Plugin.Forms.Cell GetByGrid( Vector2i coords )
+        public Plugin.Forms.Cell                GetByWorldPos( Vector3f coords )
+        {
+            return GetByWorldPos( coords.X, coords.Y );
+        }
+        public Plugin.Forms.Cell                GetByWorldPos( float x, float y )
+        {
+            return GetByGrid( Engine.SpaceConversions.WorldspaceToCellGrid( x, y ) );
+        }
+
+        public Plugin.Forms.Cell                GetByGrid( int x, int y )
+        {
+            return GetByGrid( new Vector2i( x, y ) );
+        }
+        
+        public Plugin.Forms.Cell                GetByGrid( Vector2i coords )
         {
             if( Disposed ) return null;
             lock( CollectionLock )
@@ -200,7 +216,7 @@ namespace Engine.Plugin.Collections
             }
         }
         
-        public Plugin.Forms.Cell Persistent
+        public Plugin.Forms.Cell                Persistent
         {
             get
             {
@@ -209,7 +225,7 @@ namespace Engine.Plugin.Collections
             }
         }
         
-        public override bool Add( IXHandle syncObject )
+        public override bool                    Add( IXHandle syncObject )
         {
             if( Disposed ) return false;
             lock( CollectionLock )
@@ -276,7 +292,7 @@ namespace Engine.Plugin.Collections
             }
         }
         
-        public override void Remove( IXHandle syncObject )
+        public override void                    Remove( IXHandle syncObject )
         {
             if( Disposed ) return;
             lock( CollectionLock )
@@ -294,7 +310,7 @@ namespace Engine.Plugin.Collections
             }
         }
         
-        public Plugin.Forms.Worldspace Worldspace
+        public Plugin.Forms.Worldspace          Worldspace
         {
             get
             {

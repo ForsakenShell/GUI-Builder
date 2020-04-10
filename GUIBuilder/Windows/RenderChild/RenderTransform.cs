@@ -488,9 +488,10 @@ namespace GUIBuilder.Windows.RenderChild
             
             _cellNW = cellNW;
             _cellSE = cellSE;
-            hmCentre = _poolEntry != null
-                ? _poolEntry.HeightMapOffset
-                : Maths.Vector2i.Zero;
+            // TODO:  FIX ME!
+            //hmCentre = _poolEntry != null
+            //    ? _poolEntry.HeightMapOffset
+            //    : Maths.Vector2i.Zero;
             _viewCentre.X = Math.Max( Math.Min( _viewCentre.X, _cellSE.X ), _cellNW.X );
             _viewCentre.Y = Math.Max( Math.Min( _viewCentre.Y, _cellNW.Y ), _cellSE.Y );
             

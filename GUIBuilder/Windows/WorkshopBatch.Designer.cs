@@ -57,13 +57,13 @@ namespace GUIBuilder.Windows
             this.gbElements.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pnWindow
+            // WindowPanel
             // 
             this.WindowPanel.Controls.Add(this.lvWorkshops);
             this.WindowPanel.Controls.Add(this.gbWorkshopFunctions);
-            this.WindowPanel.Size = new System.Drawing.Size( 514, 404 );
+            this.WindowPanel.Size = new System.Drawing.Size(514, 404);
             // 
-            // lvSubDivisions
+            // lvWorkshops
             // 
             this.lvWorkshops.AllowHidingItems = true;
             this.lvWorkshops.AllowOverrideColumnSorting = true;
@@ -81,12 +81,13 @@ namespace GUIBuilder.Windows
             this.lvWorkshops.Name = "lvWorkshops";
             this.lvWorkshops.Size = new System.Drawing.Size(323, 399);
             this.lvWorkshops.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
+            this.lvWorkshops.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvWorkshops.SyncedEditorFormType = null;
             this.lvWorkshops.SyncObjects = null;
             this.lvWorkshops.TabIndex = 11;
             this.lvWorkshops.TypeColumn = false;
             // 
-            // gbSubDivisionFunctions
+            // gbWorkshopFunctions
             // 
             this.gbWorkshopFunctions.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
@@ -119,6 +120,7 @@ namespace GUIBuilder.Windows
             this.btnCheckMissingElements.Size = new System.Drawing.Size(156, 23);
             this.btnCheckMissingElements.TabIndex = 1;
             this.btnCheckMissingElements.Tag = "BatchWindow.Function.CheckElements";
+            this.btnCheckMissingElements.Text = "Check Missing Elements";
             this.btnCheckMissingElements.UseVisualStyleBackColor = true;
             // 
             // cbElementSandboxVolumes
@@ -130,9 +132,10 @@ namespace GUIBuilder.Windows
             this.cbElementSandboxVolumes.Size = new System.Drawing.Size(153, 17);
             this.cbElementSandboxVolumes.TabIndex = 2;
             this.cbElementSandboxVolumes.Tag = "Workshop.Element.SandboxVolumes";
+            this.cbElementSandboxVolumes.Text = "Sandbox Volumes";
             this.cbElementSandboxVolumes.UseVisualStyleBackColor = true;
             // 
-            // cbElementBorderEnablers
+            // cbElementBorderMarkers
             // 
             this.cbElementBorderMarkers.Checked = true;
             this.cbElementBorderMarkers.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -141,6 +144,7 @@ namespace GUIBuilder.Windows
             this.cbElementBorderMarkers.Size = new System.Drawing.Size(153, 17);
             this.cbElementBorderMarkers.TabIndex = 0;
             this.cbElementBorderMarkers.Tag = "WorkshopBatchWindow.BorderMarkers";
+            this.cbElementBorderMarkers.Text = "Border Markers";
             this.cbElementBorderMarkers.UseVisualStyleBackColor = true;
             // 
             // btnNormalizeBuildVolumes
@@ -150,6 +154,7 @@ namespace GUIBuilder.Windows
             this.btnNormalizeBuildVolumes.Size = new System.Drawing.Size(156, 23);
             this.btnNormalizeBuildVolumes.TabIndex = 3;
             this.btnNormalizeBuildVolumes.Tag = "BatchWindow.Function.NormalizeBuildVolumes";
+            this.btnNormalizeBuildVolumes.Text = "Normalize Build Volumes";
             this.btnNormalizeBuildVolumes.UseVisualStyleBackColor = true;
             // 
             // btnOptimizeSandboxVolumes
@@ -159,6 +164,7 @@ namespace GUIBuilder.Windows
             this.btnOptimizeSandboxVolumes.Size = new System.Drawing.Size(156, 23);
             this.btnOptimizeSandboxVolumes.TabIndex = 0;
             this.btnOptimizeSandboxVolumes.Tag = "BatchWindow.Function.OptimizeSandboxVolumes";
+            this.btnOptimizeSandboxVolumes.Text = "Optimize Sandboxes";
             this.btnOptimizeSandboxVolumes.UseVisualStyleBackColor = true;
             // 
             // btnFinalizeElements
@@ -169,14 +175,14 @@ namespace GUIBuilder.Windows
             this.btnFinalizeElements.Size = new System.Drawing.Size(156, 23);
             this.btnFinalizeElements.TabIndex = 2;
             this.btnFinalizeElements.Tag = "BatchWindow.Function.FinalizeElements";
+            this.btnFinalizeElements.Text = "Finalize Elements";
             this.btnFinalizeElements.UseVisualStyleBackColor = true;
             // 
-            // SubDivisionBatch
+            // WorkshopBatch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(514, 404);
-            this.Controls.Add(this.WindowPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -185,10 +191,9 @@ namespace GUIBuilder.Windows
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "WorkshopBatchWindow.Title";
+            this.WindowPanel.ResumeLayout(false);
             this.gbWorkshopFunctions.ResumeLayout(false);
             this.gbElements.ResumeLayout(false);
-            this.WindowPanel.ResumeLayout( false );
-            this.WindowPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }

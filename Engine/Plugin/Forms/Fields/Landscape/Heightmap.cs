@@ -29,16 +29,6 @@ namespace Engine.Plugin.Forms.Fields.Landscape
 
         public                              Heightmap( Form form ) : base( form, _XPath ) { }
 
-        /*
-        public bool                         HasValue( TargetHandle target )
-        {
-            var h = cache_G.HandleFromTarget( target );
-            if( !XeLib.HandleExtensions.IsValid( h ) )
-                throw new System.ArgumentException( "target is not valid for field" );
-            return cache_G.HasValue( h );
-        }
-        */
-
         Engine.Plugin.Forms.Landscape       Landscape { get { return Form as Engine.Plugin.Forms.Landscape; } }
 
         void                                ReadHeightmap( TargetHandle target )
@@ -46,12 +36,18 @@ namespace Engine.Plugin.Forms.Fields.Landscape
             var h = Form.HandleFromTarget( target );
             if( cached_Handle == h ) return;
 
+            //DebugLog.OpenIndentLevel();
+            //h.DebugDumpChildElements( true );
+            //DebugLog.CloseIndentLevel();
+
             if( Landscape == null ) throw new Exception( "Cannot cast Form as Landscape!" );
             var cell = Landscape.Cell;
             if( cell == null ) throw new Exception( "Landscape is not part of a Cell!" );
             var ws = cell.Worldspace;
             if( ws == null ) throw new Exception( "Landscape Cell is not part of a Worldspace!" );
             
+            //DebugLog.OpenIndentLevel( "Loading heightmap for CELL " + cell.IDString + " Grid " + cell.CellGrid.GetGrid( target ).ToString() + " in WRLD " + ws.IDString, false );
+
             cached_Handle = h;
 
             // Calculate heightmap from combined landscape offsets and default worldspace land height
@@ -63,22 +59,32 @@ namespace Engine.Plugin.Forms.Fields.Landscape
             float offset = ReadFloat( h, _Offset ) * _HeightmapScalar;
             float row_Offset = 0.0f;
 
-            for( int rc = 0; rc < _HeightmapSize * _HeightmapSize; rc++ )
+            for( int row = 0; row < _HeightmapSize; row++ )
+            //for( int rc = 0; rc < _HeightmapSize * _HeightmapSize; rc++ )
             {
-                var row    = rc / _HeightmapSize;
-                var column = rc % _HeightmapSize;
-                var value  = ReadSByte( h, string.Format( _RowColumn, row, column ) ) * _HeightmapScalar;
-                if( column == 0 )
+                //var tmp = "Row " + row.ToString();
+                for( int col = 0; col < _HeightmapSize; col++ )
                 {
-                    row_Offset = 0.0f;
-                    offset += value;
+                    //var row = rc / _HeightmapSize;
+                    //var col = rc % _HeightmapSize;
+                    //hm[ row, col ] = ReadSByte( h, string.Format( _RowColumn, row, col ) ); // Raw value for testing
+                    var value  = ReadSByte( h, string.Format( _RowColumn, row, col ) ) * _HeightmapScalar;
+                    if( col == 0 )
+                    {
+                        row_Offset = 0.0f;
+                        offset += value;
+                    }
+                    else
+                    {
+                        row_Offset += value;
+                    }
+                    hm[ col, row ] = defaultLandHeight + offset + row_Offset;
+                    //tmp += " : " + col + "=" + hm[ col, row ];
                 }
-                else
-                {
-                    row_Offset += value;
-                }
-                hm[ column, row ] = defaultLandHeight + offset + row_Offset;
+                //DebugLog.WriteLine( tmp );
             }
+
+            //DebugLog.CloseIndentLevel();
 
             // Return finalized heightmap
             _Heightmap = hm;
@@ -87,7 +93,13 @@ namespace Engine.Plugin.Forms.Fields.Landscape
         public float[,]                     GetHeightmap( TargetHandle target )
         {
             ReadHeightmap( target );
-            return _Heightmap;
+            // Make a copy of the array so anyone writing to it doesn't wreck it
+            var result = new float[ _HeightmapSize, _HeightmapSize ];
+            for( int row = 0; row < _HeightmapSize; row++ )
+                for( int col = 0; col < _HeightmapSize; col++ )
+                    result[ col, row ] = _Heightmap[ col, row ];
+            // Return the copy
+            return result;
         }
         public void                         SetHeightmap( TargetHandle target, float[,] value )
         {

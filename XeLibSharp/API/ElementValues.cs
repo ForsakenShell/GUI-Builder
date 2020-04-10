@@ -131,11 +131,7 @@ namespace XeLib.API
 
         public static sbyte GetSByteValueEx( uint uHandle, string path )
         {
-            int len;
-            if( ( !Functions.GetValue( uHandle, path, out len ) ) || ( len != 1 ) ) return default;
-            var bytes = new byte[ 1 ];
-            if( !Functions.GetResultString( bytes, len ) ) return default;
-            return unchecked( (sbyte)bytes[ 0 ] );
+            return unchecked( (sbyte)GetUByteValueEx( uHandle, path ) );
         }
 
         public static bool SetSByteValueEx( uint uHandle, string path, sbyte value )
@@ -146,11 +142,16 @@ namespace XeLib.API
 
         public static byte GetUByteValueEx( uint uHandle, string path )
         {
-            int len;
-            if( ( !Functions.GetValue( uHandle, path, out len ) ) || ( len != 1 ) ) return default;
+            var result = GetValueEx( uHandle, path );
+            if( string.IsNullOrEmpty( result ) ) return 0;
+            if( !byte.TryParse( result, out byte b ) ) return 0;
+            return b;
+            /*
+            //if( ( !Functions.GetValue( uHandle, path, out len ) ) || ( len != 1 ) ) return 255;
             var bytes = new byte[ 1 ];
-            if( !Functions.GetResultString( bytes, len ) ) return default;
+            if( !Functions.GetResultString( bytes, len ) ) return 254;
             return bytes[ 0 ];
+            */
         }
 
         public static bool SetUByteValueEx( uint uHandle, string path, byte value )

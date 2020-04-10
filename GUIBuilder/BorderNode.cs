@@ -700,11 +700,11 @@ namespace GUIBuilder
                     goto localAbort;
                 }
 
-                if( !wpEntry.LoadHeightMapData() )
-                {
-                    DebugLog.WriteLine( "LoadHeightMapData() returned false" );
-                    goto localAbort;
-                }
+                //if( !wpEntry.LoadHeightMapData() )
+                //{
+                //    DebugLog.WriteLine( "LoadHeightMapData() returned false" );
+                //    goto localAbort;
+                //}
             }
             
             nodeLength     = nodeLength     < BorderNode.MIN_NODE_LENGTH     ? BorderNode.MIN_NODE_LENGTH     : nodeLength;

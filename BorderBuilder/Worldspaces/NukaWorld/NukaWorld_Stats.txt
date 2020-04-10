@@ -1,3 +1,0 @@
-Worldspace: NukaWorld [100290f]
-Max height: 14888.000000
-Min height: -40.000000

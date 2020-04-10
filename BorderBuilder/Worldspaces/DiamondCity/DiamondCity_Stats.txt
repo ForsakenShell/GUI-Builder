@@ -1,3 +1,0 @@
-Worldspace: DiamondCity [f94]
-Max height: 0.000000
-Min height: -2104.000000

@@ -57,11 +57,11 @@ namespace GUIBuilder.Windows
             this.gbElements.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pnWindow
+            // WindowPanel
             // 
             this.WindowPanel.Controls.Add(this.lvSubDivisions);
             this.WindowPanel.Controls.Add(this.gbSubDivisionFunctions);
-            this.WindowPanel.Size = new System.Drawing.Size( 514, 404 );
+            this.WindowPanel.Size = new System.Drawing.Size(514, 404);
             // 
             // lvSubDivisions
             // 
@@ -81,6 +81,7 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions.Name = "lvSubDivisions";
             this.lvSubDivisions.Size = new System.Drawing.Size(323, 399);
             this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
+            this.lvSubDivisions.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvSubDivisions.SyncedEditorFormType = null;
             this.lvSubDivisions.SyncObjects = null;
             this.lvSubDivisions.TabIndex = 11;
@@ -119,6 +120,7 @@ namespace GUIBuilder.Windows
             this.btnCheckMissingElements.Size = new System.Drawing.Size(156, 23);
             this.btnCheckMissingElements.TabIndex = 1;
             this.btnCheckMissingElements.Tag = "BatchWindow.Function.CheckElements";
+            this.btnCheckMissingElements.Text = "Check Missing Elements";
             this.btnCheckMissingElements.UseVisualStyleBackColor = true;
             // 
             // cbElementSandboxVolumes
@@ -130,6 +132,7 @@ namespace GUIBuilder.Windows
             this.cbElementSandboxVolumes.Size = new System.Drawing.Size(153, 17);
             this.cbElementSandboxVolumes.TabIndex = 2;
             this.cbElementSandboxVolumes.Tag = "Workshop.Element.SandboxVolumes";
+            this.cbElementSandboxVolumes.Text = "Sandbox Volumes";
             this.cbElementSandboxVolumes.UseVisualStyleBackColor = true;
             // 
             // cbElementBorderEnablers
@@ -141,6 +144,7 @@ namespace GUIBuilder.Windows
             this.cbElementBorderEnablers.Size = new System.Drawing.Size(153, 17);
             this.cbElementBorderEnablers.TabIndex = 0;
             this.cbElementBorderEnablers.Tag = "SubDivisionBatchWindow.BorderEnablers";
+            this.cbElementBorderEnablers.Text = "Border Enablers";
             this.cbElementBorderEnablers.UseVisualStyleBackColor = true;
             // 
             // btnNormalizeBuildVolumes
@@ -150,6 +154,7 @@ namespace GUIBuilder.Windows
             this.btnNormalizeBuildVolumes.Size = new System.Drawing.Size(156, 23);
             this.btnNormalizeBuildVolumes.TabIndex = 3;
             this.btnNormalizeBuildVolumes.Tag = "BatchWindow.Function.NormalizeBuildVolumes";
+            this.btnNormalizeBuildVolumes.Text = "Normalize Build Volumes";
             this.btnNormalizeBuildVolumes.UseVisualStyleBackColor = true;
             // 
             // btnOptimizeSandboxVolumes
@@ -159,6 +164,7 @@ namespace GUIBuilder.Windows
             this.btnOptimizeSandboxVolumes.Size = new System.Drawing.Size(156, 23);
             this.btnOptimizeSandboxVolumes.TabIndex = 0;
             this.btnOptimizeSandboxVolumes.Tag = "BatchWindow.Function.OptimizeSandboxVolumes";
+            this.btnOptimizeSandboxVolumes.Text = "Optimize Sandboxes";
             this.btnOptimizeSandboxVolumes.UseVisualStyleBackColor = true;
             // 
             // btnFinalizeElements
@@ -169,6 +175,7 @@ namespace GUIBuilder.Windows
             this.btnFinalizeElements.Size = new System.Drawing.Size(156, 23);
             this.btnFinalizeElements.TabIndex = 2;
             this.btnFinalizeElements.Tag = "BatchWindow.Function.FinalizeElements";
+            this.btnFinalizeElements.Text = "Finalize Elements";
             this.btnFinalizeElements.UseVisualStyleBackColor = true;
             // 
             // SubDivisionBatch
@@ -176,7 +183,6 @@ namespace GUIBuilder.Windows
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(514, 404);
-            this.Controls.Add(this.WindowPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -185,10 +191,9 @@ namespace GUIBuilder.Windows
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Tag = "SubDivisionBatchWindow.Title";
+            this.WindowPanel.ResumeLayout(false);
             this.gbSubDivisionFunctions.ResumeLayout(false);
             this.gbElements.ResumeLayout(false);
-            this.WindowPanel.ResumeLayout( false );
-            this.WindowPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }

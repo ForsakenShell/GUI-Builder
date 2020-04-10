@@ -1,3 +1,0 @@
-Worldspace: Goodneighbor [54bd5]
-Max height: 1776.000000
-Min height: -2840.000000

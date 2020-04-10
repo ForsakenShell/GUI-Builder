@@ -46,20 +46,22 @@ namespace GodObject
             
             Worldspace _Worldspace = null;
             
-            public string LandHeights_Texture_File = null;
-            public string WaterHeights_Texture_File = null;
-            public string Stats_File = null;
+            //public string LandHeights_Texture_File = null;
+            //public string WaterHeights_Texture_File = null;
+            //public string Stats_File = null;
             
             // Stats file data
-            public float MaxHeight = 0.0f;
-            public float MinHeight = 0.0f;
-            public float DeltaHeight = 0.0f;
+            //public float MaxHeight = 0.0f;
+            //public float MinHeight = 0.0f;
+            //public float DeltaHeight = 0.0f;
             
             // Height map data (extracted from DDS)
-            public int HeightMap_Width = 0;
-            public int HeightMap_Height = 0;
-            public float[,] LandHeightMap = null;
-            public float[,] WaterHeightMap = null;
+            // Height map data is now extracted from the CELLs themselves
+            //public int HeightMap_Width = 0;
+            //public int HeightMap_Height = 0;
+            //public float[,] LandHeightMap = null;
+            //public float[,] WaterHeightMap = null;
+            //public bool[,] CellLoaded = null;
             
             // Surfaces and Textures for rendering
             SDLRenderer.Surface LandHeight_Surface;
@@ -67,8 +69,8 @@ namespace GodObject
             public SDLRenderer.Texture LandHeight_Texture;
             public SDLRenderer.Texture WaterHeight_Texture;
             
-            GUIBuilder.Windows.RenderChild.RenderTransform _textureLoadQueuetransform = null;
-            bool _textureLoadQueued = false;
+            //GUIBuilder.Windows.RenderChild.RenderTransform _textureLoadQueuetransform = null;
+            //bool _textureLoadQueued = false;
             bool _texturesReady = false;
             public bool TexturesReady            { get { return _texturesReady; } }
             
@@ -79,6 +81,7 @@ namespace GodObject
             public PoolEntry( Worldspace worldspace )
             {
                 _Worldspace = worldspace;
+                /*
                 var b = string.Format( @"{0}{1}\{2}\{2}", GodObject.Paths.BorderBuilder, GUIBuilder.Constant.WorldspacePath, _Worldspace.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 if(
                     // disable once InvokeAsExtensionMethod
@@ -92,6 +95,7 @@ namespace GodObject
                     FetchPhysicalDDSInfo( LandHeights_Texture_File );
                     FetchPhysicalStatsInfo();
                 }
+                */
             }
             
             #endregion
@@ -120,8 +124,8 @@ namespace GodObject
                 DestroyTextures();
                 DestroySurfaces();
                 
-                LandHeightMap = null;
-                WaterHeightMap = null;
+                //LandHeightMap = null;
+                //WaterHeightMap = null;
             }
             
             public void DestroyTextures()
@@ -159,6 +163,7 @@ namespace GodObject
             
             #region Derived Properties from file data
             
+            /*
             public Vector2i HeightMapOffset
             {
                 get
@@ -168,7 +173,9 @@ namespace GodObject
                     return new Vector2i( midY, midY );
                 }
             }
-            
+            */
+
+            /*
             public Vector2i HeightMapCellOffset
             {
                 get
@@ -180,7 +187,9 @@ namespace GodObject
                     return new Vector2i( -midXC, midYC );
                 }
             }
-            
+            */
+
+            /*
             public Vector2i HeightMapCellSize
             {
                 get
@@ -190,7 +199,8 @@ namespace GodObject
                     return new Vector2i( xC, yC );
                 }
             }
-            
+            */
+
             #endregion
             
             #region Heightmap scanning
@@ -205,13 +215,15 @@ namespace GodObject
             
             public float LandHeightAtWorldPos( float x, float y )
             {
-                return HeightAtWorldPos( x, y, LandHeightMap );
+                return HeightAtWorldPos( x, y );//, LandHeightMap );
             }
+            /*
             public float LandHeightAtPos( int x, int y )
             {
                 return HeightAtPos( x, y, LandHeightMap );
             }
-            
+            */
+
             // Read the water height from the CELL record (or the WRLD default) instead of the exported water texture
             // as the exported water texture isn't accurate enough for analysis but it's fine for rendering purposes.
             public float WaterHeightAtWorldPos( float x, float y )
@@ -223,6 +235,8 @@ namespace GodObject
                     : cell.WaterHeight.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 return value;
             }
+
+            /*
             public float WaterHeightAtPos( int x, int y )
             {
                 var grid = Engine.SpaceConversions.HeightmapToCellGrid( x, y, HeightMapOffset );
@@ -232,14 +246,17 @@ namespace GodObject
                     : cell.WaterHeight.GetValue( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 return value;
             }
-            
+            */
+
+            /*
             public float HeightAtPos( int x, int y, float[,] heightMap )
             {
                 if( ( x < 0 )||( y < 0 )||( x >= HeightMap_Width )||( y >= HeightMap_Height ) ) return float.MinValue;
                 return MinHeight + ( heightMap[ y, x ] * DeltaHeight );
             }
-            
-            public float HeightAtWorldPos( float x, float y, float[,] heightMap )
+            */
+
+            public float HeightAtWorldPos( float x, float y )//, float[,] heightMap )
             {
                 // z01      z11
                 //  +--------+
@@ -253,24 +270,74 @@ namespace GodObject
 
                 #region Short-hand
                 
-                var hmo = HeightMapOffset;
-                var map = heightMap;
+                //var hmo = HeightMapOffset;
+                //var map = heightMap;
                 const float htw = Engine.Constant.HeightMap_To_Worldmap;
                 const float wth = Engine.Constant.WorldMap_To_Heightmap;
                 
                 #endregion
 
+                var grid = Engine.SpaceConversions.WorldspaceToCellGrid( x, y );
+
+                var cell = _Worldspace.Cells.GetByGrid( grid );
+                if( cell == null )
+                    throw new Exception( this.TypeFullName() + " : Worldspace.Cells.GetByGrid() returned null!" );
+                
+                var landscape = cell.Landscape;
+                if( landscape == null )
+                    throw new Exception( this.TypeFullName() + " : Cell.Landscape returned null!" );
+                
+                var heightmap = landscape.Heightmap.GetHeightmap( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                if( heightmap == null )
+                    throw new Exception( this.TypeFullName() + " : Landscape.GetHeightMap() returned null!" );
+
+                // Subtract the bottom-left corner of the CELL from the input world pos
+                var cellBase = Engine.SpaceConversions.CellGridToWorldspace( grid );
+                var xToCell = x - cellBase.X;
+                var yToCell = y - cellBase.Y;
+
+                /*
+                DebugLog.WriteStrings( null, new [] {
+                    "-----------------------------------------",
+                    "[in] = (" + x + "," + y + ")",
+                    "Cell.Grid = " + cell.CellGrid.GetGrid( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                    "[in]ToCell = (" + xToCell + "," + yToCell + ")",
+                    "cellBase = " + cellBase.ToString(),
+                }, false, true, false, false, false );
+                */
+
                 #region Get points on the height map
 
                 // Get the four verts for the quad the point is in.
-                var x0 = (int)( x * wth ); if( x < 0 ) x0--;
-                var y0 = (int)( y * wth ); if( y < 0 ) y0--;
+                var x0 = (int)( xToCell * wth );// if( x < 0 ) x0--;
+                var y0 = (int)( yToCell * wth );// if( y < 0 ) y0--;
                 var x1 = x0 + 1;
                 var y1 = y0 + 1;
+
+                /*
+                DebugLog.WriteStrings( null, new [] {
+                    "[hm]: x0 = " + x0 + " : y0 = " + y0,
+                    "[hm]: x1 = " + x1 + " : y1 = " + y1
+                }, false, true, false, false, false );
+                */
+
+                /*
                 var z00 = map[ hmo.Y - y0, hmo.X + x0 ] * DeltaHeight + MinHeight;
                 var z10 = map[ hmo.Y - y0, hmo.X + x1 ] * DeltaHeight + MinHeight;
                 var z01 = map[ hmo.Y - y1, hmo.X + x0 ] * DeltaHeight + MinHeight;
                 var z11 = map[ hmo.Y - y1, hmo.X + x1 ] * DeltaHeight + MinHeight;
+                */
+                var z00 = heightmap[ x0, y0 ];
+                var z10 = heightmap[ x1, y0 ];
+                var z01 = heightmap[ x0, y1 ];
+                var z11 = heightmap[ x1, y1 ];
+
+                /*
+                DebugLog.WriteStrings( null, new [] {
+                    "[hm]: z00 = " + z00 + " : z10 = " + z10,
+                    "[hm]: z01 = " + z01 + " : z11 = " + z11
+                }, false, true, false, false, false );
+                */
 
                 #endregion
 
@@ -308,7 +375,7 @@ namespace GodObject
                 var zr = Math.Max( Math.Max( Math.Max( z00, z01 ), z10 ), z11 ) + 16.0f;
 
                 // Down ray
-                Ray ray = new Ray( new Vector3f( x, y, zr ), Vector3f.Down );
+                Ray ray = new Ray( new Vector3f( xToCell, yToCell, zr ), Vector3f.Down );
 
                 // Pick the proper triangle layout (See "Notes\Heightmap Triangle Layout.[txt/png]")
                 var xO = x0 & 1; // X is odd?
@@ -332,6 +399,10 @@ namespace GodObject
                     t1 = new Vector3f[ 3 ] { new Vector3f( tx0, ty1, z01 ), new Vector3f( tx1, ty1, z11 ), new Vector3f( tx1, ty0, z10 ) };
                 }
 
+                //DebugLog.WriteLine( "t0: " + t0[ 0 ] + " " + t0[ 1 ] + " " + t0[ 2 ] );
+                //DebugLog.WriteLine( "t1: " + t1[ 0 ] + " " + t1[ 1 ] + " " + t1[ 2 ] );
+                //DebugLog.WriteLine( "ray: " + ray.ToString() );
+
                 Vector3f vResult = Vector3f.Zero;
 
                 // Get the intersection with triangle
@@ -339,10 +410,13 @@ namespace GodObject
                     result = vResult.Z;
                 else if( Geometry.Collision.RayTriangleIntersect( ray, t1, out vResult, Geometry.Orientation.CW ) )
                     result = vResult.Z;
+                else
+                    DebugLog.WriteError( "Ray did not intersect with either heightmap triangle!\nray = " + ray.ToString() + "\nt0 = " + t0[ 0 ] + " " + t0[ 1 ] + " " + t0[ 2 ] + "\nt1: " + t1[ 0 ] + " " + t1[ 1 ] + " " + t1[ 2 ] );
                 
                 #endif
                 #endregion
 
+                //DebugLog.WriteLine( "result = " + result );
                 return result;
             }
 
@@ -367,36 +441,48 @@ namespace GodObject
                     result = false;
                     goto localAbort;
                 }
+                /*
                 if( !LoadLandHeightMap() )
                 {
                     DebugLog.WriteError( "Cannot load land heightmap" );
                     result = false;
                     goto localAbort;
                 }
-                
+                */
+
                 double totalWaterZ = 0;
                 double totalLandZ = 0;
                 int waterPoints = 0;
                 int landPoints = 0;
                 var wsMin = Vector2f.Min( volumes );
                 var wsMax = Vector2f.Max( volumes );
-                var minBounding = Engine.SpaceConversions.WorldspaceToHeightmap( wsMin, HeightMapOffset );
-                var maxBounding = Engine.SpaceConversions.WorldspaceToHeightmap( wsMax, HeightMapOffset );
-                var max = minBounding.Y - maxBounding.Y;
-                
-                for( int hy = maxBounding.Y; hy <= minBounding.Y; hy++ )
+                var gridWSSize = Engine.Constant.WorldMap_Resolution;
+                var minGrid = Engine.SpaceConversions.WorldspaceToCellGrid( wsMin );
+                var maxGrid = Engine.SpaceConversions.WorldspaceToCellGrid( wsMax.X + gridWSSize, wsMax.Y - gridWSSize );
+                //var minBounding = Engine.SpaceConversions.WorldspaceToHeightmap( wsMin, HeightMapOffset );
+                //var maxBounding = Engine.SpaceConversions.WorldspaceToHeightmap( wsMax, HeightMapOffset );
+                //var max = minBounding.Y - maxBounding.Y;
+                var max = minGrid.Y - maxGrid.Y;
+
+                //for( int hy = maxBounding.Y; hy <= minBounding.Y; hy++ )
+                for( int hy = maxGrid.Y; hy <= minGrid.Y; hy++ )
                 {
                     
                     if( showScanlineProgress )
-                        m.SetItemOfItems( hy - maxBounding.Y, max );
+                        m.SetItemOfItems( hy - maxGrid.Y, max );
+                        //m.SetItemOfItems( hy - maxBounding.Y, max );
                     
-                    for( int hx = minBounding.X; hx <= maxBounding.X; hx++ )
+                    //for( int hx = minBounding.X; hx <= maxBounding.X; hx++ )
+                    for( int hx = minGrid.X; hx <= maxGrid.X; hx++ )
                     {
-                        var hmWP = Engine.SpaceConversions.HeightmapToWorldspace( hx, hy, HeightMapOffset );
+                        //var hmWP = Engine.SpaceConversions.HeightmapToWorldspace( hx, hy, HeightMapOffset );
+                        var hmWP = new Vector2f( hx * gridWSSize, hy * gridWSSize );
                         var hitIndex = Maths.Geometry.Collision.PointInPolys( hmWP, volumes );
                         if( hitIndex < 0 ) continue;
-                        var lh = LandHeightAtPos( hx, hy );
-                        var wh = WaterHeightAtPos( hx, hy );
+                        //var lh = LandHeightAtPos( hx, hy );
+                        //var wh = WaterHeightAtPos( hx, hy );
+                        var lh = LandHeightAtWorldPos( hx, hy );
+                        var wh = WaterHeightAtWorldPos( hx, hy );
                         if( wh > float.MinValue )
                         {
                             totalWaterZ += (double)wh;
@@ -440,6 +526,7 @@ namespace GodObject
             #region Heightmap[s] DDS loading and Texture creation
 
             #region Load Heightmaps
+            /*
 
             public bool LoadHeightMapData()
             {
@@ -462,14 +549,17 @@ namespace GodObject
                     ( LoadHeightMapDDS( WaterHeights_Texture_File, ref WaterHeightMap ) );
             }
 
+            */
             #endregion
 
             #region Get Heightmap Color At Position
 
             delegate int HeightMapColorAt( int x, int y );
             
-            int LandHeightmapColor( int x, int y )
+            uint LandHeightmapColor( int x, int y )
             {
+                return 0xFFFF00FF;
+                /*
                 var lh = LandHeightMap[ y, x ];
                 var f = 255 * lh;
                 var i = (byte)Math.Round( f );
@@ -477,13 +567,17 @@ namespace GodObject
                 {
                     return (int)0xFF000000 | ( i << 16 ) | ( i << 8 ) | i;
                 }
+                */
             }
             
-            int WaterHeightmapColor( int x, int y )
+            uint WaterHeightmapColor( int x, int y )
             {
+                return 0x7FFF00FF;
+                /*
                 var wh = WaterHeightMap[ y, x ];
                 var lh = LandHeightMap[ y, x ];
                 return wh > lh ? 0x7F00007F : 0;
+                */
             }
 
             #endregion
@@ -492,6 +586,8 @@ namespace GodObject
 
             unsafe SDLRenderer.Surface CreateSurface( SDLRenderer renderer, HeightMapColorAt hmColorAt, SDL.SDL_BlendMode blendMode )
             {
+                return null;
+                /*
                 var surface = renderer.CreateSurface( HeightMap_Width, HeightMap_Height, SDL.SDL_PIXELFORMAT_ARGB8888 );
                 
                 if( surface == null )
@@ -523,10 +619,12 @@ namespace GodObject
                 surface.BlendMode = blendMode;
                 
                 return surface;
+                */
             }
             
             void THREAD_SDL_INVOKE_LoadAndCreateHeightmapTextures( SDLRenderer renderer )
             {
+                /*
                 DebugLog.OpenIndentLevel();
                 
                 var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
@@ -534,9 +632,9 @@ namespace GodObject
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
 
-                LoadHeightMapData();
+                //LoadHeightMapData();
 
-                m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), LandHeights_Texture_File ) );
+                //m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), LandHeights_Texture_File ) );
                 if( LandHeight_Texture != null )
                 {
                     LandHeight_Texture.Dispose();
@@ -548,7 +646,7 @@ namespace GodObject
                 }
                 LandHeight_Texture = renderer.CreateTextureFromSurface( LandHeight_Surface );
                 
-                m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), WaterHeights_Texture_File ) );
+                //m.SetCurrentStatusMessage( string.Format( "WorldspaceDataPool.CreatingTextureFrom".Translate(), WaterHeights_Texture_File ) );
                 
                 if( WaterHeight_Texture != null )
                 {
@@ -569,10 +667,12 @@ namespace GodObject
                 m.PopStatusMessage();
                 GodObject.Windows.SetEnableState( renderer, true );
                 DebugLog.CloseIndentLevel();
+                */
             }
             
             public void CreateHeightmapTextures( GUIBuilder.Windows.RenderChild.RenderTransform transform )
             {
+                /*
                 DebugLog.OpenIndentLevel();
 
                 if( ( transform != null )&&
@@ -592,11 +692,13 @@ namespace GodObject
                 }
 
                 DebugLog.CloseIndentLevel();
+                */
             }
 
             #endregion
 
             #region DDS File Handling
+            /*
 
             bool FetchPhysicalStatsInfo()
             {
@@ -741,6 +843,7 @@ namespace GodObject
                 return thingsOk;
             }
 
+            */
             #endregion
 
             #endregion

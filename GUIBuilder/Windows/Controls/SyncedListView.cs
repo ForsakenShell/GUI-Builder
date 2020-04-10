@@ -409,10 +409,17 @@ namespace GUIBuilder.Windows.Controls
             return Columns[ idx ].Index;
         }
         
+        bool _UpdatingColumnWidth = false;
         void UpdateColumnWidth( int index )
         {
-            if( Columns.NullOrEmpty() )
-                return;
+            if(
+                ( _UpdatingColumnWidth )||
+                ( Columns.NullOrEmpty() )
+            )   return;
+
+            // Prevent stack overflow by re-entry
+            _UpdatingColumnWidth = true;
+
             foreach( var column in Columns )
             {
                 if( column.Index == index )
@@ -423,6 +430,8 @@ namespace GUIBuilder.Windows.Controls
                         GodObject.XmlConfig.WriteValue<int>( column, Column.XmlWidth, column.Header.Width, true );
                 }
             }
+
+            _UpdatingColumnWidth = false;
         }
         
         #endregion

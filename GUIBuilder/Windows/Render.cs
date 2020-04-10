@@ -853,11 +853,12 @@ namespace GUIBuilder.Windows
                 {
                     if( renderNonPlayable )
                     {
-                        var hmCSize = poolEntry.HeightMapCellSize;
-                        cellNW = poolEntry.HeightMapCellOffset;
-                        cellSE = new Maths.Vector2i(
-                            cellNW.X + ( hmCSize.X - 1 ),
-                            cellNW.Y - ( hmCSize.Y - 1 ) );
+                        // TODO: FIX ME!
+                        //var hmCSize = poolEntry.HeightMapCellSize;
+                        //cellNW = poolEntry.HeightMapCellOffset;
+                        //cellSE = new Maths.Vector2i(
+                        //    cellNW.X + ( hmCSize.X - 1 ),
+                        //    cellNW.Y - ( hmCSize.Y - 1 ) );
                     }
                     else
                     {

@@ -1,3 +1,0 @@
-Worldspace: DLC03FarHarbor [1000b0f]
-Max height: 8216.000000
-Min height: -1576.000000

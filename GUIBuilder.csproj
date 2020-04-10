@@ -34,8 +34,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>18</ApplicationRevision>
-    <ApplicationVersion>1.0.5.18</ApplicationVersion>
+    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationVersion>1.0.6.19</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -67,6 +67,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <Optimize>False</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DefineConstants>TRACE</DefineConstants>
@@ -492,6 +493,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\WindowBase.resx">
       <DependentUpon>WindowBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUIBuilder\Windows\WorkshopBatch.resx">
+      <DependentUpon>WorkshopBatch.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\WorkspaceSelector.resx">
       <DependentUpon>WorkspaceSelector.cs</DependentUpon>

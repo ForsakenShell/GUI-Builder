@@ -230,26 +230,6 @@ namespace GodObject
             }
         }
         
-        static string[] _worldspace = null;
-        public static string[] Worldspace
-        {
-            get
-            {
-                if( _worldspace == null )
-                {
-                    var bbPath = BorderBuilder;
-                    if( string.IsNullOrEmpty( bbPath ) )
-                        return null;
-                    string readPath = null;
-                    var tryPath = bbPath + GUIBuilder.Constant.WorldspacePath;
-                    if( !tryPath.TryAssignPath( ref readPath ) )
-                        return null;
-                    _worldspace = Directory.GetDirectories( readPath );
-                }
-                return _worldspace;
-            }
-        }
-        
         static string _workspace = null;
         public static string Workspace
         {

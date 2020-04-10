@@ -1,3 +1,0 @@
-Worldspace: Commonwealth [3c]
-Max height: 44872.000000
-Min height: -8320.000000
