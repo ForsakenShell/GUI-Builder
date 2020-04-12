@@ -107,7 +107,7 @@ namespace GUIBuilder
 
             workshop.ClearBorderMarkersAndNodes( false );
 
-            var borderMarkers = workshop.GetBorderMarkers();
+            var borderMarkers = workshop.BorderMarkers;
             var nodes = BorderNode.GenerateBorderNodes( workshop.Reference.Worldspace, borderMarkers, approximateNodeLength, angleAllowance, slopeAllowance, GUIBuilder.CustomForms.WorkshopForcedZMarker, GUIBuilder.CustomForms.WorkshopBorderWithBottomRef );
 
             result = !nodes.NullOrEmpty();
@@ -323,13 +323,20 @@ namespace GUIBuilder
             */
         }
 
+        /*
         public static void GenerateSandboxes(
             ref List<FormImport.ImportBase> list,
             Engine.Plugin.TargetHandle target,
-            List<Fallout4.WorkshopScript> workshops,
-            GUIBuilder.Windows.Main m,
+            List<WorkshopScript> workshops,
+            Windows.Main m,
             bool createMissing,
-            bool ignoreExisting )
+            bool ignoreExisting,
+            bool scanTerrain,
+            float cylinderTop,
+            float cylinderBottom,
+            float volumePadding,
+            Func<Engine.Plugin.Forms.ObjectReference,GUIBuilder.Interface.WorkshopController,Engine.Plugin.Forms.Layer> funcPreferedLayer
+            )
         {
             if( ( !createMissing ) && ( ignoreExisting ) )
                 return; // So, uh...do nothing, der?
@@ -347,12 +354,8 @@ namespace GUIBuilder
                 msg = string.Format( "ControllerBatch.CheckingSandboxFor".Translate(), workshop.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
-                var borderMarkers = workshop.GetBorderMarkers();
+                var borderMarkers = workshop.BorderMarkers;
                 var sandbox = workshop.SandboxVolume;
-                /*DebugLog.Write( string.Format(
-                    "Sandbox for:{0}{1}",
-                    ImportBase.ExtraInfoFor( "\n\tWorkshop = {0}", workshop, unresolveable: "unresolved" ),
-                    ImportBase.ExtraInfoFor( "\n\tSandbox = {0}", sandbox, unresolveable: "unresolved" ) ) ); */
                 if(
                     ( sandbox != null )&&
                     (
@@ -409,15 +412,15 @@ namespace GUIBuilder
                     target,
                     hull,
                     workshop.Reference.Worldspace,
-                    false,
-                    GodObject.CoreForms.Fallout4.fSandboxCylinderBottom,
-                    GodObject.CoreForms.Fallout4.fSandboxCylinderTop,
-                    128.0f, 128.0f,
+                    scanTerrain,
+                    cylinderBottom,
+                    cylinderTop,
+                    volumePadding,
                     hintZ
                 );
 
                 if( osv == null )
-                    DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", workshop.ToString() ) );
+                    DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", workshop.IDString ) );
                 else
                 {
                     DebugLog.WriteStrings( null, new[] {
@@ -488,28 +491,6 @@ namespace GUIBuilder
                         recordFlags,
                         null );
 
-                    /*
-                    FormImport.ImportBase.AddToList(
-                        ref list,
-                        new FormImport.ImportSandboxReference(
-                            sandbox,
-                            string.Format(
-                                "{0}{1}",
-                                workshop.QualifiedName,
-                                "SandboxArea" ),
-                            sandboxBase,
-                            worldspace, cell,
-                            osv.Position,
-                            osv.Rotation,
-                            osv.Size,
-                            color,
-                            workshop.Reference,
-                            GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkSandbox,
-                            preferedLayer,
-                            useLayerEditorID,
-                            recordFlags
-                    ) );
-                    */
                 }
                 var elapsed = m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
@@ -520,13 +501,18 @@ namespace GUIBuilder
             m.PopStatusMessage();
             DebugLog.CloseIndentLevel();
         }
+        */
 
         public static void NormalizeBuildVolumes(
             ref List<FormImport.ImportBase> list,
             Engine.Plugin.TargetHandle target,
             List<Fallout4.WorkshopScript> workshops,
             GUIBuilder.Windows.Main m,
-            bool missingOnly )
+            bool missingOnly,
+            bool scanTerrain,
+            float topAbovePeak,
+            float groundSink
+            )
         {
             DebugLog.OpenIndentLevel();
 
@@ -556,7 +542,7 @@ namespace GUIBuilder
                     m.PopStatusMessage();
                     continue;
                 }
-                var borderMarkers = workshop.GetBorderMarkers();
+                var borderMarkers = workshop.BorderMarkers;
                 if( borderMarkers.NullOrEmpty() )
                 {
                     m.StopSyncTimer( tStart, workshop.GetEditorID( target ) );
@@ -586,7 +572,7 @@ namespace GUIBuilder
                     hull,
                     volumes,
                     workshop.Reference.Worldspace,
-                    true,
+                    scanTerrain,
                     workshop.Reference,
                     GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedPrimitive,
                     new Engine.Plugin.Forms.Activator[]{
@@ -596,7 +582,8 @@ namespace GUIBuilder
                     }, 0,
                     color,
                     (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent,
-                    0f, 0f,
+                    groundSink,
+                    topAbovePeak,
                     null
                 ); ;
 

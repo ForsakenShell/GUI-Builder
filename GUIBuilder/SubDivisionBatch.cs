@@ -192,7 +192,14 @@ namespace GUIBuilder
 
         #region Generate and Optimize Sub-Divison Elements
 
-        public static void CheckMissingElements( List<AnnexTheCommonwealth.SubDivision> subdivisions, bool checkBorderEnablers, bool checkSandboxVolumes )
+        public static void CheckMissingElements(
+            List<AnnexTheCommonwealth.SubDivision> subdivisions,
+            bool checkBorderEnablers,
+            bool checkSandboxVolumes,
+            float cylinderTop,
+            float cylinderBottom,
+            float volumePadding
+            )
         {
             DebugLog.OpenIndentLevel();
 
@@ -204,8 +211,19 @@ namespace GUIBuilder
 
             if( checkBorderEnablers )
                 GenerateMissingBorderEnablers( ref list, subdivisions, m );
+            /*
             if( checkSandboxVolumes )
-                GenerateSandboxes( ref list, subdivisions, m, true, true );
+                GenerateSandboxes(
+                    ref list,
+                    Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                    subdivisions,
+                    m,
+                    true, true,
+                    cylinderTop,
+                    cylinderBottom,
+                    volumePadding
+                );
+            */
 
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, true, ref allImportsMatchTarget );
@@ -236,7 +254,19 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
 
-        public static void GenerateSandboxes( ref List<FormImport.ImportBase> list, List<AnnexTheCommonwealth.SubDivision> subdivisions, GUIBuilder.Windows.Main m, bool createMissing, bool ignoreExisting )
+        /*
+        public static void GenerateSandboxes(
+            ref List<FormImport.ImportBase> list,
+            Engine.Plugin.TargetHandle target,
+            List<SubDivision> subdivisions,
+            Windows.Main m,
+            bool createMissing,
+            bool ignoreExisting,
+            bool scanTerrain,
+            float cylinderTop,
+            float cylinderBottom,
+            float volumePadding
+            )
         {
             if( ( !createMissing ) && ( ignoreExisting ) )
                 return; // So, uh...do nothing, der?
@@ -251,15 +281,11 @@ namespace GUIBuilder
             foreach( var subdivision in subdivisions )
             {
                 m.PushStatusMessage();
-                msg = string.Format( "ControllerBatch.CheckingSandboxFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.CheckingSandboxFor".Translate(), subdivision.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
                 var edgeFlags = subdivision.EdgeFlags;
                 var sandbox = subdivision.SandboxVolume;
-                /*DebugLog.Write( string.Format(
-                    "Sandbox for:{0}{1}",
-                    ImportBase.ExtraInfoFor( "\n\tSub-Division = {0}", subdivision, unresolveable: "unresolved" ),
-                    ImportBase.ExtraInfoFor( "\n\tSandbox = {0}", sandbox, unresolveable: "unresolved" ) ) ); */
                 if(
                     ( ( sandbox != null ) && ( ignoreExisting ) ) ||
                     ( ( sandbox == null ) && ( !createMissing ) ) ||
@@ -272,66 +298,58 @@ namespace GUIBuilder
 
                 DebugLog.OpenIndentLevel( subdivision.IDString, false );
 
-                msg = string.Format( "ControllerBatch.CalculatingSandboxFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+                msg = string.Format( "ControllerBatch.CalculatingSandboxFor".Translate(), subdivision.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
                 m.StartSyncTimer();
                 var tStart = m.SyncTimerElapsed();
 
                 var hintZ = 0.0f;
-                var buildVolumes = subdivision.BuildVolumes;
+                var buildVolumes = subdivision.BuildAreaVolumes;
                 if( !buildVolumes.NullOrEmpty() )
                 {
-                    var bCount = 0;
                     foreach( var volume in buildVolumes )
-                    {
-                        if( subdivision.Reference.Cell == volume.Reference.Cell )
-                        {
-                            hintZ += volume.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
-                            bCount++;
-                        }
-                    }
-                    if( bCount > 1 )
-                        hintZ /= bCount;
+                        hintZ += volume.Reference.GetPosition( target ).Z;
+                    hintZ /= buildVolumes.Count;
                 }
                 else if( sandbox != null )
-                    hintZ = sandbox.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                    hintZ = sandbox.GetPosition( target ).Z;
                 else
-                    hintZ = subdivision.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z;
+                    hintZ = subdivision.Reference.GetPosition( target ).Z;
 
                 // Use edge flag reference points instead of build volumes so we can work with less points that are accurate enough
                 var points = new List<Vector2f>();
                 foreach( var flag in edgeFlags )
-                    points.Add( new Vector2f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) );
+                    points.Add( new Vector2f( flag.Reference.GetPosition( target ) ) );
 
                 var hull = Maths.Geometry.ConvexHull.MakeConvexHull( points );
 
                 var osv = VolumeBatch.CalculateOptimalSandboxVolume(
-                    Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                    target,
                     hull,
                     subdivision.Reference.Worldspace,
-                    false,
-                    GodObject.CoreForms.AnnexTheCommonwealth.fSandboxCylinderBottom,
-                    GodObject.CoreForms.AnnexTheCommonwealth.fSandboxCylinderTop,
-                    128.0f, 128.0f,
+                    scanTerrain,
+                    cylinderBottom,
+                    cylinderTop,
+                    volumePadding,
                     hintZ
                 );
 
                 if( osv == null )
-                    DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", subdivision.ToString() ) );
+                    DebugLog.WriteLine( string.Format( "Unable to calculate sandbox for {0}", subdivision.IDString ) );
                 else
                 {
                     DebugLog.WriteStrings( null, new[] {
                         string.Format(
                             "Position = {0} -> {1}",
-                            sandbox == null ? "[null]" : sandbox.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            sandbox == null ? "[null]" : sandbox.GetPosition( target ).ToString(),
                             osv.Size.ToString() ),
                         string.Format(
                             "Size = {0} -> {1}",
-                            sandbox == null ? "[null]" : sandbox.Reference.Primitive.GetBounds( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).ToString(),
+                            sandbox == null ? "[null]" : sandbox.Primitive.GetBounds( target ).ToString(),
                             osv.Position.ToString() ),
                         string.Format(
                             "Z Rotation = {0} -> {1}",
-                            sandbox == null ? "[null]" : sandbox.Reference.GetRotation( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).Z.ToString(),
+                            sandbox == null ? "[null]" : sandbox.GetRotation( target ).Z.ToString(),
                             osv.Rotation.Z.ToString() )
                         }, false, true, false, false );
 
@@ -339,10 +357,10 @@ namespace GUIBuilder
 
                     var preferedLayer =
                         sandbox != null
-                        ?   sandbox.Reference.GetLayer( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
+                        ?   sandbox.GetLayer( target )
                         ??  GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes
                         :   GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes;
-                    string useLayerEditorID = preferedLayer.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    string useLayerEditorID = preferedLayer.GetEditorID( target );
 
                     #endregion
 
@@ -356,15 +374,15 @@ namespace GUIBuilder
                         ? subdivision.Reference.Cell
                         : worldspace.Cells.Persistent;
                     var sandboxBase = GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume;
-                    var color = sandboxBase.GetMarkerColor( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                    var color = sandboxBase.GetMarkerColor( target );
                     
                     VolumeBatch.CreateVolumeRefImport( ref list,
                         "Sandbox Volume",
                         Priority.Ref_SandboxVolume,
-                        sandbox?.Reference,
+                        sandbox,
                         sandboxEditorID,
                         sandboxBase,
-                        sandboxBase.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ),
+                        sandboxBase.GetEditorID( target ),
                         cell,
                         osv.Position,
                         osv.Rotation,
@@ -387,13 +405,18 @@ namespace GUIBuilder
             m.PopStatusMessage();
             DebugLog.CloseIndentLevel();
         }
+        */
 
         public static void NormalizeBuildVolumes(
             ref List<FormImport.ImportBase> list,
             Engine.Plugin.TargetHandle target,
             List<AnnexTheCommonwealth.SubDivision> subdivisions,
             GUIBuilder.Windows.Main m,
-            bool missingOnly )
+            bool missingOnly,
+            bool scanTerrain,
+            float topAbovePeak,
+            float groundSink
+            )
         {
             DebugLog.OpenIndentLevel();
 
@@ -411,7 +434,7 @@ namespace GUIBuilder
                 msg = string.Format( "ControllerBatch.CheckingBuildVolumesFor".Translate(), subdivision.GetEditorID( target ) );
                 m.SetCurrentStatusMessage( msg );
 
-                var volumes = subdivision.BuildVolumes;
+                var volumes = subdivision.BuildAreaVolumes;
                 /*DebugLog.Write( string.Format(
                     "Sandbox for:{0}{1}",
                     ImportBase.ExtraInfoFor( "\n\tSub-Division = {0}", subdivision, unresolveable: "unresolved" ),
@@ -451,7 +474,7 @@ namespace GUIBuilder
                     hull,
                     volumes.ConvertAll<Engine.Plugin.Forms.ObjectReference>( v => v.Reference ),
                     subdivision.Reference.Worldspace,
-                    false,
+                    scanTerrain,
                     subdivision.Reference,
                     GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedBuildAreaVolume,
                     new Engine.Plugin.Forms.Activator[ 1 ] { GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_BuildAreaVolume },
@@ -462,7 +485,8 @@ namespace GUIBuilder
                         (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled |
                         (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn
                     ),
-                    -1024.0f, 5120.0f,
+                    groundSink,
+                    topAbovePeak,
                     typeof( AnnexTheCommonwealth.BuildAreaVolume )
                 );
 

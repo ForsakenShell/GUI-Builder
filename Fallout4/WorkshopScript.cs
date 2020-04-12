@@ -29,38 +29,39 @@ namespace Fallout4
     /// Description of Workshop.
     /// </summary>
     [Engine.Plugin.Attributes.ScriptAssociation( "WorkshopScript" )]
-    public class WorkshopScript : Engine.Plugin.PapyrusScript
+    public class WorkshopScript : Engine.Plugin.PapyrusScript, GUIBuilder.Interface.WorkshopController
     {
 
         // Forms for workshop borders
-        //Engine.Plugin.Forms.Keyword _BorderGeneratorKeyword = null;
-        //Engine.Plugin.Forms.Keyword _GUIBuilder.CustomForms.WorkshopBorderLinkKeyword = null;
+        //Engine.Plugin.Forms.Keyword                         _BorderGeneratorKeyword = null;
+        //Engine.Plugin.Forms.Keyword                         _GUIBuilder.CustomForms.WorkshopBorderLinkKeyword = null;
 
-        //Engine.Plugin.Forms.LocationRef _BorderWithBottomRef = null;
+        //Engine.Plugin.Forms.LocationRef                     _BorderWithBottomRef = null;
 
 
-        List<Engine.Plugin.Forms.ObjectReference> _BorderMarkers = null;
-        public List<GUIBuilder.BorderNode> BorderNodes = null;
+        List<Engine.Plugin.Forms.ObjectReference>           _BorderMarkers = null;
+        public List<GUIBuilder.BorderNode>                  BorderNodes = null;
         
-        Engine.Plugin.Forms.ObjectReference _Border = null;
+        Engine.Plugin.Forms.ObjectReference                 _Border = null;
         
         // Build volumes for workshops
-        List<Engine.Plugin.Forms.ObjectReference> _BuildVolumes = null;
+        List<Engine.Plugin.Forms.ObjectReference>           _BuildVolumes = null;
 
         // Pulled from handle for quick access
 
         //public string LocationName = null;
-        Engine.Plugin.Forms.Location _Location = null;
+        Engine.Plugin.Forms.Location                        _Location = null;
 
         #region Constructor
 
-        public WorkshopScript( Engine.Plugin.Forms.ObjectReference reference ) : base( reference ) {}
+        public                                              WorkshopScript( Engine.Plugin.Forms.ObjectReference reference )
+        : base( reference ) {}
 
         #endregion
 
         #region Public Properties
         
-        public override ConflictStatus ConflictStatus
+        public override ConflictStatus                      ConflictStatus
         {
             get
             {
@@ -71,17 +72,21 @@ namespace Fallout4
             }
         }
 
-        public string QualifiedName
+        public string                                       LocationName
         {
             get
             {
-                var location = Location;
-                if( location != null )
-                {
-                    var lName = location.GetFullName( TargetHandle.WorkingOrLastFullRequired );
-                    if( !string.IsNullOrEmpty( lName ) )
-                        return lName.Replace( " ", "" ).Replace( "-", "" );
-                }
+                return Location?.GetFullName( TargetHandle.WorkingOrLastFullRequired );
+            }
+        }
+
+        public string                                       QualifiedName
+        {
+            get
+            {
+                var lName = LocationName;
+                if( !string.IsNullOrEmpty( lName ) )
+                    return lName.Replace( " ", "" ).Replace( "-", "" );
                 // TODO:  FIX ME FOR PROPER NAMESPACE PREFIXES AND STRING SCANNING, THIS CODE SUX!
                 var foo = Reference.GetEditorID( Engine.Plugin.TargetHandle.LastValid );
                 foo = foo.StripFrom( "WorkshopREF", StringComparison.InvariantCultureIgnoreCase );
@@ -91,7 +96,7 @@ namespace Fallout4
             }
         }
 
-        public Engine.Plugin.Forms.Location Location
+        public Engine.Plugin.Forms.Location                 Location
         {
             get
             {
@@ -115,7 +120,7 @@ namespace Fallout4
         }
 
 
-        public Engine.Plugin.Forms.ObjectReference BorderReference
+        public Engine.Plugin.Forms.ObjectReference          BorderReference
         {
             get
             {
@@ -177,7 +182,7 @@ namespace Fallout4
             }
         }
         
-        public Engine.Plugin.Forms.Static BorderStatic
+        public Engine.Plugin.Forms.Static                   BorderStatic
         {
             get
             {
@@ -201,7 +206,7 @@ namespace Fallout4
             }
         }
         
-        public Engine.Plugin.Forms.ObjectReference SandboxVolume
+        public Engine.Plugin.Forms.ObjectReference          SandboxVolume
         {
             get
             {
@@ -209,7 +214,7 @@ namespace Fallout4
             }
         }
         
-        public List<Engine.Plugin.Forms.ObjectReference> BuildVolumes
+        public List<Engine.Plugin.Forms.ObjectReference>    BuildVolumes
         {
             get
             {
@@ -251,7 +256,7 @@ namespace Fallout4
         #endregion
         
 
-        Engine.Plugin.Forms.ObjectReference GetFirstBorderMarker( bool warnOnMissingLink )
+        Engine.Plugin.Forms.ObjectReference                 GetFirstBorderMarker( bool warnOnMissingLink )
         {
             Engine.Plugin.Forms.ObjectReference result = null;
             
@@ -296,77 +301,83 @@ namespace Fallout4
             return result;
         }
         
-        public List<Engine.Plugin.Forms.ObjectReference> GetBorderMarkers()
+        public List<Engine.Plugin.Forms.ObjectReference>    BorderMarkers
         {
-            if( _BorderMarkers.NullOrEmpty() )
+            get
             {
-                var list = (List<Engine.Plugin.Forms.ObjectReference>)null;
-
-                DebugLog.OpenIndentLevel( new string[] {
-                    "workshop = " + this.IDString,
-                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator + " = " + GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.NullSafeIDString(),
-                    GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink + " = " + GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.NullSafeIDString()
-                    }, true, true, false );
-                
-                var abort = false;
-                if( GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword == null )
+                if( _BorderMarkers.NullOrEmpty() )
                 {
-                    DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator ) );
-                    abort = true;
-                }
-                if( GUIBuilder.CustomForms.WorkshopBorderLinkKeyword == null )
-                {
-                    DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink ) );
-                    abort = true;
-                }
-                if( abort ) goto localAbort;
+                    var list = (List<Engine.Plugin.Forms.ObjectReference>)null;
 
-                var firstMarker = GetFirstBorderMarker( true );
-                if( firstMarker == null )
-                {
-                    //GetFirstBorderMarker() will throw a warning to the log, no need to write a reundant error here
-                    //DebugLog.WriteError( "GetFirstBorderNode() returned null!" );
-                    goto localAbort;
-                }
+                    /*
+                    DebugLog.OpenIndentLevel( new string[] {
+                        "workshop = " + this.IDString,
+                        GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator + " = " + GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword.NullSafeIDString(),
+                        GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink + " = " + GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.NullSafeIDString()
+                        }, true, true, false );
+                    */
 
-                var kywdWBL = GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.GetFormID( TargetHandle.Master );
+                    var abort = false;
+                    if( GUIBuilder.CustomForms.WorkshopBorderGeneratorKeyword == null )
+                    {
+                        DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderGenerator ) );
+                        abort = true;
+                    }
+                    if( GUIBuilder.CustomForms.WorkshopBorderLinkKeyword == null )
+                    {
+                        DebugLog.WriteError( string.Format( "Keyword:  {0} = null!", GUIBuilder.WorkshopBatch.WSDS_KYWD_BorderLink ) );
+                        abort = true;
+                    }
+                    if( abort ) goto localAbort;
 
-                var node = firstMarker.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBL );
-                if( node == null )
-                    goto localAbort;
+                    var firstMarker = GetFirstBorderMarker( true );
+                    if( firstMarker == null )
+                    {
+                        //GetFirstBorderMarker() will throw a warning to the log, no need to write a reundant error here
+                        //DebugLog.WriteError( "GetFirstBorderNode() returned null!" );
+                        goto localAbort;
+                    }
 
-                list = new List<Engine.Plugin.Forms.ObjectReference>();
+                    var kywdWBL = GUIBuilder.CustomForms.WorkshopBorderLinkKeyword.GetFormID( TargetHandle.Master );
 
-                var closedLoop = false;
-                list.Add( firstMarker );
-                list.Add( node );
-                while( true )
-                {
-                    node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBL );
+                    var node = firstMarker.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBL );
                     if( node == null )
-                        break;
+                        goto localAbort;
+
+                    list = new List<Engine.Plugin.Forms.ObjectReference>();
+
+                    var closedLoop = false;
+                    list.Add( firstMarker );
                     list.Add( node );
-                    closedLoop = ( node == firstMarker );
-                    if( closedLoop )
-                        break;
-                }
+                    while( true )
+                    {
+                        node = node.LinkedRefs.GetLinkedRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, kywdWBL );
+                        if( node == null )
+                            break;
+                        list.Add( node );
+                        closedLoop = ( node == firstMarker );
+                        if( closedLoop )
+                            break;
+                    }
 
-                if( !closedLoop )
-                {
-                    var efCount = list.Count;
-                    DebugLog.WriteWarning( string.Format( "Workshop border markers do not form a complete loop.\n\tWorkshop = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.IDString, efCount, list[ 0 ].IDString, list[ efCount - 1 ].IDString ) );
-                }
+                    if( !closedLoop )
+                    {
+                        var efCount = list.Count;
+                        DebugLog.WriteWarning( string.Format( "Workshop border markers do not form a complete loop.\n\tWorkshop = {0}\n\tFlag count = {1}\n\tFirst = {2}\n\tLast = {3}", this.IDString, efCount, list[ 0 ].IDString, list[ efCount - 1 ].IDString ) );
+                    }
                 
-                _BorderMarkers = list;
-        localAbort:
-                DebugLog.CloseIndentList( "nodes", list, true, true );
-            }
+                    _BorderMarkers = list;
+            //localAbort:
+                    //DebugLog.CloseIndentList( "BorderMarkers", list, true, true, true, true, false );
+                }
 
-            return _BorderMarkers;
+            localAbort:
+                return _BorderMarkers;
+            }
         }
         
 
-        public void ClearBorderMarkersAndNodes( bool sendchangedevent )
+        public void                                         ClearBorderMarkersAndNodes( bool sendchangedevent )
         {
             _BorderMarkers = null;
             BorderNodes = null;

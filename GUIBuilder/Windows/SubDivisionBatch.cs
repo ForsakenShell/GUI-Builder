@@ -13,6 +13,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
+using Engine.Plugin;
+
+using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+
 namespace GUIBuilder.Windows
 {
 
@@ -40,12 +44,25 @@ namespace GUIBuilder.Windows
             this.ResumeLayout( false );
         }
 
+        #region Client Window Events
 
         void OnClientLoad( object sender, EventArgs e )
         {
             lvSubDivisions.SyncedEditorFormType = typeof( FormEditor.SubDivision );
             GodObject.Plugin.Data.SubDivisions.ObjectDataChanged += OnSubDivisionListChanged;
             UpdateSubDivisionList();
+            
+            // TODO:  Load/Save these to the Workspace
+            cbNormalizeBuildVolumesScanTerrain.Checked      = true;
+            tbNormalizeBuildVolumesGroundSink.Text          = GodObject.CoreForms.AnnexTheCommonwealth.fBuildVolumeGroundSink       .ToString( "F2" );
+            tbNormalizeBuildVolumesTopAbovePeak.Text        = GodObject.CoreForms.AnnexTheCommonwealth.fBuildVolumeTopAbovePeak     .ToString( "F2" );
+            
+            cbOptimizeSandboxVolumesCreateNew.Checked       = true;
+            cbOptimizeSandboxVolumesIgnoreExisting.Checked  = true;
+            cbOptimizeSandboxVolumesScanTerrain.Checked     = true;
+            tbOptimizeSandboxVolumesCylinderTop.Text        = GodObject.CoreForms.AnnexTheCommonwealth.fSandboxCylinderTop          .ToString( "F2" );
+            tbOptimizeSandboxVolumesCylinderBottom.Text     = GodObject.CoreForms.AnnexTheCommonwealth.fSandboxCylinderBottom       .ToString( "F2" );
+            tbOptimizeSandboxVolumesVolumePadding.Text      = GodObject.CoreForms.AnnexTheCommonwealth.fSandboxPadding              .ToString( "F2" );
         }
 
         void OnClientClosing( object sender, FormClosingEventArgs e )
@@ -66,6 +83,8 @@ namespace GUIBuilder.Windows
             return enabled;
         }
 
+        #endregion
+
         #region Sync'd list monitoring
 
         void OnSyncSubDivisionsThreadComplete( GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision> sender )
@@ -83,9 +102,11 @@ namespace GUIBuilder.Windows
         {
             UpdateSubDivisionList();
         }
-        
+
         #endregion
-        
+
+        #region Check Missing Elements
+
         void OnCheckMissingElementsClick( object sender, EventArgs e )
         {
             GodObject.Windows.SetEnableState( sender, false );
@@ -108,16 +129,31 @@ namespace GUIBuilder.Windows
             m.StartSyncTimer();
             var tStart = m.SyncTimerElapsed();
             
-            GUIBuilder.SubDivisionBatch.CheckMissingElements(
-                subdivisions,
-                cbElementBorderEnablers.Checked,
-                cbElementSandboxVolumes.Checked );
+            bool validUserInput = true;
+
+            validUserInput &= float.TryParse( tbOptimizeSandboxVolumesCylinderTop.Text   , out float cylinderTop    );
+            validUserInput &= float.TryParse( tbOptimizeSandboxVolumesCylinderBottom.Text, out float cylinderBottom );
+            validUserInput &= float.TryParse( tbOptimizeSandboxVolumesVolumePadding.Text , out float volumePadding  );
+
+            if( validUserInput )
+                GUIBuilder.SubDivisionBatch.CheckMissingElements(
+                    subdivisions,
+                    cbElementBorderEnablers.Checked,
+                    cbElementSandboxVolumes.Checked,
+                    cylinderTop,
+                    cylinderBottom,
+                    volumePadding
+                );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( this, true );
         }
-        
+
+        #endregion
+
+        #region Optimize Sandbox Volumes
+
         void OnOptimizeSandboxVolumesClick( object sender, EventArgs e )
         {
             GodObject.Windows.SetEnableState( sender, false );
@@ -141,7 +177,39 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            GUIBuilder.SubDivisionBatch.GenerateSandboxes( ref list, subdivisions, m, false, false );
+            bool validUserInput = true;
+
+            var createNew       = cbOptimizeSandboxVolumesCreateNew.Checked;;
+            var ignoreExisting  = cbOptimizeSandboxVolumesIgnoreExisting.Checked;
+            var scanTerrain     = cbOptimizeSandboxVolumesScanTerrain.Checked;
+            validUserInput      &= float.TryParse( tbOptimizeSandboxVolumesCylinderTop.Text   , out float cylinderTop    );
+            validUserInput      &= float.TryParse( tbOptimizeSandboxVolumesCylinderBottom.Text, out float cylinderBottom );
+            validUserInput      &= float.TryParse( tbOptimizeSandboxVolumesVolumePadding.Text , out float volumePadding  );
+
+            if( validUserInput )
+                GUIBuilder.VolumeBatch.GenerateSandboxes(
+                    m,
+                    ref list,
+                    TargetHandle.WorkingOrLastFullRequired,
+                    subdivisions,
+                    createNew,
+                    ignoreExisting,
+                    scanTerrain,
+                    cylinderTop,
+                    cylinderBottom,
+                    volumePadding,
+                    (
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.Persistent |
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.InitiallyDisabled |
+                        (uint)Engine.Plugin.Forms.Fields.Record.Flags.REFR.NoRespawn
+                    ),
+                    string.Format( "ESM_ATC_REFR_SV_{0}", SetEditorID.Token_Name ),
+                    GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume,
+                    GodObject.CoreForms.AnnexTheCommonwealth.Activator.ESM_ATC_ACTI_SandboxVolume.GetMarkerColor( TargetHandle.Master ),
+                    GodObject.CoreForms.AnnexTheCommonwealth.Keyword.ESM_ATC_KYWD_LinkedSandboxVolume,
+                    false, // invertLinkedRefDirection (controller->volume?)
+                    PreferedSandboxLayer
+                );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
@@ -151,7 +219,28 @@ namespace GUIBuilder.Windows
 
             GodObject.Windows.SetEnableState( this, true );
         }
-        
+
+        Engine.Plugin.Forms.Layer PreferedSandboxLayer<TController>(
+            ref List<GUIBuilder.FormImport.ImportBase> imports,
+            Engine.Plugin.TargetHandle target,
+            Engine.Plugin.Forms.ObjectReference sandbox,
+            TController controller,
+            out string preferedLayerEditorID
+        )   where TController : AnnexTheCommonwealth.SubDivision, Interface.WorkshopController
+        {
+            var preferedLayer =
+                sandbox != null
+                ?   sandbox.GetLayer( target )
+                ??  GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes
+                :   GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_SandboxVolumes;
+            preferedLayerEditorID = preferedLayer.GetEditorID( target );
+            return preferedLayer;
+        }
+
+        #endregion
+
+        #region Normalize Build Volumes
+
         void OnNormalizeBuildVolumesClick( object sender, EventArgs e)
         {
             GodObject.Windows.SetEnableState( sender, false );
@@ -175,12 +264,23 @@ namespace GUIBuilder.Windows
             
             List<GUIBuilder.FormImport.ImportBase> list = null;
             
-            GUIBuilder.SubDivisionBatch.NormalizeBuildVolumes(
-                ref list,
-                Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
-                subdivisions,
-                m,
-                false );
+            bool validUserInput = true;
+
+            var scanTerrain = cbNormalizeBuildVolumesScanTerrain.Checked;
+            validUserInput &= float.TryParse( tbNormalizeBuildVolumesTopAbovePeak.Text   , out float topAbovePeak );
+            validUserInput &= float.TryParse( tbNormalizeBuildVolumesGroundSink.Text     , out float groundSink   );
+
+            if( validUserInput )
+                GUIBuilder.SubDivisionBatch.NormalizeBuildVolumes(
+                    ref list,
+                    Engine.Plugin.TargetHandle.WorkingOrLastFullRequired,
+                    subdivisions,
+                    m,
+                    false,
+                    scanTerrain,
+                    topAbovePeak,
+                    groundSink
+                );
             
             bool allImportsMatchTarget = false;
             FormImport.ImportBase.ShowImportDialog( list, false, ref allImportsMatchTarget );
@@ -189,6 +289,8 @@ namespace GUIBuilder.Windows
             m.PopStatusMessage();
             GodObject.Windows.SetEnableState( this, true );
         }
-        
+
+        #endregion
+
     }
 }

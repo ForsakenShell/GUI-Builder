@@ -177,8 +177,16 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BatchWindow.Function.NormalizeBuildVolumes>Normalize Build Volumes</BatchWindow.Function.NormalizeBuildVolumes>
     <BatchWindow.Function.OptimizeSandboxVolumes>Optimize Sandbox Volumes</BatchWindow.Function.OptimizeSandboxVolumes>
     <BatchWindow.Function.CheckElements>Check For Missing Elements</BatchWindow.Function.CheckElements>
-    <BatchWindow.Function.CheckingElements>Checking for missing sub-division elements...</BatchWindow.Function.CheckingElements>
+    <BatchWindow.Function.CheckingElements>Checking for missing elements...</BatchWindow.Function.CheckingElements>
     <BatchWindow.Function.FinalizeElements>Finalize All Elements</BatchWindow.Function.FinalizeElements>
+    <BatchWindow.Function.Volumes.ScanTerrain>Scan terrain</BatchWindow.Function.Volumes.ScanTerrain>
+    <BatchWindow.Function.NormalizeBuildVolumes.TopAbovePeak>Top Above Peak</BatchWindow.Function.NormalizeBuildVolumes.TopAbovePeak>
+    <BatchWindow.Function.NormalizeBuildVolumes.GroundSink>Ground Sink</BatchWindow.Function.NormalizeBuildVolumes.GroundSink>
+    <BatchWindow.Function.OptimizeSandboxVolumes.CreateNew>Create New</BatchWindow.Function.OptimizeSandboxVolumes.CreateNew>
+    <BatchWindow.Function.OptimizeSandboxVolumes.IgnoreExisting>Ignore Existing</BatchWindow.Function.OptimizeSandboxVolumes.IgnoreExisting>
+    <BatchWindow.Function.OptimizeSandboxVolumes.CylinderTop>Cylinder Top</BatchWindow.Function.OptimizeSandboxVolumes.CylinderTop>
+    <BatchWindow.Function.OptimizeSandboxVolumes.CylinderBottom>Cylinder Bottom</BatchWindow.Function.OptimizeSandboxVolumes.CylinderBottom>
+    <BatchWindow.Function.OptimizeSandboxVolumes.VolumePadding>Padding</BatchWindow.Function.OptimizeSandboxVolumes.VolumePadding>
     
     <SubDivisionBatchWindow.Title>Sub-Division Batch</SubDivisionBatchWindow.Title>
     <SubDivisionBatchWindow.EdgeFlags>Edge Flags</SubDivisionBatchWindow.EdgeFlags>

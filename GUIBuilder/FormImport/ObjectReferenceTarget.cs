@@ -41,12 +41,14 @@ namespace GUIBuilder.FormImport
             ImportBase parent, 
             string displayName,
             string editorID,
-            Cell cell )
+            Cell cell,
+            bool supressLookupByEditorID = false )
             : base(
                 parent,
                 displayName,
                 typeof( ObjectReference ),
-                editorID )
+                editorID,
+                supressLookupByEditorID )
         {
             INTERNAL_Constructor( parent, cell );
         }
@@ -65,6 +67,24 @@ namespace GUIBuilder.FormImport
             INTERNAL_Constructor( parent, cell );
         }
 
+        public                                          ObjectReferenceTarget(
+            ImportBase parent,
+            string displayName,
+            ObjectReference reference,
+            string editorID,
+            Cell cell,
+            bool supressLookupByEditorID = false )
+            : base(
+                parent,
+                displayName,
+                typeof( ObjectReference ),
+                reference,
+                editorID,
+                supressLookupByEditorID )
+        {
+            INTERNAL_Constructor( parent, cell );
+        }
+
         #endregion
 
         public override bool                            Resolve( bool errorIfUnresolveable = true )
@@ -77,6 +97,9 @@ namespace GUIBuilder.FormImport
 
         public override bool                            CreateNewFormInWorkingFile()
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.CreateNewFormInWorkingFile();
+
             var cell = _Cell.Value as Cell;
             if( cell == null )
             {
@@ -93,6 +116,7 @@ namespace GUIBuilder.FormImport
                         cell.IDString ) );
                     return false;
                 }
+                Value = refr;
                 return true;
             }
             catch( Exception e )

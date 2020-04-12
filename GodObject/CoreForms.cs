@@ -30,7 +30,11 @@ namespace GodObject
             // TODO: FIX THESE CONSTANTS FOR ACTUAL GAME SETTING FORMS AND MOVE THEM INTO THEIR PROPER PLACE!
             public const float fSandboxCylinderBottom       =  -100.0f;
             public const float fSandboxCylinderTop          =  1280.0f;
+            public const float fSandboxPadding              =   128.0f;
             
+            public const float fBuildVolumeGroundSink       = -1024.0f;
+            public const float fBuildVolumeTopAbovePeak     =  2560.0f;
+
             public static class Container
             {
                 public static Engine.Plugin.Forms.Container WorkshopWorkbench                       = new Engine.Plugin.Forms.Container  ( Master.Filename.Fallout4      , 0x000C1AEB );
@@ -97,7 +101,10 @@ namespace GodObject
             // TODO: FIX THESE CONSTANTS FOR ACTUAL GAME SETTING FORMS AND MOVE THEM INTO THEIR PROPER PLACE!
             public const float fSandboxCylinderBottom       = -2560.0f;
             public const float fSandboxCylinderTop          =  2560.0f;
+            public const float fSandboxPadding              =   128.0f;
 
+            public const float fBuildVolumeGroundSink       = -1024.0f;
+            public const float fBuildVolumeTopAbovePeak     =  5120.0f;
 
             public static class Activator
             {

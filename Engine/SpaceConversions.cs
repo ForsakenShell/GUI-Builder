@@ -85,13 +85,17 @@ namespace Engine
             return new Vector2i( cx, cy );
         }
         
-        public static Vector2i WorldspaceToHeightmap( float x, float y, int hmcX, int hmcY )
+        public static Vector2i WorldspaceToHeightmap( float x, float y )
         {
             var result = new Vector2i(
-                hmcX + (int)( x * Constant.WorldMap_To_Heightmap ),
-                hmcY - (int)( y * Constant.WorldMap_To_Heightmap )
+                (int)( x * Constant.WorldMap_To_Heightmap ),
+                (int)( y * Constant.WorldMap_To_Heightmap )
             );
             return result;
+        }
+        public static Vector2i WorldspaceToHeightmap( this Vector2f v )
+        {
+            return  WorldspaceToHeightmap( v.X, v.Y );
         }
         
         public static Vector2i WorldspaceToCellGrid( this Vector2f v )
@@ -103,6 +107,7 @@ namespace Engine
             return WorldspaceToCellGrid( v.X, v.Y );
         }
         
+        /*
         public static Vector2i WorldspaceToHeightmap( float x, float y, Vector2i hmC )
         {
             return WorldspaceToHeightmap( x, y, hmC.X, hmC.Y );
@@ -110,10 +115,6 @@ namespace Engine
         public static Vector2i WorldspaceToHeightmap( this Vector2f v, int hmcX, int hmcY )
         {
             return WorldspaceToHeightmap( v.X, v.Y, hmcX, hmcY );
-        }
-        public static Vector2i WorldspaceToHeightmap( this Vector2f v, Vector2i hmC )
-        {
-            return  WorldspaceToHeightmap( v.X, v.Y, hmC.X, hmC.Y );
         }
         public static Vector2i WorldspaceToHeightmap( this Vector3f v, int hmcX, int hmcY )
         {
@@ -123,7 +124,8 @@ namespace Engine
         {
             return  WorldspaceToHeightmap( v.X, v.Y, hmC.X, hmC.Y );
         }
-        
+        */
+
         #endregion
         
         #region CellGrid Conversions

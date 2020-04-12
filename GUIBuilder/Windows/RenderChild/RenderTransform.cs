@@ -812,6 +812,8 @@ namespace GUIBuilder.Windows.RenderChild
         
         public Rectangle WorldspaceToHeightmapClipper( float x, float y )
         {
+            return Rectangle.Empty;
+            /* TODO:  FIX ME!
             var ss = new Maths.Vector2f( rectTarget.w, rectTarget.h ) * _invScale;
             var hss = ss * 0.5f;
             var nw = Engine.SpaceConversions.WorldspaceToHeightmap( x - hss.X, y + hss.Y, hmCentre );
@@ -822,6 +824,7 @@ namespace GUIBuilder.Windows.RenderChild
                 nw.X, nw.Y,
                 s.X, s.Y
             );
+            */
         }
         
         #endregion
@@ -1508,7 +1511,7 @@ namespace GUIBuilder.Windows.RenderChild
             //if( _worldspace.FormID != subdivision.Reference.Worldspace.FormID )
             //    return;
             
-            var volumes = subdivision.BuildVolumes;
+            var volumes = subdivision.BuildAreaVolumes;
             if( volumes.NullOrEmpty() )
                 return;
             
@@ -1757,12 +1760,12 @@ namespace GUIBuilder.Windows.RenderChild
                     return;
                 
                 var wsFID = _worldspace.GetFormID( Engine.Plugin.TargetHandle.Master );
-                if( wsFID != volume.Reference.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
+                if( wsFID != volume.Worldspace.GetFormID( Engine.Plugin.TargetHandle.Master ) )
                     return;
                 
                 var c = Color.FromArgb( 255, 204, 76, 51 );
                 
-                var corners = volume.Reference.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                var corners = volume.GetCorners( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
                 //DebugLog.WriteArray( "DrawSandboxVolume() :: Corners", corners );
                 
                 DrawPolyWorldTransform( corners, c );

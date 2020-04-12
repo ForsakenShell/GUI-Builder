@@ -467,11 +467,13 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.Timer syncTimer = null;
         System.Diagnostics.Stopwatch syncStopwatch = null;
         
-        public void StartSyncTimer()
+        public void StartSyncTimer( bool stackDump = true )
         {
+            //if( stackDump )
+            //    DebugLog.WriteCaller( stackDump: true ); // Trying to find mismatches
             if( this.InvokeRequired )
             {
-                this.Invoke( (Action)delegate() { StartSyncTimer(); }, null );
+                this.Invoke( (Action)delegate() { StartSyncTimer( false ); }, null );
                 return;
             }
             SyncTimerCounter++;
@@ -501,11 +503,13 @@ namespace GUIBuilder.Windows
             return elapsed;
         }
         
-        void StopSyncTimerEx()
+        void StopSyncTimerEx( bool stackDump = true )
         {
+            //if( stackDump )
+            //    DebugLog.WriteCaller( stackDump: true ); // Trying to find mismatches
             if( this.InvokeRequired )
             {
-                this.Invoke( (Action)delegate() { StopSyncTimerEx(); }, null );
+                this.Invoke( (Action)delegate() { StopSyncTimerEx( false ); }, null );
                 return;
             }
             SyncTimerCounter--;

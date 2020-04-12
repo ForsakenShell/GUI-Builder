@@ -135,7 +135,12 @@ namespace GodObject
             // Read the land height from the CELLs LAND record (or the WRLD default)
             public float LandHeightAtWorldPos( Engine.Plugin.TargetHandle target, float x, float y )
             {
-                return HeightAtWorldPos( target, x, y );
+                //DebugLog.OpenIndentLevel( string.Format( "[in] = ({0},{1})", x, y ) );
+
+                var result = HeightAtWorldPos( target, x, y );
+                
+                //DebugLog.CloseIndentLevel( "result", result.ToString() );
+                return result;
             }
 
             // Read the water height from the CELL record (or the WRLD default)
@@ -210,28 +215,66 @@ namespace GodObject
 
                 #region Short-hand
                 
-                const float htw = Engine.Constant.HeightMap_To_Worldmap;
-                const float wth = Engine.Constant.WorldMap_To_Heightmap;
+                const float htw    = Engine.Constant.HeightMap_To_Worldmap;
+                const float wth    = Engine.Constant.WorldMap_To_Heightmap;
+                const int   hmSize = Engine.Plugin.Forms.Fields.Landscape.Heightmap.HeightmapSize - 1;
 
                 #endregion
 
                 // Get the heightmap for the grid that world pos x,y falls into
                 var grid = Engine.SpaceConversions.WorldspaceToCellGrid( x, y );
-                var heightmap = HeightMapForWorldspaceGrid( target, grid );
 
-                // Subtract the bottom-left corner of the CELL from the input world pos
-                var cellBase = Engine.SpaceConversions.CellGridToWorldspace( grid );
-                var xToCell = x - cellBase.X;
-                var yToCell = y - cellBase.Y;
+                Vector2f cellBase = Vector2f.Zero;
+                float xToCell = 0.0f;
+                float yToCell = 0.0f;
+                int x0 = 0;
+                int y0 = 0;
+                bool regrid = true;
+                while( regrid )
+                {
+                    regrid = false;
 
-                #region Get points on the height map
+                    // Subtract the bottom-left corner of the CELL from the input world pos
+                    cellBase = Engine.SpaceConversions.CellGridToWorldspace( grid );
+                    xToCell = x - cellBase.X;
+                    yToCell = y - cellBase.Y;
 
-                // Get the four verts for the quad the point is in.
-                var x0 = (int)( xToCell * wth );
-                var y0 = (int)( yToCell * wth );
+                    // Get the four verts for the quad the point is in.
+                    x0 = (int)( xToCell * wth );
+                    if( x0 == hmSize )
+                    {
+                        grid.X++;
+                        regrid = true;
+                        //DebugLog.WriteLine( "regrid on x0" );
+                    }
+                    y0 = (int)( yToCell * wth );
+                    if( y0 == hmSize )
+                    {
+                        grid.Y++;
+                        regrid = true;
+                        //DebugLog.WriteLine( "regrid on y0" );
+                    }
+                }
                 var x1 = x0 + 1;
                 var y1 = y0 + 1;
 
+                #region Get points on the height map
+
+                /*
+                DebugLog.WriteStrings( null, new [] {
+                    "grid = " + grid.ToString(),
+                    "cellBase = " + cellBase.ToString(),
+                    "xToCell = " + xToCell,
+                    "yToCell = " + yToCell,
+                    "x0 = " + x0,
+                    "x1 = " + x1,
+                    "y0 = " + y0,
+                    "y1 = " + y1,
+                    "hmSize = " + hmSize
+                }, false, true, false, false, false );
+                */
+
+                var heightmap = HeightMapForWorldspaceGrid( target, grid );
                 var z00 = heightmap[ x0, y0 ];
                 var z10 = heightmap[ x1, y0 ];
                 var z01 = heightmap[ x0, y1 ];
@@ -286,7 +329,8 @@ namespace GodObject
 
             public bool ComputeZHeightsFromVolumes( Engine.Plugin.TargetHandle target, Vector2f[][] volumes, out float minZ, out float maxZ, out float averageZ, out float averageWaterZ, bool useWaterIfHigher = true, bool showScanlineProgress = false )
             {
-                //DebugLog.OpenIndentLevel( new [] { "GodObject.WorldspaceDataPool.PoolEntry", "ComputeZHeightsFromVolumes()" } );
+                //DebugLog.OpenIndentLevel();
+
                 var m = GodObject.Windows.GetWindow<GUIBuilder.Windows.Main>();
                 if( showScanlineProgress )
                     m.PushItemOfItems();
@@ -313,24 +357,35 @@ namespace GodObject
                 var wsMin = Vector2f.Min( volumes );
                 var wsMax = Vector2f.Max( volumes );
                 var gridWSSize = Engine.Constant.WorldMap_Resolution;
-                var minGrid = Engine.SpaceConversions.WorldspaceToCellGrid( wsMin );
-                var maxGrid = Engine.SpaceConversions.WorldspaceToCellGrid( wsMax.X + gridWSSize, wsMax.Y - gridWSSize );
-                var max = minGrid.Y - maxGrid.Y;
+                var hmToWorld = Engine.Constant.HeightMap_To_Worldmap;
+                var minBounds = Engine.SpaceConversions.WorldspaceToHeightmap( wsMin );
+                var maxBounds = Engine.SpaceConversions.WorldspaceToHeightmap( wsMax.X + gridWSSize, wsMax.Y - gridWSSize );
+                var max = maxBounds.Y - minBounds.Y;
 
-                for( int hy = maxGrid.Y; hy <= minGrid.Y; hy++ )
+                /*
+                DebugLog.WriteStrings( null, new [] {
+                    "minBounds = " + minBounds.ToString(),
+                    "maxBounds = " + maxBounds.ToString(),
+                }, false, true, false, false, false );
+                */
+
+                for( int hy = minBounds.Y; hy <= maxBounds.Y; hy++ )
                 {
                     
                     if( showScanlineProgress )
-                        m.SetItemOfItems( hy - maxGrid.Y, max );
+                        m.SetItemOfItems( hy - minBounds.Y, max );
                     
-                    for( int hx = minGrid.X; hx <= maxGrid.X; hx++ )
+                    for( int hx = minBounds.X; hx <= maxBounds.X; hx++ )
                     {
-                        var hmWP = new Vector2f( hx * gridWSSize, hy * gridWSSize );
+                        var hmX = hx * hmToWorld;
+                        var hmY = hy * hmToWorld;
+                        var hmWP = new Vector2f( hmX, hmY );
+                        //DebugLog.WriteLine( "hmWP = " + hmWP.ToString() );
                         var hitIndex = Maths.Geometry.Collision.PointInPolys( hmWP, volumes );
                         if( hitIndex < 0 ) continue;
                         
-                        var lh = LandHeightAtWorldPos( target, hx, hy );
-                        var wh = WaterHeightAtWorldPos( target, hx, hy );
+                        var lh = LandHeightAtWorldPos( target, hmX, hmY );
+                        var wh = WaterHeightAtWorldPos( target, hmX, hmY );
                         if( wh > float.MinValue )
                         {
                             totalWaterZ += (double)wh;
@@ -362,10 +417,11 @@ namespace GodObject
                 
                 
             localAbort:
-                var tEnd = m.SyncTimerElapsed().Ticks - tStart.Ticks;
+                var tEnd = m.StopSyncTimer( tStart );
                 if( showScanlineProgress )
                     m.PopItemOfItems();
                 
+                //DebugLog.CloseIndentLevel();
                 return result;
             }
 

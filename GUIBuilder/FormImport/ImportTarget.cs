@@ -58,21 +58,37 @@ namespace GUIBuilder.FormImport
             }
         }
 
+        protected ImportTarget                          RemoteTarget = null;
+
+        bool                                            _SupressLookupByEditorID;
+
         IXHandle                                        _Value = null;
         public IXHandle                                 Value
         {
-            get { return _Value; }
+            get
+            {
+                return RemoteTarget != null
+                    ? RemoteTarget.Value
+                    : _Value;
+            }
             set
             {
-                _Value = value;
-                SyncImportReferenceInfoWithResolvedTarget();
+                if( RemoteTarget != null )
+                    RemoteTarget.Value = value;
+                else
+                {
+                    _Value = value;
+                    SyncImportReferenceInfoWithResolvedTarget();
+                }
             }
         }
         public bool                                     IsResolved
         {
             get
             {
-                return _Value != null;
+                return RemoteTarget != null
+                    ? RemoteTarget.IsResolved
+                    : _Value != null;
             }
         }
 
@@ -91,7 +107,9 @@ namespace GUIBuilder.FormImport
         {
             get
             {
-                return _Type;
+                return RemoteTarget != null
+                    ? RemoteTarget.Type
+                    : _Type;
             }
         }
 
@@ -100,7 +118,9 @@ namespace GUIBuilder.FormImport
         {
             get
             {
-                return _Association;
+                return RemoteTarget != null
+                    ? RemoteTarget.Association
+                    : _Association;
             }
         }
 
@@ -109,7 +129,9 @@ namespace GUIBuilder.FormImport
         {
             get
             {
-                return _FormID;
+                return RemoteTarget != null
+                    ? RemoteTarget.FormID
+                    : _FormID;
             }
         }
 
@@ -118,28 +140,37 @@ namespace GUIBuilder.FormImport
         {
             get
             {
-                return _EditorID;
+                return RemoteTarget != null
+                    ? RemoteTarget.EditorID
+                    : _EditorID;
             }
         }
         internal void                                   SetEditorID( string value )
         {
-            _EditorID = value;
+            if( RemoteTarget != null )
+                RemoteTarget.SetEditorID( value );
+            else
+                _EditorID = value;
         }
         
         public uint                                     CurrentFormID( TargetHandle target )
         {
             return
-                _Value == null
-                ? _FormID
-                : _Value.GetFormID( target );
+                RemoteTarget != null
+                ? RemoteTarget.CurrentFormID( target )
+                : _Value != null
+                ? _Value.GetFormID( target )
+                : _FormID;
         }
         
         public string                                   CurrentEditorID( TargetHandle target )
         {
             return
-                _Value == null
-                ? _EditorID
-                : _Value.GetEditorID( target );
+                RemoteTarget != null
+                ? RemoteTarget.CurrentEditorID( target )
+                : _Value != null
+                ? _Value.GetEditorID( target )
+                : _EditorID;
         }
 
         #region Constructors
@@ -148,11 +179,12 @@ namespace GUIBuilder.FormImport
             ImportBase parent,
             string displayName,
             Type type,
-            string editorID )
+            string editorID,
+            bool supressLookupByEditorID = false )
         {
             if( string.IsNullOrEmpty( editorID ) )
                 throw new NullReferenceException( "'editorID' cannot be null" );
-            INTERNAL_Constructor( parent, displayName, type, editorID, null );
+            INTERNAL_Constructor( parent, displayName, type, editorID, null, supressLookupByEditorID, null );
         }
 
         public                                          ImportTarget(
@@ -160,11 +192,22 @@ namespace GUIBuilder.FormImport
             string displayName,
             Type type,
             IXHandle target,
-            string editorID = null )
+            string editorID = null,
+            bool supressLookupByEditorID = false )
         {
             if( ( string.IsNullOrEmpty( editorID ) )&&( target == null ) )
                 throw new NullReferenceException( "'target' cannot be null" );
-            INTERNAL_Constructor( parent, displayName, type, editorID ?? target.GetEditorID( TargetHandle.WorkingOrLastFullRequired ), target );
+            INTERNAL_Constructor( parent, displayName, type, editorID ?? target.GetEditorID( TargetHandle.WorkingOrLastFullRequired ), target, supressLookupByEditorID, null );
+        }
+
+        public                                          ImportTarget(
+            ImportBase parent,
+            string displayName,
+            ImportTarget remoteTarget )
+        {
+            if( remoteTarget == null )
+                throw new NullReferenceException( "'remoteTarget' cannot be null" );
+            INTERNAL_Constructor( parent, displayName, null, null, null, true, remoteTarget );
         }
 
         private void                                    INTERNAL_Constructor(
@@ -172,28 +215,39 @@ namespace GUIBuilder.FormImport
             string displayName,
             Type type,
             string editorID,
-            IXHandle target )
+            IXHandle target,
+            bool supressLookupByEditorID,
+            ImportTarget remoteTarget )
         {
-            if( type == null )
-                throw new NullReferenceException( "'type' cannot be null" );
-            if( !type.HasInterface<IXHandle>() )
-                throw new NullReferenceException( "'type' must implement Engine.Plugin.Interface.IXHandle" );
-            
-            _Parent         = parent;
-            _DisplayName    = displayName;
-            _FormID         = target == null
-                            ? Engine.Plugin.Constant.FormID_Invalid
-                            : target.GetFormID( TargetHandle.Master );
-            _EditorID       = editorID;
-            _Value          = target;
-            _Type           = type;
-            _Association    = Reflection.AssociationFrom( _Type );
+            _Parent                         = parent;
+            _DisplayName                    = displayName;
+            RemoteTarget                    = remoteTarget;
+
+            if( RemoteTarget == null )
+            {
+                if( type == null )
+                    throw new NullReferenceException( "'type' cannot be null" );
+                if( !type.HasInterface<IXHandle>() )
+                    throw new NullReferenceException( "'type' must implement Engine.Plugin.Interface.IXHandle" );
+                
+                _SupressLookupByEditorID    = supressLookupByEditorID;
+                _FormID                     = target != null
+                                            ? target.GetFormID( TargetHandle.Master )
+                                            : Engine.Plugin.Constant.FormID_Invalid;
+                _EditorID                   = editorID;
+                _Value                      = target;
+                _Type                       = type;
+                _Association                = Reflection.AssociationFrom( _Type );
+            }
         }
 
         #endregion
 
         public bool                                     Matches<T>( T other, bool allowClearing ) where T : class, IXHandle
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.Matches<T>( other, allowClearing );
+            
             if(
                 ( !allowClearing )&&
                 (
@@ -220,6 +274,9 @@ namespace GUIBuilder.FormImport
         
         public bool                                     Matches( uint otherFormID, bool allowClearing )
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.Matches( otherFormID, allowClearing );
+
             return (
                 (
                     ( allowClearing )||
@@ -236,6 +293,9 @@ namespace GUIBuilder.FormImport
         
         public bool                                     Matches( string otherEditorID )
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.Matches( otherEditorID );
+
             return (
                 ( Engine.Plugin.Constant.ValidEditorID( EditorID      ) )&&
                 ( Engine.Plugin.Constant.ValidEditorID( otherEditorID ) )&&
@@ -245,6 +305,9 @@ namespace GUIBuilder.FormImport
         
         public bool                                     Resolveable()
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.Resolveable();
+
             return
                 ( _Value != null )||
                 (
@@ -258,6 +321,9 @@ namespace GUIBuilder.FormImport
         
         public virtual bool                             Resolve( bool errorIfUnresolveable = true )
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.Resolve( errorIfUnresolveable );
+
             if( _Value == null )
             {
                 var vFID = _FormID  .ValidFormID  ();
@@ -270,7 +336,7 @@ namespace GUIBuilder.FormImport
                     if( vFID )
                         Value = GodObject.Plugin.Data.Root.Find( _Association, _FormID  , true );
 
-                    else if( vEID )
+                    else if( ( vEID )&&( !_SupressLookupByEditorID ) )
                         Value = GodObject.Plugin.Data.Root.Find( _Association, _EditorID, true );
                 }
                 #endregion
@@ -281,7 +347,7 @@ namespace GUIBuilder.FormImport
                 {
                     if( vFID )
                         Value = GodObject.Plugin.Data.GetScriptByFormID( _FormID );
-                    else if( vEID )
+                    else if( ( vEID )&&( !_SupressLookupByEditorID ) )
                         Value = GodObject.Plugin.Data.GetScriptByEditorID( _EditorID );
                 }
                 #endregion
@@ -294,6 +360,9 @@ namespace GUIBuilder.FormImport
 
         public virtual bool                             CreateNewFormInWorkingFile()
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.CreateNewFormInWorkingFile();
+
             try
             {
                 var container = GodObject.Plugin.Data.Root.GetCollection( Association, true, false, false );
@@ -327,6 +396,9 @@ namespace GUIBuilder.FormImport
 
         public virtual bool                             CopyToWorkingFile()
         {
+            if( RemoteTarget != null )
+                return RemoteTarget.CopyToWorkingFile();
+
             if( _Value == null )
             {
                 Parent.AddErrorMessage( ErrorTypes.Import, string.Format( "{0} is unresolved", DisplayName ) );
@@ -359,7 +431,9 @@ namespace GUIBuilder.FormImport
 
         protected void                                  SyncImportReferenceInfoWithResolvedTarget()
         {
-            if( _Value != null )
+            if( RemoteTarget != null )
+                RemoteTarget.SyncImportReferenceInfoWithResolvedTarget();
+            else if( _Value != null )
             {
                 _FormID = Value.GetFormID( Engine.Plugin.TargetHandle.Master );
                 _EditorID = Value.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );

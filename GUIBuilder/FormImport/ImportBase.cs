@@ -91,7 +91,8 @@ namespace GUIBuilder.FormImport
             Type type,
             IXHandle target,
             string editorID,
-            Cell cell )
+            Cell cell,
+            bool supressLookupByEditorID )
         {
             bool resolved = false;
             try
@@ -109,8 +110,8 @@ namespace GUIBuilder.FormImport
                 _InjectPriority             = priority;
                 _FailOnApplyIfUnresolved    = failOnApplyIfUnresolved;
                 _Target                     = type == typeof( ObjectReference )
-                                            ? new ObjectReferenceTarget( this, "TargetU".Translate(), target as ObjectReference, cell )
-                                            : new ImportTarget( this, "TargetU".Translate(), type, target, editorID );
+                                            ? new ObjectReferenceTarget( this, "TargetU".Translate(), target as ObjectReference, editorID, cell, supressLookupByEditorID )
+                                            : new ImportTarget( this, "TargetU".Translate(), type, target, editorID, supressLookupByEditorID );
                 resolved                    = _Target.Resolve( failOnApplyIfUnresolved );
 
                 if( ( failOnApplyIfUnresolved ) & ( !resolved ) )
@@ -136,9 +137,10 @@ namespace GUIBuilder.FormImport
             bool failOnApplyIfUnresolved,
             Type type,
             IXHandle target,
-            string editorID )
+            string editorID,
+            bool supressLookupByEditorID = false )
         {
-            INTERNAL_Constructor( signature, priority, failOnApplyIfUnresolved, type, target, editorID, null );
+            INTERNAL_Constructor( signature, priority, failOnApplyIfUnresolved, type, target, editorID, null, supressLookupByEditorID );
         }
 
         public                                          ImportBase(
@@ -147,9 +149,10 @@ namespace GUIBuilder.FormImport
             bool failOnApplyIfUnresolved,
             ObjectReference target,
             string editorID,
-            Cell cell )
+            Cell cell,
+            bool supressLookupByEditorID = false  )
         {
-            INTERNAL_Constructor( signature, priority, failOnApplyIfUnresolved, typeof( ObjectReference ), target, editorID, cell );
+            INTERNAL_Constructor( signature, priority, failOnApplyIfUnresolved, typeof( ObjectReference ), target, editorID, cell, supressLookupByEditorID );
         }
 
         #endregion

@@ -43,6 +43,26 @@ namespace GUIBuilder.FormImport.Operations
                 OnLinkedRefChanged += onLinkedRefChanged;
         }
 
+        public                                          SetReferenceLinkedRef( ImportBase parent, string refEditorID, Keyword keyword, bool invertLinkDirection = false, LinkedRefChangedEvent onLinkedRefChanged = null, bool supressLookupByEditorID = false )
+        : base( parent )
+        {
+            _Reference  = new ImportTarget( parent, DN_LR_Reference.Translate(), typeof( ObjectReference ), refEditorID, supressLookupByEditorID );
+            _Keyword    = new ImportTarget( parent, DN_LR_Keyword  .Translate(), typeof( Keyword         ), keyword   );
+            _InvertLinkDirection = invertLinkDirection;
+            if( onLinkedRefChanged != null )
+                OnLinkedRefChanged += onLinkedRefChanged;
+        }
+
+        public                                          SetReferenceLinkedRef( ImportBase parent, ImportTarget reference, Keyword keyword, bool invertLinkDirection = false, LinkedRefChangedEvent onLinkedRefChanged = null )
+        : base( parent )
+        {
+            _Reference  = new ImportTarget( parent, DN_LR_Reference.Translate(),                            reference );
+            _Keyword    = new ImportTarget( parent, DN_LR_Keyword  .Translate(), typeof( Keyword         ), keyword   );
+            _InvertLinkDirection = invertLinkDirection;
+            if( onLinkedRefChanged != null )
+                OnLinkedRefChanged += onLinkedRefChanged;
+        }
+
         public override bool                            Apply()
         {
             var refr = Target.Value as ObjectReference;

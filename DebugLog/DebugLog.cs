@@ -432,12 +432,15 @@ public static class DebugLog
 
     #region Single Line Write
 
-    public static void WriteCaller( bool includeParams = false, string[] reportParams = null )
+    public static void WriteCaller( bool includeParams = false, string[] reportParams = null, bool stackDump = false )
     {
         if( _logClosed ) return;
         if( ( !_logInitialized )&&( !Open() ) ) return;
 
         _WriteLine( GenString.GetCallerId( 1, reportParams, includeParams, false, true ) );
+        if( stackDump )
+            _WriteLine( System.Environment.StackTrace );
+
         _logStream.Flush();
     }
 

@@ -163,6 +163,7 @@
     <Compile Include="GUIBuilder\FormImport\Operations\SetReferenceLocationReference.cs" />
     <Compile Include="GUIBuilder\FormImport\Operations\SetStaticObjectBounds.cs" />
     <Compile Include="GUIBuilder\FormImport\Operations\SetStaticObjectModels.cs" />
+    <Compile Include="GUIBuilder\Interface\WorkshopController.cs" />
     <Compile Include="GUIBuilder\VolumeBatch.cs" />
     <Compile Include="GUIBuilder\Windows\CustomForms.cs">
       <SubType>Form</SubType>
