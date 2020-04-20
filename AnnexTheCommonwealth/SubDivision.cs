@@ -863,9 +863,9 @@ namespace AnnexTheCommonwealth
             SendObjectDataChangedEvent( this );
             
         localReturnResult:
-            var elapsed = m.StopSyncTimer( tStart, this.GetEditorID( TargetHandle.WorkingOrLastFullRequired ) );
+            m.StopSyncTimer( tStart, this.GetEditorID( TargetHandle.WorkingOrLastFullRequired ) );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel( elapsed );
+            DebugLog.CloseIndentLevel();
         }
         
         public List<GUIBuilder.FormImport.ImportBase>       CreateBorderNIFs(
@@ -873,11 +873,8 @@ namespace AnnexTheCommonwealth
             float groundOffset,
             float groundSink,
             string targetPath,
-            string targetSuffix,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string fileSuffix,
             bool createImportData,
             bool highPrecisionVertexes )
         {
@@ -908,16 +905,22 @@ namespace AnnexTheCommonwealth
             {
                 var subList = enabler.CreateBorderNIFs(
                     gradientHeight, groundOffset, groundSink,
-                    targetPath, targetSuffix,
-                    meshSuffix, meshSubPath,
-                    filePrefix, fileSuffix,
+                    targetPath,
+                    targetSubPath,
+                    meshSubPath,
                     volumeCeiling,
                     createImportData,
                     highPrecisionVertexes );
-                //if( ( createImportData )&&( !subList.NullOrEmpty() ) )
-                //    GUIBuilder.FormImport.ImportBase.AddToList( ref list, subList );
+                if( ( createImportData )&&( !subList.NullOrEmpty() ) )
+                {
+                    if( list == null )
+                        list = subList;
+                    else
+                        list.AddAll( subList );
+                }
             }
             
+            //DebugLog.WriteList( "list", list, true, true );
             return list;
         }
         

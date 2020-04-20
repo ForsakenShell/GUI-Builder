@@ -578,35 +578,6 @@ namespace Engine.Plugin
                 return null;
             }
             
-            // Now make sure my ancestors are updated
-            /* Shouldn't need to actually do this since the tree won't change when creating an override
-            var a = Ancestor;
-            while( ( a != null )&&( ( a as File ) == null ) )
-            {
-                if( !a.IsInWorkingFile() )
-                {
-                    var h = workingFile.MasterHandle.GetRecord( GetFormID( Engine.Plugin.TargetHandle.Master ), false );
-                    if( !a.AddNewHandle( h ) )
-                    {
-                        DebugLog.WriteLine( new [] { this.FullTypeName(), "CopyAsOverride", "Unable to add new handle for override to Form to ancestor...why are we doing this?" } );
-                        return null;
-                    }
-                }
-                a = a.Ancestor;
-                // *
-                DebugLog.Write( string.Format(
-                    "\n{0} :: CopyAsOverride() :: 0x{1} - \"{2}\" :: Ancestor.IsInWorkingFile() :: 0x{3} - \"{4}\"",
-                    this.FullTypeName(),
-                    this.FormID.ToString( "X8" ),
-                    this.EditorID.ToString(),
-                    Ancestor.FormID.ToString( "X8" ),
-                    Ancestor.EditorID ) );
-                // * /
-                //var aiiwf = Ancestor.IsInWorkingFile( true );
-                //if( !aiiwf )
-                //    return false;
-            }
-            */
             // Now make sure any attached scripts are updated
             if( !_Scripts.NullOrEmpty() )
             {

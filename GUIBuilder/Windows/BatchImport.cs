@@ -28,6 +28,7 @@ namespace GUIBuilder.Windows
 
             this.ClientLoad += new System.EventHandler( this.OnClientLoad );
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.OnClientClosing );
+            this.OnSetEnableState   += new SetEnableStateHandler( this.OnClientSetEnableState );
 
             this.lvImportForms.OnSetSyncObjectsThreadComplete += OnSyncImportThreadComplete;
 
@@ -98,6 +99,18 @@ namespace GUIBuilder.Windows
                 GodObject.Windows.SetEnableState( sender, true );
         }
         
+        /// <summary>
+        /// Handle window specific global enable/disable events.
+        /// </summary>
+        /// <param name="enable">Enable state to set</param>
+        bool                                    OnClientSetEnableState( object sender, bool enable )
+        {
+            var enabled =
+                enable &&
+                !lvImportForms.IsSyncObjectsThreadRunning;
+            return enabled;
+        }
+
         
         void OnCloseButtonClick( object sender, EventArgs e )
         {
@@ -175,7 +188,7 @@ namespace GUIBuilder.Windows
             if( string.IsNullOrEmpty( message ) ) return;
             if( this.InvokeRequired )
             {
-                this.Invoke( (Action)delegate() { AddImportMessage( message ); }, null );
+                this.BeginInvoke( (Action)delegate() { AddImportMessage( message ); }, null );
                 return;
             }
             var lines = message.Split( '\n' );

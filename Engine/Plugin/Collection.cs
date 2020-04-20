@@ -1116,10 +1116,9 @@ namespace Engine.Plugin
             result = true;
 
         localReturnResult:
-            long elapsed = -1;
             if( updateUI )
             {
-                elapsed = m.StopSyncTimer( tStart );
+                m.StopSyncTimer( tStart );
                 m.PopItemOfItems();
             }
             //DebugLog.CloseIndentLevel( "result", result.ToString() );
@@ -1178,10 +1177,9 @@ namespace Engine.Plugin
             _FullLoadComplete = true;
 
         localReturnResult:
-            long elapsed = -1;
             if( updateUI )
             {
-                elapsed = m.StopSyncTimer( tStart );
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
             }
             //DebugLog.CloseIndentLevel( _FullLoadComplete.ToString() );
@@ -1258,10 +1256,9 @@ namespace Engine.Plugin
             
             _FullPostLoadComplete = true;
         LocalAbort:
-            long elapsed = -1;
             if( updateUI )
             {
-                elapsed = m.StopSyncTimer( tStart );
+                m.StopSyncTimer( tStart );
                 m.PopItemOfItems();
                 m.PopStatusMessage();
             }

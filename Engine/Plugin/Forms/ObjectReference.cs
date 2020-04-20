@@ -125,18 +125,48 @@ namespace Engine.Plugin.Forms
             
             // Changing position and some record flags will trigger XeLib to update the cell container,
             // We need to match those changes in GUIBuilder too
-            if( !IsInWorkingFile() ) goto localAbort;
+            if( !IsInWorkingFile() )
+            {
+                DebugLog.WriteLine( "Not in the working file?  wut?" );
+                goto localAbort;
+            }
             
             var oH = WorkingFileHandle as XeLib.FormHandle;
-            if( !oH.IsValid() ) goto localAbort;
+            if( !oH.IsValid() )
+            {
+                DebugLog.WriteLine( "WorkingFileHandle is invalid?  wut?" );
+                goto localAbort;
+            }
             
+            {
+                DebugLog.OpenIndentLevel( "DEBUG CRAP TO FIND WHY THE RECORDFLAGS/CELL ISN'T CHANGING", false );
+                
+                DebugLog.OpenIndentLevel( "WorkingFileHandle.DumpContainerTree()", false );
+                oH.DumpContainerTree();
+                DebugLog.CloseIndentLevel();
+                
+                var foo = oH.FindParentBySignature<ElementHandle>( "CELL" );
+                DebugLog.WriteStrings( null, new [] {
+                    "WorkingFileHandle.FindParentBySignature<ElementHandle>( \"CELL\" )",
+                    foo.ToStringNullSafe()
+                    }, false, true, false, false, false );
+                if( foo.IsValid() )
+                    foo.Dispose();
+                
+                DebugLog.CloseIndentLevel();
+            }
+
             var newCell = oH.IsPersistentRecord
                 ? Worldspace.Cells.Persistent
                 : Worldspace.Cells.GetByGrid( GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ).WorldspaceToCellGrid() );
             var fileCellFormID = oH.GetCellFormID();
             var fileCell = Worldspace.Cells.Find( fileCellFormID ) as Engine.Plugin.Forms.Cell;
             var oldCell = Cell;
-            if( ( newCell == oldCell )&&( fileCell == oldCell ) ) goto localAbort;
+            if( ( newCell == oldCell )&&( fileCell == oldCell ) )
+            {
+                DebugLog.WriteLine( "CELL didn't change, nothing to worry aboot" );
+                goto localAbort;
+            }
             
             if( !UpdateContainerCellHandle( newCell ) )
             {
@@ -152,8 +182,8 @@ namespace Engine.Plugin.Forms
             //DebugLog.WriteLine( string.Format( "sendObjectDataChangedEvent = {0}", sendObjectDataChangedEvent.ToString() ) );
             //if( sendObjectDataChangedEvent )
             //{
-                oldCell.SendObjectDataChangedEvent( null );
-                newCell.SendObjectDataChangedEvent( null );
+                oldCell.SendObjectDataChangedEvent( this );
+                newCell.SendObjectDataChangedEvent( this );
                 //this.SendObjectDataChangedEvent( null );
             //}
             

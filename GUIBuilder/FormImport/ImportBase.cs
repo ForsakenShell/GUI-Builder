@@ -416,7 +416,7 @@ namespace GUIBuilder.FormImport
             if( _Target.Value == null )
             {
                 var message = "Target.CreateNewFormInWorkingFile"; // TODO:  Add translation
-                DebugLog.WriteLine( message );
+                //DebugLog.WriteLine( message );
                 importWindow.AddImportMessage( message );
                 if( !_Target.CreateNewFormInWorkingFile() )
                     goto localAbort;
@@ -424,7 +424,7 @@ namespace GUIBuilder.FormImport
             else
             {
                 var message = "Target.CopyToWorkingFile"; // TODO:  Add translation
-                DebugLog.WriteLine( message );
+                //DebugLog.WriteLine( message );
                 importWindow.AddImportMessage( message );
                 if( !_Target.CopyToWorkingFile() )
                     goto localAbort;
@@ -517,48 +517,6 @@ namespace GUIBuilder.FormImport
         }
 
         #region Import List Management
-        
-        public static void                              AddToList( ref List<ImportBase> list, ImportBase i )
-        {
-            if( i == null ) return;
-            if( list == null ) list = new List<ImportBase>();
-            if( !list.NullOrEmpty() )
-            {
-                var iFID = i.GetFormID( TargetHandle.Master );
-                var iFIDValid = iFID.ValidFormID();
-                foreach( var li in list )
-                {
-                    if( li.Signature.InsensitiveInvariantMatch( i.Signature ) )
-                    {
-                        var liFID = li.GetFormID( TargetHandle.Master );
-                        if( ( !iFIDValid )||( !liFID.ValidFormID() ) )
-                        {
-                            if( li.GetEditorID( TargetHandle.WorkingOrLastFullRequired ).InsensitiveInvariantMatch( i.GetEditorID( TargetHandle.WorkingOrLastFullRequired ) ) )
-                            {
-                                //DebugLog.Write( string.Format( "\nReject :: \"{0}\" :: \"{1}\"", li.EditorID, i.EditorID ) );
-                                return;
-                            }
-                        }
-                        else if( iFID == liFID )
-                        {
-                            //DebugLog.Write( string.Format( "\nReject :: 0x{0} :: 0x{1}", li.FormID.ToString( "X8" ), i.FormID.ToString( "X8" ) ) );
-                            return;
-                        }
-                    }
-                }
-            }
-            DebugLog.OpenIndentLevel();
-            i.DumpImport();
-            DebugLog.CloseIndentLevel();
-            list.Add( i );
-        }
-        
-        public static void                              AddToList( ref List<ImportBase> list, List<ImportBase> otherList )
-        {
-            if( otherList.NullOrEmpty() ) return;
-            foreach( var oli in otherList )
-                AddToList( ref list, oli );
-        }
         
         public static bool                              AllImportsMatchState( List<ImportBase> list, ImportStates state )
         {

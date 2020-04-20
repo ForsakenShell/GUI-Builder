@@ -10,19 +10,72 @@ using System.Linq;
 
 using Maths;
 using AnnexTheCommonwealth;
+
 using Engine;
+using Engine.Plugin;
+using Engine.Plugin.Forms;
+
+using EditorIDFormatter = GUIBuilder.CustomForms.EditorIDFormats;
+
 
 namespace GUIBuilder
 {
     
     public class BorderNodeGroup
     {
+        const string                Meshes = @"Meshes\";
+        
         public int                  BorderIndex;
         public int                  NIFIndex;
         public Vector2i             Cell;
         public Vector3f             Placement;
         
-        public string               NIFFilePath;
+        string                      _ModPrefix;
+        string                      _Name;
+        string                      _Neighbour;
+
+        string                      _TargetSubPath;
+        string                      _MeshSubPath;
+        string                      _STATEditorIDFormat;
+
+        string                      _ForcedEditorID;
+
+        public string               EditorID
+        {
+            get
+            {
+                if( !string.IsNullOrEmpty( _ForcedEditorID ) )
+                    return _ForcedEditorID;
+                return EditorIDFormatter.FormatEditorID(
+                    _STATEditorIDFormat,
+                    _ModPrefix,
+                    "STAT",
+                    _Name,
+                    BorderIndex,
+                    _Neighbour,
+                    NIFIndex
+                    );
+            }
+        }
+
+
+        string                      _ForcedNIFFilePath;
+
+        public string               NIFFilePath( bool includeTargetSubPath )
+        {
+            if( !string.IsNullOrEmpty( _ForcedNIFFilePath ) )
+                return _ForcedNIFFilePath;
+            return BuildNIFFilePath(
+                includeTargetSubPath ? _TargetSubPath : null,
+                _MeshSubPath,
+                _STATEditorIDFormat,
+                _ModPrefix,
+                _Name     , BorderIndex,
+                _Neighbour, NIFIndex
+                );
+        }
+
+        //public string               NIFFilePath;
         
         public Vector3i             MinBounds{ get{ return BorderNode.MinBounds( Nodes ); } }
         public Vector3i             MaxBounds{ get{ return BorderNode.MaxBounds( Nodes ); } }
@@ -34,40 +87,36 @@ namespace GUIBuilder
         public BorderNodeGroup(
             Vector2i cell,
             List<BorderNode> nodes,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string location,
-            string fileSuffix,
-            int borderIndex = -1,
-            string neighbour = "",
+            string statEditorIDFormat,
+            string modPrefix,
+            string name,
+            int index = -1,
+            string neighbour = null,
             int subIndex = -1,
-            string forcedNIFPath = "",
-            string forcedNIFFile = "" )
+            string forcedNIFFilePath = null,
+            string forcedEditorID = null )
         {
-            BorderIndex             = borderIndex;
+            BorderIndex             = index;
             NIFIndex                = subIndex;
             Cell                    = new Vector2i( cell );
             Nodes                   = nodes;
-            
-            if( ( !string.IsNullOrEmpty( forcedNIFPath ) )||( !string.IsNullOrEmpty( forcedNIFFile ) ) )
-            {
-                //targetSuffix
-                if( ( !string.IsNullOrEmpty( forcedNIFPath ) )&&( forcedNIFPath[ forcedNIFPath.Length - 1 ] != '\\' ) )
-                    forcedNIFPath += @"\";
-                NIFFilePath = string.Format( @"{0}{1}", forcedNIFPath, forcedNIFFile );
-            }
-            else
-            {
-                NIFFilePath         = NIFBuilder.Mesh.BuildFilePath(
-                    meshSuffix, meshSubPath,
-                    filePrefix,
-                    location,
-                    fileSuffix,
-                    borderIndex,
-                    neighbour, subIndex );
-            }
-            //DebugLog.Write( string.Format( "GUIBuilder.BorderNodeGroup.cTor() :: {0} :: {1} :: {2}", cell.ToString(), nodes.Count, NIFFilePath ) );
+            _TargetSubPath          = targetSubPath;
+            _MeshSubPath            = meshSubPath;
+            _STATEditorIDFormat     = statEditorIDFormat;
+            _ModPrefix              = modPrefix;
+            _Name                   = name;
+            _Neighbour              = neighbour;
+            _ForcedNIFFilePath      = forcedNIFFilePath;
+            _ForcedEditorID         = forcedEditorID;
+
+            if( ( !string.IsNullOrEmpty( _TargetSubPath ) )&&( !_TargetSubPath.EndsWith( @"\" ) ) )
+                _TargetSubPath += @"\";
+            if( ( !string.IsNullOrEmpty( _MeshSubPath ) )&&( !_MeshSubPath.EndsWith( @"\" ) ) )
+                _MeshSubPath += @"\";
+            if( ( !string.IsNullOrEmpty( _ForcedNIFFilePath ) )&&( !_ForcedNIFFilePath.StartsWith( Meshes, StringComparison.InvariantCultureIgnoreCase ) ) )
+                _ForcedNIFFilePath = Meshes + _ForcedNIFFilePath;
         }
         
         public bool                 HasBottom
@@ -79,16 +128,12 @@ namespace GUIBuilder
             }
         }
 
-        public void CentreAndPlaceNodes()
+        public void                 CentreAndPlaceNodes()
         {
-            //DebugLog.OpenIndentLevel( new [] { this.FullTypeName(), "CentreAndPlaceNodes()" } );
-            //DumpGroupNodes( Nodes, "Pre-process nodes" );
             Placement = BorderNode.Centre( Nodes, true );
             BorderNode.CentreNodes( Nodes, Placement );
             // Cell may be set incorrectly while generating the nodes, recalculate it from the final mesh position
             Cell = Placement.WorldspaceToCellGrid();
-            //DumpGroupNodes( Nodes, "Post-process nodes" );
-            //DebugLog.CloseIndentLevel();
         }
         
         public static BorderNodeGroup FindGroupFromCell( List<BorderNodeGroup> nodeGroups, Vector2i cell )
@@ -108,11 +153,11 @@ namespace GUIBuilder
         
         public static List<BorderNodeGroup> SplitAcrossCells(
             List<BorderNode> clonedNodeList,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string location,
-            string fileSuffix,
+            string statEditorIDFormat,
+            string modPrefix,
+            string name,
             int borderIndex,
             string neighbour,
             int initialSubIndex
@@ -179,9 +224,11 @@ namespace GUIBuilder
                     // Add as a new group
                     var newGroup = new BorderNodeGroup(
                         currentCell, groupNodes,
-                        meshSuffix, meshSubPath,
-                        filePrefix, location,
-                        fileSuffix, borderIndex,
+                        targetSubPath,
+                        meshSubPath,
+                        statEditorIDFormat,
+                        modPrefix,
+                        name, borderIndex,
                         neighbour, nifIndex );
                     nodeGroups.Add( newGroup );
                     nifIndex++;
@@ -221,95 +268,80 @@ namespace GUIBuilder
         
         #region Try to find the best form from keywords in the EditorID
         
-        static void DumpOriginalFormsAndKeys( string callerName, List<Engine.Plugin.Form> originalForms, List<string> keys )
+        static void DumpOriginalFormsAndKeys( List<Form> originalForms, List<string> keys )
         {
-            return;
-            DebugLog.WriteLine( string.Format( "GUIBuilder.BorderNodeGroup :: {0}", callerName ) );
-            if( !originalForms.NullOrEmpty() )
-            {
-                DebugLog.WriteLine( string.Format( "\toriginalForms: {0}", originalForms.Count ) );
-                for( int i = 0; i < originalForms.Count; i++  )
-                {
-                    var form = originalForms[ i ];
-                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] = \"{1}\" - {2}", i, form.Signature, form.IDString ) );
-                }
-            }
-            if( !keys.NullOrEmpty() )
-            {
-                DebugLog.WriteLine( string.Format( "\tkeys: {0}", keys.Count ) );
-                for( int i = 0; i < keys.Count; i++  )
-                {
-                    var key = keys[ i ];
-                    DebugLog.WriteLine( string.Format( "\t\t[ {0} ] = \"{1}\"", i, key ) );
-                }
-            }
+            DebugLog.WriteIDStrings( "originalForms", originalForms, false, true );
+            DebugLog.WriteList( "keys", keys, false, true );
         }
         
-        void DumpBestMatchFound( Engine.Plugin.Form match, int bestMatchIndex, int bestMatchCount )
+        void DumpMatchFound( string matchType, Form match, int index, int score )
         {
-            return;
             DebugLog.WriteLine( string.Format(
-                "\tmatch result:\n\t\tindex = {0}\n\t\tform = \"{1}\" - {2}\n\t\tscore = {3}",
-                bestMatchIndex,
-                ( match == null ? null : match.Signature ),
-                (
-                    match == null
-                    ? "[null]"
-                    : match.IDString
-                ),
-                bestMatchCount ) );
+                "{0}:\n\tindex = {1}\n\tform = {2}\n\tscore = {3}",
+                matchType,
+                index,
+                match.NullSafeIDString(),
+                score ) );
         }
         
         // NIFFile in Mesh and original Form EditorID need to contain all the keys in the set to match
-        public Engine.Plugin.Forms.Static BestStaticFormFromOriginalsFor( List<Engine.Plugin.Form> originalForms, List<string> keys, bool removeFoundItemFromList )
+        public Static BestStaticFormFromOriginalsFor( List<Form> originalForms, List<string> keys, bool removeFoundItemFromList )
         {
-            //DumpOriginalFormsAndKeys( "BestStaticFormFromOriginalsFor()", originalForms, keys );
+            //DebugLog.OpenIndentLevel();
+            //DumpOriginalFormsAndKeys( originalForms, keys );
+
             if( ( originalForms.NullOrEmpty() )||( keys.NullOrEmpty() ) ) return null;
-            var bestMatchIndex = -1;
+            
+            var nifFilePath = NIFFilePath( false );
             var bestMatchCount = -1;
+            Static match = null;
             var ofCount = originalForms.Count;
             for( int i = 0; i < ofCount; i++ )
             {
                 var form = originalForms[ i ];
-                if( form.GetType() != typeof( Engine.Plugin.Forms.Static ) ) continue;
-                var formEDID = form.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                if( form.GetType() != typeof( Static ) ) continue;
+
+                var formEDID = form.GetEditorID( TargetHandle.WorkingOrLastFullRequired );
                 if( string.IsNullOrEmpty( formEDID ) ) continue;
-                var j = Mesh.nifFile.CountCommonMatchesBetweenStrings( formEDID, keys, StringComparison.InvariantCultureIgnoreCase );
+
+                var j = nifFilePath.CountCommonMatchesBetweenStrings( formEDID, keys, StringComparison.InvariantCultureIgnoreCase );
                 if( j > bestMatchCount )
                 {
                     bestMatchCount = j;
-                    bestMatchIndex = i;
+                    match = originalForms[ i ] as Static;
+                    //DumpMatchFound( "found", match, i, j );
                 }
             }
-            var match = bestMatchIndex < 0
-                ? null
-                : originalForms[ bestMatchIndex ] as Engine.Plugin.Forms.Static;
-            //DumpBestMatchFound( match, bestMatchIndex, bestMatchCount );
+            
+            //DumpMatchFound( "best", match, bestMatchIndex, bestMatchCount );
+
             if( ( removeFoundItemFromList )&&( match != null ) )
                 originalForms.Remove( match );
+            //DebugLog.CloseIndentLevel();
             return match;
         }
         
-        public Engine.Plugin.Forms.ObjectReference BestObjectReferenceFromOriginalsFor( List<Engine.Plugin.Form> originalForms, uint originalStaticFormID, bool removeFoundItemFromList )
+        public ObjectReference BestObjectReferenceFromOriginalsFor( List<Form> originalForms, uint originalStaticFormID, bool removeFoundItemFromList )
         {
             //DumpOriginalFormsAndKeys( "BestObjectReferenceFromOriginalsFor()", originalForms, null );
+            
             if( originalForms.NullOrEmpty() ) return null;
-            // disable once InvokeAsExtensionMethod
-            if( !Engine.Plugin.Constant.ValidFormID( originalStaticFormID ) ) return null;
-            var bestMatchIndex = -1;
+            if( !originalStaticFormID.ValidFormID() ) return null;
+
             var ofCount = originalForms.Count;
-            var match = (Engine.Plugin.Forms.ObjectReference)null;
+            var match = (ObjectReference)null;
+
             for( int i = 0; i < ofCount; i++ )
             {
-                var refr = originalForms[ i ] as Engine.Plugin.Forms.ObjectReference;
+                var refr = originalForms[ i ] as ObjectReference;
                 if( refr == null  ) continue;
-                if( originalStaticFormID == refr.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) )
+                if( originalStaticFormID == refr.GetNameFormID( TargetHandle.WorkingOrLastFullRequired ) )
                 {
-                    bestMatchIndex = i;
                     match = refr;
                     break;
                 }
             }
+
             //DumpBestMatchFound( match, bestMatchIndex, 1 );
             if( ( removeFoundItemFromList )&&( match != null ) )
                 originalForms.Remove( match );
@@ -317,6 +349,64 @@ namespace GUIBuilder
         }
         
         #endregion
+
+        public static string        BuildNIFPath(
+            string targetSubPath,
+            string meshSubPath,
+            string modPrefix,
+            string name,
+            int index,
+            string neighbour = null,
+            int subIndex = -1
+        )
+        {
+            if( ( !string.IsNullOrEmpty( targetSubPath ) )&&( !targetSubPath.EndsWith( @"\" ) ) )
+                targetSubPath += @"\";
+
+            return EditorIDFormatter.FormatEditorID(
+                string.Format(
+                    "{0}{1}{2}",
+                    targetSubPath,
+                    Meshes,
+                    meshSubPath
+                ),
+                modPrefix,
+                "STAT",
+                name     , index,
+                neighbour, subIndex
+                );
+        }
+
+        public static string        BuildNIFFilePath(
+            string targetSubPath,
+            string meshSubPath,
+            string statEditorIDFormat,
+            string modPrefix,
+            string name            , int index,
+            string neighbour = null, int subIndex = -1
+        )
+        {
+            var path = BuildNIFPath(
+                targetSubPath,
+                meshSubPath,
+                modPrefix,
+                name     , index,
+                neighbour, subIndex
+                );
+            if( ( !string.IsNullOrEmpty( path ) )&& !path.EndsWith( @"\" ) )
+                path += @"\";
+            return string.Format(
+                "{0}{1}.nif",
+                path,
+                EditorIDFormatter.FormatEditorID(
+                    statEditorIDFormat,
+                    modPrefix,
+                    "STAT",
+                    name, index,
+                    neighbour, subIndex
+                    )
+                );
+        }
         
         public static void DumpGroupNodes( List<BorderNode> nodes, string s )
         {
@@ -608,16 +698,16 @@ namespace GUIBuilder
                 Type.ToString() );
         }
         
-        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<EdgeFlag> flags, float approximateNodeLength, double angleAllowance, double slopeAllowance, Engine.Plugin.Forms.Static forcedZ )
+        public static List<BorderNode> GenerateBorderNodes( Worldspace worldspace, List<EdgeFlag> flags, float approximateNodeLength, double angleAllowance, double slopeAllowance, Static forcedZ )
         {
             if( ( worldspace == null )||( flags.NullOrEmpty() ) )
                 return null;
-            var forcedZFID = forcedZ?.GetFormID( Engine.Plugin.TargetHandle.Master );
+            var forcedZFID = forcedZ?.GetFormID( TargetHandle.Master );
             var refPoints = new List<Vector3f>();
             foreach( var flag in flags )
             {
-                var p = new Vector3f( flag.Reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null )||( forcedZFID != flag.Reference.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                var p = new Vector3f( flag.Reference.GetPosition( TargetHandle.WorkingOrLastFullRequired ) );
+                if( ( forcedZ == null )||( forcedZFID != flag.Reference.GetNameFormID( TargetHandle.WorkingOrLastFullRequired ) ) )
                     p.Z = float.MinValue;
                 
                 refPoints.Add( p );
@@ -625,24 +715,24 @@ namespace GUIBuilder
             return GenerateBorderNodes( worldspace.PoolEntry, refPoints, approximateNodeLength, angleAllowance, slopeAllowance, float.MinValue );
         }
         
-        public static List<BorderNode> GenerateBorderNodes( Engine.Plugin.Forms.Worldspace worldspace, List<Engine.Plugin.Forms.ObjectReference> references, float approximateNodeLength, double angleAllowance, double slopeAllowance, Engine.Plugin.Forms.Static forcedZ, Engine.Plugin.Forms.LocationRef borderWithBottomRef )
+        public static List<BorderNode> GenerateBorderNodes( Worldspace worldspace, List<ObjectReference> references, float approximateNodeLength, double angleAllowance, double slopeAllowance, Static forcedZ, LocationRef borderWithBottomRef )
         {
             if( references.NullOrEmpty() )
                 return null;
             var anyNonForcedZMarkers = false;
-            var statWFZ = forcedZ?.GetFormID( Engine.Plugin.TargetHandle.Master );
+            var statWFZ = forcedZ?.GetFormID( TargetHandle.Master );
             var bottomZ = float.MaxValue;
             var refPoints = new List<Vector3f>();
             foreach( var reference in references )
             {
-                var p = new Vector3f( reference.GetPosition( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
-                if( ( forcedZ == null ) || ( statWFZ != reference.GetNameFormID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) ) )
+                var p = new Vector3f( reference.GetPosition( TargetHandle.WorkingOrLastFullRequired ) );
+                if( ( forcedZ == null ) || ( statWFZ != reference.GetNameFormID( TargetHandle.WorkingOrLastFullRequired ) ) )
                 {
                     p.Z = float.MinValue;
                     anyNonForcedZMarkers = true;
                     bottomZ = float.MinValue;
                 }
-                else if( ( !anyNonForcedZMarkers )&&( borderWithBottomRef != null ) && ( reference.LocationRefTypes.HasLocationRef( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired, borderWithBottomRef ) ) )
+                else if( ( !anyNonForcedZMarkers )&&( borderWithBottomRef != null ) && ( reference.LocationRefTypes.HasLocationRef( TargetHandle.WorkingOrLastFullRequired, borderWithBottomRef ) ) )
                     if( p.Z < bottomZ ) bottomZ = p.Z;
 
                 refPoints.Add( p );
@@ -707,7 +797,7 @@ namespace GUIBuilder
                 //}
             }
             
-            var target = Engine.Plugin.TargetHandle.WorkingOrLastFullRequired;
+            var target     = TargetHandle.WorkingOrLastFullRequired;
             nodeLength     = nodeLength     < BorderNode.MIN_NODE_LENGTH     ? BorderNode.MIN_NODE_LENGTH     : nodeLength;
             angleAllowance = angleAllowance < BorderNode.MIN_ANGLE_ALLOWANCE ? BorderNode.MIN_ANGLE_ALLOWANCE : angleAllowance;
             slopeAllowance = slopeAllowance < BorderNode.MIN_SLOPE_ALLOWANCE ? BorderNode.MIN_SLOPE_ALLOWANCE : slopeAllowance;

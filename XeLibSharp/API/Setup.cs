@@ -155,7 +155,7 @@ namespace XeLib.API
                 fileHandles = filteredHandles;
             }
             
-            //DebugLog.CloseIndentLevel();
+            //DebugLog.CloseIndentArray( "fileHandles", fileHandles, true, true, true, true, true );
             return fileHandles;
         }
         

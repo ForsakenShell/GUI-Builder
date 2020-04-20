@@ -165,11 +165,11 @@
     <Compile Include="GUIBuilder\FormImport\Operations\SetStaticObjectModels.cs" />
     <Compile Include="GUIBuilder\Interface\WorkshopController.cs" />
     <Compile Include="GUIBuilder\VolumeBatch.cs" />
-    <Compile Include="GUIBuilder\Windows\CustomForms.cs">
+    <Compile Include="GUIBuilder\Windows\CustomData.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GUIBuilder\Windows\CustomForms.Designer.cs">
-      <DependentUpon>CustomForms.cs</DependentUpon>
+    <Compile Include="GUIBuilder\Windows\CustomData.Designer.cs">
+      <DependentUpon>CustomData.cs</DependentUpon>
     </Compile>
     <Compile Include="GUIBuilder\Windows\IEnableControlForm.cs" />
     <Compile Include="GUIBuilder\Windows\PluginSelector.cs">
@@ -461,8 +461,8 @@
     <EmbeddedResource Include="GUIBuilder\Windows\Controls\SyncedListView.resx">
       <DependentUpon>SyncedListView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GUIBuilder\Windows\CustomForms.resx">
-      <DependentUpon>CustomForms.cs</DependentUpon>
+    <EmbeddedResource Include="GUIBuilder\Windows\CustomData.resx">
+      <DependentUpon>CustomData.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUIBuilder\Windows\FormEditor\SubDivision.resx">
       <DependentUpon>SubDivision.cs</DependentUpon>

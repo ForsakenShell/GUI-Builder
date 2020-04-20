@@ -108,15 +108,13 @@ namespace Engine.Plugin.Collections
 
                 #region Copy-pasta from XeLib source
 
-                // Because PASCAL/Delphi is an incredibly slow and shitty programming language (seriously, XeLib is
-                // 8MB - 8 fucking megabytes!  What the fuck is that shit???  Where it should be no more than 500KB
-                // TOPs and even that is 250KB too large), anyway I digress.  The authors of XeLib have injected
-                // fake records to sub- divide the CELL records in a worldspace because otherwise it would literally
-                // take hours to look through ~36K records (trust me, it took almost 2 hours on my 4GHz 8-core Amd
-                // FX8350) where as any other language it should and would only take 200-300ms.
+                // Because Worldspaces can contain thousands of Cells, Bethesda have broken them into
+                // groups because otherwise it would literally take hours to look through them all
+                // The Commonwealth has ~36K Cells and it took almost 2 hours on my 4GHz 8-core Amd
+                // FX8350 to load them all.
 
-                // Calculate which bullshit injected block and sub-block record the cell is in and load that entire
-                // bullshit injected sub-block.
+                // Calculate which block and sub-block record the cell is in and load that entire
+                // sub-block.
 
                 var block = coords / BLOCK_SIZE;
                 if( ( coords.X < 0 ) && ( ( coords.X % BLOCK_SIZE ) != 0 ) ) block.X--;

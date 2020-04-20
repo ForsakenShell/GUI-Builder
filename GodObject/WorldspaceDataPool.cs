@@ -417,7 +417,7 @@ namespace GodObject
                 
                 
             localAbort:
-                var tEnd = m.StopSyncTimer( tStart );
+                m.StopSyncTimer( tStart );
                 if( showScanlineProgress )
                     m.PopItemOfItems();
                 

@@ -62,6 +62,9 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.gbSubDivisionFunctions = new System.Windows.Forms.GroupBox();
             this.gbOptimizeSandboxVolumes = new System.Windows.Forms.GroupBox();
+            this.cbOptimizeSandboxVolumesIgnoreExisting = new System.Windows.Forms.CheckBox();
+            this.cbOptimizeSandboxVolumesCreateNew = new System.Windows.Forms.CheckBox();
+            this.cbOptimizeSandboxVolumesScanTerrain = new System.Windows.Forms.CheckBox();
             this.tbOptimizeSandboxVolumesVolumePadding = new System.Windows.Forms.TextBox();
             this.lblOptimizeSandboxVolumesVolumePadding = new System.Windows.Forms.Label();
             this.tbOptimizeSandboxVolumesCylinderTop = new System.Windows.Forms.TextBox();
@@ -81,9 +84,6 @@ namespace GUIBuilder.Windows
             this.btnCheckMissingElements = new System.Windows.Forms.Button();
             this.cbElementSandboxVolumes = new System.Windows.Forms.CheckBox();
             this.cbElementBorderEnablers = new System.Windows.Forms.CheckBox();
-            this.cbOptimizeSandboxVolumesScanTerrain = new System.Windows.Forms.CheckBox();
-            this.cbOptimizeSandboxVolumesCreateNew = new System.Windows.Forms.CheckBox();
-            this.cbOptimizeSandboxVolumesIgnoreExisting = new System.Windows.Forms.CheckBox();
             this.WindowPanel.SuspendLayout();
             this.gbSubDivisionFunctions.SuspendLayout();
             this.gbOptimizeSandboxVolumes.SuspendLayout();
@@ -152,6 +152,42 @@ namespace GUIBuilder.Windows
             this.gbOptimizeSandboxVolumes.Size = new System.Drawing.Size(168, 153);
             this.gbOptimizeSandboxVolumes.TabIndex = 15;
             this.gbOptimizeSandboxVolumes.TabStop = false;
+            // 
+            // cbOptimizeSandboxVolumesIgnoreExisting
+            // 
+            this.cbOptimizeSandboxVolumesIgnoreExisting.Checked = true;
+            this.cbOptimizeSandboxVolumesIgnoreExisting.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbOptimizeSandboxVolumesIgnoreExisting.Location = new System.Drawing.Point(12, 48);
+            this.cbOptimizeSandboxVolumesIgnoreExisting.Name = "cbOptimizeSandboxVolumesIgnoreExisting";
+            this.cbOptimizeSandboxVolumesIgnoreExisting.Size = new System.Drawing.Size(141, 17);
+            this.cbOptimizeSandboxVolumesIgnoreExisting.TabIndex = 23;
+            this.cbOptimizeSandboxVolumesIgnoreExisting.Tag = "BatchWindow.Function.OptimizeSandboxVolumes.IgnoreExisting";
+            this.cbOptimizeSandboxVolumesIgnoreExisting.Text = "Ignore Existing";
+            this.cbOptimizeSandboxVolumesIgnoreExisting.UseVisualStyleBackColor = true;
+            // 
+            // cbOptimizeSandboxVolumesCreateNew
+            // 
+            this.cbOptimizeSandboxVolumesCreateNew.Checked = true;
+            this.cbOptimizeSandboxVolumesCreateNew.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbOptimizeSandboxVolumesCreateNew.Location = new System.Drawing.Point(12, 29);
+            this.cbOptimizeSandboxVolumesCreateNew.Name = "cbOptimizeSandboxVolumesCreateNew";
+            this.cbOptimizeSandboxVolumesCreateNew.Size = new System.Drawing.Size(141, 17);
+            this.cbOptimizeSandboxVolumesCreateNew.TabIndex = 22;
+            this.cbOptimizeSandboxVolumesCreateNew.Tag = "BatchWindow.Function.OptimizeSandboxVolumes.CreateNew";
+            this.cbOptimizeSandboxVolumesCreateNew.Text = "Create New";
+            this.cbOptimizeSandboxVolumesCreateNew.UseVisualStyleBackColor = true;
+            // 
+            // cbOptimizeSandboxVolumesScanTerrain
+            // 
+            this.cbOptimizeSandboxVolumesScanTerrain.Checked = true;
+            this.cbOptimizeSandboxVolumesScanTerrain.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbOptimizeSandboxVolumesScanTerrain.Location = new System.Drawing.Point(12, 67);
+            this.cbOptimizeSandboxVolumesScanTerrain.Name = "cbOptimizeSandboxVolumesScanTerrain";
+            this.cbOptimizeSandboxVolumesScanTerrain.Size = new System.Drawing.Size(141, 17);
+            this.cbOptimizeSandboxVolumesScanTerrain.TabIndex = 21;
+            this.cbOptimizeSandboxVolumesScanTerrain.Tag = "BatchWindow.Function.Volumes.ScanTerrain";
+            this.cbOptimizeSandboxVolumesScanTerrain.Text = "Scan Terrain";
+            this.cbOptimizeSandboxVolumesScanTerrain.UseVisualStyleBackColor = true;
             // 
             // tbOptimizeSandboxVolumesVolumePadding
             // 
@@ -338,42 +374,6 @@ namespace GUIBuilder.Windows
             this.cbElementBorderEnablers.Tag = "SubDivisionBatchWindow.BorderEnablers";
             this.cbElementBorderEnablers.Text = "Border Enablers";
             this.cbElementBorderEnablers.UseVisualStyleBackColor = true;
-            // 
-            // cbOptimizeSandboxVolumesScanTerrain
-            // 
-            this.cbOptimizeSandboxVolumesScanTerrain.Checked = true;
-            this.cbOptimizeSandboxVolumesScanTerrain.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbOptimizeSandboxVolumesScanTerrain.Location = new System.Drawing.Point(12, 67);
-            this.cbOptimizeSandboxVolumesScanTerrain.Name = "cbOptimizeSandboxVolumesScanTerrain";
-            this.cbOptimizeSandboxVolumesScanTerrain.Size = new System.Drawing.Size(141, 17);
-            this.cbOptimizeSandboxVolumesScanTerrain.TabIndex = 21;
-            this.cbOptimizeSandboxVolumesScanTerrain.Tag = "BatchWindow.Function.Volumes.ScanTerrain";
-            this.cbOptimizeSandboxVolumesScanTerrain.Text = "Scan Terrain";
-            this.cbOptimizeSandboxVolumesScanTerrain.UseVisualStyleBackColor = true;
-            // 
-            // cbOptimizeSandboxVolumesCreateNew
-            // 
-            this.cbOptimizeSandboxVolumesCreateNew.Checked = true;
-            this.cbOptimizeSandboxVolumesCreateNew.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbOptimizeSandboxVolumesCreateNew.Location = new System.Drawing.Point(12, 29);
-            this.cbOptimizeSandboxVolumesCreateNew.Name = "cbOptimizeSandboxVolumesCreateNew";
-            this.cbOptimizeSandboxVolumesCreateNew.Size = new System.Drawing.Size(141, 17);
-            this.cbOptimizeSandboxVolumesCreateNew.TabIndex = 22;
-            this.cbOptimizeSandboxVolumesCreateNew.Tag = "BatchWindow.Function.OptimizeSandboxVolumes.CreateNew";
-            this.cbOptimizeSandboxVolumesCreateNew.Text = "Create New";
-            this.cbOptimizeSandboxVolumesCreateNew.UseVisualStyleBackColor = true;
-            // 
-            // cbOptimizeSandboxVolumesIgnoreExisting
-            // 
-            this.cbOptimizeSandboxVolumesIgnoreExisting.Checked = true;
-            this.cbOptimizeSandboxVolumesIgnoreExisting.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbOptimizeSandboxVolumesIgnoreExisting.Location = new System.Drawing.Point(12, 48);
-            this.cbOptimizeSandboxVolumesIgnoreExisting.Name = "cbOptimizeSandboxVolumesIgnoreExisting";
-            this.cbOptimizeSandboxVolumesIgnoreExisting.Size = new System.Drawing.Size(141, 17);
-            this.cbOptimizeSandboxVolumesIgnoreExisting.TabIndex = 23;
-            this.cbOptimizeSandboxVolumesIgnoreExisting.Tag = "BatchWindow.Function.OptimizeSandboxVolumes.IgnoreExisting";
-            this.cbOptimizeSandboxVolumesIgnoreExisting.Text = "Ignore Existing";
-            this.cbOptimizeSandboxVolumesIgnoreExisting.UseVisualStyleBackColor = true;
             // 
             // SubDivisionBatch
             // 

@@ -32,17 +32,17 @@ namespace GUIBuilder
         const string                    XmlKey_WorkingFile                      = "WorkingFile";
         const string                    XmlKey_OpenRenderWindowOnLoad           = "OpenRenderWindowOnLoad";
 
+        const string                    XmlKey_Preset_TargetSubDirectory        = "TargetSubDirectory";
+        const string                    XmlKey_Preset_MeshSubDirectory          = "MeshSubDirectory";
         const string                    XmlKey_Preset_NodeLength                = "NodeLength";
-        const string                    XmlKey_Preset_HighPrecisionFloats       = "HighPrecisionFloats";
         const string                    XmlKey_Preset_AngleAllowance            = "AngleAllowance";
         const string                    XmlKey_Preset_SlopeAllowance            = "SlopeAllowance";
         const string                    XmlKey_Preset_GradientHeight            = "GradientHeight";
         const string                    XmlKey_Preset_GroundOffset              = "GroundOffset";
         const string                    XmlKey_Preset_GroundSink                = "GroundSink";
-        const string                    XmlKey_Preset_TargetSuffix              = "TargetSuffix";
-        const string                    XmlKey_Preset_MeshSubDirectory          = "MeshSubDirectory";
-        const string                    XmlKey_Preset_FilePrefix                = "FilePrefix";
-        const string                    XmlKey_Preset_FileSuffix                = "FileSuffix";
+        const string                    XmlKey_Preset_HighPrecisionFloats       = "HighPrecisionFloats";
+        const string                    XmlKey_Preset_UseExistingSTATEditorIDs  = "UseExistingSTATEditorIDs";
+        const string                    XmlKey_Preset_UseExistingNIFFilePaths   = "UseExistingNIFFilePaths";
         const string                    XmlKey_Preset_CreateImportData          = "CreateImportData";
 
         #region Internal
@@ -309,18 +309,18 @@ namespace GUIBuilder
             var presetNode = GetNode( xpath ) ?? AppendNode( xpath );
             if( presetNode != null )
             {
-                WriteValue<bool>(   presetNode, XmlKey_Preset_HighPrecisionFloats, preset.HighPrecisionFloats );
-                WriteValue<float>(  presetNode, XmlKey_Preset_NodeLength         , preset.NodeLength );
-                WriteValue<double>( presetNode, XmlKey_Preset_AngleAllowance     , preset.AngleAllowance );
-                WriteValue<double>( presetNode, XmlKey_Preset_SlopeAllowance     , preset.SlopeAllowance );
-                WriteValue<float>(  presetNode, XmlKey_Preset_GradientHeight     , preset.GradientHeight );
-                WriteValue<float>(  presetNode, XmlKey_Preset_GroundOffset       , preset.GroundOffset );
-                WriteValue<float>(  presetNode, XmlKey_Preset_GroundSink         , preset.GroundSink );
-                WriteValue<string>( presetNode, XmlKey_Preset_MeshSubDirectory   , preset.MeshSubDirectory );
-                WriteValue<string>( presetNode, XmlKey_Preset_FilePrefix         , preset.FilePrefix );
-                WriteValue<string>( presetNode, XmlKey_Preset_TargetSuffix       , preset.TargetSuffix );
-                WriteValue<string>( presetNode, XmlKey_Preset_FileSuffix         , preset.FileSuffix );
-                WriteValue<bool>(   presetNode, XmlKey_Preset_CreateImportData   , preset.CreateImportData );
+                WriteValue<bool>(   presetNode, XmlKey_Preset_HighPrecisionFloats     , preset.HighPrecisionFloats      );
+                WriteValue<float>(  presetNode, XmlKey_Preset_NodeLength              , preset.NodeLength               );
+                WriteValue<double>( presetNode, XmlKey_Preset_AngleAllowance          , preset.AngleAllowance           );
+                WriteValue<double>( presetNode, XmlKey_Preset_SlopeAllowance          , preset.SlopeAllowance           );
+                WriteValue<float>(  presetNode, XmlKey_Preset_GradientHeight          , preset.GradientHeight           );
+                WriteValue<float>(  presetNode, XmlKey_Preset_GroundOffset            , preset.GroundOffset             );
+                WriteValue<float>(  presetNode, XmlKey_Preset_GroundSink              , preset.GroundSink               );
+                WriteValue<string>( presetNode, XmlKey_Preset_TargetSubDirectory      , preset.TargetSubDirectory       );
+                WriteValue<string>( presetNode, XmlKey_Preset_MeshSubDirectory        , preset.MeshSubDirectory         );
+                WriteValue<bool>(   presetNode, XmlKey_Preset_UseExistingSTATEditorIDs, preset.UseExistingSTATEditorIDs );
+                WriteValue<bool>(   presetNode, XmlKey_Preset_UseExistingNIFFilePaths , preset.UseExistingNIFFilePaths  );
+                WriteValue<bool>(   presetNode, XmlKey_Preset_CreateImportData        , preset.CreateImportData         );
                 if( commit ) Commit();
             }
         }
@@ -338,18 +338,19 @@ namespace GUIBuilder
             if( presetNode != null )
             {
                 preset = new NIFBuilder.Preset( "Custom",
-                    ReadValue<bool>(   presetNode, XmlKey_Preset_HighPrecisionFloats, template.HighPrecisionFloats ),
-                    ReadValue<float>(  presetNode, XmlKey_Preset_NodeLength         , template.NodeLength ),
-                    ReadValue<double>( presetNode, XmlKey_Preset_AngleAllowance     , template.AngleAllowance ),
-                    ReadValue<double>( presetNode, XmlKey_Preset_SlopeAllowance     , template.SlopeAllowance ),
-                    ReadValue<float>(  presetNode, XmlKey_Preset_GradientHeight     , template.GradientHeight ),
-                    ReadValue<float>(  presetNode, XmlKey_Preset_GroundOffset       , template.GroundOffset ),
-                    ReadValue<float>(  presetNode, XmlKey_Preset_GroundSink         , template.GroundSink ),
-                    ReadValue<string>( presetNode, XmlKey_Preset_MeshSubDirectory   , template.MeshSubDirectory ),
-                    ReadValue<string>( presetNode, XmlKey_Preset_FilePrefix         , template.FilePrefix ),
-                    ReadValue<string>( presetNode, XmlKey_Preset_TargetSuffix       , template.TargetSuffix ),
-                    ReadValue<string>( presetNode, XmlKey_Preset_FileSuffix         , template.FileSuffix ),
-                    ReadValue<bool>(   presetNode, XmlKey_Preset_CreateImportData   , template.CreateImportData ) );
+                    ReadValue<bool>(   presetNode, XmlKey_Preset_HighPrecisionFloats      , template.HighPrecisionFloats      ),
+                    ReadValue<float>(  presetNode, XmlKey_Preset_NodeLength               , template.NodeLength               ),
+                    ReadValue<double>( presetNode, XmlKey_Preset_AngleAllowance           , template.AngleAllowance           ),
+                    ReadValue<double>( presetNode, XmlKey_Preset_SlopeAllowance           , template.SlopeAllowance           ),
+                    ReadValue<float>(  presetNode, XmlKey_Preset_GradientHeight           , template.GradientHeight           ),
+                    ReadValue<float>(  presetNode, XmlKey_Preset_GroundOffset             , template.GroundOffset             ),
+                    ReadValue<float>(  presetNode, XmlKey_Preset_GroundSink               , template.GroundSink               ),
+                    ReadValue<string>( presetNode, XmlKey_Preset_MeshSubDirectory         , template.MeshSubDirectory         ),
+                    ReadValue<bool>(   presetNode, XmlKey_Preset_CreateImportData         , template.CreateImportData         ),
+                    ReadValue<string>( presetNode, XmlKey_Preset_TargetSubDirectory       , template.TargetSubDirectory       ),
+                    ReadValue<bool>(   presetNode, XmlKey_Preset_UseExistingSTATEditorIDs , template.UseExistingSTATEditorIDs ),
+                    ReadValue<bool>(   presetNode, XmlKey_Preset_UseExistingNIFFilePaths  , template.UseExistingNIFFilePaths  )
+                );
             }
             else
                 preset = new NIFBuilder.Preset( template );

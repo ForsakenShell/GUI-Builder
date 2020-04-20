@@ -17,7 +17,7 @@ using Maths;
 using Fallout4;
 using AnnexTheCommonwealth;
 
-using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using GetEditorID = GUIBuilder.CustomForms.EditorIDFormats;
 using Operations = GUIBuilder.FormImport.Operations;
 using Priority = GUIBuilder.FormImport.Priority;
 using Shape = Engine.Plugin.Forms.Fields.ObjectReference.Primitive.PrimitiveType;
@@ -131,13 +131,12 @@ namespace GUIBuilder
             float groundOffset,
             float groundSink,
             string targetPath,
-            string targetSuffix,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string fileSuffix,
             bool createImportData,
-            bool highPrecisionVertexes )
+            bool highPrecisionVertexes,
+            bool useExistingSTATEditorID,
+            bool useExistingNIFFilePath )
         {
             DebugLog.OpenIndentLevel( workshop?.IDString );
 
@@ -176,18 +175,17 @@ namespace GUIBuilder
             if( ( createImportData ) && ( border != null ) )
                 originalForms.Add( border );
             var offsetMesh = ( border != null )&&( ( !border.IsInWorkingFile() )||( !workshop.IsInWorkingFile() ) );
-            string forcedNIFFile = null;
-            string forcedNIFPath = null;
+            string forcedNIFFilePath = null;
+            string forcedSTATEditorID = null;
             var stat = workshop.BorderStatic;
             if( stat != null )
             {
                 if( createImportData )
                     originalForms.Add( stat );
-                if( offsetMesh )
-                {
-                    var statFilePath = stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
-                    forcedNIFFile = GenFilePath.FilenameFromPathname( statFilePath, out forcedNIFPath );
-                }
+                if( useExistingSTATEditorID )
+                    forcedSTATEditorID = stat.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
+                if( useExistingNIFFilePath )
+                    forcedNIFFilePath = stat.GetModel( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired );
             }
 
             result = NIFBuilder.CreateNIFs(
@@ -199,15 +197,14 @@ namespace GUIBuilder
                 GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkedBuildAreaEdge,
                 GodObject.CoreForms.Fallout4.Layer.WorkshopBorderArt,
                 targetPath,
-                targetSuffix,
-                meshSuffix,
+                targetSubPath,
                 meshSubPath,
-                filePrefix,
-                workshopName,
-                fileSuffix,
-                "", 1,
-                forcedNIFPath,
-                forcedNIFFile,
+                CustomForms.EditorIDFormats.BorderStatic,
+                CustomForms.EditorIDFormats.ModPrefix,
+                workshopName, 1,
+                null, -1,
+                forcedNIFFilePath,
+                forcedSTATEditorID,
                 volumeCeiling,
                 gradientHeight,
                 groundOffset,
@@ -237,13 +234,13 @@ namespace GUIBuilder
             float groundOffset,
             float groundSink,
             string targetPath,
-            string targetSuffix,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string fileSuffix,
             bool createImportData,
-            bool highPrecisionVertexes )
+            bool highPrecisionVertexes,
+            bool useExistingSTATEditorIDs,
+            bool useExistingNIFFilePaths
+            )
         {
             if(
                 ( workshops.NullOrEmpty() ) ||
@@ -269,11 +266,13 @@ namespace GUIBuilder
                     var subList = WorkshopBatch.CreateNIF(
                         workshop,
                         gradientHeight, groundOffset, groundSink,
-                        targetPath, targetSuffix,
-                        meshSuffix, meshSubPath,
-                        filePrefix, fileSuffix,
+                        targetPath,
+                        targetSubPath,
+                        meshSubPath,
                         createImportData,
-                        highPrecisionVertexes );
+                        highPrecisionVertexes,
+                        useExistingSTATEditorIDs,
+                        useExistingNIFFilePaths );
                     if( ( createImportData ) && ( !subList.NullOrEmpty() ) )
                     {
                         if( list == null )
@@ -567,8 +566,8 @@ namespace GUIBuilder
                     target,
                     workshop.Reference,
                     workshop.QualifiedName,
-                    string.Format( "{0}Workshop", SetEditorID.Token_Name ),
-                    string.Format( "{0}BuildableArea{1}", SetEditorID.Token_Name, SetEditorID.Token_Index ),
+                    GetEditorID.Layer,
+                    GetEditorID.BuildVolumes,
                     hull,
                     volumes,
                     workshop.Reference.Worldspace,

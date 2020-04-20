@@ -360,6 +360,8 @@ namespace GUIBuilder.FormImport
 
         public virtual bool                             CreateNewFormInWorkingFile()
         {
+            DebugLog.WriteCaller();
+
             if( RemoteTarget != null )
                 return RemoteTarget.CreateNewFormInWorkingFile();
 
@@ -396,6 +398,8 @@ namespace GUIBuilder.FormImport
 
         public virtual bool                             CopyToWorkingFile()
         {
+            DebugLog.WriteCaller();
+
             if( RemoteTarget != null )
                 return RemoteTarget.CopyToWorkingFile();
 

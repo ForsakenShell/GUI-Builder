@@ -15,6 +15,7 @@ using Engine.Plugin.Forms;
 
 using GUIBuilder.Windows;
 
+
 namespace GUIBuilder
 {
     public static class CustomForms
@@ -70,6 +71,131 @@ namespace GUIBuilder
             #endregion
 
         }
+
+        #region Custom EditorID Formats
+
+        public static class EditorIDFormats
+        {
+            // TODO:  Move this region to a more appropriate parent static class
+
+            const string                    XmlNode_Formats         = "EditorIDFormats";
+
+            public const string             Token_ModPrefix         = "{mod}";
+            public const string             Token_FormType          = "{type}";
+            public const string             Token_Name              = "{name}";
+            public const string             Token_Index             = "{index}";
+            public const string             Token_Neighbour         = "{neighbour}";
+            public const string             Token_SubIndex          = "{subindex}";
+
+            public const string             Default_ModPrefix       = "MyMod";
+        
+            public const string             Default_Location        = "{mod}_{name}_Location";
+            public const string             Default_EncounterZone   = "{mod}_{name}_EncounterZone";
+            public const string             Default_Layer           = "{mod}_{name}";
+            public const string             Default_Cells           = "{mod}_{name}_{index}";
+            public const string             Default_WorkshopRef     = "{mod}_{name}_WorkshopRef";
+            public const string             Default_BorderStatic    = "{mod}_{name}_WorkshopBorder";
+            public const string             Default_BuildVolumes    = "{mod}_{name}_BuildAreaVolume_{index}";
+            public const string             Default_SandboxVolume   = "{mod}_{name}_SandboxArea";
+            public const string             Default_CenterMarker    = "{mod}_{name}_Center";
+            
+            public const string             ESM_ATC_Mod_Prefix      = "ESM_ATC";
+            public static string            ESM_ATC_STAT_Border     = string.Format( "{0}_{1}_{2}_Border_{3}_{4}_{5}", Token_ModPrefix, Token_FormType, Token_Name, Token_Index, Token_Neighbour, Token_SubIndex );
+            
+            static string                   FromWorkspace( string xmlKey, string defaultValue )
+            {
+                var ws = GodObject.Plugin.Workspace;
+                return ws == null
+                    ? defaultValue
+                    : ws.ReadValue<string>( XmlNode_Formats, xmlKey, defaultValue );
+            }
+
+            static void                     ToWorkspace( string xmlKey, string value, bool commit = false )
+            {
+                var ws = GodObject.Plugin.Workspace;
+                if( ws == null ) return;
+                ws.WriteValue<string>( XmlNode_Formats, xmlKey, value, commit );
+            }
+
+            public static string            FormatEditorID( string format, string modPrefix, string formType, string name, int index = -1, string neighbour = null, int subindex = -1 )
+            {
+                if( string.IsNullOrEmpty( format ) ) return null;
+
+                string result = string.Copy( format );
+
+                GenString.ReplaceToken( ref result, Token_ModPrefix , modPrefix );
+                GenString.ReplaceToken( ref result, Token_FormType  , formType  );
+                GenString.ReplaceToken( ref result, Token_Name      , name      );
+                GenString.ReplaceToken( ref result, Token_Index     , ( index    < 0 ? null : index   .ToString( "D2" ) ) );
+                GenString.ReplaceToken( ref result, Token_Neighbour , neighbour );
+                GenString.ReplaceToken( ref result, Token_SubIndex  , ( subindex < 0 ? null : subindex.ToString( "D2" ) ) );
+
+                return result;
+            }
+
+            public static string            ModPrefix
+            {
+                get { return FromWorkspace( "ModPrefix", Default_ModPrefix ); }
+                set { ToWorkspace( "ModPrefix", value, true ); }
+            }
+
+            public static string            Location
+            {
+                get { return FromWorkspace( "Location", Default_Location ); }
+                set { ToWorkspace( "Location", value, true ); }
+            }
+        
+            public static string            EncounterZone
+            {
+                get { return FromWorkspace( "EncounterZone", Default_EncounterZone ); }
+                set { ToWorkspace( "EncounterZone", value, true ); }
+            }
+        
+            public static string            Layer
+            {
+                get { return FromWorkspace( "Layer", Default_Layer ); }
+                set { ToWorkspace( "Layer", value, true ); }
+            }
+        
+            public static string            Cells
+            {
+                get { return FromWorkspace( "Cells", Default_Cells ); }
+                set { ToWorkspace( "Cells", value, true ); }
+            }
+        
+            public static string            WorkshopRef
+            {
+                get { return FromWorkspace( "WorkshopRef", Default_WorkshopRef ); }
+                set { ToWorkspace( "WorkshopRef", value, true ); }
+            }
+        
+            public static string            BorderStatic
+            {
+                get { return FromWorkspace( "BorderStatic", Default_BorderStatic ); }
+                set { ToWorkspace( "BorderStatic", value, true ); }
+            }
+        
+            public static string            BuildVolumes
+            {
+                get { return FromWorkspace( "BuildVolumes", Default_BuildVolumes ); }
+                set { ToWorkspace( "BuildVolumes", value, true ); }
+            }
+        
+            public static string            SandboxVolume
+            {
+                get { return FromWorkspace( "SandboxVolume", Default_SandboxVolume ); }
+                set { ToWorkspace( "SandboxVolume", value, true ); }
+            }
+        
+            public static string            CenterMarker
+            {
+                get { return FromWorkspace( "CenterMarker", Default_CenterMarker ); }
+                set { ToWorkspace( "CenterMarker", value, true ); }
+            }
+        
+        }
+        #endregion
+
 
         #region Custom NIFBuilder.Presets
 

@@ -13,7 +13,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using EditorIDFormatter = GUIBuilder.CustomForms.EditorIDFormats;
+
 
 namespace GUIBuilder.Windows
 {
@@ -37,6 +38,17 @@ namespace GUIBuilder.Windows
             this.btnNormalizeBuildVolumes.Click += new System.EventHandler( this.OnNormalizeBuildVolumesClick );
             this.btnOptimizeSandboxVolumes.Click += new System.EventHandler( this.OnOptimizeSandboxVolumesClick );
 
+            cbNormalizeBuildVolumesScanTerrain    .CheckedChanged += OnWorkspaceSerializableSettingChange;
+            tbNormalizeBuildVolumesGroundSink     .TextChanged    += OnWorkspaceSerializableSettingChange;
+            tbNormalizeBuildVolumesTopAbovePeak   .TextChanged    += OnWorkspaceSerializableSettingChange;
+            
+            cbOptimizeSandboxVolumesCreateNew     .CheckedChanged += OnWorkspaceSerializableSettingChange;
+            cbOptimizeSandboxVolumesIgnoreExisting.CheckedChanged += OnWorkspaceSerializableSettingChange;
+            cbOptimizeSandboxVolumesScanTerrain   .CheckedChanged += OnWorkspaceSerializableSettingChange;
+            tbOptimizeSandboxVolumesCylinderTop   .TextChanged    += OnWorkspaceSerializableSettingChange;
+            tbOptimizeSandboxVolumesCylinderBottom.TextChanged    += OnWorkspaceSerializableSettingChange;
+            tbOptimizeSandboxVolumesVolumePadding .TextChanged    += OnWorkspaceSerializableSettingChange;
+            
             this.lvWorkshops.OnSetSyncObjectsThreadComplete += OnSyncWorkshopsThreadComplete;
 
             this.ResumeLayout( false );
@@ -50,17 +62,19 @@ namespace GUIBuilder.Windows
             GodObject.Plugin.Data.Workshops.SyncedGUIList.ObjectDataChanged += OnWorkshopListChanged;
             UpdateWorkshopList();
             
-            // TODO:  Load/Save these to the Workspace
-            cbNormalizeBuildVolumesScanTerrain.Checked      = true;
-            tbNormalizeBuildVolumesGroundSink.Text          = GodObject.CoreForms.Fallout4.fBuildVolumeGroundSink       .ToString( "F2" );
-            tbNormalizeBuildVolumesTopAbovePeak.Text        = GodObject.CoreForms.Fallout4.fBuildVolumeTopAbovePeak     .ToString( "F2" );
+            var ws = GodObject.Plugin.Workspace;
             
-            cbOptimizeSandboxVolumesCreateNew.Checked       = true;
-            cbOptimizeSandboxVolumesIgnoreExisting.Checked  = true;
-            cbOptimizeSandboxVolumesScanTerrain.Checked     = true;
-            tbOptimizeSandboxVolumesCylinderTop.Text        = GodObject.CoreForms.Fallout4.fSandboxCylinderTop          .ToString( "F2" );
-            tbOptimizeSandboxVolumesCylinderBottom.Text     = GodObject.CoreForms.Fallout4.fSandboxCylinderBottom       .ToString( "F2" );
-            tbOptimizeSandboxVolumesVolumePadding.Text      = GodObject.CoreForms.Fallout4.fSandboxPadding              .ToString( "F2" );
+            SetCheckboxFromWorkspace( cbNormalizeBuildVolumesScanTerrain    , ws, VolumeBatch.XmlKey_BV_ScanTerrain   , true  );
+            SetTextboxFromWorkspace ( tbNormalizeBuildVolumesGroundSink     , ws, VolumeBatch.XmlKey_BV_GroundSink    , GodObject.CoreForms.Fallout4.fBuildVolumeGroundSink   , "F2" );
+            SetTextboxFromWorkspace ( tbNormalizeBuildVolumesTopAbovePeak   , ws, VolumeBatch.XmlKey_BV_TopAbovePeak  , GodObject.CoreForms.Fallout4.fBuildVolumeTopAbovePeak , "F2" );
+            
+            SetCheckboxFromWorkspace( cbOptimizeSandboxVolumesCreateNew     , ws, VolumeBatch.XmlKey_SV_CreateNew     , true  );
+            SetCheckboxFromWorkspace( cbOptimizeSandboxVolumesIgnoreExisting, ws, VolumeBatch.XmlKey_SV_IgnoreExisting, true  );
+            SetCheckboxFromWorkspace( cbOptimizeSandboxVolumesScanTerrain   , ws, VolumeBatch.XmlKey_SV_ScanTerrain   , true  );
+            SetTextboxFromWorkspace ( tbOptimizeSandboxVolumesCylinderTop   , ws, VolumeBatch.XmlKey_SV_CylinderTop   , GodObject.CoreForms.Fallout4.fSandboxCylinderTop      , "F2" );
+            SetTextboxFromWorkspace ( tbOptimizeSandboxVolumesCylinderBottom, ws, VolumeBatch.XmlKey_SV_CylinderBottom, GodObject.CoreForms.Fallout4.fSandboxCylinderBottom   , "F2" );
+            SetTextboxFromWorkspace ( tbOptimizeSandboxVolumesVolumePadding , ws, VolumeBatch.XmlKey_SV_Padding       , GodObject.CoreForms.Fallout4.fSandboxPadding          , "F2" );
+            
         }
 
         void OnClientClosing( object sender, FormClosingEventArgs e )
@@ -78,6 +92,61 @@ namespace GUIBuilder.Windows
                 enable &&
                 !lvWorkshops.IsSyncObjectsThreadRunning;
             return enabled;
+        }
+
+        #endregion
+
+        #region Workspace Serializable UI Elements
+
+        void SetCheckboxFromWorkspace( CheckBox cb, Workspace ws, string xmlKey, bool defaultValue )
+        {
+            cb.Checked = ws == null
+                ? defaultValue
+                : ws.ReadValue<bool>( this.XmlNodeName, xmlKey, defaultValue );
+        }
+
+        void SaveCheckboxToWorkspace( CheckBox cb, Workspace ws, string xmlKey )
+        {
+            if( ws == null ) return;
+            ws.WriteValue<bool>( this.XmlNodeName, xmlKey, cb.Checked, false );
+        }
+
+        void SetTextboxFromWorkspace( TextBox tb, Workspace ws, string xmlKey, float defaultValue, string valueFormat )
+        {
+            tb.Text =
+                (
+                    ws == null
+                    ? defaultValue
+                    : ws.ReadValue<float>( this.XmlNodeName, xmlKey, defaultValue )
+                ).ToString( valueFormat );
+        }
+
+        void SaveTextboxToWorkspace( TextBox tb, Workspace ws, string xmlKey )
+        {
+            if( ws == null ) return;
+            ws.WriteValue<float>( this.XmlNodeName, xmlKey, float.Parse( tb.Text ), false );
+        }
+
+        void OnWorkspaceSerializableSettingChange( object sender, EventArgs e )
+        {
+            if( !OnLoadComplete ) return;
+            var ws = GodObject.Plugin.Workspace;
+            if( ws == null ) return;
+
+            DebugLog.WriteCaller();
+
+            SaveCheckboxToWorkspace( cbNormalizeBuildVolumesScanTerrain    , ws, VolumeBatch.XmlKey_BV_ScanTerrain    );
+            SaveTextboxToWorkspace ( tbNormalizeBuildVolumesGroundSink     , ws, VolumeBatch.XmlKey_BV_GroundSink     );
+            SaveTextboxToWorkspace ( tbNormalizeBuildVolumesTopAbovePeak   , ws, VolumeBatch.XmlKey_BV_TopAbovePeak   );
+            
+            SaveCheckboxToWorkspace( cbOptimizeSandboxVolumesCreateNew     , ws, VolumeBatch.XmlKey_SV_CreateNew      );
+            SaveCheckboxToWorkspace( cbOptimizeSandboxVolumesIgnoreExisting, ws, VolumeBatch.XmlKey_SV_IgnoreExisting );
+            SaveCheckboxToWorkspace( cbOptimizeSandboxVolumesScanTerrain   , ws, VolumeBatch.XmlKey_SV_ScanTerrain    );
+            SaveTextboxToWorkspace ( tbOptimizeSandboxVolumesCylinderTop   , ws, VolumeBatch.XmlKey_SV_CylinderTop    );
+            SaveTextboxToWorkspace ( tbOptimizeSandboxVolumesCylinderBottom, ws, VolumeBatch.XmlKey_SV_CylinderBottom );
+            SaveTextboxToWorkspace ( tbOptimizeSandboxVolumesVolumePadding , ws, VolumeBatch.XmlKey_SV_Padding        );
+
+            ws.Commit();
         }
 
         #endregion
@@ -187,7 +256,7 @@ namespace GUIBuilder.Windows
                     cylinderBottom,
                     volumePadding,
                     (uint)0,
-                    string.Format( "{0}WorkshopSandboxArea", SetEditorID.Token_Name ),
+                    EditorIDFormatter.SandboxVolume,
                     GodObject.CoreForms.Fallout4.Activator.DefaultDummy,
                     System.Drawing.Color.FromArgb( 255, 0, 0 ),
                     GodObject.CoreForms.Fallout4.Keyword.WorkshopLinkSandbox,
@@ -220,9 +289,8 @@ namespace GUIBuilder.Windows
                     : new List<Engine.Plugin.Forms.ObjectReference>(){ sandbox }
                 ),
                 controller.Reference.GetLayer( target ),
-                string.Format( "{0}Workshop", SetEditorID.Token_Name ),
+                EditorIDFormatter.Layer,
                 controller.QualifiedName,
-                -1,
                 out preferedLayerEditorID
             );
         }

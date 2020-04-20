@@ -73,13 +73,13 @@ public static class GenString
             return str;
         
         if( wi == 0 )   // Starts with it
-            return s.Substring( wi, sl - wi );
+            return StripFrom( s.Substring( wl, sl - wl ), word, comparison );
         
         if( wi + wl == sl ) // End of it
-            return s.Substring( 0, wi );
+            return StripFrom( s.Substring( 0, wi ), word, comparison );
         
         // Middle of it
-        return s.Substring( 0, wi ) + s.Substring( wi + wl, sl - wi - wl );
+        return StripFrom( s.Substring( 0, wi ) + s.Substring( wi + wl, sl - wi - wl ), word, comparison );
     }
     
     #endregion
@@ -114,66 +114,88 @@ public static class GenString
         return longest;
     }
     
-    /// <summary>
-    /// Count the number of keys that are contained in a string.
-    /// </summary>
-    /// <param name="l">string to check</param>
-    /// <param name="k">keys to check</param>
-    /// <param name="c">comparison type</param>
-    /// <returns></returns>
-    public static int CountKeysInString( this string l, List<string> k, StringComparison c )
+
+    public static int CountKeyInString( this string left, string key, StringComparison comparison )
     {
-        if( k.NullOrEmpty() ) return 0;
-        var m = (int)0;
-        foreach( var t in k )
+        if( string.IsNullOrEmpty( key ) ) return 0;
+        var index = left.IndexOf( key, comparison );
+        int count = 0;
+        while( index >= 0 )
         {
-            if( string.IsNullOrEmpty( t ) ) continue;
-            if( l.IndexOf( t, c ) < 0 ) continue;
-            m++;
+            count++;
+            index = left.IndexOf( key, index + 1, comparison );
         }
-        return m;
+        return count;
     }
 
     /// <summary>
     /// Count the number of keys that are contained in a string.
     /// </summary>
-    /// <param name="l">string to check</param>
-    /// <param name="k">keys to check</param>
-    /// <param name="c">comparison type</param>
+    /// <param name="left">string to check</param>
+    /// <param name="keys">keys to check</param>
+    /// <param name="comparison">comparison type</param>
     /// <returns></returns>
-    public static int CountKeysInString( this string l, string[] k, StringComparison c )
+    public static int CountKeysInString( this string left, List<string> keys, StringComparison comparison )
     {
-        if( k.NullOrEmpty() ) return 0;
-        var m = (int)0;
-        foreach( var t in k )
+        if( keys.NullOrEmpty() ) return 0;
+        var count = (int)0;
+        foreach( var key in keys )
         {
-            if( string.IsNullOrEmpty( t ) ) continue;
-            if( l.IndexOf( t, c ) < 0 ) continue;
-            m++;
+            if( string.IsNullOrEmpty( key ) ) continue;
+            count += left.CountKeyInString( key, comparison );
         }
-        return m;
+        return count;
     }
 
     /// <summary>
-    /// Count the number of keys that are contained in two strings.
+    /// Count the number of times a set of keys is contained in a string.
     /// </summary>
-    /// <param name="l">first string to check</param>
-    /// <param name="r">second string to check</param>
-    /// <param name="k">keys to check</param>
-    /// <param name="c">comparison type</param>
+    /// <param name="left">string to check</param>
+    /// <param name="keys">keys to check</param>
+    /// <param name="comparison">comparison type</param>
     /// <returns></returns>
-    public static int CountCommonMatchesBetweenStrings( this string l, string r, List<string> k, StringComparison c )
+    public static int CountKeysInString( this string left, string[] keys, StringComparison comparison )
     {
-        if( ( l == null )||( r == null )||( k == null ) ) return 0;
-        var m = (int)0;
-        foreach( var t in k )
+        if( keys.NullOrEmpty() ) return 0;
+        var count = (int)0;
+        foreach( var key in keys )
         {
-            if( string.IsNullOrEmpty( t ) ) continue;
-            if( l.IndexOf( t, c ) < 0 ) continue;
-            if( r.IndexOf( t, c ) < 0 ) continue;
-            m++;
+            if( string.IsNullOrEmpty( key ) ) continue;
+            count += left.CountKeyInString( key, comparison );
         }
-        return m;
+        return count;
+    }
+
+    /// <summary>
+    /// Count the number of times set of keys is contained in both strings.
+    /// </summary>
+    /// <param name="left">first string to check</param>
+    /// <param name="right">second string to check</param>
+    /// <param name="keys">keys to check</param>
+    /// <param name="comparison">comparison type</param>
+    /// <param name="minOrMax">Count using Min (true) or Max (false)</param>
+    /// <returns></returns>
+    public static int CountCommonMatchesBetweenStrings( this string left, string right, List<string> keys, StringComparison comparison, bool minOrMax = false )
+    {
+        if( ( string.IsNullOrEmpty( left ) )||( string.IsNullOrEmpty( right ) )||( keys.NullOrEmpty() ) ) return 0;
+        //DebugLog.OpenIndentLevel();
+        var count = (int)0;
+        foreach( var key in keys )
+        {
+            if( string.IsNullOrEmpty( key ) ) continue;
+            var lCount = left .CountKeyInString( key, comparison );
+            var rCount = right.CountKeyInString( key, comparison );
+            //DebugLog.WriteStrings( null, new [] {
+            //    "key: \"" + key + "\"",
+            //    "\t" + lCount.ToString() + " times in \"" + left + "\"",
+            //    "\t" + rCount.ToString() + " times in \"" + right + "\"",
+            //}, false, true, false, false, false  );
+            //count += minOrMax ? Math.Min( lCount, rCount ) : Math.Max( lCount, rCount );
+            count += lCount;
+            count += rCount;
+        }
+        //DebugLog.CloseIndentLevel( "count", count.ToString() );
+        return count;
     }
     
     #endregion

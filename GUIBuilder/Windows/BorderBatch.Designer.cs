@@ -28,8 +28,6 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.TextBox tbSubDivisionNIFGroundSink;
         System.Windows.Forms.GroupBox gbBorderFunctions;
         System.Windows.Forms.Button btnImportNIFs;
-        System.Windows.Forms.TextBox tbWorkshopNIFFilePrefix;
-        System.Windows.Forms.Label lblWorkshopNIFFilePrefix;
         System.Windows.Forms.TextBox tbWorkshopNIFSampleFilePath;
         System.Windows.Forms.TextBox tbWorkshopNIFMeshSubDirectory;
         System.Windows.Forms.CheckBox cbSubDivisionNIFCreateImportData;
@@ -44,10 +42,6 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.TextBox tbSubDivisionNIFMeshSubDirectory;
         System.Windows.Forms.TextBox tbNIFBuilderSubDivisionNIFSampleFilePath;
         System.Windows.Forms.GroupBox gbWorkshopNIFParameters;
-        System.Windows.Forms.TextBox tbMeshDirectory;
-        System.Windows.Forms.Label lblMeshDirectory;
-        System.Windows.Forms.TextBox tbSubDivisionNIFFilePrefix;
-        System.Windows.Forms.Label lblSubDivisionNIFFilePrefix;
         System.Windows.Forms.Label lblSubDivisionNIFMeshSubDirectory;
         System.Windows.Forms.Label lblWorkshopNIFMeshSubDirectory;
         System.Windows.Forms.ComboBox cbSubDivisionPresets;
@@ -64,12 +58,8 @@ namespace GUIBuilder.Windows
         System.Windows.Forms.TextBox tbWorkshopNodeLength;
         System.Windows.Forms.ComboBox cbWorkshopPresets;
         System.Windows.Forms.Label lblWorkshopPresets;
-        System.Windows.Forms.TextBox tbSubDivisionNIFFileSuffix;
-        System.Windows.Forms.Label lblSubDivisionNIFFileSuffix;
         System.Windows.Forms.TextBox tbSubDivisionNIFTargetSubDirectory;
         System.Windows.Forms.Label lblSubDivisionNIFTargetSubDirectory;
-        System.Windows.Forms.TextBox tbWorkshopNIFFileSuffix;
-        System.Windows.Forms.Label lblWorkshopNIFFileSuffix;
         System.Windows.Forms.TextBox tbWorkshopNIFTargetSubDirectory;
         System.Windows.Forms.Label lblWorkshopNIFTargetSubDirectory;
         System.Windows.Forms.CheckBox cbWorkshopNIFCreateImportData;
@@ -81,6 +71,8 @@ namespace GUIBuilder.Windows
         private System.Windows.Forms.Label lblWorkshopNodeAngleAllowance;
         private System.Windows.Forms.CheckBox cbSubDivisionNIFHighPrecisionVertexes;
         private System.Windows.Forms.CheckBox cbWorkshopNIFHighPrecisionVertexes;
+        private System.Windows.Forms.CheckBox cbWorkshopNIFUseExistingFilePaths;
+        private System.Windows.Forms.CheckBox cbWorkshopNIFUseExistingSTATEditorIDs;
         
         /// <summary>
         /// Disposes resources used by the form.
@@ -104,9 +96,7 @@ namespace GUIBuilder.Windows
         void InitializeComponent()
         {
             this.gbTargetFolder = new System.Windows.Forms.GroupBox();
-            this.tbMeshDirectory = new System.Windows.Forms.TextBox();
             this.tbTargetFolder = new System.Windows.Forms.TextBox();
-            this.lblMeshDirectory = new System.Windows.Forms.Label();
             this.tcObjectSelect = new System.Windows.Forms.TabControl();
             this.tpSubDivisions = new System.Windows.Forms.TabPage();
             this.gbSubDivisionNodeParameters = new System.Windows.Forms.GroupBox();
@@ -117,11 +107,8 @@ namespace GUIBuilder.Windows
             this.lbSubDivisionNodeLength = new System.Windows.Forms.Label();
             this.lbSubDivisionNodeSlopeAllowance = new System.Windows.Forms.Label();
             this.gbSubDivisionNIFParameters = new System.Windows.Forms.GroupBox();
-            this.cbSubDivisionNIFHighPrecisionVertexes = new System.Windows.Forms.CheckBox();
             this.tbSubDivisionNIFGroundSink = new System.Windows.Forms.TextBox();
-            this.tbSubDivisionNIFFileSuffix = new System.Windows.Forms.TextBox();
             this.cbSubDivisionNIFCreateImportData = new System.Windows.Forms.CheckBox();
-            this.lblSubDivisionNIFFileSuffix = new System.Windows.Forms.Label();
             this.tbSubDivisionNIFTargetSubDirectory = new System.Windows.Forms.TextBox();
             this.lblSubDivisionNIFTargetSubDirectory = new System.Windows.Forms.Label();
             this.tbSubDivisionNIFGroundOffset = new System.Windows.Forms.TextBox();
@@ -131,9 +118,8 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionNIFGroundOffset = new System.Windows.Forms.Label();
             this.lblSubDivisionNIFMeshSubDirectory = new System.Windows.Forms.Label();
             this.lblSubDivisionNIFGradientHeight = new System.Windows.Forms.Label();
-            this.tbSubDivisionNIFFilePrefix = new System.Windows.Forms.TextBox();
             this.lblSubDivisionNIFGroundSink = new System.Windows.Forms.Label();
-            this.lblSubDivisionNIFFilePrefix = new System.Windows.Forms.Label();
+            this.cbSubDivisionNIFHighPrecisionVertexes = new System.Windows.Forms.CheckBox();
             this.lvSubDivisions = new GUIBuilder.Windows.Controls.SyncedListView<AnnexTheCommonwealth.SubDivision>();
             this.cbSubDivisionPresets = new System.Windows.Forms.ComboBox();
             this.lblSubDivisionPresets = new System.Windows.Forms.Label();
@@ -147,11 +133,9 @@ namespace GUIBuilder.Windows
             this.lblWorkshopNodeSlopeAllowance = new System.Windows.Forms.Label();
             this.cbWorkshopPresets = new System.Windows.Forms.ComboBox();
             this.gbWorkshopNIFParameters = new System.Windows.Forms.GroupBox();
+            this.cbWorkshopNIFHighPrecisionVertexes = new System.Windows.Forms.CheckBox();
             this.cbWorkshopNIFCreateImportData = new System.Windows.Forms.CheckBox();
             this.tbWorkshopNIFGroundSink = new System.Windows.Forms.TextBox();
-            this.tbWorkshopNIFFileSuffix = new System.Windows.Forms.TextBox();
-            this.lblWorkshopNIFFileSuffix = new System.Windows.Forms.Label();
-            this.tbWorkshopNIFFilePrefix = new System.Windows.Forms.TextBox();
             this.tbWorkshopNIFGroundOffset = new System.Windows.Forms.TextBox();
             this.tbWorkshopNIFMeshSubDirectory = new System.Windows.Forms.TextBox();
             this.tbWorkshopNIFTargetSubDirectory = new System.Windows.Forms.TextBox();
@@ -161,7 +145,6 @@ namespace GUIBuilder.Windows
             this.lblWorkshopNIFGradientHeight = new System.Windows.Forms.Label();
             this.lblWorkshopNIFMeshSubDirectory = new System.Windows.Forms.Label();
             this.lblWorkshopNIFGroundOffset = new System.Windows.Forms.Label();
-            this.lblWorkshopNIFFilePrefix = new System.Windows.Forms.Label();
             this.lblWorkshopNIFGroundSink = new System.Windows.Forms.Label();
             this.lvWorkshops = new GUIBuilder.Windows.Controls.SyncedListView<Fallout4.WorkshopScript>();
             this.lblWorkshopPresets = new System.Windows.Forms.Label();
@@ -170,7 +153,8 @@ namespace GUIBuilder.Windows
             this.btnClearNodes = new System.Windows.Forms.Button();
             this.btnGenerateNodes = new System.Windows.Forms.Button();
             this.btnBuildNIFs = new System.Windows.Forms.Button();
-            this.cbWorkshopNIFHighPrecisionVertexes = new System.Windows.Forms.CheckBox();
+            this.cbWorkshopNIFUseExistingSTATEditorIDs = new System.Windows.Forms.CheckBox();
+            this.cbWorkshopNIFUseExistingFilePaths = new System.Windows.Forms.CheckBox();
             this.WindowPanel.SuspendLayout();
             this.gbTargetFolder.SuspendLayout();
             this.tcObjectSelect.SuspendLayout();
@@ -188,31 +172,20 @@ namespace GUIBuilder.Windows
             this.WindowPanel.Controls.Add(this.gbTargetFolder);
             this.WindowPanel.Controls.Add(this.tcObjectSelect);
             this.WindowPanel.Controls.Add(this.gbBorderFunctions);
-            this.WindowPanel.Size = new System.Drawing.Size(672, 450);
+            this.WindowPanel.Size = new System.Drawing.Size(672, 420);
             // 
             // gbTargetFolder
             // 
             this.gbTargetFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbTargetFolder.Controls.Add(this.tbMeshDirectory);
             this.gbTargetFolder.Controls.Add(this.tbTargetFolder);
-            this.gbTargetFolder.Controls.Add(this.lblMeshDirectory);
             this.gbTargetFolder.Location = new System.Drawing.Point(339, 6);
             this.gbTargetFolder.Name = "gbTargetFolder";
-            this.gbTargetFolder.Size = new System.Drawing.Size(330, 68);
+            this.gbTargetFolder.Size = new System.Drawing.Size(330, 44);
             this.gbTargetFolder.TabIndex = 5;
             this.gbTargetFolder.TabStop = false;
             this.gbTargetFolder.Tag = "BorderBatchWindow.TargetDirectory";
             this.gbTargetFolder.Text = "Target Folder";
-            // 
-            // tbMeshDirectory
-            // 
-            this.tbMeshDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbMeshDirectory.Location = new System.Drawing.Point(60, 42);
-            this.tbMeshDirectory.Name = "tbMeshDirectory";
-            this.tbMeshDirectory.Size = new System.Drawing.Size(264, 20);
-            this.tbMeshDirectory.TabIndex = 9;
             // 
             // tbTargetFolder
             // 
@@ -224,14 +197,6 @@ namespace GUIBuilder.Windows
             this.tbTargetFolder.Size = new System.Drawing.Size(318, 20);
             this.tbTargetFolder.TabIndex = 0;
             // 
-            // lblMeshDirectory
-            // 
-            this.lblMeshDirectory.Location = new System.Drawing.Point(6, 45);
-            this.lblMeshDirectory.Name = "lblMeshDirectory";
-            this.lblMeshDirectory.Size = new System.Drawing.Size(56, 17);
-            this.lblMeshDirectory.TabIndex = 8;
-            this.lblMeshDirectory.Text = "Meshes\\";
-            // 
             // tcObjectSelect
             // 
             this.tcObjectSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -239,10 +204,10 @@ namespace GUIBuilder.Windows
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tcObjectSelect.Controls.Add(this.tpSubDivisions);
             this.tcObjectSelect.Controls.Add(this.tpWorkshops);
-            this.tcObjectSelect.Location = new System.Drawing.Point(0, 80);
+            this.tcObjectSelect.Location = new System.Drawing.Point(0, 56);
             this.tcObjectSelect.Name = "tcObjectSelect";
             this.tcObjectSelect.SelectedIndex = 0;
-            this.tcObjectSelect.Size = new System.Drawing.Size(672, 369);
+            this.tcObjectSelect.Size = new System.Drawing.Size(672, 364);
             this.tcObjectSelect.TabIndex = 0;
             // 
             // tpSubDivisions
@@ -255,7 +220,7 @@ namespace GUIBuilder.Windows
             this.tpSubDivisions.Location = new System.Drawing.Point(4, 22);
             this.tpSubDivisions.Name = "tpSubDivisions";
             this.tpSubDivisions.Padding = new System.Windows.Forms.Padding(3);
-            this.tpSubDivisions.Size = new System.Drawing.Size(664, 343);
+            this.tpSubDivisions.Size = new System.Drawing.Size(664, 461);
             this.tpSubDivisions.TabIndex = 1;
             this.tpSubDivisions.Tag = "BorderBatchWindow.Tab.SubDivisions";
             this.tpSubDivisions.Text = "Sub-Divisions";
@@ -334,9 +299,7 @@ namespace GUIBuilder.Windows
             // gbSubDivisionNIFParameters
             // 
             this.gbSubDivisionNIFParameters.Controls.Add(this.tbSubDivisionNIFGroundSink);
-            this.gbSubDivisionNIFParameters.Controls.Add(this.tbSubDivisionNIFFileSuffix);
             this.gbSubDivisionNIFParameters.Controls.Add(this.cbSubDivisionNIFCreateImportData);
-            this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFFileSuffix);
             this.gbSubDivisionNIFParameters.Controls.Add(this.tbSubDivisionNIFTargetSubDirectory);
             this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFTargetSubDirectory);
             this.gbSubDivisionNIFParameters.Controls.Add(this.tbSubDivisionNIFGroundOffset);
@@ -346,28 +309,15 @@ namespace GUIBuilder.Windows
             this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFGroundOffset);
             this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFMeshSubDirectory);
             this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFGradientHeight);
-            this.gbSubDivisionNIFParameters.Controls.Add(this.tbSubDivisionNIFFilePrefix);
             this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFGroundSink);
-            this.gbSubDivisionNIFParameters.Controls.Add(this.lblSubDivisionNIFFilePrefix);
             this.gbSubDivisionNIFParameters.Controls.Add(this.cbSubDivisionNIFHighPrecisionVertexes);
             this.gbSubDivisionNIFParameters.Location = new System.Drawing.Point(0, 91);
             this.gbSubDivisionNIFParameters.Name = "gbSubDivisionNIFParameters";
-            this.gbSubDivisionNIFParameters.Size = new System.Drawing.Size(330, 252);
+            this.gbSubDivisionNIFParameters.Size = new System.Drawing.Size(330, 205);
             this.gbSubDivisionNIFParameters.TabIndex = 11;
             this.gbSubDivisionNIFParameters.TabStop = false;
             this.gbSubDivisionNIFParameters.Tag = "BorderBatchWindow.NIF.Parameters";
             this.gbSubDivisionNIFParameters.Text = "NIFs";
-            // 
-            // cbSubDivisionNIFHighPrecisionVertexes
-            // 
-            this.cbSubDivisionNIFHighPrecisionVertexes.AutoEllipsis = true;
-            this.cbSubDivisionNIFHighPrecisionVertexes.Location = new System.Drawing.Point(6, 37);
-            this.cbSubDivisionNIFHighPrecisionVertexes.Name = "cbSubDivisionNIFHighPrecisionVertexes";
-            this.cbSubDivisionNIFHighPrecisionVertexes.Size = new System.Drawing.Size(317, 21);
-            this.cbSubDivisionNIFHighPrecisionVertexes.TabIndex = 29;
-            this.cbSubDivisionNIFHighPrecisionVertexes.Tag = "BorderBatchWindow.NIF.UseHighPrecisionFloats";
-            this.cbSubDivisionNIFHighPrecisionVertexes.Text = "High Precision Vertexes";
-            this.cbSubDivisionNIFHighPrecisionVertexes.UseVisualStyleBackColor = true;
             // 
             // tbSubDivisionNIFGroundSink
             // 
@@ -376,13 +326,6 @@ namespace GUIBuilder.Windows
             this.tbSubDivisionNIFGroundSink.Size = new System.Drawing.Size(60, 20);
             this.tbSubDivisionNIFGroundSink.TabIndex = 8;
             this.tbSubDivisionNIFGroundSink.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // tbSubDivisionNIFFileSuffix
-            // 
-            this.tbSubDivisionNIFFileSuffix.Location = new System.Drawing.Point(103, 202);
-            this.tbSubDivisionNIFFileSuffix.Name = "tbSubDivisionNIFFileSuffix";
-            this.tbSubDivisionNIFFileSuffix.Size = new System.Drawing.Size(221, 20);
-            this.tbSubDivisionNIFFileSuffix.TabIndex = 28;
             // 
             // cbSubDivisionNIFCreateImportData
             // 
@@ -394,15 +337,6 @@ namespace GUIBuilder.Windows
             this.cbSubDivisionNIFCreateImportData.Tag = "BorderBatchWindow.NIF.CreateImports";
             this.cbSubDivisionNIFCreateImportData.Text = "Create Import Data";
             this.cbSubDivisionNIFCreateImportData.UseVisualStyleBackColor = true;
-            // 
-            // lblSubDivisionNIFFileSuffix
-            // 
-            this.lblSubDivisionNIFFileSuffix.Location = new System.Drawing.Point(6, 205);
-            this.lblSubDivisionNIFFileSuffix.Name = "lblSubDivisionNIFFileSuffix";
-            this.lblSubDivisionNIFFileSuffix.Size = new System.Drawing.Size(101, 17);
-            this.lblSubDivisionNIFFileSuffix.TabIndex = 27;
-            this.lblSubDivisionNIFFileSuffix.Tag = "BorderBatchWindow.NIF.FileSuffix:";
-            this.lblSubDivisionNIFFileSuffix.Text = "File Suffix:";
             // 
             // tbSubDivisionNIFTargetSubDirectory
             // 
@@ -439,7 +373,7 @@ namespace GUIBuilder.Windows
             // 
             this.tbNIFBuilderSubDivisionNIFSampleFilePath.BackColor = System.Drawing.SystemColors.Control;
             this.tbNIFBuilderSubDivisionNIFSampleFilePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbNIFBuilderSubDivisionNIFSampleFilePath.Location = new System.Drawing.Point(6, 225);
+            this.tbNIFBuilderSubDivisionNIFSampleFilePath.Location = new System.Drawing.Point(6, 179);
             this.tbNIFBuilderSubDivisionNIFSampleFilePath.Name = "tbNIFBuilderSubDivisionNIFSampleFilePath";
             this.tbNIFBuilderSubDivisionNIFSampleFilePath.Size = new System.Drawing.Size(318, 20);
             this.tbNIFBuilderSubDivisionNIFSampleFilePath.TabIndex = 7;
@@ -479,13 +413,6 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionNIFGradientHeight.Tag = "BorderBatchWindow.NIF.GradientHeight:";
             this.lblSubDivisionNIFGradientHeight.Text = "Gradient Height:";
             // 
-            // tbSubDivisionNIFFilePrefix
-            // 
-            this.tbSubDivisionNIFFilePrefix.Location = new System.Drawing.Point(103, 179);
-            this.tbSubDivisionNIFFilePrefix.Name = "tbSubDivisionNIFFilePrefix";
-            this.tbSubDivisionNIFFilePrefix.Size = new System.Drawing.Size(221, 20);
-            this.tbSubDivisionNIFFilePrefix.TabIndex = 9;
-            // 
             // lblSubDivisionNIFGroundSink
             // 
             this.lblSubDivisionNIFGroundSink.Location = new System.Drawing.Point(6, 113);
@@ -495,14 +422,16 @@ namespace GUIBuilder.Windows
             this.lblSubDivisionNIFGroundSink.Tag = "BorderBatchWindow.NIF.GroundSink:";
             this.lblSubDivisionNIFGroundSink.Text = "Ground Sink:";
             // 
-            // lblSubDivisionNIFFilePrefix
+            // cbSubDivisionNIFHighPrecisionVertexes
             // 
-            this.lblSubDivisionNIFFilePrefix.Location = new System.Drawing.Point(6, 182);
-            this.lblSubDivisionNIFFilePrefix.Name = "lblSubDivisionNIFFilePrefix";
-            this.lblSubDivisionNIFFilePrefix.Size = new System.Drawing.Size(101, 17);
-            this.lblSubDivisionNIFFilePrefix.TabIndex = 8;
-            this.lblSubDivisionNIFFilePrefix.Tag = "BorderBatchWindow.NIF.FilePrefix:";
-            this.lblSubDivisionNIFFilePrefix.Text = "File Prefix:";
+            this.cbSubDivisionNIFHighPrecisionVertexes.AutoEllipsis = true;
+            this.cbSubDivisionNIFHighPrecisionVertexes.Location = new System.Drawing.Point(6, 37);
+            this.cbSubDivisionNIFHighPrecisionVertexes.Name = "cbSubDivisionNIFHighPrecisionVertexes";
+            this.cbSubDivisionNIFHighPrecisionVertexes.Size = new System.Drawing.Size(317, 21);
+            this.cbSubDivisionNIFHighPrecisionVertexes.TabIndex = 29;
+            this.cbSubDivisionNIFHighPrecisionVertexes.Tag = "BorderBatchWindow.NIF.UseHighPrecisionFloats";
+            this.cbSubDivisionNIFHighPrecisionVertexes.Text = "High Precision Vertexes";
+            this.cbSubDivisionNIFHighPrecisionVertexes.UseVisualStyleBackColor = true;
             // 
             // lvSubDivisions
             // 
@@ -520,7 +449,7 @@ namespace GUIBuilder.Windows
             this.lvSubDivisions.Location = new System.Drawing.Point(336, 0);
             this.lvSubDivisions.MultiSelect = true;
             this.lvSubDivisions.Name = "lvSubDivisions";
-            this.lvSubDivisions.Size = new System.Drawing.Size(328, 343);
+            this.lvSubDivisions.Size = new System.Drawing.Size(328, 461);
             this.lvSubDivisions.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
             this.lvSubDivisions.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvSubDivisions.SyncedEditorFormType = null;
@@ -555,7 +484,7 @@ namespace GUIBuilder.Windows
             this.tpWorkshops.Location = new System.Drawing.Point(4, 22);
             this.tpWorkshops.Name = "tpWorkshops";
             this.tpWorkshops.Padding = new System.Windows.Forms.Padding(3);
-            this.tpWorkshops.Size = new System.Drawing.Size(664, 343);
+            this.tpWorkshops.Size = new System.Drawing.Size(664, 338);
             this.tpWorkshops.TabIndex = 0;
             this.tpWorkshops.Tag = "BorderBatchWindow.Tab.Workshops";
             this.tpWorkshops.Text = "Workshops";
@@ -641,12 +570,11 @@ namespace GUIBuilder.Windows
             // 
             // gbWorkshopNIFParameters
             // 
+            this.gbWorkshopNIFParameters.Controls.Add(this.cbWorkshopNIFUseExistingFilePaths);
+            this.gbWorkshopNIFParameters.Controls.Add(this.cbWorkshopNIFUseExistingSTATEditorIDs);
             this.gbWorkshopNIFParameters.Controls.Add(this.cbWorkshopNIFHighPrecisionVertexes);
             this.gbWorkshopNIFParameters.Controls.Add(this.cbWorkshopNIFCreateImportData);
             this.gbWorkshopNIFParameters.Controls.Add(this.tbWorkshopNIFGroundSink);
-            this.gbWorkshopNIFParameters.Controls.Add(this.tbWorkshopNIFFileSuffix);
-            this.gbWorkshopNIFParameters.Controls.Add(this.lblWorkshopNIFFileSuffix);
-            this.gbWorkshopNIFParameters.Controls.Add(this.tbWorkshopNIFFilePrefix);
             this.gbWorkshopNIFParameters.Controls.Add(this.tbWorkshopNIFGroundOffset);
             this.gbWorkshopNIFParameters.Controls.Add(this.tbWorkshopNIFMeshSubDirectory);
             this.gbWorkshopNIFParameters.Controls.Add(this.tbWorkshopNIFTargetSubDirectory);
@@ -656,15 +584,25 @@ namespace GUIBuilder.Windows
             this.gbWorkshopNIFParameters.Controls.Add(this.lblWorkshopNIFGradientHeight);
             this.gbWorkshopNIFParameters.Controls.Add(this.lblWorkshopNIFMeshSubDirectory);
             this.gbWorkshopNIFParameters.Controls.Add(this.lblWorkshopNIFGroundOffset);
-            this.gbWorkshopNIFParameters.Controls.Add(this.lblWorkshopNIFFilePrefix);
             this.gbWorkshopNIFParameters.Controls.Add(this.lblWorkshopNIFGroundSink);
             this.gbWorkshopNIFParameters.Location = new System.Drawing.Point(0, 91);
             this.gbWorkshopNIFParameters.Name = "gbWorkshopNIFParameters";
-            this.gbWorkshopNIFParameters.Size = new System.Drawing.Size(330, 252);
+            this.gbWorkshopNIFParameters.Size = new System.Drawing.Size(330, 247);
             this.gbWorkshopNIFParameters.TabIndex = 10;
             this.gbWorkshopNIFParameters.TabStop = false;
             this.gbWorkshopNIFParameters.Tag = "BorderBatchWindow.NIF.Parameters";
             this.gbWorkshopNIFParameters.Text = "NIFs";
+            // 
+            // cbWorkshopNIFHighPrecisionVertexes
+            // 
+            this.cbWorkshopNIFHighPrecisionVertexes.AutoEllipsis = true;
+            this.cbWorkshopNIFHighPrecisionVertexes.Location = new System.Drawing.Point(6, 37);
+            this.cbWorkshopNIFHighPrecisionVertexes.Name = "cbWorkshopNIFHighPrecisionVertexes";
+            this.cbWorkshopNIFHighPrecisionVertexes.Size = new System.Drawing.Size(317, 21);
+            this.cbWorkshopNIFHighPrecisionVertexes.TabIndex = 30;
+            this.cbWorkshopNIFHighPrecisionVertexes.Tag = "BorderBatchWindow.NIF.UseHighPrecisionFloats";
+            this.cbWorkshopNIFHighPrecisionVertexes.Text = "High Precision Vertexes";
+            this.cbWorkshopNIFHighPrecisionVertexes.UseVisualStyleBackColor = true;
             // 
             // cbWorkshopNIFCreateImportData
             // 
@@ -679,38 +617,15 @@ namespace GUIBuilder.Windows
             // 
             // tbWorkshopNIFGroundSink
             // 
-            this.tbWorkshopNIFGroundSink.Location = new System.Drawing.Point(103, 110);
+            this.tbWorkshopNIFGroundSink.Location = new System.Drawing.Point(103, 152);
             this.tbWorkshopNIFGroundSink.Name = "tbWorkshopNIFGroundSink";
             this.tbWorkshopNIFGroundSink.Size = new System.Drawing.Size(60, 20);
             this.tbWorkshopNIFGroundSink.TabIndex = 24;
             this.tbWorkshopNIFGroundSink.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // tbWorkshopNIFFileSuffix
-            // 
-            this.tbWorkshopNIFFileSuffix.Location = new System.Drawing.Point(103, 202);
-            this.tbWorkshopNIFFileSuffix.Name = "tbWorkshopNIFFileSuffix";
-            this.tbWorkshopNIFFileSuffix.Size = new System.Drawing.Size(221, 20);
-            this.tbWorkshopNIFFileSuffix.TabIndex = 26;
-            // 
-            // lblWorkshopNIFFileSuffix
-            // 
-            this.lblWorkshopNIFFileSuffix.Location = new System.Drawing.Point(6, 205);
-            this.lblWorkshopNIFFileSuffix.Name = "lblWorkshopNIFFileSuffix";
-            this.lblWorkshopNIFFileSuffix.Size = new System.Drawing.Size(101, 17);
-            this.lblWorkshopNIFFileSuffix.TabIndex = 25;
-            this.lblWorkshopNIFFileSuffix.Tag = "BorderBatchWindow.NIF.FileSuffix:";
-            this.lblWorkshopNIFFileSuffix.Text = "File Suffix:";
-            // 
-            // tbWorkshopNIFFilePrefix
-            // 
-            this.tbWorkshopNIFFilePrefix.Location = new System.Drawing.Point(103, 179);
-            this.tbWorkshopNIFFilePrefix.Name = "tbWorkshopNIFFilePrefix";
-            this.tbWorkshopNIFFilePrefix.Size = new System.Drawing.Size(221, 20);
-            this.tbWorkshopNIFFilePrefix.TabIndex = 1;
-            // 
             // tbWorkshopNIFGroundOffset
             // 
-            this.tbWorkshopNIFGroundOffset.Location = new System.Drawing.Point(103, 87);
+            this.tbWorkshopNIFGroundOffset.Location = new System.Drawing.Point(103, 129);
             this.tbWorkshopNIFGroundOffset.Name = "tbWorkshopNIFGroundOffset";
             this.tbWorkshopNIFGroundOffset.Size = new System.Drawing.Size(60, 20);
             this.tbWorkshopNIFGroundOffset.TabIndex = 23;
@@ -718,21 +633,21 @@ namespace GUIBuilder.Windows
             // 
             // tbWorkshopNIFMeshSubDirectory
             // 
-            this.tbWorkshopNIFMeshSubDirectory.Location = new System.Drawing.Point(103, 156);
+            this.tbWorkshopNIFMeshSubDirectory.Location = new System.Drawing.Point(103, 198);
             this.tbWorkshopNIFMeshSubDirectory.Name = "tbWorkshopNIFMeshSubDirectory";
             this.tbWorkshopNIFMeshSubDirectory.Size = new System.Drawing.Size(221, 20);
             this.tbWorkshopNIFMeshSubDirectory.TabIndex = 2;
             // 
             // tbWorkshopNIFTargetSubDirectory
             // 
-            this.tbWorkshopNIFTargetSubDirectory.Location = new System.Drawing.Point(103, 133);
+            this.tbWorkshopNIFTargetSubDirectory.Location = new System.Drawing.Point(103, 175);
             this.tbWorkshopNIFTargetSubDirectory.Name = "tbWorkshopNIFTargetSubDirectory";
             this.tbWorkshopNIFTargetSubDirectory.Size = new System.Drawing.Size(221, 20);
             this.tbWorkshopNIFTargetSubDirectory.TabIndex = 20;
             // 
             // lblWorkshopNIFTargetSubDirectory
             // 
-            this.lblWorkshopNIFTargetSubDirectory.Location = new System.Drawing.Point(6, 136);
+            this.lblWorkshopNIFTargetSubDirectory.Location = new System.Drawing.Point(6, 178);
             this.lblWorkshopNIFTargetSubDirectory.Name = "lblWorkshopNIFTargetSubDirectory";
             this.lblWorkshopNIFTargetSubDirectory.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopNIFTargetSubDirectory.TabIndex = 21;
@@ -741,7 +656,7 @@ namespace GUIBuilder.Windows
             // 
             // tbWorkshopNIFGradientHeight
             // 
-            this.tbWorkshopNIFGradientHeight.Location = new System.Drawing.Point(103, 64);
+            this.tbWorkshopNIFGradientHeight.Location = new System.Drawing.Point(103, 106);
             this.tbWorkshopNIFGradientHeight.Name = "tbWorkshopNIFGradientHeight";
             this.tbWorkshopNIFGradientHeight.Size = new System.Drawing.Size(60, 20);
             this.tbWorkshopNIFGradientHeight.TabIndex = 22;
@@ -751,14 +666,14 @@ namespace GUIBuilder.Windows
             // 
             this.tbWorkshopNIFSampleFilePath.BackColor = System.Drawing.SystemColors.Control;
             this.tbWorkshopNIFSampleFilePath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbWorkshopNIFSampleFilePath.Location = new System.Drawing.Point(6, 225);
+            this.tbWorkshopNIFSampleFilePath.Location = new System.Drawing.Point(6, 221);
             this.tbWorkshopNIFSampleFilePath.Name = "tbWorkshopNIFSampleFilePath";
             this.tbWorkshopNIFSampleFilePath.Size = new System.Drawing.Size(318, 20);
             this.tbWorkshopNIFSampleFilePath.TabIndex = 4;
             // 
             // lblWorkshopNIFGradientHeight
             // 
-            this.lblWorkshopNIFGradientHeight.Location = new System.Drawing.Point(6, 67);
+            this.lblWorkshopNIFGradientHeight.Location = new System.Drawing.Point(6, 109);
             this.lblWorkshopNIFGradientHeight.Name = "lblWorkshopNIFGradientHeight";
             this.lblWorkshopNIFGradientHeight.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopNIFGradientHeight.TabIndex = 20;
@@ -767,7 +682,7 @@ namespace GUIBuilder.Windows
             // 
             // lblWorkshopNIFMeshSubDirectory
             // 
-            this.lblWorkshopNIFMeshSubDirectory.Location = new System.Drawing.Point(6, 159);
+            this.lblWorkshopNIFMeshSubDirectory.Location = new System.Drawing.Point(6, 201);
             this.lblWorkshopNIFMeshSubDirectory.Name = "lblWorkshopNIFMeshSubDirectory";
             this.lblWorkshopNIFMeshSubDirectory.Size = new System.Drawing.Size(101, 17);
             this.lblWorkshopNIFMeshSubDirectory.TabIndex = 5;
@@ -776,25 +691,16 @@ namespace GUIBuilder.Windows
             // 
             // lblWorkshopNIFGroundOffset
             // 
-            this.lblWorkshopNIFGroundOffset.Location = new System.Drawing.Point(6, 90);
+            this.lblWorkshopNIFGroundOffset.Location = new System.Drawing.Point(6, 132);
             this.lblWorkshopNIFGroundOffset.Name = "lblWorkshopNIFGroundOffset";
             this.lblWorkshopNIFGroundOffset.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopNIFGroundOffset.TabIndex = 21;
             this.lblWorkshopNIFGroundOffset.Tag = "BorderBatchWindow.NIF.GroundOffset:";
             this.lblWorkshopNIFGroundOffset.Text = "Ground Offset:";
             // 
-            // lblWorkshopNIFFilePrefix
-            // 
-            this.lblWorkshopNIFFilePrefix.Location = new System.Drawing.Point(6, 182);
-            this.lblWorkshopNIFFilePrefix.Name = "lblWorkshopNIFFilePrefix";
-            this.lblWorkshopNIFFilePrefix.Size = new System.Drawing.Size(101, 17);
-            this.lblWorkshopNIFFilePrefix.TabIndex = 0;
-            this.lblWorkshopNIFFilePrefix.Tag = "BorderBatchWindow.NIF.FilePrefix:";
-            this.lblWorkshopNIFFilePrefix.Text = "File Prefix:";
-            // 
             // lblWorkshopNIFGroundSink
             // 
-            this.lblWorkshopNIFGroundSink.Location = new System.Drawing.Point(6, 113);
+            this.lblWorkshopNIFGroundSink.Location = new System.Drawing.Point(6, 155);
             this.lblWorkshopNIFGroundSink.Name = "lblWorkshopNIFGroundSink";
             this.lblWorkshopNIFGroundSink.Size = new System.Drawing.Size(90, 16);
             this.lblWorkshopNIFGroundSink.TabIndex = 19;
@@ -817,7 +723,7 @@ namespace GUIBuilder.Windows
             this.lvWorkshops.Location = new System.Drawing.Point(336, 0);
             this.lvWorkshops.MultiSelect = true;
             this.lvWorkshops.Name = "lvWorkshops";
-            this.lvWorkshops.Size = new System.Drawing.Size(328, 343);
+            this.lvWorkshops.Size = new System.Drawing.Size(328, 338);
             this.lvWorkshops.SortByColumn = GUIBuilder.Windows.Controls.SyncedSortByColumns.EditorID;
             this.lvWorkshops.SortDirection = GUIBuilder.Windows.Controls.SyncedSortDirections.Ascending;
             this.lvWorkshops.SyncedEditorFormType = null;
@@ -842,7 +748,7 @@ namespace GUIBuilder.Windows
             this.gbBorderFunctions.Controls.Add(this.btnBuildNIFs);
             this.gbBorderFunctions.Location = new System.Drawing.Point(3, 6);
             this.gbBorderFunctions.Name = "gbBorderFunctions";
-            this.gbBorderFunctions.Size = new System.Drawing.Size(330, 68);
+            this.gbBorderFunctions.Size = new System.Drawing.Size(330, 44);
             this.gbBorderFunctions.TabIndex = 9;
             this.gbBorderFunctions.TabStop = false;
             this.gbBorderFunctions.Tag = "BatchWindow.Functions";
@@ -888,26 +794,37 @@ namespace GUIBuilder.Windows
             this.btnBuildNIFs.Text = "Build NIFs";
             this.btnBuildNIFs.UseVisualStyleBackColor = true;
             // 
-            // cbWorkshopNIFHighPrecisionVertexes
+            // cbWorkshopNIFUseExistingSTATEditorIDs
             // 
-            this.cbWorkshopNIFHighPrecisionVertexes.AutoEllipsis = true;
-            this.cbWorkshopNIFHighPrecisionVertexes.Location = new System.Drawing.Point(6, 37);
-            this.cbWorkshopNIFHighPrecisionVertexes.Name = "cbWorkshopNIFHighPrecisionVertexes";
-            this.cbWorkshopNIFHighPrecisionVertexes.Size = new System.Drawing.Size(317, 21);
-            this.cbWorkshopNIFHighPrecisionVertexes.TabIndex = 30;
-            this.cbWorkshopNIFHighPrecisionVertexes.Tag = "BorderBatchWindow.NIF.UseHighPrecisionFloats";
-            this.cbWorkshopNIFHighPrecisionVertexes.Text = "High Precision Vertexes";
-            this.cbWorkshopNIFHighPrecisionVertexes.UseVisualStyleBackColor = true;
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.AutoEllipsis = true;
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.Location = new System.Drawing.Point(6, 58);
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.Name = "cbWorkshopNIFUseExistingSTATEditorIDs";
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.Size = new System.Drawing.Size(317, 21);
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.TabIndex = 31;
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.Tag = "BorderBatchWindow.NIF.UseExistingSTATEditorIDs";
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.Text = "Use Existing Static EditorIDs";
+            this.cbWorkshopNIFUseExistingSTATEditorIDs.UseVisualStyleBackColor = true;
+            // 
+            // cbWorkshopNIFUseExistingFilePaths
+            // 
+            this.cbWorkshopNIFUseExistingFilePaths.AutoEllipsis = true;
+            this.cbWorkshopNIFUseExistingFilePaths.Location = new System.Drawing.Point(6, 79);
+            this.cbWorkshopNIFUseExistingFilePaths.Name = "cbWorkshopNIFUseExistingFilePaths";
+            this.cbWorkshopNIFUseExistingFilePaths.Size = new System.Drawing.Size(317, 21);
+            this.cbWorkshopNIFUseExistingFilePaths.TabIndex = 32;
+            this.cbWorkshopNIFUseExistingFilePaths.Tag = "BorderBatchWindow.NIF.UseExistingFilePaths";
+            this.cbWorkshopNIFUseExistingFilePaths.Text = "Use Existing Static NIF Filepaths";
+            this.cbWorkshopNIFUseExistingFilePaths.UseVisualStyleBackColor = true;
             // 
             // BorderBatch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(672, 450);
+            this.ClientSize = new System.Drawing.Size(672, 420);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(680, 474);
+            this.MinimumSize = new System.Drawing.Size(680, 444);
             this.Name = "BorderBatch";
             this.ShowInTaskbar = false;
             this.Tag = "BorderBatchWindow.Title";

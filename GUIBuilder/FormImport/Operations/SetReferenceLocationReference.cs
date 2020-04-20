@@ -19,11 +19,19 @@ namespace GUIBuilder.FormImport.Operations
 
         readonly ImportTarget                           _Location;
 
+        bool                                            ClearValue
+        {
+            get
+            {
+                return ( _Location == null )||( !_Location.FormID.ValidFormID() );
+            }
+        }
+        
         public override string[]                        OperationalInformation()
         {
             return new [] {
                 (
-                    ( _Location == null )
+                    ClearValue
                     ? string.Format( "{0}: {1}", DN_Location.Translate(), DN_Clear .Translate()        )
                     : string.Format( "{0}: {1}", _Location  .DisplayName, _Location.NullSafeIDString() )
                 )
@@ -61,8 +69,8 @@ namespace GUIBuilder.FormImport.Operations
                 Parent.AddErrorMessage( ErrorTypes.Import, "ImportTarget did not resolve to " + typeof( ObjectReference ).FullName() );
             else
             {
-                if( ( _Location == null )||( _Location.Value == null ) )
-                    refr.LocationReference.DeleteRootElement( false, false );
+                if( ClearValue )
+                    result = refr.LocationReference.DeleteRootElement( false, false );
                 else
                 {
                     refr.LocationReference.SetValue( TargetHandle.Working, _Location.FormID );
@@ -76,8 +84,11 @@ namespace GUIBuilder.FormImport.Operations
         {
             var refr = Target.Value as ObjectReference;
             if( refr == null ) return false;
-            var lFID = refr.LocationReference.GetValue( TargetHandle.WorkingOrLastFullRequired );
-            return lFID == ( ( _Location != null ) ? _Location.FormID : 0 );
+            
+            if( ClearValue )
+                return !refr.LocationReference.HasValue( TargetHandle.WorkingOrLastFullRequired );
+
+            return _Location.FormID == refr.LocationReference.GetValue( TargetHandle.WorkingOrLastFullRequired );
         }
     }
 

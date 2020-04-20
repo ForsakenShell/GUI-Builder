@@ -99,16 +99,16 @@ public static partial class NIFBuilder
             Engine.Plugin.Forms.Keyword linkKeyword,
             Engine.Plugin.Forms.Layer layer,
             string targetPath,
-            string targetSuffix,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string location,
-            string fileSuffix,
-            string neighbour,
+            string statEditorIDFormat,
+            string modPrefix,
+            string name,
             int borderIndex,
-            string forcedNIFPath,
-            string forcedNIFFile,
+            string neighbour,
+            int subIndex,
+            string forcedNIFFilePath,
+            string forcedEditorID,
             float volumeCeiling,
             float gradientHeight,
             float groundOffset,
@@ -125,11 +125,12 @@ public static partial class NIFBuilder
     {
         DebugLog.OpenIndentLevel(
             new string [] {
-                "Target Path = \"" + Mesh.BuildTargetPath( targetPath, targetSuffix ) + "\"",
+                "TargetPath = \"" + targetPath + "\"",
+                "TargetSubPath = \"" + targetSubPath + "\"",
                 "gradientHeight = " + gradientHeight.ToString(),
                 "groundOffset = " + groundOffset.ToString(),
                 "groundSink = " + groundSink.ToString(),
-                "location = \"" + location + "\"",
+                "location = \"" + name + "\"",
                 "neighbour = \"" + neighbour + "\"",
                 "createImportData = " + createImportData.ToString(),
                 "highPrecisionVertexes = " + highPrecisionVertexes.ToString()
@@ -138,13 +139,15 @@ public static partial class NIFBuilder
         
         List<GUIBuilder.FormImport.ImportBase> list = null;
 
+        #region Sanity Checks
+
         if( string.IsNullOrEmpty( targetPath ) )
         {
             DebugLog.WriteLine( "No targetPath!" );
             goto localAbort;
         }
 
-        if( string.IsNullOrEmpty( location ) )
+        if( string.IsNullOrEmpty( name ) )
         {
             DebugLog.WriteLine( "No location!" );
             goto localAbort;
@@ -170,9 +173,9 @@ public static partial class NIFBuilder
 
         if(
             ( splitMeshes ) &&
-            ( !string.IsNullOrEmpty( forcedNIFFile ) )
+            ( !string.IsNullOrEmpty( forcedEditorID ) )
         ){
-            DebugLog.WriteLine( "Cannot split meshes with a forcedNIFFile!" );
+            DebugLog.WriteLine( "Cannot split meshes with a forcedNIFEditorID!" );
             goto localAbort;
         }
 
@@ -186,19 +189,27 @@ public static partial class NIFBuilder
             DebugLog.WriteLine( "No enablerReference or, linkRef and linkKeyword!" );
             goto localAbort;
         }
-        
+
+        #endregion
+
         // If enablerKeyword is null then the enabler is linked to the border reference as it's enable parent (XESP field of the reference), ie: sub-division borders
         // otherwise, the border reference is linked to the enable parent as a standard linked reference using the keyword, ie: workshop borders
-        
+
+        #region Clone the input nodes before doing nasty things to them
+
         //BorderNodeGroup.DumpGroupNodes( allNodes, "Pre-clone nodes:" );
-        
+
         // Clone the list and the nodes so we don't corrupt the original data
         var clonedNodeList = new List<BorderNode>();
         foreach( var node in allNodes )
             clonedNodeList.Add( node.Clone() );
-        
+
         //BorderNodeGroup.DumpGroupNodes( clonedNodeList, "Post-clone nodes:" );
-        
+
+        #endregion
+
+        #region Create the node groups from clones nodes (unsplit/cell split)
+
         List<BorderNodeGroup> nodeGroups = null;
         if( !splitMeshes )
         {
@@ -213,11 +224,13 @@ public static partial class NIFBuilder
             var nodeGroup = new BorderNodeGroup(
                 centreCell,
                 clonedNodeList,
-                meshSuffix, meshSubPath,
-                filePrefix, location,
-                fileSuffix, borderIndex,
+                targetSubPath,
+                meshSubPath,
+                statEditorIDFormat,
+                modPrefix,
+                name, borderIndex,
                 neighbour, -1,
-                forcedNIFPath, forcedNIFFile
+                forcedNIFFilePath, forcedEditorID
                 );
             nodeGroup.Placement = new Vector3f( meshCentre );
             nodeGroups.Add( nodeGroup );
@@ -226,90 +239,121 @@ public static partial class NIFBuilder
         {
             nodeGroups = BorderNodeGroup.SplitAcrossCells(
                 clonedNodeList,
-                meshSuffix, meshSubPath,
-                filePrefix, location,
-                fileSuffix, borderIndex,
+                targetSubPath,
+                meshSubPath,
+                statEditorIDFormat,
+                modPrefix,
+                name, subIndex,
                 neighbour, 0 );
             foreach( var group in nodeGroups )
                 group.CentreAndPlaceNodes();
         }
-        
+
         if( nodeGroups.NullOrEmpty() )
         {
             DebugLog.WriteLine( "No Node Groups!" );
             goto localAbort;
         }
         
+        #endregion
+
         for( int i = 0; i < nodeGroups.Count; i++ )
         {
             var group = nodeGroups[ i ];
-            BorderNodeGroup.DumpGroupNodes( group.Nodes, "Group[ " + i + " ] Nodes:" );
-            
-            if( group.BuildMesh( gradientHeight, groundOffset, groundSink, insideColours, outsideColours, highPrecisionVertexes ) )
-            {
-                group.Mesh.Write( targetPath, targetSuffix, exportInfo );
-                if( createImportData )
-                {
-                    var keys = string.IsNullOrEmpty( forcedNIFFile )
-                        ? Mesh.MatchKeys( location, neighbour, group.BorderIndex, group.NIFIndex )
-                        : Mesh.MatchKeys( group.Mesh.nifFile );
 
-                    // Create an import for the Static Object
-                    
-                    uint recordFlags = workshopBorder
-                        ? F4_BORDER_STATIC_RECORD_FLAGS
-                        : ATC_BORDER_STATIC_RECORD_FLAGS;
+            DebugLog.OpenIndentLevel( "Group[ " + i + " ]", false );
+            BorderNodeGroup.DumpGroupNodes( group.Nodes, "Nodes" );
 
-                    var orgStat = group.BestStaticFormFromOriginalsFor( originalForms, keys, true );
-                    var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_Invalid : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
-                    var statEditorID = group.Mesh.nifFile;
-                    var minBounds = group.MinBounds; // Nodes are terrain following and their bounds will be
-                    var maxBounds = group.MaxBounds; // the elevation differences from the center (placement)
-                    minBounds.Z -= (int)groundSink;  // point, so add the appropriate offsets for the mesh
-                    maxBounds.Z += (int)( groundOffset + gradientHeight );
+            #region Create a NIF for the node group
 
-                    CreateBorderStaticImport( ref list,
-                        workshopBorder,
-                        statEditorID,
-                        orgStat,
-                        group.NIFFilePath,
-                        minBounds,
-                        maxBounds );
-
-                    //GUIBuilder.FormImport.ImportBase.AddToList( ref list, new GUIBuilder.FormImport.ImportBorderStatic( orgStat, statEditorID, group.NIFFilePath, minBounds, maxBounds, recordFlags ) );
-
-                    // Create an import for the Object Reference
-                    var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
-
-                    CreateBorderReferenceImport( ref list,
-                        workshopBorder,
-                        orgStat,
-                        statEditorID,
-                        orgRefr,
-                        (
-                            ( worldspace == null )
-                            ? orgRefr?.Cell
-                            : worldspace.Cells.GetByGrid( group.Cell )
-                        ),
-                        group.Placement,
-                        layer,
-                        (
-                            ( layer == null )
-                            ? null
-                            : layer.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
-                        ),
-                        enablerReference,
-                        linkRef, linkKeyword );
-                }
-            }
-            else
+            if( !group.BuildMesh( gradientHeight, groundOffset, groundSink, insideColours, outsideColours, highPrecisionVertexes ) )
             {
                 DebugLog.WriteError( "Could not build NIF for node group " + i );
+                continue;
             }
+
+            #endregion
+
+            #region Write the NIF to file
+
+            try
+            {
+                //group.Mesh.Write( targetPath, targetSubPath, exportInfo );
+                group.Mesh.Write( targetPath, exportInfo );
+            }
+            catch( Exception e )
+            {
+                DebugLog.WriteException( e );
+                continue;
+            }
+
+            #endregion
+
+            #region Create imports for the Static (NIF) and Object Reference
+
+            if( createImportData )
+            {
+
+                #region Create an import for the Static Object
+
+                var keys = string.IsNullOrEmpty( forcedEditorID )
+                    ? Mesh.MatchKeys( name, neighbour, group.BorderIndex, group.NIFIndex )
+                    : Mesh.MatchKeys( group.EditorID );
+
+                var orgStat = group.BestStaticFormFromOriginalsFor( originalForms, keys, true );
+                var statFormID = orgStat == null ? Engine.Plugin.Constant.FormID_Invalid : orgStat.GetFormID( Engine.Plugin.TargetHandle.Master );
+                var statEditorID = group.EditorID;
+                var minBounds = group.MinBounds; // Nodes are terrain following and their bounds will be
+                var maxBounds = group.MaxBounds; // the elevation differences from the center (placement)
+                minBounds.Z -= (int)groundSink;  // point, so add the appropriate offsets for the mesh
+                maxBounds.Z += (int)( groundOffset + gradientHeight );
+
+                CreateBorderStaticImport( ref list,
+                    workshopBorder,
+                    statEditorID,
+                    orgStat,
+                    group.NIFFilePath( false ),
+                    minBounds,
+                    maxBounds );
+
+                #endregion
+
+                #region  Create an import for the Object Reference
+
+                var orgRefr = group.BestObjectReferenceFromOriginalsFor( originalForms, statFormID, true );
+
+                CreateBorderReferenceImport( ref list,
+                    workshopBorder,
+                    orgStat,
+                    statEditorID,
+                    orgRefr,
+                    (
+                        ( worldspace == null )
+                        ? orgRefr?.Cell
+                        : worldspace.Cells.GetByGrid( group.Cell )
+                    ),
+                    group.Placement,
+                    layer,
+                    (
+                        ( layer == null )
+                        ? null
+                        : layer.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired )
+                    ),
+                    enablerReference,
+                    linkRef, linkKeyword );
+
+                #endregion
+
+            }
+
+            #endregion
+
+            DebugLog.CloseIndentLevel();
         }
-        
+
     localAbort:
-        DebugLog.CloseIndentList( "Imports", list, false, true, true );
+        //DebugLog.CloseIndentList( "Imports", list, false, true, true );
+        DebugLog.CloseIndentLevel();
         return list;
     }
 
@@ -338,12 +382,13 @@ public static partial class NIFBuilder
 
         import.AddOperation( new Operations.SetEditorID( import, statEditorID ) );
 
+        var strippedFilePath = NIFFilePath.StripFrom( "Meshes\\", StringComparison.InvariantCultureIgnoreCase );
         import.AddOperation( new Operations.SetStaticObjectModels( import,
-            NIFFilePath,
+            strippedFilePath,
             (
                 ( ( recordFlags & (uint)Engine.Plugin.Forms.Fields.Record.Flags.Common.HasDistantLOD ) == 0 )
                 ? null
-                : new string[] { NIFFilePath, NIFFilePath, NIFFilePath, NIFFilePath }
+                : new string[] { strippedFilePath, strippedFilePath, strippedFilePath, strippedFilePath }
             ) ) );
 
         import.AddOperation( new Operations.SetStaticObjectBounds( import,
@@ -351,9 +396,8 @@ public static partial class NIFBuilder
             maxBounds
             ) );
         
-        GUIBuilder.FormImport.ImportBase.AddToList(
-            ref list,
-            import );
+        list = list ?? new List<GUIBuilder.FormImport.ImportBase>();
+        list.Add( import );
     }
 
     static void CreateBorderReferenceImport( ref List<GUIBuilder.FormImport.ImportBase> list,
@@ -414,10 +458,8 @@ public static partial class NIFBuilder
         
         import.AddOperation( new Operations.SetReferenceLocationReference( import ) );
 
-        GUIBuilder.FormImport.ImportBase.AddToList(
-            ref list,
-            import );
-
+        list = list ?? new List<GUIBuilder.FormImport.ImportBase>();
+        list.Add( import );
     }
 
     static bool EnableParentChanged( Engine.Plugin.Forms.ObjectReference reference, bool linked )

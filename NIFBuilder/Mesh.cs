@@ -15,6 +15,9 @@ using System.Runtime.InteropServices;
 using Maths;
 using GUIBuilder;
 
+using EditorIDFormatter = GUIBuilder.CustomForms.EditorIDFormats;
+
+
 public static partial class NIFBuilder
 {
     /// <summary>
@@ -268,8 +271,8 @@ public static partial class NIFBuilder
             
         }
         
-        string              nifFilePath;
-        public string       nifFile;
+        //string              nifFilePath;
+        //public string       nifFile;
         //string              nifPath;
 
         /// <summary>
@@ -333,21 +336,24 @@ public static partial class NIFBuilder
 
         public Mesh( BorderNodeGroup group, float gradientHeight, float groundOffset, float groundSink, uint[] insideColours, uint[] outsideColours, bool fullPrecisionVertexes )
         {
+
             //DebugLog.OpenIndentLevel();
             //DebugLog.WriteList( "nodes", group.Nodes, true, true );
 
-            fullPrecisionVerts  = fullPrecisionVertexes;
-
-            nodeGroup           = group;
+            nodeGroup           = group ?? throw new NullReferenceException( "group" );
             
+            fullPrecisionVerts = fullPrecisionVertexes;
+
+            /*
             nifFilePath         = nodeGroup.NIFFilePath;
             string workingPath;
             var working         = GenFilePath.FilenameFromPathname( nifFilePath, out workingPath );
             nifFile             = working.EndsWith( ".nif", StringComparison.InvariantCultureIgnoreCase )
                                 ? working.Substring( 0, working.Length - 4 )
                                 : working;
-            
-            nCount              = nodeGroup == null ? 0 : nodeGroup.Nodes.NullOrEmpty() ? 0 : nodeGroup.Nodes.Count;
+            */
+
+            nCount              = nodeGroup.Nodes.NullOrEmpty() ? 0 : nodeGroup.Nodes.Count;
             gHeight             = Math.Max( 0.0f, gradientHeight );
             gOffset             = Math.Max( 0.0f, groundOffset );
             gSink               = Math.Max( 0.0f, groundSink );
@@ -368,7 +374,12 @@ public static partial class NIFBuilder
                 vCount          = CalculateTotalVertexCount();
                 tCount          = CalculateTotalTriangleCount();
 
-                DebugLog.WriteLine( string.Format( "nCount = {0} :: vCount = {1} :: tCount = {2} :: nifFilePath = \"{3}\"", nCount, vCount, tCount, nifFilePath ), true );
+                DebugLog.WriteStrings( null, new [] {
+                    "nCount = " + nCount,
+                    "vCount = " + vCount,
+                    "tCount = " + tCount,
+                    "nifFilePath = \"" + nodeGroup.NIFFilePath( false ) + "\""
+                }, false, true, false, false, true, true );
 
                 if( vCount > 0 )
                 {
@@ -425,90 +436,65 @@ public static partial class NIFBuilder
 
         #region String Builders
 
-        public static string MeshSubSetIndex( string neighbour = null, int subIndex = -1 )
+        public static List<string> MatchKeys( string name, string neighbour = null, int borderIndex = 1, int subIndex = -1 )
         {
-            var sSubIndex = subIndex > -1
-                ? string.Format( "_{0}", subIndex.ToString( "X2" ) )
-                : null;
-            return
-                !string.IsNullOrEmpty( neighbour )
-                    ? string.Format( "{0}{1}", neighbour, sSubIndex )
-                    : !string.IsNullOrEmpty( sSubIndex )
-                        ? sSubIndex
-                        : null;
-        }
-        
-        public static List<string> MatchKeys( string location, string neighbour = null, int borderIndex = 1, int subIndex = -1 )
-        {
-            var keys = new List<string>{ location };
+            var keys = new List<string>{ name };
             var sBorderIndex = borderIndex > -1
                 ? borderIndex.ToString( "X2" )
                 : null;
             if( !string.IsNullOrEmpty( sBorderIndex ) )
                 keys.Add( sBorderIndex );
-            var mssi = MeshSubSetIndex( neighbour, subIndex );
+            if( !string.IsNullOrEmpty( neighbour ) )
+                keys.Add( neighbour );
+            var mssi = subIndex > -1
+                ? subIndex.ToString( "X2" )
+                : null;
+                //= MeshSubSetIndex( neighbour, subIndex );
             if( !string.IsNullOrEmpty( mssi ) )
                 keys.Add( mssi );
             return keys;
         }
         
-        public static string BuildFullFilePath( string target, string targetSuffix, string meshPathSuffix, string meshSubPath, string filePrefix, string location, string fileSuffix = "", int borderIndex = 1, string neighbour = "", int subIndex = -1 )
+        /*
+        public static string BuildTargetPath( string target, string targetSubPath )
         {
             if( ( !string.IsNullOrEmpty( target ) )&&( target[ target.Length - 1 ] != '\\' ) )
                 target += @"\";
-            if( ( !string.IsNullOrEmpty( targetSuffix ) )&&( targetSuffix[ targetSuffix.Length - 1 ] != '\\' ) )
-                targetSuffix += @"\";
-            return string.Format(
-                @"{0}{1}",
-                BuildTargetPath(
-                    target,
-                    targetSuffix ),
-                BuildFilePath(
-                    meshPathSuffix,
-                    meshSubPath,
-                    filePrefix,
-                    location,
-                    fileSuffix,
-                    borderIndex,
-                    neighbour,
-                    subIndex )
-            );
-        }
-        
-        public static string BuildTargetPath( string target, string targetSuffix )
-        {
-            if( ( !string.IsNullOrEmpty( target ) )&&( target[ target.Length - 1 ] != '\\' ) )
-                target += @"\";
-            if( ( !string.IsNullOrEmpty( targetSuffix ) )&&( targetSuffix[ targetSuffix.Length - 1 ] != '\\' ) )
-                targetSuffix += @"\";
+            if( ( !string.IsNullOrEmpty( targetSubPath ) )&&( targetSubPath[ targetSubPath.Length - 1 ] != '\\' ) )
+                targetSubPath += @"\";
             return string.Format(
                 @"{0}{1}",
                 target,
-                targetSuffix
+                targetSubPath
             );
         }
         
-        public static string BuildFilePath( string meshPathSuffix, string meshSubPath, string filePrefix, string location, string fileSuffix = "", int borderIndex = 1, string neighbour = "", int subIndex = -1 )
+        public static string BuildFilePath( string targetSubPath, string meshSubPath, string statEditorIDFormat, string modPrefix, string name, int index = 1, string neighbour = null, int subIndex = -1 )
         {
-            if( ( !string.IsNullOrEmpty( meshPathSuffix ) )&&( meshPathSuffix[ meshPathSuffix.Length - 1 ] != '\\' ) )
-                meshPathSuffix += @"\";
-            if( ( !string.IsNullOrEmpty( meshSubPath ) )&&( meshSubPath[ meshSubPath.Length - 1 ] != '\\' ) )
+            if( ( !string.IsNullOrEmpty( targetSubPath ) )&&( !targetSubPath.EndsWith( @"\" ) ) )
+                targetSubPath += @"\";
+            if( ( !string.IsNullOrEmpty( meshSubPath ) )&&( meshSubPath.EndsWith( @"\" ) ) )
                 meshSubPath += @"\";
-            var sBorderIndex = borderIndex > -1
-                ? borderIndex.ToString( "X2" )
+            var sBorderIndex = index > -1
+                ? index.ToString( "X2" )
                 : null;
-            var mssi = MeshSubSetIndex( neighbour, subIndex );
-            return string.Format(
-                @"{0}{1}{2}{3}{4}{5}{6}.nif",
-                meshPathSuffix,
-                meshSubPath,
-                filePrefix,
-                location,
-                fileSuffix,
-                sBorderIndex,
-                mssi );
+            return EditorIDFormatter.FormatEditorID(
+                string.Format(
+                    @"{0}Meshes\{1}{2}.nif",
+                    targetSubPath,
+                    meshSubPath,
+                    statEditorIDFormat
+                ),
+                modPrefix,
+                "STAT",
+                name,
+                index,
+                neighbour,
+                subIndex
+                );
         }
-        
+        */
+
         #endregion
 
         #region Build Mesh
@@ -976,23 +962,19 @@ public static partial class NIFBuilder
 
         #region NIF Writer
 
-        public bool Write( string targetPath, string targetSuffix, string[] exportInfo )
+        //public bool Write( string targetPath, string targetSuffix, string[] exportInfo )
+        public bool Write( string targetPath, string[] exportInfo )
         {
-            DebugLog.WriteStrings( null,
-                new[] {
-                    "targetPath = \"" + targetPath + "\"",
-                    "targetSuffix = \"" + targetSuffix + "\"",
-                    "nifFilePath = \"" + nifFilePath + "\"",
-                    "nifFile = \"" + nifFile + "\""
-                }, false, true, false, false, false
-            );
+            DebugLog.WriteStrings( null, new[] {
+                "targetPath = \"" + targetPath + "\"",
+                "nodeGroup.NIFFilePath = \"" + nodeGroup.NIFFilePath( true ) + "\"",
+            }, false, true, false, false, true, true );
 
-            var fullTarget = BuildTargetPath( targetPath, targetSuffix );
-            if( ( !string.IsNullOrEmpty( fullTarget ) )&&( fullTarget[ fullTarget.Length - 1 ] != '\\' ) )
-                fullTarget += @"\";
-            var fullPath = string.Format( @"{0}Meshes\{1}", fullTarget, nifFilePath );
-            string nifPath;
-            GenFilePath.FilenameFromPathname( fullPath, out nifPath );
+            if( ( !string.IsNullOrEmpty( targetPath ) )&&( !targetPath.EndsWith( @"\" ) ) )
+                targetPath += @"\";
+
+            var fullPath = string.Format( @"{0}{1}", targetPath, nodeGroup.NIFFilePath( true ) );
+            GenFilePath.FilenameFromPathname( fullPath, out string nifPath );
 
             if( string.IsNullOrEmpty( nifPath ) )
             {
@@ -1109,9 +1091,9 @@ public static partial class NIFBuilder
         void WriteHeader( System.IO.BinaryWriter stream, string[] exportInfo )
         {
             string[] NIFStrings = {
-                nifFile,
+                nodeGroup.EditorID,
                 "BSX",
-                string.Format( "{0}:0", nifFile ),
+                string.Format( "{0}:0", nodeGroup.EditorID ),
                 ""
             };
             

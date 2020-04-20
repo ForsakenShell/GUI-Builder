@@ -17,7 +17,7 @@ using Maths;
 using Fallout4;
 using AnnexTheCommonwealth;
 
-using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using EditorIDFormatter = GUIBuilder.CustomForms.EditorIDFormats;
 using Operations = GUIBuilder.FormImport.Operations;
 using Priority = GUIBuilder.FormImport.Priority;
 using Shape = Engine.Plugin.Forms.Fields.ObjectReference.Primitive.PrimitiveType;
@@ -114,9 +114,9 @@ namespace GUIBuilder
             result = true;
             
         localReturnResult:
-            var elapsed = m.StopSyncTimer( tStart );
+            m.StopSyncTimer( tStart );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel( elapsed, "result", result.ToString() );
+            DebugLog.CloseIndentLevel( "result", result.ToString() );
             return result;
         }
 
@@ -131,11 +131,8 @@ namespace GUIBuilder
             float groundOffset,
             float groundSink,
             string targetPath,
-            string targetSuffix,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string fileSuffix,
             bool createImportData,
             bool highPrecisionVertexes )
         {
@@ -162,9 +159,9 @@ namespace GUIBuilder
                     m.SetCurrentStatusMessage( string.Format( "BorderBatch.CreateNIFsFor".Translate(), borderSetName, subdivision.IDString ) );
                     var subList = subdivision.CreateBorderNIFs(
                         gradientHeight, groundOffset, groundSink,
-                        targetPath, targetSuffix,
-                        meshSuffix, meshSubPath,
-                        filePrefix, fileSuffix,
+                        targetPath,
+                        targetSubPath,
+                        meshSubPath,
                         createImportData,
                         highPrecisionVertexes );
                     if( ( createImportData ) && ( !subList.NullOrEmpty() ) )
@@ -180,6 +177,8 @@ namespace GUIBuilder
             {
                 DebugLog.WriteException( e );
             }
+
+            //DebugLog.WriteList( "list", list, true, true );
 
             m.StopSyncTimer( tStart, borderSetName );
             m.PopStatusMessage();
@@ -246,8 +245,14 @@ namespace GUIBuilder
             {
                 msg = string.Format( "SubDivisionBatch.CheckingBorderEnablersFor".Translate(), subdivision.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
                 m.SetCurrentStatusMessage( msg );
-                FormImport.ImportBase.AddToList( ref list, subdivision.GenerateMissingBorderEnablersFromEdgeFlags() );
+                var subList = subdivision.GenerateMissingBorderEnablersFromEdgeFlags();
+                if( list == null )
+                    list = subList;
+                else
+                    list.AddAll( subList );
             }
+
+            //DebugLog.WriteList( "list", list, true, true );
 
             m.StopSyncTimer( tStart );
             m.PopStatusMessage();
@@ -469,8 +474,8 @@ namespace GUIBuilder
                     target,
                     subdivision.Reference,
                     subdivision.QualifiedName,
-                    string.Format( "ESM_ATC_LAYR_{0}", SetEditorID.Token_Name ),
-                    string.Format( "ESM_ATC_REFR_BV_{0}_{1}", SetEditorID.Token_Name, SetEditorID.Token_Index ),
+                    string.Format( "ESM_ATC_LAYR_{0}", EditorIDFormatter.Token_Name ),
+                    string.Format( "ESM_ATC_REFR_BV_{0}_{1}", EditorIDFormatter.Token_Name, EditorIDFormatter.Token_Index ),
                     hull,
                     volumes.ConvertAll<Engine.Plugin.Forms.ObjectReference>( v => v.Reference ),
                     subdivision.Reference.Worldspace,

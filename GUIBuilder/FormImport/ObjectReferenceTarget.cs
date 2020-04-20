@@ -97,6 +97,8 @@ namespace GUIBuilder.FormImport
 
         public override bool                            CreateNewFormInWorkingFile()
         {
+            DebugLog.WriteCaller();
+
             if( RemoteTarget != null )
                 return RemoteTarget.CreateNewFormInWorkingFile();
 

@@ -9,6 +9,8 @@ using System.Collections.Generic;
 
 using Maths;
 
+using EditorIDFormatter = GUIBuilder.CustomForms.EditorIDFormats;
+
 
 namespace AnnexTheCommonwealth
 {
@@ -209,11 +211,8 @@ namespace AnnexTheCommonwealth
             float groundOffset,
             float groundSink,
             string targetPath,
-            string targetSuffix,
-            string meshSuffix,
+            string targetSubPath,
             string meshSubPath,
-            string filePrefix,
-            string fileSuffix,
             float volumeCeiling,
             bool createImportData,
             bool highPrecisionVertexes )
@@ -242,7 +241,7 @@ namespace AnnexTheCommonwealth
             
             if( ( !string.IsNullOrEmpty( meshSubPath ) )&&( meshSubPath[ meshSubPath.Length - 1 ] != '\\' ) )
                 meshSubPath += @"\";
-            var subSubPath = string.Format( "{0}{1}", meshSubPath, subName );
+            //var subSubPath = string.Format( "{0}{1}", meshSubPath, subName );
             
             if( createImportData )
             {
@@ -275,16 +274,13 @@ namespace AnnexTheCommonwealth
                     null, null,
                     GodObject.CoreForms.AnnexTheCommonwealth.Layer.ESM_ATC_LAYR_BorderMeshes,
                     targetPath,
-                    targetSuffix,
-                    meshSuffix,
-                    subSubPath,
-                    filePrefix,
-                    subName,
-                    fileSuffix,
-                    nsubName,
-                    ( si + 1 ),
-                    "",
-                    "",
+                    targetSubPath,
+                    meshSubPath,
+                    EditorIDFormatter.ESM_ATC_STAT_Border,
+                    EditorIDFormatter.ESM_ATC_Mod_Prefix,
+                    subName, 1,
+                    nsubName, ( si + 1 ),
+                    null, null,
                     volumeCeiling,
                     gradientHeight,
                     groundOffset,
@@ -301,9 +297,15 @@ namespace AnnexTheCommonwealth
                     );
                 
                 if( ( createImportData )&&( !subList.NullOrEmpty() ) )
-                    GUIBuilder.FormImport.ImportBase.AddToList( ref list, subList );
+                {
+                    if( list == null )
+                        list = subList;
+                    else
+                        list.AddAll( subList );
+                }
             }
             
+            //DebugLog.WriteList( "list", list, true, true );
             return list;
         }
         
@@ -389,9 +391,9 @@ namespace AnnexTheCommonwealth
             SendObjectDataChangedEvent(this);
             
         localReturnResult:
-            var elapsed = m.StopSyncTimer( tStart, this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
+            m.StopSyncTimer( tStart, this.GetEditorID( Engine.Plugin.TargetHandle.WorkingOrLastFullRequired ) );
             m.PopStatusMessage();
-            DebugLog.CloseIndentLevel( elapsed );
+            DebugLog.CloseIndentLevel();
         }
         
         List<EdgeFlag> GenerateSegment( List<EdgeFlag> subFlags, uint subFID, bool closedLoop )

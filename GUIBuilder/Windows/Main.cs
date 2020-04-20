@@ -736,7 +736,7 @@ namespace GUIBuilder.Windows
         
         void OnCustomFormsWindowClick( object sender, EventArgs e )
         {
-            GodObject.Windows.GetWindow<GUIBuilder.Windows.CustomForms>( true );
+            GodObject.Windows.GetWindow<GUIBuilder.Windows.CustomData>( true );
         }
 
         #endregion

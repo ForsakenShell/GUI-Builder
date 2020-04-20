@@ -21,4 +21,27 @@
     <Filename>Custom_Vanilla_Workshop_Border_Replacements.esp</Filename>
     <FormID>00000F9B</FormID>
   </ForcedZ>
+  <WorkshopBorderPreset>
+    <NodeLength>512</NodeLength>
+    <AngleAllowance>5</AngleAllowance>
+    <SlopeAllowance>0.02</SlopeAllowance>
+    <GradientHeight>256</GradientHeight>
+    <GroundOffset>0</GroundOffset>
+    <GroundSink>128</GroundSink>
+    <MeshSubDirectory>Workshop</MeshSubDirectory>
+    <CreateImportData>True</CreateImportData>
+    <HighPrecisionFloats>True</HighPrecisionFloats>
+  </WorkshopBorderPreset>
+  <EditorIDFormats>
+    <ModPrefix></ModPrefix>
+    <Location>{name}Location</Location>
+    <EncounterZone>{name}Zone</EncounterZone>
+    <Layer>{name}Workshop</Layer>
+    <Cells>{name}Ext{index}</Cells>
+    <WorkshopRef>{name}WorkshopREF</WorkshopRef>
+    <BorderStatic>WorkshopBorder{name}{index}</BorderStatic>
+    <BuildVolumes>{name}WorkshopBuildableArea{index}</BuildVolumes>
+    <SandboxVolume>{name}WorkshopSandboxArea</SandboxVolume>
+    <CenterMarker>{name}LocationCenterMarker</CenterMarker>
+  </EditorIDFormats>
 </Workspace>

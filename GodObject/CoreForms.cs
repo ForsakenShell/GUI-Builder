@@ -175,7 +175,7 @@ namespace GodObject
                 public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_Traps                       = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3B );
                 public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_LvlActorPassiveAnimals      = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3C );
                 public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_Ambushes                    = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3D );
-                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_WorkshopResources           = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3E );
+                public static Engine.Plugin.Forms.Formlist ESM_ATC_FLST_WorkshopObjects             = new Engine.Plugin.Forms.Formlist   ( Master.Filename.AnnexTheCommonwealth   , 0x00110D3E );
             }
 
         }
@@ -291,7 +291,7 @@ namespace GodObject
                         AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_Traps,
                         AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_LvlActorPassiveAnimals,
                         AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_Ambushes,
-                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_WorkshopResources
+                        AnnexTheCommonwealth.Formlist.ESM_ATC_FLST_WorkshopObjects
 
                         #endregion
 

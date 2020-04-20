@@ -17,10 +17,11 @@ using Engine.Plugin;
 using Engine.Plugin.Forms;
 using Engine.Plugin.Forms.Fields;
 
-using SetEditorID = GUIBuilder.FormImport.Operations.SetEditorID;
+using EditorIDFormatter = GUIBuilder.CustomForms.EditorIDFormats;
 using Operations = GUIBuilder.FormImport.Operations;
 using Priority = GUIBuilder.FormImport.Priority;
 using Shape = Engine.Plugin.Forms.Fields.ObjectReference.Primitive.PrimitiveType;
+using Hull = Maths.Geometry.ConvexHull;
 
 
 namespace GUIBuilder
@@ -29,9 +30,20 @@ namespace GUIBuilder
     public static class VolumeBatch
     {
         
-        public delegate Layer       PreferedLayerFunctionDelegate<TController>( ref List<ImportBase> imports, TargetHandle target, ObjectReference sandbox, TController controller, out string preferedLayerEditorID );
+        public delegate Layer                   PreferedLayerFunctionDelegate<TController>( ref List<ImportBase> imports, TargetHandle target, ObjectReference sandbox, TController controller, out string preferedLayerEditorID );
 
-        public static Geometry.ConvexHull.OptimalBoundingBox CalculateOptimalSandboxVolume(
+        public const string                     XmlKey_BV_ScanTerrain       = "BV_ScanTerrain";
+        public const string                     XmlKey_BV_GroundSink        = "BV_GroundSink";
+        public const string                     XmlKey_BV_TopAbovePeak      = "BV_TopAbovePeak";
+        
+        public const string                     XmlKey_SV_CreateNew         = "SV_CreateNew";
+        public const string                     XmlKey_SV_IgnoreExisting    = "SV_IgnoreExisting";
+        public const string                     XmlKey_SV_ScanTerrain       = "SV_ScanTerrain";
+        public const string                     XmlKey_SV_CylinderTop       = "SV_CylinderTop";
+        public const string                     XmlKey_SV_CylinderBottom    = "SV_CylinderBottom";
+        public const string                     XmlKey_SV_Padding           = "SV_Padding";
+
+        public static Hull.OptimalBoundingBox   CalculateOptimalSandboxVolume(
             TargetHandle target,
             List<Vector2f> hull,
             Worldspace worldspace,
@@ -56,7 +68,6 @@ namespace GUIBuilder
                 return null;
             }
 
-            var volOffset = fSandboxCylinderBottom;
             var halfHeight = fSandboxCylinderTop > Math.Abs( fSandboxCylinderBottom )
                 ? fSandboxCylinderTop
                 : Math.Abs( fSandboxCylinderBottom );
@@ -71,10 +82,12 @@ namespace GUIBuilder
                 float minZ, maxZ, avgZ, avgWaterZ;
                 if( wsdp.ComputeZHeightsFromVolumes( target, volumeCorners, out minZ, out maxZ, out avgZ, out avgWaterZ, showScanlineProgress: true ) )
                 {
-                    var zUse = avgZ;                                        // Start with the average land height
-                    if( ( zUse - volOffset ) + fSandboxCylinderBottom > minZ ) zUse = minZ; // Move down to make sure the lowest point is inside the volume
-                    if( avgWaterZ > zUse ) zUse = avgWaterZ;                // Move up to the average water surface
-                    optVol.Z = zUse - volOffset;
+                    var bottomZ = avgZ + fSandboxCylinderBottom;            // Calculate the volumes cylinder bottom
+                    if( avgWaterZ > minZ )                                  // Water level above lowest land point?
+                        if( avgWaterZ > bottomZ ) bottomZ = avgWaterZ;      // Move up to the average water surface
+                    else
+                        if( bottomZ > minZ ) bottomZ = minZ;                // Move down to make sure the lowest land point is inside the volume
+                    optVol.Z = bottomZ - fSandboxCylinderBottom;
                 }
                 else
                 {
@@ -85,18 +98,13 @@ namespace GUIBuilder
             else
                 optVol.Z = hintZ;
 
-            // Add offset and margin to final result
-            optVol.Z -= volOffset;
-            var size = optVol.Size;
-            optVol.Size = new Vector3f(
-                size.X + volumePadding,
-                size.Y + volumePadding,
-                size.Z + volumePadding );
+            // Add margin to final result
+            optVol.Size += new Vector3f( volumePadding, volumePadding, volumePadding );
 
             return optVol;
         }
 
-        public static void GenerateSandboxes<TController>(
+        public static void                      GenerateSandboxes<TController>(
             Windows.Main m,
             ref List<ImportBase> imports,
             TargetHandle target,
@@ -225,7 +233,7 @@ namespace GUIBuilder
                         }, false, true, false, false );
 
                     var preferedLayer = funcPreferedLayer( ref imports, target, sandbox, controller, out string preferedLayerEditorID );
-                    var sandboxEditorID = SetEditorID.FormatEditorID( volumeEditorIDFormat, controller.QualifiedName );
+                    var sandboxEditorID = EditorIDFormatter.FormatEditorID( volumeEditorIDFormat, CustomForms.EditorIDFormats.ModPrefix, "REFR", controller.QualifiedName );
                     
                     var worldspace = controller.Reference.Worldspace;
                     var cell = worldspace == null
@@ -254,9 +262,9 @@ namespace GUIBuilder
                         null );
 
                 }
-                var elapsed = m.StopSyncTimer( tStart );
+                m.StopSyncTimer( tStart );
                 m.PopStatusMessage();
-                DebugLog.CloseIndentLevel( elapsed );
+                DebugLog.CloseIndentLevel();
             }
 
             m.StopSyncTimer( fStart );
@@ -264,7 +272,7 @@ namespace GUIBuilder
             DebugLog.CloseIndentLevel();
         }
 
-        public static bool NormalizeBuildVolumes(
+        public static bool                      NormalizeBuildVolumes(
             ref List<GUIBuilder.FormImport.ImportBase> list,
             TargetHandle target,
             ObjectReference controller,
@@ -402,7 +410,7 @@ namespace GUIBuilder
                 volumes,
                 controller.GetLayer( TargetHandle.WorkingOrLastFullRequired ),
                 layerEditorIDFormat,
-                ownerName, -1,
+                ownerName,
                 out string useLayerEditorID
                 );
 
@@ -417,7 +425,7 @@ namespace GUIBuilder
                 //var useVolumeEditorID = !string.IsNullOrEmpty( oldVolumeEditorID )
                 //    ? oldVolumeEditorID
                 //    : volumeEditorIDFormat.FormatEditorID( ownerName, i + 1 );
-                var useVolumeEditorID = SetEditorID.FormatEditorID( volumeEditorIDFormat, ownerName, i + 1 );
+                var useVolumeEditorID = EditorIDFormatter.FormatEditorID( volumeEditorIDFormat, CustomForms.EditorIDFormats.ModPrefix, "REFR", ownerName, i + 1 );
 
                 var volumeBase = volume.GetName<Engine.Plugin.Forms.Activator>( TargetHandle.WorkingOrLastFullRequired );
                 if( !volumeBases.Contains( volumeBase ) )
@@ -459,7 +467,7 @@ namespace GUIBuilder
             return true;
         }
 
-        public static void CreateVolumeRefImport( ref List<GUIBuilder.FormImport.ImportBase> list,
+        public static void                      CreateVolumeRefImport( ref List<GUIBuilder.FormImport.ImportBase> list,
             string importSignature,
             Priority priority,
             ObjectReference volumeRef,
@@ -522,9 +530,8 @@ namespace GUIBuilder
             if( attachScript != null )
                 impVolume.AddOperation( new Operations.AddPapyrusScript( impVolume, attachScript ) );
             
-            ImportBase.AddToList(
-                ref list,
-                impVolume );
+            list = list ?? new List<ImportBase>();
+            list.Add( impVolume );
 
             if( (  invertLinkedRefDirection )&&( linkedRef != null ) )
             {
@@ -543,13 +550,11 @@ namespace GUIBuilder
                     LinkedRefChanged
                 ) );
 
-                ImportBase.AddToList(
-                    ref list,
-                    impWorkshop );
+                list.Add( impWorkshop );
             }
         }
 
-        static bool LinkedRefChanged( ObjectReference reference, bool linked )
+        static bool                             LinkedRefChanged( ObjectReference reference, bool linked )
         {   // TODO:  Put this somewhere more appropriate, it will likely be used by other imports
         
             if( reference == null ) return true;
@@ -559,13 +564,12 @@ namespace GUIBuilder
             return true;
         }
 
-        public static Layer GetRecommendedLayer(
+        public static Layer                     GetRecommendedLayer(
             ref List<GUIBuilder.FormImport.ImportBase> list,
             List<ObjectReference> volumes,
             Layer preferedLayer,
             string layerEditorIDFormat,
             string ownerName,
-            int index,
             out string useLayerEditorID )
         {
             Layer result = preferedLayer;
@@ -607,7 +611,7 @@ namespace GUIBuilder
             
             if( string.IsNullOrEmpty( useLayerEditorID ) )
             {
-                useLayerEditorID = SetEditorID.FormatEditorID( layerEditorIDFormat, ownerName, index );
+                useLayerEditorID = EditorIDFormatter.FormatEditorID( layerEditorIDFormat, CustomForms.EditorIDFormats.ModPrefix, "LAYR", ownerName );
                 result = result ?? GodObject.Plugin.Data.Root.Find<Layer>( useLayerEditorID );
                 if(
                     ( result == null )||
@@ -624,9 +628,8 @@ namespace GUIBuilder
 
                     import.AddOperation( new Operations.SetEditorID( import, useLayerEditorID ) );
 
-                    GUIBuilder.FormImport.ImportBase.AddToList(
-                        ref list,
-                        import );
+                    list = list ?? new List<ImportBase>();
+                    list.Add( import );
                 }
             }
 

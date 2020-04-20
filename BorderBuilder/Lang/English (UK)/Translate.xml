@@ -210,6 +210,8 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <BorderBatchWindow.Node.SlopeAllowance>Slope Allowance</BorderBatchWindow.Node.SlopeAllowance>
     <BorderBatchWindow.NIF.Parameters>NIF Parameters</BorderBatchWindow.NIF.Parameters>
     <BorderBatchWindow.NIF.UseHighPrecisionFloats>High Precision Vertexes</BorderBatchWindow.NIF.UseHighPrecisionFloats>
+    <BorderBatchWindow.NIF.UseExistingSTATEditorIDs>Use Existing Static EditorIDs</BorderBatchWindow.NIF.UseExistingSTATEditorIDs>
+    <BorderBatchWindow.NIF.UseExistingFilePaths>Use Existing Static NIF Filepaths</BorderBatchWindow.NIF.UseExistingFilePaths>
     <BorderBatchWindow.NIF.CreateImports>Create Import Data</BorderBatchWindow.NIF.CreateImports>
     <BorderBatchWindow.NIF.GradientHeight>Gradient Height</BorderBatchWindow.NIF.GradientHeight>
     <BorderBatchWindow.NIF.GroundOffset>Ground Offset</BorderBatchWindow.NIF.GroundOffset>
@@ -338,18 +340,39 @@ For more information, please refer to http://unlicense.org/</AboutWindow.Release
     <WorkspaceCreateAlreadyLoaded.Body>There is already a workspace created for the working file.</WorkspaceCreateAlreadyLoaded.Body>
     <WorkspaceCreateAlreadyLoaded.Title>Been there, done that.</WorkspaceCreateAlreadyLoaded.Title>
     
-    <CustomFormsWindow.Title>Custom Forms</CustomFormsWindow.Title>
-    <CustomFormsWindow.Restrict>Restrict to</CustomFormsWindow.Restrict>
-    <CustomFormsWindow.Tab.Workshop>Workshop</CustomFormsWindow.Tab.Workshop>
-    <CustomFormsWindow.Tab.Containers>Containers</CustomFormsWindow.Tab.Containers>
-    <CustomFormsWindow.Tab.Container.Filter>Filter</CustomFormsWindow.Tab.Container.Filter>
-    <CustomFormsWindow.Tab.Container.Filter.Apply>Apply Filter</CustomFormsWindow.Tab.Container.Filter.Apply>
-    <CustomFormsWindow.SearchingForForms>Searching for forms...</CustomFormsWindow.SearchingForForms>
+    <CustomDataWindow.Title>Custom Data</CustomDataWindow.Title>
+    <CustomDataWindow.Restrict>Restrict to</CustomDataWindow.Restrict>
     
-    <CustomForms.SearchingForKeyword>Searching for default keyword...</CustomForms.SearchingForKeyword>
-    <CustomForms.SearchingForStatic>Searching for default static object...</CustomForms.SearchingForStatic>
-    <CustomForms.SearchingForLocationRef>Searching for default location ref...</CustomForms.SearchingForLocationRef>
-    <CustomForms.SearchingForContainer>Searching for default container...</CustomForms.SearchingForContainer>
+    <CustomDataWindow.Tab.Forms>Forms</CustomDataWindow.Tab.Forms>
+    <CustomDataWindow.Tab.Forms.Workshops>Workshops</CustomDataWindow.Tab.Forms.Workshops>
+    <CustomDataWindow.Tab.Forms.Workshops.Filter>Filter</CustomDataWindow.Tab.Forms.Workshops.Filter>
+    <CustomDataWindow.Tab.Forms.Workshops.Filter.Apply>Apply Filter</CustomDataWindow.Tab.Forms.Workshops.Filter.Apply>
+
+    <CustomDataWindow.Tab.EditorIDs>EditorIDs</CustomDataWindow.Tab.EditorIDs>
+    
+    <CustomDataWindow.Tab.EditorIDs.Legend>Token Replacement Keys</CustomDataWindow.Tab.EditorIDs.Legend>
+    <CustomDataWindow.Tab.EditorIDs.Legend.ModPrefix>{mod} Mod Prefix</CustomDataWindow.Tab.EditorIDs.Legend.ModPrefix>
+    <CustomDataWindow.Tab.EditorIDs.Legend.Type>{type} Form type (LAYR, ACTI, etc)</CustomDataWindow.Tab.EditorIDs.Legend.Type>
+    <CustomDataWindow.Tab.EditorIDs.Legend.Name>{name} Workshop Location Full Name</CustomDataWindow.Tab.EditorIDs.Legend.Name>
+    <CustomDataWindow.Tab.EditorIDs.Legend.Index>{index} Unique index in a set or group</CustomDataWindow.Tab.EditorIDs.Legend.Index>
+    <CustomDataWindow.Tab.EditorIDs.Legend.Caveat>Note that some characters may be replaced or dropped based on what is a legal character for an EditorID.</CustomDataWindow.Tab.EditorIDs.Legend.Caveat>
+
+    <CustomDataWindow.Tab.EditorIDs.ModPrefix>Mod Prefix</CustomDataWindow.Tab.EditorIDs.ModPrefix>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.Location>Location</CustomDataWindow.Tab.EditorIDs.Workshop.Location>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.EncounterZone>Encounter Zone</CustomDataWindow.Tab.EditorIDs.Workshop.EncounterZone>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.Layer>Layer</CustomDataWindow.Tab.EditorIDs.Workshop.Layer>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.Cells>Cells</CustomDataWindow.Tab.EditorIDs.Workshop.Cells>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.WorkbenchRef>Workbench Ref</CustomDataWindow.Tab.EditorIDs.Workshop.WorkbenchRef>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.BorderStatic>Border Static</CustomDataWindow.Tab.EditorIDs.Workshop.BorderStatic>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.BuildVolumes>Build Volumes</CustomDataWindow.Tab.EditorIDs.Workshop.BuildVolumes>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.SandboxVolume>Sandbox Volume</CustomDataWindow.Tab.EditorIDs.Workshop.SandboxVolume>
+    <CustomDataWindow.Tab.EditorIDs.Workshop.CenterMarker>Center Marker</CustomDataWindow.Tab.EditorIDs.Workshop.CenterMarker>
+
+    <CustomData.Forms.SearchingForForms>Searching for forms...</CustomData.Forms.SearchingForForms>
+    <CustomData.Forms.SearchingForKeyword>Searching for default keyword...</CustomData.Forms.SearchingForKeyword>
+    <CustomData.Forms.SearchingForStatic>Searching for default static object...</CustomData.Forms.SearchingForStatic>
+    <CustomData.Forms.SearchingForLocationRef>Searching for default location ref...</CustomData.Forms.SearchingForLocationRef>
+    <CustomData.Forms.SearchingForContainer>Searching for default container...</CustomData.Forms.SearchingForContainer>
     
 
 

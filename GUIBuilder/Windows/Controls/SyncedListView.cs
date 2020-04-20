@@ -291,7 +291,7 @@ namespace GUIBuilder.Windows.Controls
                 if( _SyncObject == null ) return;
                 if( _Parent.InvokeRequired )
                 {
-                    _Parent.Invoke( (Action)delegate() { SyncListViewItemWithObject(); }, null );
+                    _Parent.BeginInvoke( (Action)delegate() { SyncListViewItemWithObject(); }, null );
                     return;
                 }
                 _ListItem.BackColor = _SyncObject.ConflictStatus.GetConflictStatusBackColor();
