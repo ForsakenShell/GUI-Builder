@@ -70,4 +70,5 @@ Workshop Reference Requirements:
         
 Additional notes (need to be confirmed):
     + Power References with Actor Values will not automatically update the Power Grid status without changing their animation.  This is because setting an ActorValue does not automatically trigger re-evaluation of the Power Grid while an animation state change does.  If you want to dynamically alter the Actor Values on a Power Reference you need to change their animation state after you update the values.  The simplest way to trigger the Power Grid re-evaluation via animation state changes is to call SetOpen() on the Power Reference.  You don't need to actually change the state (ie, you can set it to open when it's already open) nor does the NIF itself require any animations (ie, it doesn't even need "open", "close" or, transition animations).
+        + This is confirmed working, SS2 uses this method to update the output of the municipal power pole and update the workshop workbench
 
